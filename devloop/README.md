@@ -27,7 +27,7 @@ Enabled by default. To disable (local-only), create `devloop/local.env`:
 
 ```bash
 DEVLOOP_USE_GEMINI=0
-# DEVLOOP_GEMINI_MODEL=gemini-3-pro
+# DEVLOOP_GEMINI_MODEL=gemini-3-pro-preview
 # DEVLOOP_GEMINI_FALLBACK_MODEL=gemini-2.5-pro
 # DEVLOOP_GEMINI_TIMEOUT_SEC=600
 # DEVLOOP_GEMINI_AUTH_PROBE_SEC=5

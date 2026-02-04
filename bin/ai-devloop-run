@@ -46,7 +46,7 @@ git config --global --add safe.directory "${REPO_DIR}" >/dev/null 2>&1 || true
 # Optional local config (gitignored): devloop/local.env
 # Example:
 #   DEVLOOP_USE_GEMINI=1
-#   DEVLOOP_GEMINI_MODEL=gemini-3-pro
+#   DEVLOOP_GEMINI_MODEL=gemini-3-pro-preview
 #   DEVLOOP_GEMINI_FALLBACK_MODEL=gemini-2.5-pro
 #   DEVLOOP_USE_KIMI=1
 if [[ -f "${LOCAL_ENV_FILE}" ]]; then
@@ -186,7 +186,7 @@ run_gemini_advice() {
   [[ "${DEVLOOP_USE_GEMINI:-1}" == "1" ]] || return 1
   command -v gemini >/dev/null 2>&1 || return 1
 
-  local model="${DEVLOOP_GEMINI_MODEL:-gemini-3-pro}"
+  local model="${DEVLOOP_GEMINI_MODEL:-gemini-3-pro-preview}"
   local fallback_model="${DEVLOOP_GEMINI_FALLBACK_MODEL:-gemini-2.5-pro}"
   local timeout_sec="${DEVLOOP_GEMINI_TIMEOUT_SEC:-600}"
   local auth_probe_sec="${DEVLOOP_GEMINI_AUTH_PROBE_SEC:-5}"
