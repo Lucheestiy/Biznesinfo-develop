@@ -266,7 +266,8 @@ export default function AssistantClient({
                       </button>
                     </div>
                     <div className="mt-2 text-xs text-gray-500">
-                      Отправка сообщения создаёт запись в системе AI-запросов (пока без ответа модели).
+                      {t("ai.disclaimer") ||
+                        "Ответы генерируются AI и могут быть неточными. Не передавайте чувствительные данные и проверяйте важную информацию."}
                     </div>
                   </div>
                 </div>
