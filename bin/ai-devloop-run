@@ -68,6 +68,14 @@ git log -1 --oneline > "${RUN_DIR}/git_head_before.txt" || true
 # Make sure codex-auth-switcher had a chance to run recently.
 systemctl start codex-auth-switcher.service >/dev/null 2>&1 || true
 
+CODEX_SWITCH_LOCK="/root/.codex/codex-auth-switcher.lock"
+exec 8>"${CODEX_SWITCH_LOCK}"
+if flock -w 30 8; then
+  log "Acquired codex-auth switch lock."
+else
+  log "WARNING: could not acquire codex-auth switch lock; continuing without it."
+fi
+
 CODEX_ACCOUNT="$(cat /root/.codex/current 2>/dev/null || true)"
 CODEX_ACCOUNT="${CODEX_ACCOUNT//$'\n'/}"
 if [[ -z "${CODEX_ACCOUNT}" ]]; then
@@ -171,6 +179,9 @@ else
   fi
 fi
 
+flock -u 8 || true
+exec 8>&- || true
+
 git status -sb > "${RUN_DIR}/git_status_after_codex.txt" || true
 git diff --stat > "${RUN_DIR}/git_diff_stat_after_codex.txt" || true
 
@@ -257,4 +268,3 @@ if ! "${REPO_DIR}/bin/telegram-send" "${MSG}"; then
 fi
 
 log "Done: ${SHORT_STATUS}"
-
