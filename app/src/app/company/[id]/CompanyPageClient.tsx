@@ -60,6 +60,30 @@ function normalizePhoneForTel(phone: string): string {
   return cleaned.replace(/\+/g, "");
 }
 
+async function writeTextToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.setAttribute("readonly", "");
+      el.style.position = "fixed";
+      el.style.top = "-1000px";
+      el.style.left = "-1000px";
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(el);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
+
 function getWorkStatusDotClass(workStatus: { isOpen: boolean }): string {
   if (workStatus.isOpen) {
     return "bg-green-700 animate-pulse shadow-[0_0_10px_rgba(21,128,61,0.35)]";
@@ -314,6 +338,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [data, setData] = useState<BiznesinfoCompanyResponse | null>(initialData);
   const [isLoading, setIsLoading] = useState(!initialData);
   const [logoFailed, setLogoFailed] = useState(false);
@@ -323,6 +348,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
   const [photoViewerIndex, setPhotoViewerIndex] = useState(0);
   const touchStartXRef = useRef<number | null>(null);
   const logoImgRef = useRef<HTMLImageElement | null>(null);
+  const shareCopiedTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -353,6 +379,12 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
       isMounted = false;
     };
   }, [id, initialData]);
+
+  useEffect(() => {
+    return () => {
+      if (shareCopiedTimeoutRef.current) window.clearTimeout(shareCopiedTimeoutRef.current);
+    };
+  }, []);
 
   const companyMaybe = data?.company ?? null;
   const logoOverride = useMemo(() => {
@@ -508,6 +540,28 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
   const primaryEmail = company.emails?.[0] || "";
 
   const descriptionText = (company.description || "").trim();
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const categoryName = (primaryCategory?.name || "").trim();
+    const text = categoryName ? `${company.name} — ${categoryName}` : company.name;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: company.name, text, url });
+        return;
+      } catch (error) {
+        if ((error as any)?.name === "AbortError") return;
+      }
+    }
+
+    const ok = await writeTextToClipboard(url);
+    if (!ok) return;
+
+    setShareCopied(true);
+    if (shareCopiedTimeoutRef.current) window.clearTimeout(shareCopiedTimeoutRef.current);
+    shareCopiedTimeoutRef.current = window.setTimeout(() => setShareCopied(false), 2000);
+  };
 
   const aboutText = (company.about || "").trim()
     || (BIZNESINFO_ABOUT_OVERRIDES[company.source_id] || "").trim()
@@ -698,23 +752,27 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                 {/* Share button */}
                 <div className="mt-4 flex justify-start gap-2 flex-wrap">
                   <button
-                    onClick={() => {
-                      const url = window.location.href;
-                      const text = `${company.name} — ${primaryCategory?.name || ""}`;
-                      if (navigator.share) {
-                        navigator.share({ title: company.name, text, url }).catch(() => {});
-                      } else {
-                        navigator.clipboard.writeText(url).then(() => {
-                          alert("Ссылка скопирована!");
-                        }).catch(() => {});
-                      }
-                    }}
+                    type="button"
+                    onClick={handleShare}
+                    aria-label={shareCopied ? t("company.linkCopied") : t("company.share")}
+                    title={shareCopied ? t("company.linkCopied") : t("company.share")}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors bg-white/10 text-white hover:bg-white/20 border border-white/20"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    <span>Поделиться</span>
+                    {shareCopied ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                        />
+                      </svg>
+                    )}
+                    <span>{shareCopied ? t("company.linkCopied") : t("company.share")}</span>
                   </button>
 
                   <button
@@ -771,23 +829,27 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                 {/* Share button */}
                 <div className="mt-4 flex justify-center gap-2 flex-wrap">
                   <button
-                    onClick={() => {
-                      const url = window.location.href;
-                      const text = `${company.name} — ${primaryCategory?.name || ""}`;
-                      if (navigator.share) {
-                        navigator.share({ title: company.name, text, url }).catch(() => {});
-                      } else {
-                        navigator.clipboard.writeText(url).then(() => {
-                          alert("Ссылка скопирована!");
-                        }).catch(() => {});
-                      }
-                    }}
+                    type="button"
+                    onClick={handleShare}
+                    aria-label={shareCopied ? t("company.linkCopied") : t("company.share")}
+                    title={shareCopied ? t("company.linkCopied") : t("company.share")}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors bg-white/10 text-white hover:bg-white/20 border border-white/20"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    <span>Поделиться</span>
+                    {shareCopied ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                        />
+                      </svg>
+                    )}
+                    <span>{shareCopied ? t("company.linkCopied") : t("company.share")}</span>
                   </button>
 
                   <button

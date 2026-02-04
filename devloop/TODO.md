@@ -29,7 +29,7 @@ Suggested milestones (do in order; keep each run small):
 ## Current focus
 
 1. ✅ Improve the homepage/search UX — polish search result cards (hover lift/shadow + clearer “Подробнее” affordance).
-2. (fill in) Improve company page layout and blocks.
+2. ✅ Improve company page layout and blocks — localized “Share” button (native share/copy link + “copied” feedback).
 3. (fill in) Add admin tooling / reindex UX improvements.
 
 ## Constraints
