@@ -390,7 +390,7 @@ function SearchCompanyCard({
   }, [logoSrc]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border-2 border-[#820251] hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full">
+    <div className="group bg-white rounded-2xl shadow-sm border border-[#820251]/25 hover:border-[#820251]/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col h-full">
       <div className="bg-gradient-to-r from-[#820251] to-[#6a0143] p-3.5">
         <div className="flex items-start gap-4">
           {/* Logo (must stay as implemented) */}
@@ -509,9 +509,18 @@ function SearchCompanyCard({
         <div className="mt-auto pt-2.5 flex justify-end">
           <Link
             href={companyHref}
-            className="inline-flex items-center justify-center bg-[#820251] text-white px-4 py-1.5 rounded-lg text-[15px] font-bold shadow-sm hover:bg-[#6a0143] active:bg-[#520031] transition-colors"
+            className="inline-flex items-center justify-center gap-1 bg-[#820251] text-white px-4 py-1.5 rounded-lg text-[15px] font-bold shadow-sm hover:bg-[#6a0143] active:bg-[#520031] transition-colors"
           >
             {t("company.details")}
+            <svg
+              className="w-4 h-4 opacity-0 group-hover:opacity-100 translate-x-0 group-hover:translate-x-0.5 transition-all duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </Link>
         </div>
       </div>
