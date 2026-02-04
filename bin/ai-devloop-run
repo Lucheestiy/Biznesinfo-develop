@@ -16,6 +16,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUNS_DIR="${REPO_DIR}/devloop/runs"
 LATEST_DIR="${REPO_DIR}/devloop/latest"
 SESSION_FILE="${REPO_DIR}/devloop/session_id.txt"
+SESSION_MAP_FILE="${REPO_DIR}/devloop/session_ids.json"
 
 LOCK_DIR="${REPO_DIR}/devloop"
 LOCK_FILE="${LOCK_DIR}/devloop.lock"
@@ -84,6 +85,81 @@ fi
 CODEX_ACCOUNT_START="${CODEX_ACCOUNT}"
 echo "${CODEX_ACCOUNT_START}" > "${RUN_DIR}/codex_account.txt"
 
+load_session_id_for_account() {
+  local account="${1}"
+  python3 - <<'PY' "${SESSION_MAP_FILE}" "${SESSION_FILE}" "${account}" 2>/dev/null || true
+import json
+import re
+import sys
+from pathlib import Path
+
+map_path = Path(sys.argv[1])
+legacy_path = Path(sys.argv[2])
+account = sys.argv[3]
+
+uuid_re = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", re.I)
+
+def pick_uuid(text: str) -> str | None:
+    m = uuid_re.search(text or "")
+    return m.group(0) if m else None
+
+if map_path.is_file():
+    try:
+        data = json.loads(map_path.read_text(encoding="utf-8"))
+    except Exception:
+        data = None
+    if isinstance(data, dict):
+        by = data.get("byAccount")
+        if isinstance(by, dict):
+            value = by.get(account)
+            if isinstance(value, str):
+                u = pick_uuid(value)
+                if u:
+                    print(u)
+                    raise SystemExit(0)
+
+if legacy_path.is_file():
+    u = pick_uuid(legacy_path.read_text(encoding="utf-8", errors="replace"))
+    if u:
+        print(u)
+PY
+}
+
+save_session_id_for_account() {
+  local account="${1}"
+  local session_id="${2}"
+  umask 077
+  python3 - <<'PY' "${SESSION_MAP_FILE}" "${account}" "${session_id}"
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+account = sys.argv[2]
+session_id = sys.argv[3]
+
+data = {}
+if path.is_file():
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        data = {}
+if not isinstance(data, dict):
+    data = {}
+
+by = data.get("byAccount")
+if not isinstance(by, dict):
+    by = {}
+by[account] = session_id
+data["byAccount"] = by
+
+tmp = path.with_suffix(path.suffix + ".tmp")
+tmp.parent.mkdir(parents=True, exist_ok=True)
+tmp.write_text(json.dumps(data, ensure_ascii=True, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+tmp.replace(path)
+PY
+}
+
 TODO_TEXT=""
 if [[ -f "${REPO_DIR}/devloop/TODO.md" ]]; then
   TODO_TEXT="$(cat "${REPO_DIR}/devloop/TODO.md")"
@@ -126,10 +202,7 @@ CODEX_LAST="${RUN_DIR}/codex_last_message.txt"
 CODEX_ATTEMPTS=0
 
 SESSION_ID=""
-if [[ -f "${SESSION_FILE}" ]]; then
-  # Keep only the first UUID-looking token (in case the file contains extra lines).
-  SESSION_ID="$(grep -Eo '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' "${SESSION_FILE}" 2>/dev/null | head -n 1 || true)"
-fi
+SESSION_ID="$(load_session_id_for_account "${CODEX_ACCOUNT}" || true)"
 
 CODEX_COMMON=(
   codex
@@ -181,6 +254,13 @@ run_codex_resume_thread() {
   timeout 45m "${CODEX_COMMON[@]}" exec resume --json "${session_id}" "$(cat "${PROMPT_FILE}")" > "${CODEX_JSONL}" 2>&1
 }
 
+resume_failure_maybe_wrong_account() {
+  [[ -f "${CODEX_JSONL}" ]] || return 1
+  grep -Eiq \
+    '(thread[^\\n]*not found|not found|http[^0-9]*(401|403|404)|\\b(401|403|404)\\b|unauthorized|forbidden)' \
+    "${CODEX_JSONL}"
+}
+
 extract_last_agent_message() {
   python3 - <<'PY' "${CODEX_JSONL}" "${CODEX_LAST}" || true
 import json
@@ -218,12 +298,28 @@ run_codex_attempt() {
     if SESSION_ID="$(run_codex_new_thread)"; then
       umask 077
       printf '%s\n' "${SESSION_ID}" > "${SESSION_FILE}"
+      save_session_id_for_account "${CODEX_ACCOUNT}" "${SESSION_ID}"
       log "Saved session id: ${SESSION_ID}"
       return 0
     fi
     return 1
   fi
-  run_codex_resume_thread "${SESSION_ID}"
+  if run_codex_resume_thread "${SESSION_ID}"; then
+    return 0
+  fi
+  # If the thread can't be resumed under this account, start a new thread for this account.
+  if resume_failure_maybe_wrong_account; then
+    log "Codex resume failed (thread/account mismatch). Starting a new thread for ${CODEX_ACCOUNT}..."
+    SESSION_ID=""
+    if SESSION_ID="$(run_codex_new_thread)"; then
+      umask 077
+      printf '%s\n' "${SESSION_ID}" > "${SESSION_FILE}"
+      save_session_id_for_account "${CODEX_ACCOUNT}" "${SESSION_ID}"
+      log "Saved session id: ${SESSION_ID}"
+      return 0
+    fi
+  fi
+  return 1
 }
 
 if ! run_codex_attempt; then
@@ -246,6 +342,7 @@ if [[ "${CODEX_OK}" -eq 0 ]] && is_retryable_codex_failure; then
   fi
 
   refresh_codex_account
+  SESSION_ID="$(load_session_id_for_account "${CODEX_ACCOUNT}" || true)"
   echo "${CODEX_ACCOUNT}" > "${RUN_DIR}/codex_account_retry.txt"
 
   CODEX_OK=1
