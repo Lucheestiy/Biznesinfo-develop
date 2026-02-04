@@ -1,0 +1,81 @@
+name: biznesinfodeveloplucheestiycom
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: biznesinfo-develop-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      BIZNESINFO_COMPANIES_JSONL_PATH: /app/public/data/biznesinfo/companies.jsonl
+      BIZNESINFO_LOGO_UPSTREAM_SUFFIX: ${BIZNESINFO_LOGO_UPSTREAM_SUFFIX:-}
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-changeme-min-16-chars}
+      ADMIN_SECRET: ${ADMIN_SECRET:-dev-secret-change-me}
+      YANDEX_MAPS_API_KEY: ${YANDEX_MAPS_API_KEY:-}
+      DATABASE_URL: ${DATABASE_URL:-}
+    networks:
+      - biznesinfo-network
+    volumes:
+      - ./app/public/data/biznesinfo:/app/public/data/biznesinfo:ro
+      - ./app/public/companies:/app/public/companies:ro
+      - ./app/.cache/biznesinfo-logo-cache:/tmp/biznesinfo-logo-cache
+    expose:
+      - "3000"
+    depends_on:
+      - meilisearch
+      - postgres
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: biznesinfo-develop-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-changeme-min-16-chars}
+      MEILI_NO_ANALYTICS: true
+    volumes:
+      - biznesinfo-develop-meilisearch-data:/meili_data
+    networks:
+      - biznesinfo-network
+    expose:
+      - "7700"
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: biznesinfo-develop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-biznesinfo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB:-biznesinfo}
+    volumes:
+      - biznesinfo-develop-postgres-data:/var/lib/postgresql/data
+    networks:
+      - biznesinfo-network
+    expose:
+      - "5432"
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: biznesinfo-develop-nginx
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-8131}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - app
+    networks:
+      - biznesinfo-network
+
+networks:
+  biznesinfo-network:
+    driver: bridge
+
+volumes:
+  biznesinfo-develop-meilisearch-data:
+  biznesinfo-develop-postgres-data:
