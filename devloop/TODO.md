@@ -25,13 +25,14 @@ Suggested milestones (do in order; keep each run small):
    - ✅ Add basic prompt-injection guardrails in server-side prompt assembly.
    - ✅ Chat UX polish: Enter-to-send + quick prompt chips.
 5. Add real model integration (behind env vars; never commit keys):
+   - ✅ Optional OpenAI realtime replies (enable with `AI_ASSISTANT_PROVIDER=openai` + `OPENAI_API_KEY`).
    - If the key is missing → keep the stub reply (do not break the site).
 
 ## Current focus
 
 1. ✅ Improve the homepage/search UX — polish search result cards (hover lift/shadow + clearer “Подробнее” affordance).
 2. ✅ Improve company page layout and blocks — localized “Share” button (native share/copy link + “copied” feedback).
-3. (fill in) Add admin tooling / reindex UX improvements.
+3. Improve AI assistant chat quality (small steps: better prompts, context, and UX).
 
 ## Constraints
 
