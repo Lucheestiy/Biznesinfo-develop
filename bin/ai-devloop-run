@@ -4,7 +4,7 @@ set -euo pipefail
 SELF="$(basename "$0")"
 
 log() {
-  echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] ${*}"
+  echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] ${*}" >&2
 }
 
 die() {
@@ -125,7 +125,8 @@ CODEX_LAST="${RUN_DIR}/codex_last_message.txt"
 
 SESSION_ID=""
 if [[ -f "${SESSION_FILE}" ]]; then
-  SESSION_ID="$(tr -d '\r\n' < "${SESSION_FILE}" || true)"
+  # Keep only the first UUID-looking token (in case the file contains extra lines).
+  SESSION_ID="$(grep -Eo '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' "${SESSION_FILE}" 2>/dev/null | head -n 1 || true)"
 fi
 
 CODEX_COMMON=(
