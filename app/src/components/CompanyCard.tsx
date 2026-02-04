@@ -390,7 +390,7 @@ function SearchCompanyCard({
   }, [logoSrc]);
 
   return (
-    <div className="group bg-white rounded-2xl shadow-sm border-2 border-[#820251]/25 hover:border-[#820251]/35 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col h-full">
+    <div className="bg-white rounded-2xl shadow-sm border-2 border-[#820251]/25 hover:border-[#820251]/35 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col h-full">
       <div className="bg-gradient-to-r from-[#820251] to-[#6a0143] p-3.5">
         <div className="flex items-start gap-4">
           {/* Logo (must stay as implemented) */}
@@ -509,11 +509,11 @@ function SearchCompanyCard({
         <div className="mt-auto pt-2.5 flex justify-end">
           <Link
             href={companyHref}
-            className="inline-flex items-center justify-center gap-2 bg-[#820251] text-white px-4 py-1.5 rounded-lg text-[15px] font-bold shadow-sm hover:bg-[#6a0143] active:bg-[#520031] transition-colors"
+            className="group inline-flex items-center justify-center gap-2 bg-[#820251] text-white px-4 py-1.5 rounded-lg text-[15px] font-bold shadow-sm hover:bg-[#6a0143] active:bg-[#520031] transition-colors"
           >
             {t("company.details")}
             <svg
-              className="w-4 h-4 opacity-0 -translate-x-0.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+              className="w-4 h-4 opacity-90 transition-transform group-hover:translate-x-0.5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
