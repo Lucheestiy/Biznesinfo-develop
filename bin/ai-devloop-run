@@ -162,7 +162,37 @@ PY
 run_codex_resume_thread() {
   local session_id="${1}"
   log "Resuming Codex thread ${session_id}..."
-  timeout 45m "${CODEX_COMMON[@]}" exec resume --json --output-last-message "${CODEX_LAST}" "${session_id}" "$(cat "${PROMPT_FILE}")" > "${CODEX_JSONL}" 2>&1
+  timeout 45m "${CODEX_COMMON[@]}" exec resume --json "${session_id}" "$(cat "${PROMPT_FILE}")" > "${CODEX_JSONL}" 2>&1
+}
+
+extract_last_agent_message() {
+  python3 - <<'PY' "${CODEX_JSONL}" "${CODEX_LAST}" || true
+import json
+import sys
+
+in_path = sys.argv[1]
+out_path = sys.argv[2]
+last_text = None
+
+with open(in_path, "r", encoding="utf-8", errors="replace") as f:
+    for line in f:
+        try:
+            obj = json.loads(line)
+        except Exception:
+            continue
+        if obj.get("type") != "item.completed":
+            continue
+        item = obj.get("item") or {}
+        if item.get("type") != "agent_message":
+            continue
+        text = item.get("text")
+        if isinstance(text, str) and text.strip():
+            last_text = text.strip()
+
+if last_text:
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(last_text + "\n")
+PY
 }
 
 CODEX_OK=1
@@ -179,6 +209,8 @@ else
     CODEX_OK=0
   fi
 fi
+
+extract_last_agent_message
 
 flock -u 8 || true
 exec 8>&- || true
