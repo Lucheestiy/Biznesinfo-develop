@@ -14,7 +14,7 @@ Suggested milestones (do in order; keep each run small):
    - Gate it behind auth (must be logged in).
    - For `plan=free`: show upsell + quota info (no chat yet).
    - For `plan=paid|partner`: allow sending messages.
-2. Use the existing `POST /api/ai/request` as the backend for the UI.
+2. ✅ Use the existing `POST /api/ai/request` as the backend for the UI.
    - Make the endpoint return a stub reply for now (until real model integration is wired).
    - Store the request + response in `ai_requests.payload`.
 3. Add a contextual entrypoint:

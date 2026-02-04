@@ -50,16 +50,41 @@ export async function POST(request: Request) {
     );
   }
 
+  const replyText =
+    "Запрос сохранён. Пока AI-ассистент работает в режиме заглушки — скоро здесь будут ответы в реальном времени. (stub)";
+
+  const payloadToStore: unknown = (() => {
+    const response = {
+      text: replyText,
+      isStub: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    const requestPayload = {
+      message: message.trim().slice(0, 5000),
+      companyId: companyId?.trim() || null,
+      plan: effective.plan,
+    };
+
+    if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+      return { ...(payload as Record<string, unknown>), _assistant: { request: requestPayload, response } };
+    }
+
+    const payloadRaw = payload ?? null;
+    return { payloadRaw, _assistant: { request: requestPayload, response } };
+  })();
+
   const created = await createAiRequest({
     userId: user.id,
     companyId: companyId?.trim() || null,
     message: message.trim().slice(0, 5000),
-    payload,
+    payload: payloadToStore,
   });
 
   return NextResponse.json({
     success: true,
     requestId: created.id,
+    reply: { text: replyText, isStub: true },
     day: quota.day,
     used: quota.used,
     limit: quota.limit,

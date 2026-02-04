@@ -96,11 +96,15 @@ export default function AssistantClient({
         setQuota({ used: data.used, limit: data.limit, day: data.day });
       }
 
+      const replyText =
+        typeof data?.reply?.text === "string"
+          ? data.reply.text
+          : "Запрос сохранён. Скоро здесь появится полноценный чат-ассистент с ответами в реальном времени. (stub)";
+
       const assistantMessage: AssistantMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content:
-          "Запрос сохранён. Скоро здесь появится полноценный чат-ассистент с ответами в реальном времени. (stub)",
+        content: replyText,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
@@ -230,4 +234,3 @@ export default function AssistantClient({
     </div>
   );
 }
-
