@@ -26,6 +26,8 @@ Or via systemd:
 Enabled by default. To disable (local-only), create `devloop/local.env`:
 
 ```bash
+DEVLOOP_AUTO_MERGE_MAIN=1  # 1=auto-merge successful runs into main (default), 0=keep PR-only workflow
+
 DEVLOOP_USE_GEMINI=0
 # DEVLOOP_GEMINI_MODEL=gemini-3-pro-preview
 # DEVLOOP_GEMINI_FALLBACK_MODEL=gemini-2.5-pro

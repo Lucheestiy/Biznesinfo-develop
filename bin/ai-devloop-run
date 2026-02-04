@@ -54,6 +54,8 @@ if [[ -f "${LOCAL_ENV_FILE}" ]]; then
   source "${LOCAL_ENV_FILE}"
 fi
 
+DEVLOOP_AUTO_MERGE_MAIN="${DEVLOOP_AUTO_MERGE_MAIN:-1}"
+
 if [[ -n "$(git status --porcelain)" ]]; then
   msg="Biznesinfo develop devloop aborted: working tree is dirty in ${REPO_DIR}. Commit/stash changes and retry."
   log "${msg}"
@@ -552,17 +554,29 @@ else
 fi
 
 PUSH_OK=0
+PUSH_PERFORMED=0
+COMMIT_OK=0
 COMMIT_SHA=""
 if [[ "${CHANGED}" -eq 1 ]]; then
   log "Changes detected; committing..."
   git add -A
-  git commit -m "AI devloop: ${TS}" > "${RUN_DIR}/git_commit.txt" 2>&1 || true
-  COMMIT_SHA="$(git rev-parse HEAD 2>/dev/null || true)"
-  if git push -u origin "${BRANCH}" > "${RUN_DIR}/git_push.txt" 2>&1; then
-    PUSH_OK=1
+  PUSH_PERFORMED=1
+  if git commit -m "AI devloop: ${TS}" > "${RUN_DIR}/git_commit.txt" 2>&1; then
+    COMMIT_OK=1
+    COMMIT_SHA="$(git rev-parse HEAD 2>/dev/null || true)"
+    if git push -u origin "${BRANCH}" > "${RUN_DIR}/git_push.txt" 2>&1; then
+      PUSH_OK=1
+    else
+      PUSH_OK=0
+    fi
+  else
+    COMMIT_OK=0
+    PUSH_OK=0
   fi
 else
   log "No changes detected."
+  # "Push ok" is treated as a stage result (ok or skipped), not "a push happened".
+  PUSH_OK=1
 fi
 
 DEPLOY_OK=0
@@ -576,6 +590,27 @@ else
 fi
 
 docker compose ps > "${RUN_DIR}/docker_ps.txt" 2>&1 || true
+
+MERGE_MAIN_OK=0
+MAIN_PUSH_OK=0
+MAIN_COMMIT_SHA=""
+if [[ "${DEVLOOP_AUTO_MERGE_MAIN}" == "1" ]] && [[ "${CHANGED}" -eq 1 ]] && [[ "${COMMIT_OK}" -eq 1 ]] && [[ "${BUILD_OK}" -eq 1 ]] && [[ "${DEPLOY_OK}" -eq 1 ]]; then
+  log "Auto-merging ${BRANCH} into main..."
+  if git checkout main > "${RUN_DIR}/git_checkout_main_after.txt" 2>&1 \
+    && git pull --ff-only origin main > "${RUN_DIR}/git_pull_before_merge_main.txt" 2>&1 \
+    && git merge --ff-only "${BRANCH}" > "${RUN_DIR}/git_merge_main.txt" 2>&1; then
+    MERGE_MAIN_OK=1
+    MAIN_COMMIT_SHA="$(git rev-parse HEAD 2>/dev/null || true)"
+    if GIT_TERMINAL_PROMPT=0 git push origin main > "${RUN_DIR}/git_push_main.txt" 2>&1; then
+      MAIN_PUSH_OK=1
+    else
+      MAIN_PUSH_OK=0
+    fi
+  else
+    MERGE_MAIN_OK=0
+    MAIN_PUSH_OK=0
+  fi
+fi
 
 SUMMARY="${RUN_DIR}/SUMMARY.md"
 {
@@ -595,9 +630,16 @@ SUMMARY="${RUN_DIR}/SUMMARY.md"
   echo "- Changed: ${CHANGED}"
   echo "- Build ok: ${BUILD_OK}"
   echo "- Push ok: ${PUSH_OK}"
+  echo "- Push performed: ${PUSH_PERFORMED}"
   echo "- Deploy ok: ${DEPLOY_OK}"
+  echo "- Auto-merge main: ${DEVLOOP_AUTO_MERGE_MAIN}"
+  echo "- Merged to main: ${MERGE_MAIN_OK}"
+  echo "- Main push ok: ${MAIN_PUSH_OK}"
   if [[ -n "${COMMIT_SHA}" ]]; then
     echo "- Commit: ${COMMIT_SHA}"
+  fi
+  if [[ -n "${MAIN_COMMIT_SHA}" ]]; then
+    echo "- Main commit: ${MAIN_COMMIT_SHA}"
   fi
   echo
   echo "## Links"
@@ -622,10 +664,19 @@ SUMMARY="${RUN_DIR}/SUMMARY.md"
   echo
   echo "## Notes"
   echo
-  echo "If the branch looks good, open a PR from \`${BRANCH}\` into \`main\`."
+  if [[ "${CHANGED}" -eq 0 ]]; then
+    echo "No code changes in this run."
+  elif [[ "${MERGE_MAIN_OK}" -eq 1 ]]; then
+    echo "Auto-merged into \`main\`."
+  else
+    echo "If the branch looks good, open a PR from \`${BRANCH}\` into \`main\`."
+  fi
 } > "${SUMMARY}"
 
 SHORT_STATUS="CODEX=${CODEX_OK} GEMINI=${GEMINI_OK} KIMI=${KIMI_OK} CHANGED=${CHANGED} BUILD=${BUILD_OK} PUSH=${PUSH_OK} DEPLOY=${DEPLOY_OK}"
+if [[ "${MERGE_MAIN_OK}" -eq 1 ]]; then
+  SHORT_STATUS="${SHORT_STATUS} MERGE_MAIN=${MERGE_MAIN_OK} MAIN_PUSH=${MAIN_PUSH_OK}"
+fi
 MSG="Biznesinfo develop devloop ${TS}\n${SHORT_STATUS}\nbranch: ${BRANCH}\nreport: ${SUMMARY}"
 log "Telegram notify..."
 if ! "${REPO_DIR}/bin/telegram-send" "${MSG}"; then
