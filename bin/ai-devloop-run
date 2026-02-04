@@ -185,7 +185,8 @@ run_gemini_advice() {
   [[ "${DEVLOOP_USE_GEMINI:-1}" == "1" ]] || return 1
   command -v gemini >/dev/null 2>&1 || return 1
 
-  local model="${DEVLOOP_GEMINI_MODEL:-gemini-2.5-pro}"
+  local model="${DEVLOOP_GEMINI_MODEL:-gemini-3-pro}"
+  local fallback_model="${DEVLOOP_GEMINI_FALLBACK_MODEL:-gemini-2.5-pro}"
   local ctx_file="${RUN_DIR}/gemini_context.txt"
 
   {
@@ -212,6 +213,13 @@ run_gemini_advice() {
   log "Gemini advice (model=${model})..."
   if timeout 10m gemini --output-format text --model "${model}" "Read the context and propose one concrete improvement." < "${ctx_file}" > "${GEMINI_ADVICE_FILE}" 2>&1; then
     return 0
+  fi
+
+  if [[ -n "${fallback_model}" && "${fallback_model}" != "${model}" ]]; then
+    log "Gemini advice failed with model=${model}; trying fallback=${fallback_model}..."
+    if timeout 10m gemini --output-format text --model "${fallback_model}" "Read the context and propose one concrete improvement." < "${ctx_file}" > "${GEMINI_ADVICE_FILE}" 2>&1; then
+      return 0
+    fi
   fi
   return 1
 }

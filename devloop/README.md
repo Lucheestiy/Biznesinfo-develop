@@ -27,7 +27,8 @@ Enabled by default. To disable (local-only), create `devloop/local.env`:
 
 ```bash
 DEVLOOP_USE_GEMINI=0
-# DEVLOOP_GEMINI_MODEL=gemini-2.5-pro
+# DEVLOOP_GEMINI_MODEL=gemini-3-pro
+# DEVLOOP_GEMINI_FALLBACK_MODEL=gemini-2.5-pro
 
 DEVLOOP_USE_KIMI=0
 # DEVLOOP_KIMI_MODEL=...
