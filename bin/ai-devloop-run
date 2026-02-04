@@ -188,6 +188,8 @@ run_gemini_advice() {
 
   local model="${DEVLOOP_GEMINI_MODEL:-gemini-3-pro}"
   local fallback_model="${DEVLOOP_GEMINI_FALLBACK_MODEL:-gemini-2.5-pro}"
+  local timeout_sec="${DEVLOOP_GEMINI_TIMEOUT_SEC:-600}"
+  local auth_probe_sec="${DEVLOOP_GEMINI_AUTH_PROBE_SEC:-5}"
   local ctx_file="${RUN_DIR}/gemini_context.txt"
 
   {
@@ -211,14 +213,59 @@ run_gemini_advice() {
     echo "${TODO_TEXT}"
   } > "${ctx_file}"
 
+  gemini_auth_prompt_seen() {
+    [[ -f "${1}" ]] || return 1
+    grep -Eiq \
+      '(please visit the following url to authorize the application|enter the authorization code)' \
+      "${1}"
+  }
+
+  gemini_try_model() {
+    local try_model="${1}"
+    local out_file="${2}"
+    local tmp_file="${out_file}.tmp"
+    : > "${tmp_file}"
+
+    timeout "${timeout_sec}s" gemini --output-format text --model "${try_model}" "Read the context and propose one concrete improvement." < "${ctx_file}" > "${tmp_file}" 2>&1 &
+    local pid=$!
+
+    # Fail fast if Gemini enters interactive auth flow (would otherwise hang in cron).
+    local i=0
+    while [[ "${i}" -lt "${auth_probe_sec}" ]]; do
+      if gemini_auth_prompt_seen "${tmp_file}"; then
+        kill "${pid}" >/dev/null 2>&1 || true
+        wait "${pid}" >/dev/null 2>&1 || true
+        rm -f "${tmp_file}" >/dev/null 2>&1 || true
+        return 1
+      fi
+      if ! kill -0 "${pid}" >/dev/null 2>&1; then
+        if wait "${pid}"; then
+          mv -f "${tmp_file}" "${out_file}"
+          return 0
+        fi
+        rm -f "${tmp_file}" >/dev/null 2>&1 || true
+        return 1
+      fi
+      sleep 1
+      i=$((i + 1))
+    done
+
+    if wait "${pid}"; then
+      mv -f "${tmp_file}" "${out_file}"
+      return 0
+    fi
+    rm -f "${tmp_file}" >/dev/null 2>&1 || true
+    return 1
+  }
+
   log "Gemini advice (model=${model})..."
-  if timeout 10m gemini --output-format text --model "${model}" "Read the context and propose one concrete improvement." < "${ctx_file}" > "${GEMINI_ADVICE_FILE}" 2>&1; then
+  if gemini_try_model "${model}" "${GEMINI_ADVICE_FILE}"; then
     return 0
   fi
 
   if [[ -n "${fallback_model}" && "${fallback_model}" != "${model}" ]]; then
     log "Gemini advice failed with model=${model}; trying fallback=${fallback_model}..."
-    if timeout 10m gemini --output-format text --model "${fallback_model}" "Read the context and propose one concrete improvement." < "${ctx_file}" > "${GEMINI_ADVICE_FILE}" 2>&1; then
+    if gemini_try_model "${fallback_model}" "${GEMINI_ADVICE_FILE}"; then
       return 0
     fi
   fi
