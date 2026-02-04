@@ -181,12 +181,15 @@ fi
 
 GEMINI_OK=0
 KIMI_OK=0
+GEMINI_ATTEMPTED=0
 GEMINI_ADVICE_FILE="${RUN_DIR}/gemini_advice.txt"
 KIMI_ADVICE_FILE="${RUN_DIR}/kimi_advice.txt"
 
 run_gemini_advice() {
   [[ "${DEVLOOP_USE_GEMINI:-1}" == "1" ]] || return 1
   command -v gemini >/dev/null 2>&1 || return 1
+
+  GEMINI_ATTEMPTED=1
 
   local model="${DEVLOOP_GEMINI_MODEL:-gemini-3-pro-preview}"
   local fallback_model="${DEVLOOP_GEMINI_FALLBACK_MODEL:-gemini-2.5-pro}"
@@ -275,7 +278,15 @@ run_gemini_advice() {
 }
 
 run_kimi_advice() {
-  [[ "${DEVLOOP_USE_KIMI:-1}" == "1" ]] || return 1
+  local use_kimi="${DEVLOOP_USE_KIMI:-1}"
+  local use_kimi_fallback="${DEVLOOP_USE_KIMI_FALLBACK:-0}"
+
+  if [[ "${use_kimi}" != "1" ]]; then
+    # Optional: only run Kimi when Gemini was attempted but failed (e.g., quota exceeded).
+    if [[ "${use_kimi_fallback}" != "1" ]] || [[ "${GEMINI_ATTEMPTED}" -ne 1 ]] || [[ "${GEMINI_OK}" -ne 0 ]]; then
+      return 1
+    fi
+  fi
   command -v kimi >/dev/null 2>&1 || return 1
 
   local model="${DEVLOOP_KIMI_MODEL:-}"

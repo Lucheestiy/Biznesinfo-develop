@@ -35,5 +35,8 @@ DEVLOOP_USE_GEMINI=0
 # DEVLOOP_GEMINI_AUTH_PROBE_SEC=5
 
 DEVLOOP_USE_KIMI=0
+# If you disable Gemini (quota) and still want *some* advisor notes, you can
+# enable Kimi only as a fallback when Gemini was attempted but failed:
+# DEVLOOP_USE_KIMI_FALLBACK=1
 # DEVLOOP_KIMI_MODEL=...
 ```
