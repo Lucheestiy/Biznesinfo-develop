@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SELF="$(basename "$0")"
+
+die() {
+  echo "${SELF}: ${*}" >&2
+  exit 1
+}
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "${REPO_DIR}"
+
+CHAT_ID="${TELEGRAM_CHAT_ID:-}"
+if [[ -z "${CHAT_ID}" ]]; then
+  if [[ -f "${REPO_DIR}/secrets/telegram-chat-id" ]]; then
+    CHAT_ID="$(tr -d '\r\n' < "${REPO_DIR}/secrets/telegram-chat-id" || true)"
+  fi
+fi
+if [[ -z "${CHAT_ID}" ]]; then
+  CHAT_ID="1296946396"
+fi
+
+BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+if [[ -z "${BOT_TOKEN}" && -f "${REPO_DIR}/secrets/telegram-bot-token" ]]; then
+  BOT_TOKEN="$(tr -d '\r\n' < "${REPO_DIR}/secrets/telegram-bot-token" || true)"
+fi
+
+if [[ -z "${BOT_TOKEN}" && -f "/home/mlweb/droidminimaxbot/config.json" ]]; then
+  BOT_TOKEN="$(python3 - <<'PY' || true
+import json
+from pathlib import Path
+p=Path('/home/mlweb/droidminimaxbot/config.json')
+data=json.loads(p.read_text(encoding='utf-8'))
+print(data.get('telegram_bot_token',''))
+PY
+)"
+  BOT_TOKEN="$(echo "${BOT_TOKEN}" | tr -d '\r\n' || true)"
+fi
+
+if [[ -z "${BOT_TOKEN}" ]]; then
+  echo "${SELF}: no telegram bot token found; skipping" >&2
+  exit 0
+fi
+
+TEXT=""
+if [[ $# -ge 1 ]]; then
+  TEXT="${1}"
+else
+  TEXT="$(cat)"
+fi
+
+if [[ -z "${TEXT}" ]]; then
+  exit 0
+fi
+
+# Telegram hard limit is 4096 chars; keep a little headroom.
+MAX_LEN=3800
+if [[ "${#TEXT}" -gt "${MAX_LEN}" ]]; then
+  TEXT="${TEXT:0:${MAX_LEN}}…"
+fi
+
+curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+  --data-urlencode "chat_id=${CHAT_ID}" \
+  --data-urlencode "text=${TEXT}" \
+  > /dev/null
+

@@ -1,0 +1,260 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SELF="$(basename "$0")"
+
+log() {
+  echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] ${*}"
+}
+
+die() {
+  echo "${SELF}: ${*}" >&2
+  exit 1
+}
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RUNS_DIR="${REPO_DIR}/devloop/runs"
+LATEST_DIR="${REPO_DIR}/devloop/latest"
+SESSION_FILE="${REPO_DIR}/devloop/session_id.txt"
+
+LOCK_DIR="${REPO_DIR}/devloop"
+LOCK_FILE="${LOCK_DIR}/devloop.lock"
+
+mkdir -p "${RUNS_DIR}" "${LOCK_DIR}"
+
+exec 9>"${LOCK_FILE}"
+if ! flock -n 9; then
+  log "Another devloop run is in progress; exiting."
+  exit 0
+fi
+
+TS="$(date -u '+%Y%m%dT%H%M%SZ')"
+RUN_DIR="${RUNS_DIR}/${TS}"
+mkdir -p "${RUN_DIR}"
+
+ln -sfn "${RUN_DIR}" "${LATEST_DIR}"
+
+cd "${REPO_DIR}"
+
+log "Repo: ${REPO_DIR}"
+log "Run:  ${RUN_DIR}"
+
+git config --global --add safe.directory "${REPO_DIR}" >/dev/null 2>&1 || true
+
+if [[ -n "$(git status --porcelain)" ]]; then
+  msg="Biznesinfo develop devloop aborted: working tree is dirty in ${REPO_DIR}. Commit/stash changes and retry."
+  log "${msg}"
+  "${REPO_DIR}/bin/telegram-send" "${msg}" || true
+  git status -sb > "${RUN_DIR}/git_status_dirty.txt" || true
+  exit 2
+fi
+
+git fetch origin > "${RUN_DIR}/git_fetch.txt" 2>&1 || true
+
+if git show-ref --verify --quiet refs/heads/main; then
+  git checkout main > "${RUN_DIR}/git_checkout_main.txt" 2>&1 || true
+else
+  git checkout -B main > "${RUN_DIR}/git_checkout_main.txt" 2>&1 || true
+fi
+
+git pull --ff-only origin main > "${RUN_DIR}/git_pull.txt" 2>&1 || true
+
+BRANCH="ai/devloop/${TS}"
+git checkout -b "${BRANCH}" > "${RUN_DIR}/git_checkout_branch.txt" 2>&1 || true
+
+git status -sb > "${RUN_DIR}/git_status_before.txt" || true
+git log -1 --oneline > "${RUN_DIR}/git_head_before.txt" || true
+
+# Make sure codex-auth-switcher had a chance to run recently.
+systemctl start codex-auth-switcher.service >/dev/null 2>&1 || true
+
+CODEX_ACCOUNT="$(cat /root/.codex/current 2>/dev/null || true)"
+CODEX_ACCOUNT="${CODEX_ACCOUNT//$'\n'/}"
+if [[ -z "${CODEX_ACCOUNT}" ]]; then
+  CODEX_ACCOUNT="(unknown)"
+fi
+echo "${CODEX_ACCOUNT}" > "${RUN_DIR}/codex_account.txt"
+
+TODO_TEXT=""
+if [[ -f "${REPO_DIR}/devloop/TODO.md" ]]; then
+  TODO_TEXT="$(cat "${REPO_DIR}/devloop/TODO.md")"
+fi
+
+PROMPT_FILE="${RUN_DIR}/prompt.txt"
+cat > "${PROMPT_FILE}" <<EOF
+You are an autonomous coding agent working inside this repository:
+
+- Repo: ${REPO_DIR}
+- Dev site: https://biznesinfo-develop.lucheestiy.com (SSO protected)
+- Local: http://127.0.0.1:8131/
+
+Objective:
+- Make a small, safe, reviewable improvement based on the TODO list below.
+
+Hard constraints (do not violate):
+- DO NOT touch production: /home/mlweb/biznesinfo.lucheestiy.com
+- DO NOT change systemd units, nginx on the droplet, or any other sites.
+- Work ONLY inside this repo directory.
+- Do not read or print secrets (e.g., .env). Do not commit datasets.
+- Avoid destructive shell commands.
+
+Project notes:
+- Docker stack is in docker-compose.yml (host port 8131).
+- Main Next.js app is in ./app (Next.js 16).
+- Dataset file is local-only: app/public/data/biznesinfo/companies.jsonl (gitignored).
+
+TODO:
+${TODO_TEXT}
+
+Output requirements:
+- Apply changes to the working tree.
+- Keep changes minimal; prefer focused commits.
+- Briefly summarize what you changed and why.
+EOF
+
+CODEX_JSONL="${RUN_DIR}/codex.jsonl"
+CODEX_LAST="${RUN_DIR}/codex_last_message.txt"
+
+SESSION_ID=""
+if [[ -f "${SESSION_FILE}" ]]; then
+  SESSION_ID="$(tr -d '\r\n' < "${SESSION_FILE}" || true)"
+fi
+
+CODEX_COMMON=(
+  codex
+  -a never
+  -s workspace-write
+  -m gpt-5.2
+  -c 'model_reasoning_effort="xhigh"'
+  -c 'notice.model_migrations={}'
+  -C "${REPO_DIR}"
+)
+
+run_codex_new_thread() {
+  log "Starting new Codex thread..."
+  timeout 45m "${CODEX_COMMON[@]}" exec --json --output-last-message "${CODEX_LAST}" "$(cat "${PROMPT_FILE}")" > "${CODEX_JSONL}" 2>&1 || return 1
+  python3 - <<'PY' "${CODEX_JSONL}"
+import json
+import sys
+path=sys.argv[1]
+with open(path,'r',encoding='utf-8',errors='replace') as f:
+    for line in f:
+        try:
+            obj=json.loads(line)
+        except Exception:
+            continue
+        if obj.get('type')=='thread.started' and obj.get('thread_id'):
+            print(obj['thread_id'])
+            raise SystemExit(0)
+raise SystemExit(2)
+PY
+}
+
+run_codex_resume_thread() {
+  local session_id="${1}"
+  log "Resuming Codex thread ${session_id}..."
+  timeout 45m "${CODEX_COMMON[@]}" exec resume --json --output-last-message "${CODEX_LAST}" "${session_id}" "$(cat "${PROMPT_FILE}")" > "${CODEX_JSONL}" 2>&1
+}
+
+CODEX_OK=1
+if [[ -z "${SESSION_ID}" ]]; then
+  if SESSION_ID="$(run_codex_new_thread)"; then
+    umask 077
+    printf '%s\n' "${SESSION_ID}" > "${SESSION_FILE}"
+    log "Saved session id: ${SESSION_ID}"
+  else
+    CODEX_OK=0
+  fi
+else
+  if ! run_codex_resume_thread "${SESSION_ID}"; then
+    CODEX_OK=0
+  fi
+fi
+
+git status -sb > "${RUN_DIR}/git_status_after_codex.txt" || true
+git diff --stat > "${RUN_DIR}/git_diff_stat_after_codex.txt" || true
+
+CHANGED=0
+if [[ -n "$(git status --porcelain)" ]]; then
+  CHANGED=1
+fi
+
+BUILD_OK=0
+log "Building docker image (gate)..."
+if timeout 45m docker compose build app > "${RUN_DIR}/docker_build.txt" 2>&1; then
+  BUILD_OK=1
+else
+  BUILD_OK=0
+fi
+
+PUSH_OK=0
+COMMIT_SHA=""
+if [[ "${CHANGED}" -eq 1 ]]; then
+  log "Changes detected; committing..."
+  git add -A
+  git commit -m "AI devloop: ${TS}" > "${RUN_DIR}/git_commit.txt" 2>&1 || true
+  COMMIT_SHA="$(git rev-parse HEAD 2>/dev/null || true)"
+  if git push -u origin "${BRANCH}" > "${RUN_DIR}/git_push.txt" 2>&1; then
+    PUSH_OK=1
+  fi
+else
+  log "No changes detected."
+fi
+
+DEPLOY_OK=0
+if [[ "${BUILD_OK}" -eq 1 ]]; then
+  log "Build OK; deploying dev stack..."
+  if timeout 20m docker compose up -d --build > "${RUN_DIR}/docker_up.txt" 2>&1; then
+    DEPLOY_OK=1
+  fi
+else
+  log "Build failed; skipping deploy."
+fi
+
+docker compose ps > "${RUN_DIR}/docker_ps.txt" 2>&1 || true
+
+SUMMARY="${RUN_DIR}/SUMMARY.md"
+{
+  echo "# Biznesinfo Develop – AI Devloop Run"
+  echo
+  echo "- Time (UTC): ${TS}"
+  echo "- Branch: ${BRANCH}"
+  echo "- Codex account: ${CODEX_ACCOUNT}"
+  echo "- Codex session: ${SESSION_ID:-'(none)'}"
+  echo "- Codex ok: ${CODEX_OK}"
+  echo "- Changed: ${CHANGED}"
+  echo "- Build ok: ${BUILD_OK}"
+  echo "- Push ok: ${PUSH_OK}"
+  echo "- Deploy ok: ${DEPLOY_OK}"
+  if [[ -n "${COMMIT_SHA}" ]]; then
+    echo "- Commit: ${COMMIT_SHA}"
+  fi
+  echo
+  echo "## Links"
+  echo
+  echo "- Dev: https://biznesinfo-develop.lucheestiy.com/"
+  echo "- Local: http://127.0.0.1:8131/"
+  echo
+  echo "## Artifacts"
+  echo
+  echo "- ${RUN_DIR}/prompt.txt"
+  echo "- ${RUN_DIR}/codex.jsonl"
+  echo "- ${RUN_DIR}/codex_last_message.txt"
+  echo "- ${RUN_DIR}/docker_build.txt"
+  echo "- ${RUN_DIR}/docker_up.txt"
+  echo "- ${RUN_DIR}/docker_ps.txt"
+  echo
+  echo "## Notes"
+  echo
+  echo "If the branch looks good, open a PR from \`${BRANCH}\` into \`main\`."
+} > "${SUMMARY}"
+
+SHORT_STATUS="CODEX=${CODEX_OK} CHANGED=${CHANGED} BUILD=${BUILD_OK} PUSH=${PUSH_OK} DEPLOY=${DEPLOY_OK}"
+MSG="Biznesinfo develop devloop ${TS}\n${SHORT_STATUS}\nbranch: ${BRANCH}\nreport: ${SUMMARY}"
+log "Telegram notify..."
+if ! "${REPO_DIR}/bin/telegram-send" "${MSG}"; then
+  log "Telegram send failed (non-fatal)."
+fi
+
+log "Done: ${SHORT_STATUS}"
+
