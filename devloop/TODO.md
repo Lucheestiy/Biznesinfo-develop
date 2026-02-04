@@ -10,7 +10,7 @@ Goal: help paid/partner users use the B2B website (find suppliers, craft outreac
 
 Suggested milestones (do in order; keep each run small):
 
-1. Add an `/assistant` page with a minimal chat UI + a navigation entry.
+1. ✅ Add an `/assistant` page with a minimal chat UI + a navigation entry.
    - Gate it behind auth (must be logged in).
    - For `plan=free`: show upsell + quota info (no chat yet).
    - For `plan=paid|partner`: allow sending messages.

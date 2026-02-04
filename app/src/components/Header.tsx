@@ -454,6 +454,10 @@ export default function Header() {
               {t("nav.about")}
             </Link>
             <span className="text-yellow-400 text-lg">|</span>
+            <Link href="/assistant" className="px-3 py-2 text-yellow-400 hover:text-white hover:scale-105 hover:underline underline-offset-4 transition-all duration-200 font-semibold cursor-pointer">
+              {t("ai.title")}
+            </Link>
+            <span className="text-yellow-400 text-lg">|</span>
             <Link href="/favorites" className="px-3 py-2 text-yellow-400 hover:text-white hover:scale-105 hover:underline underline-offset-4 transition-all duration-200 font-semibold cursor-pointer">
               {t("nav.favorites")}
             </Link>
@@ -603,6 +607,23 @@ export default function Header() {
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* Assistant */}
+              <div className="border-b border-white/10">
+                <Link
+                  href="/assistant"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-between py-3 px-2 hover:text-yellow-400 transition-colors text-left font-medium"
+                >
+                  <span className="flex items-center gap-2">
+                    <span aria-hidden>🤖</span>
+                    <span>{t("ai.title")}</span>
+                  </span>
+                  <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
               </div>
 
               {/* Contact Information Accordion */}
