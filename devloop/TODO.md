@@ -22,7 +22,7 @@ Suggested milestones (do in order; keep each run small):
 4. Add basic safety + limits:
    - ✅ Rate limit, daily quota already exist — make sure the UI displays remaining quota.
    - ✅ Add a visible disclaimer in the assistant UI.
-   - Add basic prompt-injection guardrails in server-side prompt assembly.
+   - ✅ Add basic prompt-injection guardrails in server-side prompt assembly.
 5. Add real model integration (behind env vars; never commit keys):
    - If the key is missing → keep the stub reply (do not break the site).
 
