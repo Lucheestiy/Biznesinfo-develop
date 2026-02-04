@@ -269,3 +269,8 @@ if ! "${REPO_DIR}/bin/telegram-send" "${MSG}"; then
 fi
 
 log "Done: ${SHORT_STATUS}"
+
+# Keep the working tree on main for the next run (only if clean).
+if [[ -z "$(git status --porcelain)" ]]; then
+  git checkout main >/dev/null 2>&1 || true
+fi
