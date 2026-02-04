@@ -94,8 +94,10 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
             icon: s.icon || (s.type === "category" ? "📁" : s.type === "rubric" ? "📌" : "🏢"),
             subtitle: s.type === "company" 
               ? s.subtitle 
-              : ('category_name' in s && s.category_name ? `${s.category_name} • ${s.count} компаний` : `${s.count} компаний`),
-            count: 'count' in s ? s.count : undefined,
+              : ("category_name" in s && s.category_name
+                ? `${s.category_name} • ${formatCompanyCount(s.count)}`
+                : formatCompanyCount(s.count)),
+            count: "count" in s ? s.count : undefined,
           }))
           .slice(0, 8);
 
@@ -186,7 +188,14 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions || suggestions.length === 0) return;
+    if (!showSuggestions) return;
+
+    if (e.key === "Tab" || e.key === "Escape") {
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (suggestions.length === 0) return;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -198,14 +207,26 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
       e.preventDefault();
       router.push(suggestions[selectedIndex].url);
       setShowSuggestions(false);
-    } else if (e.key === "Escape") {
-      setShowSuggestions(false);
     }
   };
 
   const handleSuggestionClick = (url: string) => {
     setShowSuggestions(false);
     router.push(url);
+  };
+
+  const clearCompany = () => {
+    setCompanyQuery("");
+    setServiceQuery("");
+    setSuggestions([]);
+    setSelectedIndex(-1);
+    setShowSuggestions(false);
+    companyInputRef.current?.focus();
+  };
+
+  const clearKeywords = () => {
+    setKeywordsQuery("");
+    keywordsInputRef.current?.focus();
   };
 
   if (variant === "compact") {
@@ -300,6 +321,19 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
                 autoComplete="off"
                 className="portal-dialog-typography search-input-mobile flex-grow py-3.5 px-3 text-gray-600 focus:outline-none text-base bg-transparent"
               />
+              {query.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearCompany}
+                  aria-label={t("search.clear")}
+                  title={t("search.clear")}
+                  className="m-2 w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 hover:text-[#820251] active:scale-95 transition-all duration-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
               {/* Search button inside input */}
               <button
                 type="submit"
@@ -366,6 +400,19 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
               autoComplete="off"
               className="portal-dialog-typography flex-grow py-3.5 px-3 text-gray-600 focus:outline-none text-base bg-transparent"
             />
+            {keywordsQuery.length > 0 && (
+              <button
+                type="button"
+                onClick={clearKeywords}
+                aria-label={t("search.clear")}
+                title={t("search.clear")}
+                className="m-2 w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 hover:text-[#820251] active:scale-95 transition-all duration-200"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -401,6 +448,19 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
                 autoComplete="off"
                 className="portal-dialog-typography search-input-hero flex-grow py-5 px-4 text-[#4b5563] focus:outline-none text-lg bg-transparent"
               />
+              {companyQuery.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearCompany}
+                  aria-label={t("search.clear")}
+                  title={t("search.clear")}
+                  className="mr-3 w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 hover:text-[#820251] active:scale-95 transition-all duration-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 
@@ -460,6 +520,19 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
                 autoComplete="off"
                 className="portal-dialog-typography search-input-hero flex-grow py-5 px-4 text-[#4b5563] focus:outline-none text-lg bg-transparent"
               />
+              {keywordsQuery.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearKeywords}
+                  aria-label={t("search.clear")}
+                  title={t("search.clear")}
+                  className="mr-3 w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 hover:text-[#820251] active:scale-95 transition-all duration-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
         </div>
