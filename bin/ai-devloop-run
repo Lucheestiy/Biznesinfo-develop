@@ -81,7 +81,8 @@ CODEX_ACCOUNT="${CODEX_ACCOUNT//$'\n'/}"
 if [[ -z "${CODEX_ACCOUNT}" ]]; then
   CODEX_ACCOUNT="(unknown)"
 fi
-echo "${CODEX_ACCOUNT}" > "${RUN_DIR}/codex_account.txt"
+CODEX_ACCOUNT_START="${CODEX_ACCOUNT}"
+echo "${CODEX_ACCOUNT_START}" > "${RUN_DIR}/codex_account.txt"
 
 TODO_TEXT=""
 if [[ -f "${REPO_DIR}/devloop/TODO.md" ]]; then
@@ -122,6 +123,7 @@ EOF
 
 CODEX_JSONL="${RUN_DIR}/codex.jsonl"
 CODEX_LAST="${RUN_DIR}/codex_last_message.txt"
+CODEX_ATTEMPTS=0
 
 SESSION_ID=""
 if [[ -f "${SESSION_FILE}" ]]; then
@@ -137,6 +139,21 @@ CODEX_COMMON=(
   -c 'notice.model_migrations={}'
   -C "${REPO_DIR}"
 )
+
+is_retryable_codex_failure() {
+  [[ -f "${CODEX_JSONL}" ]] || return 1
+  grep -Eiq \
+    '(insufficient[_ -]?quota|quota exceeded|rate limit|too many requests|http[^0-9]*(401|403|429)|\b(401|403|429)\b|unauthorized|forbidden|expired token|invalid token|please log in|authentication failed)' \
+    "${CODEX_JSONL}"
+}
+
+refresh_codex_account() {
+  CODEX_ACCOUNT="$(cat /root/.codex/current 2>/dev/null || true)"
+  CODEX_ACCOUNT="${CODEX_ACCOUNT//$'\n'/}"
+  if [[ -z "${CODEX_ACCOUNT}" ]]; then
+    CODEX_ACCOUNT="(unknown)"
+  fi
+}
 
 run_codex_new_thread() {
   log "Starting new Codex thread..."
@@ -195,16 +212,44 @@ PY
 }
 
 CODEX_OK=1
-if [[ -z "${SESSION_ID}" ]]; then
-  if SESSION_ID="$(run_codex_new_thread)"; then
-    umask 077
-    printf '%s\n' "${SESSION_ID}" > "${SESSION_FILE}"
-    log "Saved session id: ${SESSION_ID}"
-  else
-    CODEX_OK=0
+run_codex_attempt() {
+  CODEX_ATTEMPTS=$((CODEX_ATTEMPTS + 1))
+  if [[ -z "${SESSION_ID}" ]]; then
+    if SESSION_ID="$(run_codex_new_thread)"; then
+      umask 077
+      printf '%s\n' "${SESSION_ID}" > "${SESSION_FILE}"
+      log "Saved session id: ${SESSION_ID}"
+      return 0
+    fi
+    return 1
   fi
-else
-  if ! run_codex_resume_thread "${SESSION_ID}"; then
+  run_codex_resume_thread "${SESSION_ID}"
+}
+
+if ! run_codex_attempt; then
+  CODEX_OK=0
+fi
+
+if [[ "${CODEX_OK}" -eq 0 ]] && is_retryable_codex_failure; then
+  log "Codex failed (auth/quota). Switching codex-auth and retrying once..."
+  mv -f "${CODEX_JSONL}" "${RUN_DIR}/codex_attempt1.txt" 2>/dev/null || true
+  mv -f "${CODEX_LAST}" "${RUN_DIR}/codex_last_message_attempt1.txt" 2>/dev/null || true
+
+  flock -u 8 || true
+  exec 8>&- || true
+  systemctl start codex-auth-switcher.service >/dev/null 2>&1 || true
+  exec 8>"${CODEX_SWITCH_LOCK}"
+  if flock -w 30 8; then
+    log "Re-acquired codex-auth switch lock."
+  else
+    log "WARNING: could not re-acquire codex-auth switch lock; continuing without it."
+  fi
+
+  refresh_codex_account
+  echo "${CODEX_ACCOUNT}" > "${RUN_DIR}/codex_account_retry.txt"
+
+  CODEX_OK=1
+  if ! run_codex_attempt; then
     CODEX_OK=0
   fi
 fi
@@ -262,8 +307,12 @@ SUMMARY="${RUN_DIR}/SUMMARY.md"
   echo
   echo "- Time (UTC): ${TS}"
   echo "- Branch: ${BRANCH}"
-  echo "- Codex account: ${CODEX_ACCOUNT}"
+  echo "- Codex account (start): ${CODEX_ACCOUNT_START}"
+  if [[ -f "${RUN_DIR}/codex_account_retry.txt" ]]; then
+    echo "- Codex account (retry): $(cat "${RUN_DIR}/codex_account_retry.txt" 2>/dev/null || true)"
+  fi
   echo "- Codex session: ${SESSION_ID:-'(none)'}"
+  echo "- Codex attempts: ${CODEX_ATTEMPTS}"
   echo "- Codex ok: ${CODEX_OK}"
   echo "- Changed: ${CHANGED}"
   echo "- Build ok: ${BUILD_OK}"
