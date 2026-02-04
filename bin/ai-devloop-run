@@ -647,6 +647,16 @@ SUMMARY="${RUN_DIR}/SUMMARY.md"
   echo "- Dev: https://biznesinfo-develop.lucheestiy.com/"
   echo "- Local: http://127.0.0.1:8131/"
   echo
+  echo "## Changes"
+  echo
+  if [[ "${CHANGED}" -eq 0 ]]; then
+    echo "No code changes in this run."
+  else
+    echo '```'
+    cat "${RUN_DIR}/git_diff_stat_after_codex.txt" 2>/dev/null || true
+    echo '```'
+  fi
+  echo
   echo "## Artifacts"
   echo
   echo "- ${RUN_DIR}/prompt.txt"
