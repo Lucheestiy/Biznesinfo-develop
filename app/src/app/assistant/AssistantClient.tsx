@@ -38,6 +38,7 @@ export default function AssistantClient({
   const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(initialUsage ?? null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const draftRef = useRef<HTMLTextAreaElement | null>(null);
   const prefillAppliedRef = useRef(false);
 
   const canChat = user.plan === "paid" || user.plan === "partner";
@@ -58,6 +59,16 @@ export default function AssistantClient({
         "Привет! Я помогу разобраться с рубриками, сформулировать запрос поставщикам и быстро найти нужные компании. (Пока в режиме заглушки.)",
     },
   ]);
+  const showSuggestionChips = canChat && messages.length <= 1 && !draft.trim();
+  const suggestionChips = useMemo(
+    () => [
+      { id: "findSuppliers", text: t("ai.quick.findSuppliers") },
+      { id: "draftOutreach", text: t("ai.quick.draftOutreach") },
+      { id: "explainRubrics", text: t("ai.quick.explainRubrics") },
+      { id: "checkCompany", text: t("ai.quick.checkCompany") },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     if (prefillAppliedRef.current) return;
@@ -247,10 +258,36 @@ export default function AssistantClient({
 
                   <div className="border-t border-gray-200 p-4 bg-white">
                     {error && <div className="mb-3 text-sm text-red-700">{error}</div>}
+                    {showSuggestionChips && (
+                      <div className="mb-3 flex flex-wrap gap-2">
+                        {suggestionChips.map((chip) => (
+                          <button
+                            key={chip.id}
+                            type="button"
+                            onClick={() => {
+                              setDraft(chip.text);
+                              draftRef.current?.focus();
+                            }}
+                            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition-colors border border-gray-200"
+                          >
+                            {chip.text}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex flex-col sm:flex-row gap-3">
                       <textarea
+                        ref={draftRef}
                         value={draft}
                         onChange={(e) => setDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (sending) return;
+                          if (e.key !== "Enter") return;
+                          if (e.shiftKey) return;
+                          if (e.nativeEvent.isComposing) return;
+                          e.preventDefault();
+                          void send();
+                        }}
                         placeholder="Напишите сообщение…"
                         rows={2}
                         className="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a0006d]/30"
