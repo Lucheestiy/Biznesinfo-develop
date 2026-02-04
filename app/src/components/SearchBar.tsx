@@ -94,8 +94,10 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
             icon: s.icon || (s.type === "category" ? "📁" : s.type === "rubric" ? "📌" : "🏢"),
             subtitle: s.type === "company" 
               ? s.subtitle 
-              : ('category_name' in s && s.category_name ? `${s.category_name} • ${s.count} компаний` : `${s.count} компаний`),
-            count: 'count' in s ? s.count : undefined,
+              : ("category_name" in s && s.category_name
+                ? `${s.category_name} • ${formatCompanyCount(s.count)}`
+                : formatCompanyCount(s.count)),
+            count: "count" in s ? s.count : undefined,
           }))
           .slice(0, 8);
 
@@ -186,7 +188,14 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions || suggestions.length === 0) return;
+    if (!showSuggestions) return;
+
+    if (e.key === "Tab" || e.key === "Escape") {
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (suggestions.length === 0) return;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -197,8 +206,6 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
     } else if (e.key === "Enter" && selectedIndex >= 0) {
       e.preventDefault();
       router.push(suggestions[selectedIndex].url);
-      setShowSuggestions(false);
-    } else if (e.key === "Escape") {
       setShowSuggestions(false);
     }
   };
@@ -321,7 +328,21 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
               ref={suggestionsRef}
               className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-2xl shadow-2xl mt-2 z-50 overflow-hidden"
             >
-              {suggestions.map((suggestion, idx) => (
+              {suggestions.map((suggestion, idx) => {
+                const badgeText =
+                  suggestion.type === "company"
+                    ? t("search.company")
+                    : suggestion.type === "category"
+                      ? t("search.category")
+                      : t("catalog.subcategories");
+                const badgeClassName =
+                  suggestion.type === "company"
+                    ? "bg-green-100 text-green-700"
+                    : suggestion.type === "category"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-purple-100 text-purple-700";
+
+                return (
                 <button
                   key={`${suggestion.type}-${suggestion.url}`}
                   type="button"
@@ -338,11 +359,12 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
                       <div className="text-sm text-gray-500 truncate">{suggestion.subtitle}</div>
                     )}
                   </div>
-                  <span className="text-xs px-2 py-1 rounded-full flex-shrink-0 bg-green-100 text-green-700">
-                    {t("search.company")}
+                  <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${badgeClassName}`}>
+                    {badgeText}
                   </span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -410,7 +432,21 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
               ref={suggestionsRef}
               className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-2xl shadow-2xl mt-2 z-50 overflow-hidden"
             >
-              {suggestions.map((suggestion, idx) => (
+              {suggestions.map((suggestion, idx) => {
+                const badgeText =
+                  suggestion.type === "company"
+                    ? t("search.company")
+                    : suggestion.type === "category"
+                      ? t("search.category")
+                      : t("catalog.subcategories");
+                const badgeClassName =
+                  suggestion.type === "company"
+                    ? "bg-green-100 text-green-700"
+                    : suggestion.type === "category"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-purple-100 text-purple-700";
+
+                return (
                 <button
                   key={`${suggestion.type}-${suggestion.url}`}
                   type="button"
@@ -427,13 +463,12 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
                       <div className="text-sm text-gray-500 truncate">{suggestion.subtitle}</div>
                     )}
                   </div>
-                  <span
-                    className="text-xs px-3 py-1.5 rounded-full flex-shrink-0 font-medium bg-green-100 text-green-700"
-                  >
-                    {t("search.company")}
+                  <span className={`text-xs px-3 py-1.5 rounded-full flex-shrink-0 font-medium ${badgeClassName}`}>
+                    {badgeText}
                   </span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
