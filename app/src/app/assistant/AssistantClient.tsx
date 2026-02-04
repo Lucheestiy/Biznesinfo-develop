@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -26,15 +27,26 @@ export default function AssistantClient({
   user: { name: string | null; email: string; plan: UserPlan; aiRequestsPerDay: number };
 }) {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
+  const companyIdFromUrl = (searchParams.get("companyId") || "").trim();
+  const companyNameFromUrl = (searchParams.get("companyName") || "").trim();
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const prefillAppliedRef = useRef(false);
 
   const canChat = user.plan === "paid" || user.plan === "partner";
   const planLabel = useMemo(() => formatPlanLabel(user.plan), [user.plan]);
+
+  const companyContext = useMemo(() => {
+    const companyId = companyIdFromUrl || null;
+    const companyName = companyNameFromUrl || null;
+    if (!companyId && !companyName) return null;
+    return { companyId, companyName };
+  }, [companyIdFromUrl, companyNameFromUrl]);
 
   const [messages, setMessages] = useState<AssistantMessage[]>([
     {
@@ -44,6 +56,24 @@ export default function AssistantClient({
         "Привет! Я помогу разобраться с рубриками, сформулировать запрос поставщикам и быстро найти нужные компании. (Пока в режиме заглушки.)",
     },
   ]);
+
+  useEffect(() => {
+    if (prefillAppliedRef.current) return;
+    if (!companyContext) return;
+
+    const label = companyContext.companyName
+      ? `«${companyContext.companyName}»`
+      : (companyContext.companyId ? `#${companyContext.companyId}` : "");
+
+    setDraft((prev) => {
+      if (prev.trim()) return prev;
+      return label
+        ? `Составь краткую справку о компании ${label}: чем занимается и какие товары/услуги предлагает.`
+        : "Составь краткую справку об этой компании: чем занимается и какие товары/услуги предлагает.";
+    });
+
+    prefillAppliedRef.current = true;
+  }, [companyContext]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -63,13 +93,19 @@ export default function AssistantClient({
     setMessages((prev) => [...prev, userMessage]);
 
     try {
+      const payload: Record<string, unknown> = { source: "assistant_page", page: "/assistant" };
+      if (companyContext) payload.context = companyContext;
+
+      const requestBody: Record<string, unknown> = {
+        message: text,
+        payload,
+      };
+      if (companyContext?.companyId) requestBody.companyId = companyContext.companyId;
+
       const res = await fetch("/api/ai/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          payload: { source: "assistant_page", page: "/assistant" },
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await res.json().catch(() => ({}));

@@ -17,7 +17,7 @@ Suggested milestones (do in order; keep each run small):
 2. ✅ Use the existing `POST /api/ai/request` as the backend for the UI.
    - Make the endpoint return a stub reply for now (until real model integration is wired).
    - Store the request + response in `ai_requests.payload`.
-3. Add a contextual entrypoint:
+3. ✅ Add a contextual entrypoint:
    - On `/company/[id]`: “Ask AI about this company” → opens assistant with company context prefilled.
 4. Add basic safety + limits:
    - Rate limit, daily quota already exist — make sure the UI displays remaining quota.
