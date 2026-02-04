@@ -23,12 +23,12 @@ Or via systemd:
 
 ## Optional advisors (Gemini / Kimi)
 
-To enable (local-only), create `devloop/local.env`:
+Enabled by default. To disable (local-only), create `devloop/local.env`:
 
 ```bash
-DEVLOOP_USE_GEMINI=1
-DEVLOOP_GEMINI_MODEL=gemini-2.5-pro
+DEVLOOP_USE_GEMINI=0
+# DEVLOOP_GEMINI_MODEL=gemini-2.5-pro
 
-DEVLOOP_USE_KIMI=1
+DEVLOOP_USE_KIMI=0
 # DEVLOOP_KIMI_MODEL=...
 ```
