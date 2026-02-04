@@ -509,7 +509,7 @@ function SearchCompanyCard({
         <div className="mt-auto pt-2.5 flex justify-end">
           <Link
             href={companyHref}
-            className="group inline-flex items-center justify-center gap-2 bg-[#820251] text-white px-4 py-1.5 rounded-lg text-[15px] font-bold shadow-sm hover:bg-[#6a0143] hover:shadow-md hover:shadow-[#820251]/25 active:bg-[#520031] active:scale-[0.98] transition-all duration-200"
+            className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#820251] text-white px-5 py-2 rounded-lg text-[15px] font-bold shadow-sm hover:bg-[#6a0143] hover:shadow-md hover:shadow-[#820251]/25 active:bg-[#520031] active:scale-[0.98] transition-all duration-200"
           >
             {t("company.details")}
             <svg
