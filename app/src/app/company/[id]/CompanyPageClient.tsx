@@ -954,11 +954,11 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
               <div id="contacts" className="bg-white rounded-xl shadow-md p-6 border-l-4 border-[#820251]">
                 <h2 className="text-xl font-bold text-[#820251] mb-4 flex items-center gap-2">
                   <span
-                    className="w-9 h-9 rounded-full bg-[#14532d]/10 flex items-center justify-center flex-shrink-0"
+                    className="w-9 h-9 rounded-full bg-[#166534]/10 flex items-center justify-center flex-shrink-0"
                     aria-hidden
                   >
                     <svg
-                      className="w-5 h-5 text-[#14532d]"
+                      className="w-5 h-5 text-[#166534]"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -977,9 +977,9 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                   <div className="flex-1 space-y-4">
                     {company.address && (
                       <div>
-                        <div className="text-gray-500 text-sm mb-1">{t("company.address")}</div>
+                        <div className="text-gray-500 text-[11px] font-semibold tracking-wide uppercase mb-1">{t("company.address")}</div>
                         <div className="flex items-start gap-2">
-                          <span className="text-[#820251]">📍</span>
+                          <span className="text-[#820251] mt-0.5">📍</span>
                           <span className="text-gray-700">{company.address}</span>
                         </div>
                       </div>
@@ -987,17 +987,17 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
 
                     {phones && phones.length > 0 && (
                       <div>
-                        <div className="text-gray-500 text-sm mb-2">{t("company.phone")}</div>
+                        <div className="text-gray-500 text-[11px] font-semibold tracking-wide uppercase mb-2">{t("company.phone")}</div>
                         <div className="space-y-2">
                           {phones.map((p, idx) => (
                             <div key={`${p.number}-${idx}`} className="flex items-start gap-2">
                               <div className="flex items-center gap-3 w-full flex-nowrap">
                                 <a
                                   href={`tel:${normalizePhoneForTel(p.number) || p.number}`}
-                                  className="flex items-start gap-2 text-[#820251] font-semibold text-base md:text-lg hover:underline whitespace-nowrap"
+                                  className="flex items-start gap-2 text-[#820251] font-semibold text-base md:text-lg hover:underline whitespace-nowrap px-2 py-2 -ml-2 rounded-lg hover:bg-gray-50 transition-colors"
                                 >
                                   <svg
-                                    className="w-4 h-4 text-[#14532d] mt-1"
+                                    className="w-4 h-4 text-[#166534] mt-1"
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
@@ -1011,7 +1011,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                                   <span>{p.number}</span>
                                 </a>
                                 {p.labels && p.labels.length > 0 && (
-                                  <div className="text-sm md:text-base text-gray-500 ml-auto text-right whitespace-nowrap">{p.labels.join(", ")}</div>
+                                  <div className="text-[11px] sm:text-sm md:text-base text-gray-500 tracking-wide ml-auto text-right whitespace-nowrap">{p.labels.join(", ")}</div>
                                 )}
                               </div>
                             </div>
@@ -1022,7 +1022,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
 
                     {regularWebsites.length > 0 && (
                       <div>
-                        <div className="text-gray-500 text-sm mb-1">{t("company.website")}</div>
+                        <div className="text-gray-500 text-[11px] font-semibold tracking-wide uppercase mb-1">{t("company.website")}</div>
                         <div className="space-y-1">
                           {websitesToRender.map((w) => (
                             <a
@@ -1060,7 +1060,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
 
                     {company.emails && company.emails.length > 0 && (
                       <div>
-                        <div className="text-gray-500 text-sm mb-1">{t("company.email")}</div>
+                        <div className="text-gray-500 text-[11px] font-semibold tracking-wide uppercase mb-1">{t("company.email")}</div>
                         <div className="space-y-1">
                           {company.emails.map((e) => (
                             <a
@@ -1068,10 +1068,10 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                               href={`https://mail.yandex.ru/compose?to=${encodeURIComponent(e)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 min-w-0 text-[#820251] hover:underline"
+                              className="flex items-start gap-2 min-w-0 text-[#820251] hover:underline px-2 py-2 -ml-2 rounded-lg hover:bg-gray-50 transition-colors"
                             >
                               <svg
-                                className="w-4 h-4 text-[#14532d] flex-shrink-0"
+                                className="w-4 h-4 text-[#166534] flex-shrink-0 mt-0.5"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
@@ -1083,7 +1083,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                                 <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
                                 <path d="M22 6l-10 7L2 6" />
                               </svg>
-                              <span className="truncate">{e}</span>
+                              <span className="break-all sm:truncate">{e}</span>
                             </a>
                           ))}
                         </div>
@@ -1092,7 +1092,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
 
                     {socials.length > 0 && (
                       <div>
-                        <div className="text-gray-500 text-sm mb-2">Социальные сети</div>
+                        <div className="text-gray-500 text-[11px] font-semibold tracking-wide uppercase mb-2">Социальные сети</div>
                         <div className="space-y-2">
                           {socials.map((social, idx) => (
                             <a
@@ -1126,13 +1126,13 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {company.unp && (
                         <div>
-                          <div className="text-gray-500 text-sm mb-1">УНП</div>
+                          <div className="text-gray-500 text-[11px] font-semibold tracking-wide uppercase mb-1">УНП</div>
                           <div className="text-gray-700 font-medium">{company.unp}</div>
                         </div>
                       )}
                       {company.contact_person && (
                         <div>
-                          <div className="text-gray-500 text-sm mb-1">Контактное лицо</div>
+                          <div className="text-gray-500 text-[11px] font-semibold tracking-wide uppercase mb-1">Контактное лицо</div>
                           <div className="text-gray-700 font-medium">{company.contact_person}</div>
                         </div>
                       )}
@@ -1142,7 +1142,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                   {company.work_hours &&
                     (company.work_hours.work_time || company.work_hours.break_time || company.work_hours.status) && (
                       <div>
-                        <div className="text-gray-500 text-sm mb-1">{t("company.workHours")}</div>
+                        <div className="text-gray-500 text-[11px] font-semibold tracking-wide uppercase mb-1">{t("company.workHours")}</div>
                         <div className="text-gray-700 space-y-1">
                           {company.work_hours.work_time && (
                             <div className="flex items-center gap-2">
@@ -1168,7 +1168,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
                 <div className="flex flex-wrap gap-3 mt-6">
                   <button
                     onClick={() => setMessageModalOpen(true)}
-                    className="flex-1 min-w-[140px] border-2 border-[#820251] text-[#820251] py-3 rounded-lg font-semibold hover:bg-[#820251] hover:text-white transition-colors"
+                    className="flex-1 min-w-[140px] border-2 border-[#166534] text-[#166534] py-3 rounded-lg font-semibold hover:bg-[#166534] hover:text-white transition-colors"
                   >
                     {t("company.write")}
                   </button>
@@ -1179,7 +1179,7 @@ export default function CompanyPageClient({ id, initialData }: CompanyPageClient
               </div>
 
               {/* Divider between Contacts and About */}
-              <div className="h-3 bg-gradient-to-r from-[#820251]/10 via-[#820251]/20 to-[#820251]/10 rounded-full" aria-hidden="true" />
+              <div className="h-px bg-gradient-to-r from-transparent via-[#820251]/25 to-transparent" aria-hidden="true" />
 
               {/* About */}
               <div id="about" className="bg-white rounded-xl shadow-md p-6 border-l-4 border-[#820251]">
