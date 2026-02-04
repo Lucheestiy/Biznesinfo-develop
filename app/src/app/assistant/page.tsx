@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, isAuthEnabled } from "@/lib/auth/currentUser";
 import { getUserEffectivePlan } from "@/lib/auth/plans";
+import { getAiUsage } from "@/lib/auth/aiUsage";
 import AssistantClient from "./AssistantClient";
 
 export default async function AssistantPage() {
@@ -10,6 +11,7 @@ export default async function AssistantPage() {
   if (!user) redirect("/login?next=/assistant");
 
   const effective = await getUserEffectivePlan(user);
+  const usage = await getAiUsage({ userId: user.id });
 
   return (
     <AssistantClient
@@ -19,7 +21,7 @@ export default async function AssistantPage() {
         plan: effective.plan,
         aiRequestsPerDay: effective.aiRequestsPerDay,
       }}
+      initialUsage={{ day: usage.day, used: usage.used, limit: effective.aiRequestsPerDay }}
     />
   );
 }
-

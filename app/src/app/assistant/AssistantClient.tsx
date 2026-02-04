@@ -23,8 +23,10 @@ function formatPlanLabel(plan: UserPlan): string {
 
 export default function AssistantClient({
   user,
+  initialUsage,
 }: {
   user: { name: string | null; email: string; plan: UserPlan; aiRequestsPerDay: number };
+  initialUsage?: { used: number; limit: number; day: string };
 }) {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
@@ -33,7 +35,7 @@ export default function AssistantClient({
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(null);
+  const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(initialUsage ?? null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prefillAppliedRef = useRef(false);
@@ -113,6 +115,8 @@ export default function AssistantClient({
         if (res.status === 429 && data?.error === "QuotaExceeded") {
           const used = typeof data?.used === "number" ? data.used : null;
           const limit = typeof data?.limit === "number" ? data.limit : null;
+          const day = typeof data?.day === "string" ? data.day : null;
+          if (used !== null && limit !== null && day) setQuota({ used, limit, day });
           setError(
             used !== null && limit !== null
               ? `Лимит AI на сегодня: ${used}/${limit}`
@@ -187,6 +191,12 @@ export default function AssistantClient({
                   {quota && (
                     <div className="mt-1">
                       <span className="text-gray-500">Сегодня ({quota.day}):</span> {quota.used}/{quota.limit}
+                      {quota.limit > 0 && (
+                        <span className="text-gray-500"> • Осталось:</span>
+                      )}
+                      {quota.limit > 0 && (
+                        <span> {Math.max(0, quota.limit - quota.used)}</span>
+                      )}
                     </div>
                   )}
                 </div>
