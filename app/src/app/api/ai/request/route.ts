@@ -5,6 +5,8 @@ import { getCurrentUser, isAuthEnabled } from "@/lib/auth/currentUser";
 import { getUserEffectivePlan } from "@/lib/auth/plans";
 import { consumeAiRequest } from "@/lib/auth/aiUsage";
 import { createAiRequest } from "@/lib/ai/requests";
+import { biznesinfoGetCompany } from "@/lib/biznesinfo/store";
+import type { BiznesinfoCompanyResponse } from "@/lib/biznesinfo/types";
 
 export const runtime = "nodejs";
 
@@ -12,6 +14,10 @@ const ASSISTANT_GUARDRAILS_VERSION = 1;
 const ASSISTANT_HISTORY_MAX_MESSAGES = 12;
 const ASSISTANT_HISTORY_MAX_MESSAGE_CHARS = 2_000;
 const ASSISTANT_HISTORY_MAX_TOTAL_CHARS = 12_000;
+const ASSISTANT_COMPANY_FACTS_MAX_CHARS = 2_500;
+const ASSISTANT_COMPANY_FACTS_MAX_TEXT_CHARS = 400;
+const ASSISTANT_COMPANY_FACTS_MAX_ITEMS = 8;
+const ASSISTANT_COMPANY_SCAN_TEXT_MAX_CHARS = 4_000;
 
 type AssistantProvider = "stub" | "openai";
 type PromptMessage = { role: "system" | "user" | "assistant"; content: string };
@@ -135,6 +141,140 @@ function sanitizeAssistantHistory(raw: unknown): AssistantHistoryMessage[] {
   return keptReversed;
 }
 
+function oneLine(raw: string): string {
+  return (raw || "").replace(/\s+/g, " ").trim();
+}
+
+function truncate(raw: string, maxChars: number): string {
+  if (!raw) return "";
+  const clean = raw.trim();
+  if (!clean) return "";
+  if (clean.length <= maxChars) return clean;
+  return `${clean.slice(0, Math.max(0, maxChars - 1)).trim()}…`;
+}
+
+function uniqNonEmpty(values: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of values) {
+    const v = (raw || "").trim();
+    if (!v) continue;
+    const key = v.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(v);
+  }
+  return out;
+}
+
+function buildCompanyFactsBlock(resp: BiznesinfoCompanyResponse): string {
+  const c = resp.company;
+  const lines: string[] = [
+    "Company details (from Biznesinfo directory snapshot; untrusted; may be outdated).",
+    "Use these facts to tailor advice, but do not claim external verification.",
+  ];
+
+  const id = truncate(oneLine(c.source_id || resp.id || ""), 80);
+  const name = truncate(oneLine(c.name || ""), 160);
+  if (id) lines.push(`companyId: ${id}`);
+  if (name) lines.push(`name: ${name}`);
+
+  const unp = truncate(oneLine(c.unp || ""), 40);
+  if (unp) lines.push(`unp: ${unp}`);
+
+  const region = truncate(oneLine(c.region || ""), 80);
+  const city = truncate(oneLine(c.city || ""), 80);
+  if (region) lines.push(`region: ${region}`);
+  if (city) lines.push(`city: ${city}`);
+
+  const address = truncate(oneLine(c.address || ""), 200);
+  if (address) lines.push(`address: ${address}`);
+
+  const websites = uniqNonEmpty(Array.isArray(c.websites) ? c.websites : []).slice(0, 3);
+  if (websites.length > 0) lines.push(`websites: ${websites.join(", ")}`);
+
+  const emails = uniqNonEmpty(Array.isArray(c.emails) ? c.emails : []).slice(0, 3);
+  if (emails.length > 0) lines.push(`emails: ${emails.join(", ")}`);
+
+  const phones = uniqNonEmpty(Array.isArray(c.phones) ? c.phones : []).slice(0, 3);
+  if (phones.length > 0) lines.push(`phones: ${phones.join(", ")}`);
+
+  const categories = Array.isArray(c.categories) ? c.categories : [];
+  if (categories.length > 0) {
+    const items = categories
+      .slice(0, ASSISTANT_COMPANY_FACTS_MAX_ITEMS)
+      .map((cat) => {
+        const catName = truncate(oneLine(cat?.name || ""), 80);
+        const slug = truncate(oneLine(cat?.slug || ""), 80);
+        if (catName && slug) return `${catName} (${slug})`;
+        return catName || slug;
+      })
+      .filter(Boolean);
+    if (items.length > 0) lines.push(`categories: ${items.join(" | ")}`);
+  }
+
+  const rubrics = Array.isArray(c.rubrics) ? c.rubrics : [];
+  if (rubrics.length > 0) {
+    const items = rubrics
+      .slice(0, ASSISTANT_COMPANY_FACTS_MAX_ITEMS)
+      .map((r) => {
+        const rName = truncate(oneLine(r?.name || ""), 80);
+        const slug = truncate(oneLine(r?.slug || ""), 120);
+        if (rName && slug) return `${rName} (${slug})`;
+        return rName || slug;
+      })
+      .filter(Boolean);
+    if (items.length > 0) lines.push(`rubrics: ${items.join(" | ")}`);
+  }
+
+  const services = Array.isArray(c.services_list) ? c.services_list : [];
+  if (services.length > 0) {
+    const items = services
+      .slice(0, ASSISTANT_COMPANY_FACTS_MAX_ITEMS)
+      .map((s) => truncate(oneLine(s?.name || ""), 80))
+      .filter(Boolean);
+    if (items.length > 0) lines.push(`services: ${items.join("; ")}`);
+  }
+
+  const products = Array.isArray(c.products) ? c.products : [];
+  if (products.length > 0) {
+    const items = products
+      .slice(0, ASSISTANT_COMPANY_FACTS_MAX_ITEMS)
+      .map((p) => truncate(oneLine(p?.name || ""), 80))
+      .filter(Boolean);
+    if (items.length > 0) lines.push(`products: ${items.join("; ")}`);
+  }
+
+  const description = truncate(oneLine(c.description || ""), ASSISTANT_COMPANY_FACTS_MAX_TEXT_CHARS);
+  if (description) lines.push(`description: ${description}`);
+
+  const about = truncate(oneLine(c.about || ""), ASSISTANT_COMPANY_FACTS_MAX_TEXT_CHARS);
+  if (about) lines.push(`about: ${about}`);
+
+  const full = lines.join("\n");
+  if (full.length <= ASSISTANT_COMPANY_FACTS_MAX_CHARS) return full;
+  return `${full.slice(0, Math.max(0, ASSISTANT_COMPANY_FACTS_MAX_CHARS - 1)).trim()}…`;
+}
+
+function buildCompanyScanText(resp: BiznesinfoCompanyResponse): string {
+  const c = resp.company;
+  const parts = [
+    c.name,
+    c.description,
+    c.about,
+    ...(Array.isArray(c.categories) ? c.categories.map((x) => x.name) : []),
+    ...(Array.isArray(c.rubrics) ? c.rubrics.map((x) => x.name) : []),
+    ...(Array.isArray(c.products) ? c.products.map((x) => x.name) : []),
+    ...(Array.isArray(c.services_list) ? c.services_list.map((x) => x.name) : []),
+  ]
+    .map((v) => oneLine(String(v || "")))
+    .filter(Boolean);
+
+  const joined = parts.join("\n");
+  if (joined.length <= ASSISTANT_COMPANY_SCAN_TEXT_MAX_CHARS) return joined;
+  return joined.slice(0, ASSISTANT_COMPANY_SCAN_TEXT_MAX_CHARS);
+}
+
 function buildAssistantSystemPrompt(): string {
   return [
     "You are Biznesinfo AI assistant — an expert B2B sourcing and outreach consultant for the Belarus business directory.",
@@ -159,6 +299,7 @@ function buildAssistantPrompt(params: {
   message: string;
   history?: AssistantHistoryMessage[];
   companyContext?: { id: string | null; name: string | null };
+  companyFacts?: string | null;
   promptInjection?: { flagged: boolean; signals: string[] };
 }): PromptMessage[] {
   const prompt: PromptMessage[] = [{ role: "system", content: buildAssistantSystemPrompt() }];
@@ -177,8 +318,16 @@ function buildAssistantPrompt(params: {
     const lines = ["Context (untrusted, from product UI): user is viewing a company page."];
     if (params.companyContext.id) lines.push(`companyId: ${params.companyContext.id}`);
     if (params.companyContext.name) lines.push(`companyName: ${params.companyContext.name}`);
-    lines.push("Note: no verified company details were provided; do not guess facts about the company.");
+    if (params.companyFacts) {
+      lines.push("Note: company details below come from Biznesinfo directory snapshot (untrusted).");
+    } else {
+      lines.push("Note: no verified company details were provided; do not guess facts about the company.");
+    }
     prompt.push({ role: "system", content: lines.join("\n") });
+  }
+
+  if (params.companyFacts) {
+    prompt.push({ role: "system", content: params.companyFacts });
   }
 
   if (params.history && params.history.length > 0) {
@@ -249,19 +398,46 @@ export async function POST(request: Request) {
   let providerError: { name: string; message: string } | null = null;
   let providerMeta: { provider: AssistantProvider; model?: string } = { provider: "stub" };
 
-  const promptInjectionSource = [message, ...history.filter((m) => m.role === "user").map((m) => m.content)].join("\n\n");
-  const guardrails = {
-    version: ASSISTANT_GUARDRAILS_VERSION,
-    promptInjection: detectPromptInjectionSignals(promptInjectionSource),
-  };
+  const companyIdTrimmed = (companyId || "").trim() || null;
+
   const companyNameFromPayload =
     payload && typeof payload === "object" && !Array.isArray(payload) && typeof (payload as any)?.context?.companyName === "string"
       ? String((payload as any).context.companyName).trim()
       : null;
+
+  let companyResp: BiznesinfoCompanyResponse | null = null;
+  let companyFacts: string | null = null;
+  let companyScanText: string | null = null;
+  if (companyIdTrimmed) {
+    try {
+      companyResp = await biznesinfoGetCompany(companyIdTrimmed);
+      companyFacts = buildCompanyFactsBlock(companyResp);
+      companyScanText = buildCompanyScanText(companyResp);
+    } catch {
+      companyResp = null;
+    }
+  }
+
+  const companyNameFromDirectory = companyResp ? truncate(oneLine(companyResp.company.name || ""), 160) : null;
+  const companyNameForPrompt = companyNameFromDirectory || (companyNameFromPayload ? truncate(oneLine(companyNameFromPayload), 160) : null);
+  const companyIdForPrompt = companyResp
+    ? truncate(oneLine(companyResp.company.source_id || companyResp.id || companyIdTrimmed || ""), 80)
+    : (companyIdTrimmed ? truncate(oneLine(companyIdTrimmed), 80) : null);
+
+  const promptInjectionParts = [
+    message,
+    ...history.filter((m) => m.role === "user").map((m) => m.content),
+    companyScanText || "",
+  ].map((v) => v.trim()).filter(Boolean);
+  const guardrails = {
+    version: ASSISTANT_GUARDRAILS_VERSION,
+    promptInjection: detectPromptInjectionSignals(promptInjectionParts.join("\n\n")),
+  };
   const prompt = buildAssistantPrompt({
     message,
     history,
-    companyContext: { id: companyId?.trim() || null, name: companyNameFromPayload },
+    companyContext: { id: companyIdForPrompt, name: companyNameForPrompt },
+    companyFacts,
     promptInjection: guardrails.promptInjection,
   });
 
@@ -304,7 +480,7 @@ export async function POST(request: Request) {
 
     const requestPayload = {
       message,
-      companyId: companyId?.trim() || null,
+      companyId: companyIdTrimmed,
       plan: effective.plan,
     };
 
@@ -321,7 +497,7 @@ export async function POST(request: Request) {
 
   const created = await createAiRequest({
     userId: user.id,
-    companyId: companyId?.trim() || null,
+    companyId: companyIdTrimmed,
     message,
     payload: payloadToStore,
   });

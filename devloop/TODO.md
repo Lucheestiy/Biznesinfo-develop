@@ -32,14 +32,13 @@ Suggested milestones (do in order; keep each run small):
 
 ## Current focus
 
-1. ✅ Improve the homepage/search UX — polish search result cards (hover lift/shadow + clearer “Подробнее” affordance).
-2. ✅ Improve company page layout and blocks — localized “Share” button (native share/copy link + “copied” feedback).
-3. ✅ Improve AI assistant chat quality (small steps: better prompts, context, and UX) — mobile menu: sticky bottom actions for Favorites + AI.
-4. ✅ Improve AI assistant chat quality — add conversation history + “New chat” reset + context badge on `/assistant`.
-5. ✅ Improve AI assistant chat UX — add “Copy answer” action on assistant messages (with “Copied” feedback).
-6. ✅ Improve AI assistant chat UX — preserve formatting/newlines in assistant messages (`whitespace-pre-wrap`).
-7. ✅ Add admin tooling / reindex UX improvements — add an auth-gated `/admin/reindex` page with a “Run reindex” button and response output.
-8. ✅ Add admin tooling / reindex UX improvements — show Meilisearch index stats (read-only) on `/admin/reindex`.
+See the roadmap: `devloop/AI_ASSISTANT_PLAN.md`
+
+Rule of thumb: pick **ONE** small, safe, reviewable change per run.
+
+1. ✅ Inject safe company facts into the assistant prompt when `companyId` is provided (server-side fetch + whitelist + truncation).
+2. Linkify assistant answers safely (URLs/emails/phones) — no HTML injection.
+3. Add outreach export helpers: “Copy as Email” (subject+body) + “Copy as WhatsApp”.
 
 ## Constraints
 
