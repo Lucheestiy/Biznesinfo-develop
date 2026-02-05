@@ -38,7 +38,7 @@ Rule of thumb: pick **ONE** small, safe, reviewable change per run.
 
 1. ✅ Inject safe company facts into the assistant prompt when `companyId` is provided (server-side fetch + whitelist + truncation).
 2. ✅ Linkify assistant answers safely (URLs/emails/phones) — no HTML injection.
-3. Add outreach export helpers: “Copy as Email” (subject+body) + “Copy as WhatsApp”.
+3. ✅ Add outreach export helpers: “Copy as Email” (subject+body) + “Copy as WhatsApp”.
 
 ## Constraints
 

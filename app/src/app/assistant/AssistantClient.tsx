@@ -16,6 +16,8 @@ type AssistantMessage = {
   content: string;
 };
 
+type AssistantCopyKind = "answer" | "email" | "whatsapp";
+
 function formatPlanLabel(plan: UserPlan): string {
   if (plan === "free") return "Free";
   if (plan === "paid") return "Paid";
@@ -61,12 +63,13 @@ export default function AssistantClient({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(initialUsage ?? null);
-  const [copiedAnswerId, setCopiedAnswerId] = useState<string | null>(null);
+  const [copied, setCopied] = useState<{ id: string; kind: AssistantCopyKind } | null>(null);
+  const [openActionsId, setOpenActionsId] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
   const prefillAppliedRef = useRef(false);
-  const copiedAnswerTimeoutRef = useRef<number | null>(null);
+  const copiedTimeoutRef = useRef<number | null>(null);
 
   const canChat = user.plan === "paid" || user.plan === "partner";
   const planLabel = useMemo(() => formatPlanLabel(user.plan), [user.plan]);
@@ -128,15 +131,23 @@ export default function AssistantClient({
 
   useEffect(() => {
     return () => {
-      if (copiedAnswerTimeoutRef.current) window.clearTimeout(copiedAnswerTimeoutRef.current);
+      if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!openActionsId) return;
+    const onClick = () => setOpenActionsId(null);
+    window.addEventListener("click", onClick);
+    return () => window.removeEventListener("click", onClick);
+  }, [openActionsId]);
 
   const resetChat = () => {
     setSending(false);
     setError(null);
-    setCopiedAnswerId(null);
-    if (copiedAnswerTimeoutRef.current) window.clearTimeout(copiedAnswerTimeoutRef.current);
+    setCopied(null);
+    setOpenActionsId(null);
+    if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     setMessages([buildIntroMessage()]);
 
     if (companyPrefillPrompt) {
@@ -150,14 +161,68 @@ export default function AssistantClient({
     setTimeout(() => draftRef.current?.focus(), 0);
   };
 
-  const copyAnswer = async (message: AssistantMessage) => {
+  const extractEmailParts = (text: string): { subject: string | null; body: string } => {
+    const lines = String(text || "").split(/\r?\n/u);
+    let subject: string | null = null;
+    let subjectIdx: number | null = null;
+    let bodyIdx: number | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i] || "";
+      if (subject === null) {
+        const m = line.match(/^\s*(subject|тема(?:\s+письма)?)\s*[:\-—]\s*(.+)\s*$/iu);
+        if (m && m[2]) {
+          subject = m[2].trim() || null;
+          subjectIdx = i;
+        }
+      }
+      if (bodyIdx === null) {
+        const m = line.match(/^\s*(body|текст|сообщение|письмо)\s*[:\-—]\s*(.*)\s*$/iu);
+        if (m) bodyIdx = i;
+      }
+    }
+
+    if (bodyIdx !== null) {
+      const firstLine = lines[bodyIdx] || "";
+      const first = firstLine.replace(/^\s*(body|текст|сообщение|письмо)\s*[:\-—]\s*/iu, "");
+      const rest = lines.slice(bodyIdx + 1);
+      return { subject, body: [first, ...rest].join("\n").trim() };
+    }
+
+    const body = subjectIdx !== null ? lines.filter((_, idx) => idx !== subjectIdx).join("\n").trim() : lines.join("\n").trim();
+    return { subject, body };
+  };
+
+  const buildEmailCopy = (text: string): string => {
+    const { subject, body } = extractEmailParts(text);
+    const subjectValue = subject || (t("ai.export.defaultSubject") || "Запрос через Biznesinfo");
+    const subjectLabel = t("ai.export.subjectLabel") || "Тема";
+    const bodyLabel = t("ai.export.bodyLabel") || "Текст";
+    const bodyValue = body || String(text || "").trim();
+    return `${subjectLabel}: ${subjectValue}\n\n${bodyLabel}:\n${bodyValue}`;
+  };
+
+  const buildWhatsAppCopy = (text: string): string => {
+    const { body } = extractEmailParts(text);
+    const value = (body || String(text || "")).trim();
+    const maxChars = 1200;
+    if (value.length <= maxChars) return value;
+    return `${value.slice(0, Math.max(0, maxChars - 1)).trim()}…`;
+  };
+
+  const copyAssistantMessage = async (message: AssistantMessage, kind: AssistantCopyKind) => {
     if (message.role !== "assistant") return;
-    const ok = await writeTextToClipboard(message.content);
+
+    const textToCopy =
+      kind === "answer" ? message.content : (kind === "email" ? buildEmailCopy(message.content) : buildWhatsAppCopy(message.content));
+
+    const ok = await writeTextToClipboard(textToCopy);
     if (!ok) return;
 
-    setCopiedAnswerId(message.id);
-    if (copiedAnswerTimeoutRef.current) window.clearTimeout(copiedAnswerTimeoutRef.current);
-    copiedAnswerTimeoutRef.current = window.setTimeout(() => setCopiedAnswerId(null), 2000);
+    setCopied({ id: message.id, kind });
+    setOpenActionsId(null);
+    if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
+    copiedTimeoutRef.current = window.setTimeout(() => setCopied(null), 2000);
   };
 
   const send = async () => {
@@ -353,30 +418,64 @@ export default function AssistantClient({
                               : "relative group bg-white border border-gray-200 text-gray-900 rounded-bl-md pr-11 whitespace-pre-wrap break-words"
                           }`}
                         >
-                          {m.role === "assistant" && (
-                            <button
-                              type="button"
-                              onClick={() => void copyAnswer(m)}
-                              aria-label={copiedAnswerId === m.id ? t("ai.copied") : t("ai.copyAnswer")}
-                              title={copiedAnswerId === m.id ? t("ai.copied") : t("ai.copyAnswer")}
-                              className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition opacity-80 sm:opacity-0 sm:group-hover:opacity-100"
-                            >
-                              {copiedAnswerId === m.id ? (
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                              ) : (
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 7a2 2 0 012-2h7a2 2 0 012 2v7m-1 4H8a2 2 0 01-2-2V7a2 2 0 012-2h7"
-                                  />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 5v4a2 2 0 002 2h4" />
-                                </svg>
+                          {m.role === "assistant" && m.id !== "intro" && (
+                            <div className="absolute right-2 top-2">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenActionsId((prev) => (prev === m.id ? null : m.id));
+                                }}
+                                aria-label={copied?.id === m.id ? t("ai.copied") : (t("ai.copyOptions") || t("ai.copyAnswer"))}
+                                title={copied?.id === m.id ? t("ai.copied") : (t("ai.copyOptions") || t("ai.copyAnswer"))}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition opacity-80 sm:opacity-0 sm:group-hover:opacity-100"
+                              >
+                                {copied?.id === m.id ? (
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M8 7a2 2 0 012-2h7a2 2 0 012 2v7m-1 4H8a2 2 0 01-2-2V7a2 2 0 012-2h7"
+                                    />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 5v4a2 2 0 002 2h4" />
+                                  </svg>
+                                )}
+                              </button>
+
+                              {openActionsId === m.id && (
+                                <div
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => void copyAssistantMessage(m, "answer")}
+                                    className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                                  >
+                                    {t("ai.copyAnswer") || "Скопировать ответ"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => void copyAssistantMessage(m, "email")}
+                                    className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                                  >
+                                    {t("ai.copyAsEmail") || "Скопировать как Email"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => void copyAssistantMessage(m, "whatsapp")}
+                                    className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                                  >
+                                    {t("ai.copyAsWhatsApp") || "Скопировать как WhatsApp"}
+                                  </button>
+                                </div>
                               )}
-                            </button>
+                            </div>
                           )}
                           {m.role === "assistant" ? renderLinkifiedText(m.content) : m.content}
                         </div>
