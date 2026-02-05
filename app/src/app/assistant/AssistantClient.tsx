@@ -90,16 +90,22 @@ export default function AssistantClient({
   });
 
   const [messages, setMessages] = useState<AssistantMessage[]>(() => [buildIntroMessage()]);
-  const showSuggestionChips = canChat && messages.length <= 1 && !draft.trim();
-  const suggestionChips = useMemo(
-    () => [
+  const suggestionChips = useMemo(() => {
+    if (companyContext) {
+      return [
+        { id: "draftToThisCompany", text: t("ai.quick.draftToThisCompany") },
+        { id: "questionsToThisCompany", text: t("ai.quick.questionsToThisCompany") },
+        { id: "followUpToThisCompany", text: t("ai.quick.followUpToThisCompany") },
+        { id: "findAlternatives", text: t("ai.quick.findAlternatives") },
+      ];
+    }
+    return [
       { id: "findSuppliers", text: t("ai.quick.findSuppliers") },
       { id: "draftOutreach", text: t("ai.quick.draftOutreach") },
       { id: "explainRubrics", text: t("ai.quick.explainRubrics") },
       { id: "checkCompany", text: t("ai.quick.checkCompany") },
-    ],
-    [t],
-  );
+    ];
+  }, [t, companyContext]);
 
   const companyPrefillPrompt = useMemo(() => {
     if (!companyContext) return null;
@@ -110,6 +116,8 @@ export default function AssistantClient({
       ? `Составь краткую справку о компании ${label}: чем занимается и какие товары/услуги предлагает.`
       : "Составь краткую справку об этой компании: чем занимается и какие товары/услуги предлагает.";
   }, [companyContext]);
+
+  const showSuggestionChips = canChat && messages.length <= 1 && (!draft.trim() || draft.trim() === (companyPrefillPrompt || "").trim());
 
   useEffect(() => {
     if (prefillAppliedRef.current) return;

@@ -41,6 +41,7 @@ Recently completed:
 1. ✅ Inject safe company facts into the assistant prompt when `companyId` is provided (server-side fetch + whitelist + truncation).
 2. ✅ Linkify assistant answers safely (URLs/emails/phones) — no HTML injection.
 3. ✅ Add outreach export helpers: “Copy as Email” (subject+body) + “Copy as WhatsApp”.
+4. ✅ Make suggestion chips context-aware (company context → outreach/questions/follow-up/alternatives).
 
 Next (pick ONE):
 
@@ -48,9 +49,7 @@ Next (pick ONE):
    - Email subject
    - Email body
    - WhatsApp short message
-2. Make suggestion chips context-aware:
-   - If company context exists, show chips like “Draft message to this company”, “Questions to ask”, “Follow-up”.
-3. Linkify internal Biznesinfo paths in assistant answers (`/company/...`, `/catalog/...`) safely.
+2. Linkify internal Biznesinfo paths in assistant answers (`/company/...`, `/catalog/...`) safely.
 
 ## Constraints
 
