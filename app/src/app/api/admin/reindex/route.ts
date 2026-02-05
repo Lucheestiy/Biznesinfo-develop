@@ -1,13 +1,27 @@
 import { NextResponse } from "next/server";
+import { assertSameOrigin } from "@/lib/security/origin";
 import { indexCompanies } from "@/lib/meilisearch/indexer";
+import { getCurrentUser, isAuthEnabled } from "@/lib/auth/currentUser";
+
+export const runtime = "nodejs";
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "dev-secret-change-me";
 
 export async function POST(request: Request) {
-  // Check authorization
+  // Auth: allow either Bearer token (for automation) or admin session (for UI).
   const authHeader = request.headers.get("Authorization");
-  if (authHeader !== `Bearer ${ADMIN_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const tokenAuthorized = authHeader === `Bearer ${ADMIN_SECRET}`;
+  if (!tokenAuthorized) {
+    if (!isAuthEnabled()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    try {
+      assertSameOrigin(request);
+    } catch {
+      return NextResponse.json({ error: "CSRF" }, { status: 403 });
+    }
+
+    const me = await getCurrentUser();
+    if (!me) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (me.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const jsonlPath = process.env.BIZNESINFO_COMPANIES_JSONL_PATH
@@ -38,7 +52,7 @@ export async function GET() {
   return NextResponse.json({
     endpoint: "/api/admin/reindex",
     method: "POST",
-    auth: "Bearer token required",
+    auth: "Bearer token or admin session required",
     description: "Triggers a full reindex of the Meilisearch companies index",
   });
 }
