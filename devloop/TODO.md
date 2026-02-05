@@ -36,9 +36,21 @@ See the roadmap: `devloop/AI_ASSISTANT_PLAN.md`
 
 Rule of thumb: pick **ONE** small, safe, reviewable change per run.
 
+Recently completed:
+
 1. ✅ Inject safe company facts into the assistant prompt when `companyId` is provided (server-side fetch + whitelist + truncation).
 2. ✅ Linkify assistant answers safely (URLs/emails/phones) — no HTML injection.
 3. ✅ Add outreach export helpers: “Copy as Email” (subject+body) + “Copy as WhatsApp”.
+
+Next (pick ONE):
+
+1. Improve assistant system prompt for outreach: when drafting messages, output explicit blocks:
+   - Email subject
+   - Email body
+   - WhatsApp short message
+2. Make suggestion chips context-aware:
+   - If company context exists, show chips like “Draft message to this company”, “Questions to ask”, “Follow-up”.
+3. Linkify internal Biznesinfo paths in assistant answers (`/company/...`, `/catalog/...`) safely.
 
 ## Constraints
 
