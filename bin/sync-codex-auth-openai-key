@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SELF="$(basename "${0}")"
+
+usage() {
+  cat <<'EOF'
+Sync the current Codex CLI ChatGPT auth token into this repo's local secrets file for Docker.
+
+Why:
+  The app container runs as an unprivileged user and cannot read /root/.codex/auth.json directly.
+  This script extracts `tokens.access_token` from /root/.codex/auth.json and writes a minimal JSON secret:
+    ./secrets/codex-auth.json
+
+Usage:
+  bin/sync-codex-auth-openai-key [--project-dir DIR] [--force]
+
+Options:
+  --project-dir DIR   Override project directory (defaults to this script's folder parent)
+  --force             Write even if the value did not change
+  -h, --help          Show this help
+EOF
+}
+
+die() {
+  echo "${SELF}: ${*}" >&2
+  exit 1
+}
+
+PROJECT_DIR=""
+FORCE=0
+
+while [[ $# -gt 0 ]]; do
+  case "${1}" in
+    --project-dir)
+      [[ $# -ge 2 ]] || die "--project-dir requires a value"
+      PROJECT_DIR="${2}"
+      shift 2
+      ;;
+    --force)
+      FORCE=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      die "unknown argument: ${1} (try --help)"
+      ;;
+  esac
+done
+
+if [[ -z "${PROJECT_DIR}" ]]; then
+  SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+  PROJECT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")/.." && pwd)"
+fi
+
+AUTH_JSON="/root/.codex/auth.json"
+[[ -r "${AUTH_JSON}" ]] || die "codex auth file not readable: ${AUTH_JSON}"
+
+command -v jq >/dev/null 2>&1 || die "jq is required (install jq)"
+
+ACCESS_TOKEN="$(jq -r '.tokens.access_token // empty' "${AUTH_JSON}" 2>/dev/null || true)"
+ACCESS_TOKEN="$(echo -n "${ACCESS_TOKEN}" | tr -d '\r' | xargs)"
+[[ -n "${ACCESS_TOKEN}" ]] || die "tokens.access_token missing in ${AUTH_JSON}"
+
+SECRETS_DIR="${PROJECT_DIR}/secrets"
+OUT_FILE="${SECRETS_DIR}/codex-auth.json"
+
+install -d -m 0700 "${SECRETS_DIR}"
+
+NEW_PAYLOAD="$(jq -cn --arg token "${ACCESS_TOKEN}" '{tokens:{access_token:$token}}')"
+
+if [[ -f "${OUT_FILE}" ]] && [[ "${FORCE}" -ne 1 ]]; then
+  OLD_PAYLOAD="$(cat "${OUT_FILE}" 2>/dev/null || true)"
+  if [[ "${OLD_PAYLOAD}" == "${NEW_PAYLOAD}" ]]; then
+    exit 0
+  fi
+fi
+
+TMP="${OUT_FILE}.tmp.$$"
+umask 022
+printf '%s\n' "${NEW_PAYLOAD}" > "${TMP}"
+chmod 0644 "${TMP}"
+mv -f "${TMP}" "${OUT_FILE}"

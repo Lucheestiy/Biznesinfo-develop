@@ -98,6 +98,11 @@ else
   die "docker compose is not installed"
 fi
 
+if [[ -x "${PROJECT_DIR}/bin/sync-codex-auth-openai-key" ]]; then
+  echo "==> Syncing Codex CLI auth token (best effort)..."
+  "${PROJECT_DIR}/bin/sync-codex-auth-openai-key" --project-dir "${PROJECT_DIR}" >/dev/null 2>&1 || true
+fi
+
 echo "==> Project: ${PROJECT_DIR}"
 echo "==> Compose: ${COMPOSE_FILE}"
 

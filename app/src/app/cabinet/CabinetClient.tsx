@@ -10,7 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function CabinetClient({
   user,
 }: {
-  user: { email: string; name: string | null; plan: string; role: string };
+  user: { email: string; name: string | null; plan: string; role: string; aiAccessEndsAt?: string | null };
 }) {
   const { t } = useLanguage();
   const router = useRouter();
@@ -43,6 +43,14 @@ export default function CabinetClient({
     if (user.plan === "partner") return t("plan.partner") || "partner";
     return user.plan;
   }, [t, user.plan]);
+
+  const aiAccessUntilLabel = useMemo(() => {
+    const raw = (user.aiAccessEndsAt || "").trim();
+    if (!raw) return null;
+    const d = new Date(raw);
+    if (!Number.isFinite(d.getTime())) return raw;
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+  }, [user.aiAccessEndsAt]);
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -157,6 +165,11 @@ export default function CabinetClient({
                 </div>
 
                 <div className="pt-2"><span className="text-gray-500">{t("cabinet.plan") || "План"}:</span> {planLabel}</div>
+                {aiAccessUntilLabel && (
+                  <div>
+                    <span className="text-gray-500">{t("ai.accessUntil") || "AI доступ до"}:</span> {aiAccessUntilLabel}
+                  </div>
+                )}
                 <div><span className="text-gray-500">{t("cabinet.role") || "Роль"}:</span> {user.role}</div>
               </div>
             </div>

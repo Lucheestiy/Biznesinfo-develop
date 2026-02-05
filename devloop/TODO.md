@@ -48,10 +48,16 @@ Recently completed:
 8. ✅ In `/assistant`, show shortlist UI when `companyIds` are provided (company names + links + shortlist chips).
 9. ✅ Improve quick prompt chips: insert “ready-to-send” prompts (not only short labels), especially for shortlist mode.
 10. ✅ Shortlist mode: show a tiny meta line per company (category + region) in the shortlist UI to help compare faster.
+11. ✅ Shortlist mode: add a “remove” (×) action on shortlist chips (URL-only; doesn’t change favorites).
+12. ✅ Outreach templates: render Subject/Body/WhatsApp as structured UI blocks + per-block copy buttons.
+13. ✅ Admin: add `/admin/ai-requests` page to inspect AI request logs + provider errors.
+14. ✅ Add 👍/👎 feedback buttons for assistant messages (store in DB + show in `/admin/ai-requests`).
+15. ✅ Store a lightweight “template compliance” flag in `ai_requests.payload` for analytics (Subject/Body/WhatsApp blocks).
+16. ✅ Add streaming replies (SSE) for `/assistant` (via `POST /api/ai/request?stream=1`) with safe fallback.
 
 Next (pick ONE):
 
-1. Shortlist mode: add a “remove” (×) action on shortlist chips (URL-only; doesn’t change favorites).
+1. Add safe “rubric hints” injection for sourcing prompts (catalog-based, capped, injection-safe).
 
 ## Constraints
 

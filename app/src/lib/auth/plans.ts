@@ -1,6 +1,7 @@
 import { getDbPool } from "./db";
 import type { UserPlan, UserRow } from "./users";
 import { findPartnerDomain } from "./partnerDomains";
+import { findActivePlanGrant } from "./planGrants";
 
 export type PlanLimits = {
   plan: UserPlan;
@@ -52,6 +53,12 @@ export async function getUserEffectivePlan(user: UserRow): Promise<{ plan: UserP
       const limit = typeof partner.ai_requests_per_day === "number" ? partner.ai_requests_per_day : partnerLimits.ai_requests_per_day;
       return { plan: "partner", aiRequestsPerDay: limit };
     }
+  }
+
+  const grant = await findActivePlanGrant(user.id);
+  if (grant) {
+    const limits = await getPlanLimits(grant.plan);
+    return { plan: grant.plan, aiRequestsPerDay: limits.ai_requests_per_day };
   }
 
   const limits = await getPlanLimits(user.plan);

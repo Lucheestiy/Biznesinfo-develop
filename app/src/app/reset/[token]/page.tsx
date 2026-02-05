@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { redirect } from "next/navigation";
 import { isAuthEnabled } from "@/lib/auth/currentUser";
 import ResetConfirmClient from "./ResetConfirmClient";

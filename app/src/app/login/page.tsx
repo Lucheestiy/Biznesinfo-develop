@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { redirect } from "next/navigation";
 import { getCurrentUser, isAuthEnabled } from "@/lib/auth/currentUser";
 import LoginClient from "./LoginClient";

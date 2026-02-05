@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser, isAuthEnabled } from "@/lib/auth/currentUser";
+import { getUserEffectivePlan } from "@/lib/auth/plans";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,7 @@ export async function GET() {
     return NextResponse.json({ enabled: true, user: null }, { headers: { "Cache-Control": "no-store" } });
   }
 
+  const effective = await getUserEffectivePlan(user);
   return NextResponse.json(
     {
       enabled: true,
@@ -21,10 +23,9 @@ export async function GET() {
         email: user.email,
         name: user.name,
         role: user.role,
-        plan: user.plan,
+        plan: effective.plan,
       },
     },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
-

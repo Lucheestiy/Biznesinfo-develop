@@ -136,6 +136,41 @@ const MIGRATIONS: Migration[] = [
       );
     `,
   },
+  {
+    id: "20260205_01_user_plan_grants",
+    sql: `
+      CREATE TABLE IF NOT EXISTS user_plan_grants (
+        id UUID PRIMARY KEY,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        plan TEXT NOT NULL CHECK (plan IN ('paid', 'partner')),
+        starts_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        ends_at TIMESTAMPTZ NOT NULL,
+        revoked_at TIMESTAMPTZ,
+        source TEXT NOT NULL DEFAULT 'manual',
+        note TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
+      CREATE INDEX IF NOT EXISTS user_plan_grants_user_id_idx ON user_plan_grants(user_id);
+      CREATE INDEX IF NOT EXISTS user_plan_grants_ends_at_idx ON user_plan_grants(ends_at);
+      CREATE INDEX IF NOT EXISTS user_plan_grants_active_lookup_idx ON user_plan_grants(user_id, ends_at);
+    `,
+  },
+  {
+    id: "20260205_02_ai_request_locks",
+    sql: `
+      CREATE TABLE IF NOT EXISTS ai_request_locks (
+        user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        request_id UUID NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        expires_at TIMESTAMPTZ NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
+      CREATE INDEX IF NOT EXISTS ai_request_locks_expires_at_idx ON ai_request_locks(expires_at);
+    `,
+  },
 ];
 
 export async function ensureAuthDb(): Promise<{ applied: string[] }> {

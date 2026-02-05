@@ -558,6 +558,10 @@ fi
 
 BUILD_OK=0
 log "Building docker image (gate)..."
+if [[ -x "${REPO_DIR}/bin/sync-codex-auth-openai-key" ]]; then
+  log "Syncing Codex CLI auth token (best effort)..."
+  "${REPO_DIR}/bin/sync-codex-auth-openai-key" --project-dir "${REPO_DIR}" >/dev/null 2>&1 || true
+fi
 if timeout 45m docker compose build app > "${RUN_DIR}/docker_build.txt" 2>&1; then
   BUILD_OK=1
 else

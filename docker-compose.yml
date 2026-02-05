@@ -16,7 +16,18 @@ services:
       ADMIN_SECRET: ${ADMIN_SECRET:-dev-secret-change-me}
       YANDEX_MAPS_API_KEY: ${YANDEX_MAPS_API_KEY:-}
       DATABASE_URL: ${DATABASE_URL:-}
+      AUTH_ENABLED: ${AUTH_ENABLED:-0}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-1}
+      AUTH_SESSION_DAYS: ${AUTH_SESSION_DAYS:-30}
+      AUTH_RESET_TOKEN_TTL_MIN: ${AUTH_RESET_TOKEN_TTL_MIN:-30}
+      AUTH_DEBUG_RESET_TOKENS: ${AUTH_DEBUG_RESET_TOKENS:-0}
+      SMTP_URL: ${SMTP_URL:-}
+      EMAIL_FROM: ${EMAIL_FROM:-no-reply@biznesinfo-develop.lucheestiy.com}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://biznesinfo-develop.lucheestiy.com}
       AI_ASSISTANT_PROVIDER: ${AI_ASSISTANT_PROVIDER:-stub}
+      CODEX_AUTH_JSON_PATH: ${CODEX_AUTH_JSON_PATH:-/run/secrets/codex_auth_json}
+      CODEX_BASE_URL: ${CODEX_BASE_URL:-https://chatgpt.com/backend-api/codex}
+      CODEX_MODEL: ${CODEX_MODEL:-gpt-5.2-codex}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
@@ -28,6 +39,7 @@ services:
       - ./app/public/data/biznesinfo:/app/public/data/biznesinfo:ro
       - ./app/public/companies:/app/public/companies:ro
       - ./app/.cache/biznesinfo-logo-cache:/tmp/biznesinfo-logo-cache
+      - ./secrets/codex-auth.json:/run/secrets/codex_auth_json:ro
     expose:
       - "3000"
     depends_on:

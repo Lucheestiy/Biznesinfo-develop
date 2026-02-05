@@ -234,6 +234,18 @@ export default function AdminClient() {
             <h1 className="text-3xl font-bold text-gray-800">{t("admin.title") || "Админка"}</h1>
             <div className="flex items-center gap-2">
               <Link
+                href="/admin/ai-requests"
+                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200"
+              >
+                AI
+              </Link>
+              <Link
+                href="/admin/ai-access"
+                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200"
+              >
+                AI доступ
+              </Link>
+              <Link
                 href="/admin/reindex"
                 className="bg-[#820251] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#6a0143]"
               >

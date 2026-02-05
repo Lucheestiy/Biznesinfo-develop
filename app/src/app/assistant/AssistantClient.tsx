@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -15,9 +15,13 @@ type AssistantMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  requestId?: string;
+  feedback?: AssistantFeedback | null;
 };
 
-type AssistantCopyKind = "answer" | "email" | "whatsapp";
+type AssistantCopyKind = "answer" | "email" | "whatsapp" | "subject" | "body";
+
+type AssistantFeedback = { rating: "up" | "down"; reason: string | null; createdAt: string };
 
 type AssistantRfqForm = {
   what: string;
@@ -71,16 +75,24 @@ export default function AssistantClient({
   initialUsage?: { used: number; limit: number; day: string };
 }) {
   const { t } = useLanguage();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const abortRef = useRef<AbortController | null>(null);
+  const chatVersionRef = useRef(0);
   const companyIdFromUrl = (searchParams.get("companyId") || "").trim();
   const companyNameFromUrl = (searchParams.get("companyName") || "").trim();
   const companyIdsFromUrl = (searchParams.get("companyIds") || "").trim();
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [streamingReplyId, setStreamingReplyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(initialUsage ?? null);
   const [copied, setCopied] = useState<{ id: string; kind: AssistantCopyKind } | null>(null);
   const [openActionsId, setOpenActionsId] = useState<string | null>(null);
+  const [feedbackOpenId, setFeedbackOpenId] = useState<string | null>(null);
+  const [feedbackSendingId, setFeedbackSendingId] = useState<string | null>(null);
   const [rfqOpen, setRfqOpen] = useState(false);
   const [rfqForm, setRfqForm] = useState<AssistantRfqForm>({
     what: "",
@@ -138,7 +150,7 @@ export default function AssistantClient({
     role: "assistant",
     content:
       t("ai.chatIntro") ||
-      "Привет! Я помогу разобраться с рубриками, сформулировать запрос поставщикам и быстро найти нужные компании. (Пока в режиме заглушки.)",
+      "Привет! Я помогу разобраться с рубриками, сформулировать запрос поставщикам и быстро найти нужные компании.",
   });
 
   const [messages, setMessages] = useState<AssistantMessage[]>(() => [buildIntroMessage()]);
@@ -281,11 +293,24 @@ export default function AssistantClient({
     return () => window.removeEventListener("click", onClick);
   }, [openActionsId]);
 
+  useEffect(() => {
+    if (!feedbackOpenId) return;
+    const onClick = () => setFeedbackOpenId(null);
+    window.addEventListener("click", onClick);
+    return () => window.removeEventListener("click", onClick);
+  }, [feedbackOpenId]);
+
   const resetChat = () => {
+    chatVersionRef.current += 1;
+    abortRef.current?.abort();
+    abortRef.current = null;
     setSending(false);
+    setStreamingReplyId(null);
     setError(null);
     setCopied(null);
     setOpenActionsId(null);
+    setFeedbackOpenId(null);
+    setFeedbackSendingId(null);
     setRfqOpen(false);
     if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     setMessages([buildIntroMessage()]);
@@ -301,7 +326,13 @@ export default function AssistantClient({
     setTimeout(() => draftRef.current?.focus(), 0);
   };
 
-  const extractEmailParts = (text: string): { subject: string | null; body: string; whatsapp: string | null } => {
+  const extractEmailParts = (text: string): {
+    subject: string | null;
+    body: string;
+    whatsapp: string | null;
+    markers: { subject: boolean; body: boolean; whatsapp: boolean };
+    preamble: string | null;
+  } => {
     const lines = String(text || "").split(/\r?\n/u);
     let subject: string | null = null;
     let subjectIdx: number | null = null;
@@ -327,6 +358,15 @@ export default function AssistantClient({
       }
     }
 
+    const markerIdxs = [subjectIdx, bodyIdx, whatsappIdx].filter((v) => v != null) as number[];
+    const preamble =
+      markerIdxs.length > 0
+        ? lines
+            .slice(0, Math.min(...markerIdxs))
+            .join("\n")
+            .trim() || null
+        : null;
+
     const bodyEnd = bodyIdx !== null && whatsappIdx !== null && whatsappIdx > bodyIdx ? whatsappIdx : lines.length;
     if (bodyIdx !== null) {
       const firstLine = lines[bodyIdx] || "";
@@ -339,10 +379,22 @@ export default function AssistantClient({
         const waFirst = waFirstLine.replace(/^\s*(whatsapp)\s*[:\-—]\s*/iu, "");
         const waRest = lines.slice(whatsappIdx + 1);
         const whatsapp = [waFirst, ...waRest].join("\n").trim() || null;
-        return { subject, body, whatsapp };
+        return {
+          subject,
+          body,
+          whatsapp,
+          markers: { subject: subjectIdx !== null, body: true, whatsapp: true },
+          preamble,
+        };
       }
 
-      return { subject, body, whatsapp: null };
+      return {
+        subject,
+        body,
+        whatsapp: null,
+        markers: { subject: subjectIdx !== null, body: true, whatsapp: false },
+        preamble,
+      };
     }
 
     const fallbackEnd = whatsappIdx !== null ? whatsappIdx : lines.length;
@@ -357,10 +409,22 @@ export default function AssistantClient({
       const waFirst = waFirstLine.replace(/^\s*(whatsapp)\s*[:\-—]\s*/iu, "");
       const waRest = lines.slice(whatsappIdx + 1);
       const whatsapp = [waFirst, ...waRest].join("\n").trim() || null;
-      return { subject, body, whatsapp };
+      return {
+        subject,
+        body,
+        whatsapp,
+        markers: { subject: subjectIdx !== null, body: false, whatsapp: true },
+        preamble,
+      };
     }
 
-    return { subject, body, whatsapp: null };
+    return {
+      subject,
+      body,
+      whatsapp: null,
+      markers: { subject: subjectIdx !== null, body: false, whatsapp: false },
+      preamble,
+    };
   };
 
   const buildEmailCopy = (text: string): string => {
@@ -380,7 +444,22 @@ export default function AssistantClient({
     return `${value.slice(0, Math.max(0, maxChars - 1)).trim()}…`;
   };
 
-  const copyAssistantMessage = async (message: AssistantMessage, kind: AssistantCopyKind) => {
+  const tr = (key: string, fallback: string): string => {
+    const value = t(key);
+    if (!value || value === key) return fallback;
+    return value;
+  };
+
+  const copyRawText = async (params: { messageId: string; kind: AssistantCopyKind; text: string }) => {
+    const ok = await writeTextToClipboard(params.text);
+    if (!ok) return;
+
+    setCopied({ id: params.messageId, kind: params.kind });
+    if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
+    copiedTimeoutRef.current = window.setTimeout(() => setCopied(null), 2000);
+  };
+
+  const copyAssistantMessage = async (message: AssistantMessage, kind: "answer" | "email" | "whatsapp") => {
     if (message.role !== "assistant") return;
 
     const textToCopy =
@@ -393,6 +472,141 @@ export default function AssistantClient({
     setOpenActionsId(null);
     if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     copiedTimeoutRef.current = window.setTimeout(() => setCopied(null), 2000);
+  };
+
+  const replaceSearchParams = (next: URLSearchParams) => {
+    const qs = next.toString();
+    const href = qs ? `${pathname}?${qs}` : pathname;
+    router.replace(href, { scroll: false });
+  };
+
+  const removeShortlistCompany = (companyId: string) => {
+    const key = (companyId || "").trim().toLowerCase();
+    if (!key) return;
+    const nextIds = shortlistCompanyIds.filter((id) => id.toLowerCase() !== key);
+
+    const next = new URLSearchParams(searchParams.toString());
+    if (nextIds.length > 0) {
+      next.set("companyIds", nextIds.join(","));
+    } else {
+      next.delete("companyIds");
+    }
+    replaceSearchParams(next);
+  };
+
+  const renderAssistantMessageContent = (message: AssistantMessage) => {
+    if (message.role !== "assistant") return message.content;
+    if (message.id === "intro") return renderLinkifiedText(message.content);
+
+    const parts = extractEmailParts(message.content);
+    const hasTemplateMarkers = parts.markers.subject || parts.markers.body || parts.markers.whatsapp;
+    if (!hasTemplateMarkers) return renderLinkifiedText(message.content);
+
+    const subjectValue = parts.subject || (t("ai.export.defaultSubject") || "Запрос через Biznesinfo");
+    const subjectLabel = t("ai.export.subjectLabel") || "Subject";
+    const bodyLabel = t("ai.export.bodyLabel") || "Body";
+    const whatsappLabel = "WhatsApp";
+    const copyLabel = tr("ai.copy", "Copy");
+
+    return (
+      <div className="space-y-3">
+        {parts.preamble && (
+          <div className="text-gray-700">
+            {renderLinkifiedText(parts.preamble)}
+          </div>
+        )}
+
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[11px] font-semibold text-gray-600">{subjectLabel}</div>
+            <button
+              type="button"
+              onClick={() => void copyRawText({ messageId: message.id, kind: "subject", text: subjectValue })}
+              className="inline-flex items-center justify-center rounded-lg px-2 py-1 text-[11px] text-gray-500 hover:text-gray-800 hover:bg-white border border-transparent hover:border-gray-200 transition"
+            >
+              {copyLabel}
+            </button>
+          </div>
+          <div className="mt-1 text-sm text-gray-900">{renderLinkifiedText(subjectValue)}</div>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[11px] font-semibold text-gray-600">{bodyLabel}</div>
+            <button
+              type="button"
+              onClick={() => void copyRawText({ messageId: message.id, kind: "body", text: parts.body || "" })}
+              className="inline-flex items-center justify-center rounded-lg px-2 py-1 text-[11px] text-gray-500 hover:text-gray-800 hover:bg-white border border-transparent hover:border-gray-200 transition"
+            >
+              {copyLabel}
+            </button>
+          </div>
+          <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{renderLinkifiedText(parts.body || "")}</div>
+        </div>
+
+        {parts.whatsapp && (
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-[11px] font-semibold text-gray-600">{whatsappLabel}</div>
+              <button
+                type="button"
+                onClick={() => void copyAssistantMessage(message, "whatsapp")}
+                className="inline-flex items-center justify-center rounded-lg px-2 py-1 text-[11px] text-gray-500 hover:text-gray-800 hover:bg-white border border-transparent hover:border-gray-200 transition"
+              >
+                {copyLabel}
+              </button>
+            </div>
+            <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{renderLinkifiedText(parts.whatsapp)}</div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const submitFeedback = async (params: {
+    messageId: string;
+    requestId: string;
+    rating: "up" | "down";
+    reason: string | null;
+  }) => {
+    if (!params.requestId) return;
+    if (feedbackSendingId) return;
+
+    setFeedbackSendingId(params.messageId);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestId: params.requestId,
+          rating: params.rating,
+          reason: params.reason || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data?.error || (t("common.error") || "Ошибка"));
+        return;
+      }
+      const feedback: AssistantFeedback =
+        data?.feedback && typeof data.feedback === "object" && !Array.isArray(data.feedback)
+          ? {
+              rating: data.feedback.rating === "down" ? "down" : "up",
+              reason: typeof data.feedback.reason === "string" ? data.feedback.reason : null,
+              createdAt: typeof data.feedback.createdAt === "string" ? data.feedback.createdAt : new Date().toISOString(),
+            }
+          : { rating: params.rating, reason: params.reason, createdAt: new Date().toISOString() };
+
+      setMessages((prev) =>
+        prev.map((m) => (m.id === params.messageId ? { ...m, feedback } : m)),
+      );
+      setFeedbackOpenId(null);
+    } catch {
+      setError(t("common.networkError") || "Ошибка сети");
+    } finally {
+      setFeedbackSendingId(null);
+    }
   };
 
   const buildRfqDraft = (form: AssistantRfqForm): string => {
@@ -445,6 +659,12 @@ export default function AssistantClient({
     if (!text) return;
     if (!canChat) return;
 
+    const startChatVersion = chatVersionRef.current;
+
+    const abortController = new AbortController();
+    abortRef.current?.abort();
+    abortRef.current = abortController;
+
     const history = messages
       .filter((m) => m.id !== "intro")
       .slice(-12)
@@ -453,8 +673,11 @@ export default function AssistantClient({
     setDraft("");
     setError(null);
     setSending(true);
+    setStreamingReplyId(null);
     const userMessage: AssistantMessage = { id: crypto.randomUUID(), role: "user", content: text };
     setMessages((prev) => [...prev, userMessage]);
+
+    let assistantAdded = false;
 
     try {
       const payload: Record<string, unknown> = { source: "assistant_page", page: "/assistant" };
@@ -471,14 +694,15 @@ export default function AssistantClient({
       if (companyContext?.companyId) requestBody.companyId = companyContext.companyId;
       if (shortlistCompanyIds.length > 0) requestBody.companyIds = shortlistCompanyIds;
 
-      const res = await fetch("/api/ai/request", {
+      const res = await fetch("/api/ai/request?stream=1", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
         body: JSON.stringify(requestBody),
+        signal: abortController.signal,
       });
 
-      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         if (res.status === 429 && data?.error === "QuotaExceeded") {
           const used = typeof data?.used === "number" ? data.used : null;
           const limit = typeof data?.limit === "number" ? data.limit : null;
@@ -491,6 +715,21 @@ export default function AssistantClient({
           );
           return;
         }
+        if (res.status === 409 && data?.error === "AiBusy") {
+          const retryAfterSeconds = typeof data?.retryAfterSeconds === "number" ? data.retryAfterSeconds : null;
+          const msgBase = t("ai.busy") || "AI занят — подождите немного и попробуйте ещё раз.";
+          const msg = retryAfterSeconds ? `${msgBase} (${retryAfterSeconds}s)` : msgBase;
+          setError(msg);
+          const assistantMessage: AssistantMessage = {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: msg,
+            requestId: undefined,
+            feedback: null,
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          return;
+        }
         if (res.status === 401) {
           setError(t("auth.loginRequired") || "Нужно войти в кабинет.");
           return;
@@ -499,26 +738,145 @@ export default function AssistantClient({
         return;
       }
 
-      if (typeof data?.used === "number" && typeof data?.limit === "number" && typeof data?.day === "string") {
-        setQuota({ used: data.used, limit: data.limit, day: data.day });
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("text/event-stream") || !res.body) {
+        setError(t("common.error") || "Ошибка");
+        return;
       }
 
-      const replyText =
-        typeof data?.reply?.text === "string"
-          ? data.reply.text
-          : "Запрос сохранён. Скоро здесь появится полноценный чат-ассистент с ответами в реальном времени. (stub)";
+      const assistantMessageId = crypto.randomUUID();
+      let assistantText = "";
+      let requestId: string | undefined;
+      let done = false;
 
-      const assistantMessage: AssistantMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: replyText,
+      const addAssistantIfNeeded = () => {
+        if (assistantAdded) return;
+        assistantAdded = true;
+        setStreamingReplyId(assistantMessageId);
+        const assistantMessage: AssistantMessage = {
+          id: assistantMessageId,
+          role: "assistant",
+          content: assistantText || (t("common.loading") || "Загрузка..."),
+          requestId,
+          feedback: null,
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+
+      const updateAssistant = () => {
+        if (!assistantAdded) {
+          addAssistantIfNeeded();
+          return;
+        }
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMessageId
+              ? { ...m, content: assistantText || (t("common.loading") || "Загрузка..."), requestId: requestId ?? m.requestId }
+              : m,
+          ),
+        );
+      };
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        if (readerDone) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        while (true) {
+          const idx = buffer.indexOf("\n\n");
+          if (idx < 0) break;
+          const rawEvent = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 2);
+
+          const lines = rawEvent.split(/\r?\n/u);
+          let eventName = "message";
+          const dataLines: string[] = [];
+          for (const line of lines) {
+            if (!line) continue;
+            if (line.startsWith("event:")) eventName = line.slice("event:".length).trim() || eventName;
+            if (line.startsWith("data:")) dataLines.push(line.slice("data:".length).trim());
+          }
+          const dataRaw = dataLines.join("\n").trim();
+          if (!dataRaw) continue;
+
+          let data: any = null;
+          try {
+            data = JSON.parse(dataRaw);
+          } catch {
+            data = null;
+          }
+
+          if (eventName === "meta") {
+            if (typeof data?.requestId === "string") requestId = data.requestId;
+            continue;
+          }
+
+          if (eventName === "delta") {
+            const delta = typeof data?.delta === "string" ? data.delta : "";
+            if (!delta) continue;
+            assistantText += delta;
+            updateAssistant();
+            const el = scrollRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+            continue;
+          }
+
+          if (eventName === "error") {
+            const msg = typeof data?.message === "string" ? data.message : (data?.error || "");
+            if (msg) setError(String(msg));
+            continue;
+          }
+
+          if (eventName === "done") {
+            done = true;
+            if (typeof data?.used === "number" && typeof data?.limit === "number" && typeof data?.day === "string") {
+              setQuota({ used: data.used, limit: data.limit, day: data.day });
+            }
+            if (typeof data?.requestId === "string") requestId = data.requestId;
+            const finalText = typeof data?.reply?.text === "string" ? data.reply.text : "";
+            if (finalText) assistantText = finalText;
+            updateAssistant();
+            break;
+          }
+        }
+      }
+
+      if (!assistantAdded) {
+        assistantText = assistantText || "Запрос сохранён. Скоро здесь появится полноценный чат-ассистент с ответами в реальном времени. (stub)";
+        addAssistantIfNeeded();
+        updateAssistant();
+      }
     } catch {
+      if (abortController.signal.aborted) {
+        if (abortRef.current === abortController) abortRef.current = null;
+        if (chatVersionRef.current !== startChatVersion) return;
+        if (!assistantAdded) {
+          const assistantMessage: AssistantMessage = {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: t("ai.stopped") || "Остановлено.",
+            requestId: undefined,
+            feedback: null,
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+        }
+        return;
+      }
       setError(t("common.networkError") || "Ошибка сети");
     } finally {
       setSending(false);
+      setStreamingReplyId(null);
+      if (abortRef.current === abortController) abortRef.current = null;
     }
+  };
+
+  const stopGenerating = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
   };
 
   return (
@@ -627,22 +985,39 @@ export default function AssistantClient({
 		                            if (company?.region) metaParts.push(company.region);
 		                            const meta = metaParts.join(" • ");
 		                            const title = company ? [company.name, meta].filter(Boolean).join(" — ") : id;
+		                            const removeTitle = tr("ai.shortlistRemove", "Убрать из шортлиста");
 		                            return (
-		                              <Link
-		                                key={id}
-		                                href={`/company/${id}`}
-		                                title={title}
-		                                className="group inline-flex max-w-[16rem] min-w-0 flex-col gap-0.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-left hover:border-[#820251] transition-colors"
-		                              >
-		                                <span className="truncate text-xs font-semibold text-gray-800 group-hover:text-[#820251]">
-		                                  {label}
-		                                </span>
-		                                {meta && (
-		                                  <span className="truncate text-[11px] text-gray-500">
-		                                    {meta}
+		                              <div key={id} className="relative group">
+		                                <Link
+		                                  href={`/company/${id}`}
+		                                  title={title}
+		                                  className="inline-flex max-w-[16rem] min-w-0 flex-col gap-0.5 rounded-xl border border-gray-200 bg-white px-3 py-2 pr-8 text-left hover:border-[#820251] transition-colors"
+		                                >
+		                                  <span className="truncate text-xs font-semibold text-gray-800 group-hover:text-[#820251]">
+		                                    {label}
 		                                  </span>
-		                                )}
-		                              </Link>
+		                                  {meta && (
+		                                    <span className="truncate text-[11px] text-gray-500">
+		                                      {meta}
+		                                    </span>
+		                                  )}
+		                                </Link>
+		                                <button
+		                                  type="button"
+		                                  onClick={(e) => {
+		                                    e.preventDefault();
+		                                    e.stopPropagation();
+		                                    removeShortlistCompany(id);
+		                                  }}
+		                                  aria-label={removeTitle}
+		                                  title={removeTitle}
+		                                  className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 hover:text-gray-800 hover:border-gray-300 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition"
+		                                >
+		                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+		                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+		                                  </svg>
+		                                </button>
+		                              </div>
 		                            );
 		                          })}
 		                        </div>
@@ -739,11 +1114,102 @@ export default function AssistantClient({
                               )}
                             </div>
                           )}
-                          {m.role === "assistant" ? renderLinkifiedText(m.content) : m.content}
+                          {renderAssistantMessageContent(m)}
+
+                          {m.role === "assistant" && m.id !== "intro" && m.requestId && (
+                            <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                              {m.feedback ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-400">{tr("ai.feedback.thanks", "Спасибо за оценку!")}</span>
+                                  <span className="text-gray-300">•</span>
+                                  <span className="font-semibold text-gray-600">
+                                    {m.feedback.rating === "up" ? "👍" : "👎"}
+                                  </span>
+                                  {m.feedback.reason && (
+                                    <span className="text-gray-400">
+                                      {tr(`ai.feedback.reason.${m.feedback.reason}`, m.feedback.reason)}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    disabled={feedbackSendingId === m.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      void submitFeedback({ messageId: m.id, requestId: m.requestId!, rating: "up", reason: null });
+                                    }}
+                                    className="inline-flex items-center justify-center rounded-lg px-2 py-1 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-50 border border-transparent hover:border-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    aria-label={tr("ai.feedback.up", "Полезно")}
+                                    title={tr("ai.feedback.up", "Полезно")}
+                                  >
+                                    👍
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={feedbackSendingId === m.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setFeedbackOpenId((prev) => (prev === m.id ? null : m.id));
+                                    }}
+                                    className="inline-flex items-center justify-center rounded-lg px-2 py-1 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-50 border border-transparent hover:border-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    aria-label={tr("ai.feedback.down", "Не полезно")}
+                                    title={tr("ai.feedback.down", "Не полезно")}
+                                  >
+                                    👎
+                                  </button>
+
+                                  {feedbackOpenId === m.id && (
+                                    <div
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="ml-2 flex flex-wrap gap-2"
+                                    >
+                                      {[
+                                        { id: "hallucination", label: tr("ai.feedback.reason.hallucination", "Придуманные факты") },
+                                        { id: "format", label: tr("ai.feedback.reason.format", "Плохой формат") },
+                                        { id: "too_generic", label: tr("ai.feedback.reason.too_generic", "Слишком общо") },
+                                        { id: "too_long", label: tr("ai.feedback.reason.too_long", "Слишком длинно") },
+                                        { id: "wrong_language", label: tr("ai.feedback.reason.wrong_language", "Не тот язык") },
+                                        { id: "other", label: tr("ai.feedback.reason.other", "Другое") },
+                                      ].map((reason) => (
+                                        <button
+                                          key={reason.id}
+                                          type="button"
+                                          disabled={feedbackSendingId === m.id}
+                                          onClick={() =>
+                                            void submitFeedback({
+                                              messageId: m.id,
+                                              requestId: m.requestId!,
+                                              rating: "down",
+                                              reason: reason.id,
+                                            })
+                                          }
+                                          className="inline-flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 text-[11px] transition-colors border border-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                                        >
+                                          {reason.label}
+                                        </button>
+                                      ))}
+                                      <button
+                                        type="button"
+                                        disabled={feedbackSendingId === m.id}
+                                        onClick={() =>
+                                          void submitFeedback({ messageId: m.id, requestId: m.requestId!, rating: "down", reason: null })
+                                        }
+                                        className="inline-flex items-center justify-center rounded-full bg-white hover:bg-gray-50 text-gray-600 px-3 py-1 text-[11px] transition-colors border border-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                                      >
+                                        {tr("ai.feedback.skip", "Без причины")}
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
-                    {sending && (
+                    {sending && !streamingReplyId && (
                       <div className="flex justify-start">
                         <div className="max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm bg-white border border-gray-200 text-gray-500 rounded-bl-md animate-pulse">
                           {t("common.loading") || "Загрузка..."}
@@ -889,6 +1355,15 @@ export default function AssistantClient({
                       >
                         {sending ? (t("common.loading") || "Загрузка...") : (t("ai.sendRequest") || "Отправить")}
                       </button>
+                      {sending && (
+                        <button
+                          type="button"
+                          onClick={stopGenerating}
+                          className="inline-flex items-center justify-center rounded-xl bg-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-300"
+                        >
+                          {t("ai.stopGenerating") || "Стоп"}
+                        </button>
+                      )}
                     </div>
                     <div className="mt-2 text-xs text-gray-500">
                       {t("ai.disclaimer") ||
