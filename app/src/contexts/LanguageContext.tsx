@@ -106,6 +106,7 @@ const translations: Record<Language, Record<string, string>> = {
     "ai.chatIntro": "Привет! Я помогу разобраться с рубриками, сформулировать запрос поставщикам и быстро найти нужные компании. (Пока в режиме заглушки.)",
     "ai.newChat": "Новый чат",
     "ai.chatMemoryHint": "Контекст диалога: последние 12 сообщений",
+    "ai.shortlistLabel": "Шортлист",
     "ai.copyAnswer": "Скопировать ответ",
     "ai.copyOptions": "Копировать…",
     "ai.copied": "Скопировано!",
@@ -208,6 +209,7 @@ const translations: Record<Language, Record<string, string>> = {
     "favorites.empty": "У вас пока нет избранных компаний",
     "favorites.add": "Добавить в избранное",
     "favorites.remove": "Удалить из избранного",
+    "favorites.askAi": "Спросить AI",
 
     // Common
     "common.loading": "Загрузка...",
@@ -753,6 +755,7 @@ const translations: Record<Language, Record<string, string>> = {
     "ai.chatIntro": "Hi! I can help you navigate rubrics, draft supplier requests, and quickly find the right companies. (Currently in stub mode.)",
     "ai.newChat": "New chat",
     "ai.chatMemoryHint": "Chat context: last 12 messages",
+    "ai.shortlistLabel": "Shortlist",
     "ai.copyAnswer": "Copy answer",
     "ai.copyOptions": "Copy…",
     "ai.copied": "Copied!",
@@ -855,6 +858,7 @@ const translations: Record<Language, Record<string, string>> = {
     "favorites.empty": "You have no favorite companies yet",
     "favorites.add": "Add to favorites",
     "favorites.remove": "Remove from favorites",
+    "favorites.askAi": "Ask AI",
 
     // Common
     "common.loading": "Loading...",

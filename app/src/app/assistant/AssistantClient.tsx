@@ -67,6 +67,7 @@ export default function AssistantClient({
   const searchParams = useSearchParams();
   const companyIdFromUrl = (searchParams.get("companyId") || "").trim();
   const companyNameFromUrl = (searchParams.get("companyName") || "").trim();
+  const companyIdsFromUrl = (searchParams.get("companyIds") || "").trim();
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +97,24 @@ export default function AssistantClient({
     if (!companyId && !companyName) return null;
     return { companyId, companyName };
   }, [companyIdFromUrl, companyNameFromUrl]);
+
+  const shortlistCompanyIds = useMemo(() => {
+    if (!companyIdsFromUrl) return [];
+    const exclude = companyContext?.companyId ? companyContext.companyId.toLowerCase() : null;
+    const out: string[] = [];
+    const seen = new Set<string>();
+    for (const raw of companyIdsFromUrl.split(",")) {
+      const id = raw.trim();
+      if (!id) continue;
+      const key = id.toLowerCase();
+      if (exclude && key === exclude) continue;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(id);
+      if (out.length >= 8) break;
+    }
+    return out;
+  }, [companyIdsFromUrl, companyContext?.companyId]);
 
   const buildIntroMessage = (): AssistantMessage => ({
     id: "intro",
@@ -343,7 +362,10 @@ export default function AssistantClient({
 
     try {
       const payload: Record<string, unknown> = { source: "assistant_page", page: "/assistant" };
-      if (companyContext) payload.context = companyContext;
+      const context: Record<string, unknown> = {};
+      if (companyContext) Object.assign(context, companyContext);
+      if (shortlistCompanyIds.length > 0) context.shortlistCompanyIds = shortlistCompanyIds;
+      if (Object.keys(context).length > 0) payload.context = context;
 
       const requestBody: Record<string, unknown> = {
         message: text,
@@ -351,6 +373,7 @@ export default function AssistantClient({
         payload,
       };
       if (companyContext?.companyId) requestBody.companyId = companyContext.companyId;
+      if (shortlistCompanyIds.length > 0) requestBody.companyIds = shortlistCompanyIds;
 
       const res = await fetch("/api/ai/request", {
         method: "POST",
@@ -480,6 +503,11 @@ export default function AssistantClient({
                             {companyContext.companyName || (companyContext.companyId ? `#${companyContext.companyId}` : "—")}
                           </span>
                         </div>
+                      ) : shortlistCompanyIds.length > 0 ? (
+                        <div className="text-xs text-gray-600 truncate">
+                          <span className="text-gray-500">{t("ai.shortlistLabel") || "Шортлист"}:</span>{" "}
+                          <span className="font-semibold text-[#820251]">{shortlistCompanyIds.length}</span>
+                        </div>
                       ) : (
                         <div className="text-xs text-gray-500">
                           {t("ai.chatMemoryHint") || "Контекст диалога: последние 12 сообщений"}
@@ -487,7 +515,7 @@ export default function AssistantClient({
                       )}
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      {companyContext && (
+                      {(companyContext || shortlistCompanyIds.length > 0) && (
                         <Link
                           href="/assistant"
                           className="text-xs text-[#820251] hover:underline underline-offset-2"

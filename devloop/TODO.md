@@ -44,10 +44,13 @@ Recently completed:
 4. ✅ Make suggestion chips context-aware (company context → outreach/questions/follow-up/alternatives).
 5. ✅ Improve assistant system prompt for outreach: when drafting messages, output explicit blocks (Subject/Body/WhatsApp).
 6. ✅ Add an “RFQ builder” mini-form (product/service, qty, city/region, deadline) that generates a prompt and fills the chat draft.
+7. ✅ Add “shortlist mode” (favorites → assistant): pass selected company IDs and generate an outreach plan.
 
 Next (pick ONE):
 
-1. Add “shortlist mode” (favorites → assistant): pass selected company IDs and generate an outreach plan.
+1. In `/assistant`, show shortlist UI when `companyIds` are provided:
+   - Display the shortlisted company names + links
+   - Add shortlist-specific chips (“Draft outreach plan”, “Compare”, “Find gaps”)
 
 ## Constraints
 

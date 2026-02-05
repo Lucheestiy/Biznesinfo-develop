@@ -18,6 +18,9 @@ const ASSISTANT_COMPANY_FACTS_MAX_CHARS = 2_500;
 const ASSISTANT_COMPANY_FACTS_MAX_TEXT_CHARS = 400;
 const ASSISTANT_COMPANY_FACTS_MAX_ITEMS = 8;
 const ASSISTANT_COMPANY_SCAN_TEXT_MAX_CHARS = 4_000;
+const ASSISTANT_SHORTLIST_MAX_COMPANIES = 8;
+const ASSISTANT_SHORTLIST_FACTS_MAX_CHARS = 3_500;
+const ASSISTANT_SHORTLIST_SCAN_TEXT_MAX_CHARS = 6_000;
 
 type AssistantProvider = "stub" | "openai";
 type PromptMessage = { role: "system" | "user" | "assistant"; content: string };
@@ -167,6 +170,23 @@ function uniqNonEmpty(values: string[]): string[] {
   return out;
 }
 
+function sanitizeCompanyIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const item of raw) {
+    if (typeof item !== "string") continue;
+    const trimmed = item.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(trimmed.slice(0, 120));
+    if (out.length >= ASSISTANT_SHORTLIST_MAX_COMPANIES) break;
+  }
+  return out;
+}
+
 function buildCompanyFactsBlock(resp: BiznesinfoCompanyResponse): string {
   const c = resp.company;
   const lines: string[] = [
@@ -256,6 +276,49 @@ function buildCompanyFactsBlock(resp: BiznesinfoCompanyResponse): string {
   return `${full.slice(0, Math.max(0, ASSISTANT_COMPANY_FACTS_MAX_CHARS - 1)).trim()}…`;
 }
 
+function buildShortlistFactsBlock(resps: BiznesinfoCompanyResponse[]): string {
+  const lines: string[] = [
+    "Shortlist companies (from Biznesinfo directory snapshot; untrusted; may be outdated).",
+    "Use to tailor an outreach plan, but do not claim external verification.",
+  ];
+
+  for (const resp of resps.slice(0, ASSISTANT_SHORTLIST_MAX_COMPANIES)) {
+    const c = resp.company;
+    const id = truncate(oneLine(c.source_id || resp.id || ""), 80);
+    const name = truncate(oneLine(c.name || ""), 140);
+
+    const loc = [oneLine(c.city || ""), oneLine(c.region || "")]
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .slice(0, 2)
+      .join(", ");
+
+    const rubrics = uniqNonEmpty(Array.isArray(c.rubrics) ? c.rubrics.map((r) => oneLine(r?.name || "")) : [])
+      .slice(0, 2)
+      .join(" / ");
+
+    const websites = uniqNonEmpty(Array.isArray(c.websites) ? c.websites : []).slice(0, 1);
+    const emails = uniqNonEmpty(Array.isArray(c.emails) ? c.emails : []).slice(0, 1);
+    const phones = uniqNonEmpty(Array.isArray(c.phones) ? c.phones : []).slice(0, 1);
+
+    const meta: string[] = [];
+    if (id) meta.push(`id:${id}`);
+    if (loc) meta.push(loc);
+    if (rubrics) meta.push(rubrics);
+    if (websites[0]) meta.push(websites[0]);
+    if (emails[0]) meta.push(emails[0]);
+    if (phones[0]) meta.push(phones[0]);
+
+    const head = name || id || "Company";
+    const tail = meta.length > 0 ? truncate(oneLine(meta.join(" | ")), 220) : "";
+    lines.push(tail ? `- ${head} — ${tail}` : `- ${head}`);
+  }
+
+  const full = lines.join("\n");
+  if (full.length <= ASSISTANT_SHORTLIST_FACTS_MAX_CHARS) return full;
+  return `${full.slice(0, Math.max(0, ASSISTANT_SHORTLIST_FACTS_MAX_CHARS - 1)).trim()}…`;
+}
+
 function buildCompanyScanText(resp: BiznesinfoCompanyResponse): string {
   const c = resp.company;
   const parts = [
@@ -309,6 +372,7 @@ function buildAssistantPrompt(params: {
   history?: AssistantHistoryMessage[];
   companyContext?: { id: string | null; name: string | null };
   companyFacts?: string | null;
+  shortlistFacts?: string | null;
   promptInjection?: { flagged: boolean; signals: string[] };
 }): PromptMessage[] {
   const prompt: PromptMessage[] = [{ role: "system", content: buildAssistantSystemPrompt() }];
@@ -337,6 +401,10 @@ function buildAssistantPrompt(params: {
 
   if (params.companyFacts) {
     prompt.push({ role: "system", content: params.companyFacts });
+  }
+
+  if (params.shortlistFacts) {
+    prompt.push({ role: "system", content: params.shortlistFacts });
   }
 
   if (params.history && params.history.length > 0) {
@@ -379,6 +447,7 @@ export async function POST(request: Request) {
 
   const messageRaw = typeof (body as any)?.message === "string" ? (body as any).message : "";
   const companyId = typeof (body as any)?.companyId === "string" ? (body as any).companyId : null;
+  const companyIds = sanitizeCompanyIds((body as any)?.companyIds);
   const payload = (body as any)?.payload ?? null;
   const message = messageRaw.trim().slice(0, 5000);
   if (!message) return NextResponse.json({ error: "BadRequest" }, { status: 400 });
@@ -408,6 +477,11 @@ export async function POST(request: Request) {
   let providerMeta: { provider: AssistantProvider; model?: string } = { provider: "stub" };
 
   const companyIdTrimmed = (companyId || "").trim() || null;
+  const companyIdsTrimmed = companyIds
+    .map((id) => (id || "").trim())
+    .filter(Boolean)
+    .filter((id) => !companyIdTrimmed || id.toLowerCase() !== companyIdTrimmed.toLowerCase())
+    .slice(0, ASSISTANT_SHORTLIST_MAX_COMPANIES);
 
   const companyNameFromPayload =
     payload && typeof payload === "object" && !Array.isArray(payload) && typeof (payload as any)?.context?.companyName === "string"
@@ -427,6 +501,23 @@ export async function POST(request: Request) {
     }
   }
 
+  const shortlistResps: BiznesinfoCompanyResponse[] = [];
+  for (const id of companyIdsTrimmed) {
+    try {
+      const resp = await biznesinfoGetCompany(id);
+      shortlistResps.push(resp);
+    } catch {
+      // ignore
+    }
+  }
+  const shortlistFacts = shortlistResps.length > 0 ? buildShortlistFactsBlock(shortlistResps) : null;
+  const shortlistScanText = (() => {
+    if (shortlistResps.length === 0) return null;
+    const joined = shortlistResps.map((r) => buildCompanyScanText(r)).join("\n\n");
+    if (joined.length <= ASSISTANT_SHORTLIST_SCAN_TEXT_MAX_CHARS) return joined;
+    return joined.slice(0, ASSISTANT_SHORTLIST_SCAN_TEXT_MAX_CHARS);
+  })();
+
   const companyNameFromDirectory = companyResp ? truncate(oneLine(companyResp.company.name || ""), 160) : null;
   const companyNameForPrompt = companyNameFromDirectory || (companyNameFromPayload ? truncate(oneLine(companyNameFromPayload), 160) : null);
   const companyIdForPrompt = companyResp
@@ -437,6 +528,7 @@ export async function POST(request: Request) {
     message,
     ...history.filter((m) => m.role === "user").map((m) => m.content),
     companyScanText || "",
+    shortlistScanText || "",
   ].map((v) => v.trim()).filter(Boolean);
   const guardrails = {
     version: ASSISTANT_GUARDRAILS_VERSION,
@@ -447,6 +539,7 @@ export async function POST(request: Request) {
     history,
     companyContext: { id: companyIdForPrompt, name: companyNameForPrompt },
     companyFacts,
+    shortlistFacts,
     promptInjection: guardrails.promptInjection,
   });
 
@@ -490,6 +583,7 @@ export async function POST(request: Request) {
     const requestPayload = {
       message,
       companyId: companyIdTrimmed,
+      companyIds: companyIdsTrimmed,
       plan: effective.plan,
     };
 
