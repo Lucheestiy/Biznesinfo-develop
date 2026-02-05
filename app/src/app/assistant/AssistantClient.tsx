@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { renderLinkifiedText } from "@/lib/utils/linkify";
 
 type UserPlan = "free" | "paid" | "partner";
 
@@ -377,7 +378,7 @@ export default function AssistantClient({
                               )}
                             </button>
                           )}
-                          {m.content}
+                          {m.role === "assistant" ? renderLinkifiedText(m.content) : m.content}
                         </div>
                       </div>
                     ))}
