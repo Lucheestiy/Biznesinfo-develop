@@ -8,12 +8,19 @@ import { getUserEffectivePlan } from "@/lib/auth/plans";
 import { consumeAiRequest } from "@/lib/auth/aiUsage";
 import { createAiRequest } from "@/lib/ai/requests";
 import { releaseAiRequestLock, tryAcquireAiRequestLock } from "@/lib/ai/locks";
-import { biznesinfoDetectRubricHints, biznesinfoGetCompany, type BiznesinfoRubricHint } from "@/lib/biznesinfo/store";
-import type { BiznesinfoCompanyResponse } from "@/lib/biznesinfo/types";
+import {
+  biznesinfoDetectRubricHints,
+  biznesinfoGetCompany,
+  biznesinfoSearch,
+  type BiznesinfoRubricHint,
+} from "@/lib/biznesinfo/store";
+import { companySlugForUrl } from "@/lib/biznesinfo/slug";
+import { isMeiliHealthy, meiliSearch } from "@/lib/meilisearch";
+import type { BiznesinfoCompanyResponse, BiznesinfoCompanySummary } from "@/lib/biznesinfo/types";
 
 export const runtime = "nodejs";
 
-const ASSISTANT_GUARDRAILS_VERSION = 2;
+const ASSISTANT_GUARDRAILS_VERSION = 3;
 const ASSISTANT_HISTORY_MAX_MESSAGES = 12;
 const ASSISTANT_HISTORY_MAX_MESSAGE_CHARS = 2_000;
 const ASSISTANT_HISTORY_MAX_TOTAL_CHARS = 12_000;
@@ -26,6 +33,8 @@ const ASSISTANT_SHORTLIST_FACTS_MAX_CHARS = 3_500;
 const ASSISTANT_SHORTLIST_SCAN_TEXT_MAX_CHARS = 6_000;
 const ASSISTANT_RUBRIC_HINTS_MAX_ITEMS = 8;
 const ASSISTANT_RUBRIC_HINTS_MAX_CHARS = 1_600;
+const ASSISTANT_VENDOR_CANDIDATES_MAX = 6;
+const ASSISTANT_VENDOR_CANDIDATES_MAX_CHARS = 3_200;
 
 type AssistantProvider = "stub" | "openai" | "codex";
 type PromptMessage = { role: "system" | "user" | "assistant"; content: string };
@@ -577,6 +586,217 @@ function buildRubricHintsBlock(hints: BiznesinfoRubricHint[]): string | null {
   return `${full.slice(0, Math.max(0, ASSISTANT_RUBRIC_HINTS_MAX_CHARS - 1)).trim()}…`;
 }
 
+function looksLikeVendorLookupIntent(message: string): boolean {
+  const text = oneLine(message).toLowerCase();
+  if (!text) return false;
+
+  const explicitPhrases = [
+    "где купить",
+    "кто продает",
+    "кто продаёт",
+    "кто поставляет",
+    "найти поставщик",
+    "подобрать поставщик",
+    "where can i buy",
+    "who sells",
+    "find supplier",
+    "find suppliers",
+    "find vendor",
+    "find vendors",
+  ];
+  const explicit = explicitPhrases.some((p) => text.includes(p));
+  if (explicit) return true;
+
+  const hasSupply = /(купить|куплю|покупк|прода[её]т|поставщ|поставк|оптом|закупк|vendor|supplier|buy|sell)/u.test(text);
+  const hasFind = /(где|кто|найти|подобрать|порекомендуй|where|who|find|recommend)/u.test(text);
+  return hasSupply && hasFind;
+}
+
+function dedupeVendorCandidates(companies: BiznesinfoCompanySummary[]): BiznesinfoCompanySummary[] {
+  const out: BiznesinfoCompanySummary[] = [];
+  const seen = new Set<string>();
+  for (const c of companies || []) {
+    const key = companySlugForUrl(c.id).toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(c);
+  }
+  return out;
+}
+
+function extractVendorSearchTerms(text: string): string[] {
+  const cleaned = String(text || "")
+    .toLowerCase()
+    .replace(/ё/gu, "е")
+    .replace(/[^\p{L}\p{N}\s-]+/gu, " ");
+
+  const stopWords = new Set([
+    "нужно",
+    "нужна",
+    "нужен",
+    "нужны",
+    "надо",
+    "купить",
+    "куплю",
+    "покупка",
+    "кто",
+    "где",
+    "продает",
+    "продает?",
+    "продает.",
+    "продает,",
+    "продаёт",
+    "продают",
+    "поставщик",
+    "поставщики",
+    "поставщика",
+    "поставка",
+    "тонна",
+    "тонну",
+    "тонны",
+    "кг",
+    "килограмм",
+    "килограмма",
+    "литр",
+    "литра",
+    "литров",
+    "мне",
+    "для",
+    "по",
+    "в",
+    "на",
+    "и",
+    "или",
+    "the",
+    "a",
+    "an",
+    "need",
+    "buy",
+    "who",
+    "where",
+    "sell",
+    "sells",
+    "supplier",
+    "suppliers",
+    "vendor",
+    "vendors",
+  ]);
+
+  const tokens = cleaned
+    .split(/\s+/u)
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .filter((t) => t.length >= 3)
+    .filter((t) => !stopWords.has(t))
+    .filter((t) => !/^\d+$/u.test(t));
+
+  const uniq = uniqNonEmpty(tokens);
+  if (uniq.length === 0) return [];
+
+  const out: string[] = [];
+  const push = (s: string) => {
+    const v = oneLine(s);
+    if (!v) return;
+    if (out.some((x) => x.toLowerCase() === v.toLowerCase())) return;
+    out.push(v);
+  };
+
+  push(uniq.slice(0, 4).join(" "));
+  push(uniq.slice(0, 2).join(" "));
+  push(uniq[0]);
+  return out.slice(0, 4);
+}
+
+async function fetchVendorCandidates(text: string): Promise<BiznesinfoCompanySummary[]> {
+  const searchText = String(text || "").trim().slice(0, 320);
+  if (!searchText) return [];
+  const limit = ASSISTANT_VENDOR_CANDIDATES_MAX;
+
+  const runSearch = async (params: { query: string; service: string }): Promise<BiznesinfoCompanySummary[]> => {
+    try {
+      if (await isMeiliHealthy()) {
+        const meili = await meiliSearch({
+          query: params.query,
+          service: params.service,
+          keywords: null,
+          region: null,
+          city: null,
+          offset: 0,
+          limit,
+        });
+        if (Array.isArray(meili.companies) && meili.companies.length > 0) {
+          return dedupeVendorCandidates(meili.companies).slice(0, limit);
+        }
+      }
+    } catch {
+      // fall through to in-memory search
+    }
+
+    try {
+      const mem = await biznesinfoSearch({
+        query: params.query,
+        service: params.service,
+        region: null,
+        city: null,
+        offset: 0,
+        limit,
+      });
+      if (Array.isArray(mem.companies) && mem.companies.length > 0) {
+        return dedupeVendorCandidates(mem.companies).slice(0, limit);
+      }
+    } catch {
+      // ignore
+    }
+
+    return [];
+  };
+
+  const serviceFirst = await runSearch({ query: "", service: searchText });
+  if (serviceFirst.length > 0) return serviceFirst;
+
+  const queryFirst = await runSearch({ query: searchText, service: "" });
+  if (queryFirst.length > 0) return queryFirst;
+
+  const extracted = extractVendorSearchTerms(searchText);
+  for (const term of extracted) {
+    const byService = await runSearch({ query: "", service: term });
+    if (byService.length > 0) return byService;
+    const byQuery = await runSearch({ query: term, service: "" });
+    if (byQuery.length > 0) return byQuery;
+  }
+
+  return [];
+}
+
+function buildVendorCandidatesBlock(companies: BiznesinfoCompanySummary[]): string | null {
+  if (!Array.isArray(companies) || companies.length === 0) return null;
+
+  const lines: string[] = [
+    "Vendor candidates (from Biznesinfo search snapshot; untrusted; may be outdated).",
+    "If the user asks who can sell/supply something, start with concrete candidates from this list.",
+  ];
+
+  for (const c of companies.slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX)) {
+    const name = truncate(oneLine(c.name || ""), 140) || `#${c.id}`;
+    const path = `/company/${companySlugForUrl(c.id)}`;
+    const rubric = truncate(oneLine(c.primary_rubric_name || c.primary_category_name || ""), 120);
+    const location = truncate(
+      oneLine([c.city || "", c.region || ""].map((v) => (v || "").trim()).filter(Boolean).join(", ")),
+      90,
+    );
+    const phone = truncate(oneLine(Array.isArray(c.phones) ? c.phones[0] || "" : ""), 48);
+    const email = truncate(oneLine(Array.isArray(c.emails) ? c.emails[0] || "" : ""), 80);
+    const website = truncate(oneLine(Array.isArray(c.websites) ? c.websites[0] || "" : ""), 90);
+
+    const meta = [rubric, location, phone, email, website].filter(Boolean).join(" | ");
+    lines.push(meta ? `- ${name} — ${path} | ${meta}` : `- ${name} — ${path}`);
+  }
+
+  const full = lines.join("\n");
+  if (full.length <= ASSISTANT_VENDOR_CANDIDATES_MAX_CHARS) return full;
+  return `${full.slice(0, Math.max(0, ASSISTANT_VENDOR_CANDIDATES_MAX_CHARS - 1)).trim()}…`;
+}
+
 function buildCompanyScanText(resp: BiznesinfoCompanyResponse): string {
   const c = resp.company;
   const parts = [
@@ -623,6 +843,7 @@ function buildAssistantSystemPrompt(): string {
     "- Be concise and practical.",
     "- Always provide a useful first-pass answer from available context before asking clarifying questions.",
     "- Ask up to 3 clarifying questions only for missing details that block a better next step.",
+    "- If vendor candidates are provided in context, start with concrete supplier options from that list first.",
     "- When providing templates, use placeholders like {company}, {product/service}, {city}, {deadline}.",
   ].join("\n");
 }
@@ -631,6 +852,7 @@ function buildAssistantPrompt(params: {
   message: string;
   history?: AssistantHistoryMessage[];
   rubricHints?: string | null;
+  vendorCandidates?: string | null;
   companyContext?: { id: string | null; name: string | null };
   companyFacts?: string | null;
   shortlistFacts?: string | null;
@@ -650,6 +872,15 @@ function buildAssistantPrompt(params: {
 
   if (params.rubricHints) {
     prompt.push({ role: "system", content: params.rubricHints });
+  }
+
+  if (params.vendorCandidates) {
+    prompt.push({
+      role: "system",
+      content:
+        "Vendor guidance (mandatory): if the user is asking who can sell/supply/buy from, start the answer with 3-7 concrete vendors from the candidate list below. For each: name, short fit reason, and /company/... path.",
+    });
+    prompt.push({ role: "system", content: params.vendorCandidates });
   }
 
   if (params.companyContext?.id || params.companyContext?.name) {
@@ -823,12 +1054,30 @@ export async function POST(request: Request) {
     }
   }
 
+  const shouldLookupVendors =
+    !companyIdTrimmed &&
+    companyIdsTrimmed.length === 0 &&
+    looksLikeVendorLookupIntent(message);
+
+  let vendorCandidates: BiznesinfoCompanySummary[] = [];
+  let vendorCandidatesBlock: string | null = null;
+  if (shouldLookupVendors) {
+    try {
+      vendorCandidates = await fetchVendorCandidates(message);
+      vendorCandidatesBlock = buildVendorCandidatesBlock(vendorCandidates);
+    } catch {
+      vendorCandidates = [];
+      vendorCandidatesBlock = null;
+    }
+  }
+
   const promptInjectionParts = [
     message,
     ...history.filter((m) => m.role === "user").map((m) => m.content),
     companyScanText || "",
     shortlistScanText || "",
     rubricHintsBlock || "",
+    vendorCandidatesBlock || "",
   ].map((v) => v.trim()).filter(Boolean);
   const guardrails = {
     version: ASSISTANT_GUARDRAILS_VERSION,
@@ -838,6 +1087,7 @@ export async function POST(request: Request) {
     message,
     history,
     rubricHints: rubricHintsBlock,
+    vendorCandidates: vendorCandidatesBlock,
     companyContext: { id: companyIdForPrompt, name: companyNameForPrompt },
     companyFacts,
     shortlistFacts,
@@ -878,6 +1128,8 @@ export async function POST(request: Request) {
       companyId: companyIdTrimmed,
       companyIds: companyIdsTrimmed,
       plan: effective.plan,
+      vendorLookupIntent: shouldLookupVendors,
+      vendorCandidateIds: vendorCandidates.map((c) => c.id).slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX),
     };
 
     if (payload && typeof payload === "object" && !Array.isArray(payload)) {
