@@ -55,10 +55,11 @@ Recently completed:
 15. ✅ Store a lightweight “template compliance” flag in `ai_requests.payload` for analytics (Subject/Body/WhatsApp blocks).
 16. ✅ Add streaming replies (SSE) for `/assistant` (via `POST /api/ai/request?stream=1`) with safe fallback.
 17. ✅ Add safe “rubric hints” injection for sourcing prompts (catalog-based, capped, injection-safe).
+18. ✅ Add safe “query variants” suggestions for sourcing prompts (2–3 variants with synonyms; capped; injection-safe).
 
 Next (pick ONE):
 
-1. Add safe “query variants” suggestions for sourcing prompts (2–3 variants with synonyms; capped; injection-safe).
+1. Add safe “city/region extraction” hints for sourcing prompts (best-effort; capped; injection-safe).
 
 ## Constraints
 

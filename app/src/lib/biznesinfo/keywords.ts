@@ -244,6 +244,21 @@ function expandSynonyms(phrase: string): string[] {
   return Array.from(out).filter(Boolean);
 }
 
+export function suggestSourcingSynonyms(raw: string): string[] {
+  const normalized = normalizePhrase(raw);
+  if (!normalized) return [];
+
+  const out = new Set<string>();
+  for (const rule of SYNONYM_RULES) {
+    if (!rule.pattern.test(normalized)) continue;
+    for (const syn of rule.synonyms) {
+      const phrase = normalizePhrase(syn);
+      if (phrase) out.add(phrase);
+    }
+  }
+  return Array.from(out);
+}
+
 function simplifyActivityPhrase(raw: string): string {
   let phrase = normalizePhrase(raw);
   if (!phrase) return "";

@@ -8,6 +8,7 @@ import { getUserEffectivePlan } from "@/lib/auth/plans";
 import { consumeAiRequest } from "@/lib/auth/aiUsage";
 import { createAiRequest } from "@/lib/ai/requests";
 import { releaseAiRequestLock, tryAcquireAiRequestLock } from "@/lib/ai/locks";
+import { suggestSourcingSynonyms } from "@/lib/biznesinfo/keywords";
 import {
   biznesinfoDetectRubricHints,
   biznesinfoGetCompany,
@@ -33,6 +34,9 @@ const ASSISTANT_SHORTLIST_FACTS_MAX_CHARS = 3_500;
 const ASSISTANT_SHORTLIST_SCAN_TEXT_MAX_CHARS = 6_000;
 const ASSISTANT_RUBRIC_HINTS_MAX_ITEMS = 8;
 const ASSISTANT_RUBRIC_HINTS_MAX_CHARS = 1_600;
+const ASSISTANT_QUERY_VARIANTS_MAX_ITEMS = 3;
+const ASSISTANT_QUERY_VARIANTS_MAX_CHARS = 420;
+const ASSISTANT_QUERY_VARIANTS_MAX_ITEM_CHARS = 72;
 const ASSISTANT_VENDOR_CANDIDATES_MAX = 6;
 const ASSISTANT_VENDOR_CANDIDATES_MAX_CHARS = 3_200;
 
@@ -586,6 +590,44 @@ function buildRubricHintsBlock(hints: BiznesinfoRubricHint[]): string | null {
   return `${full.slice(0, Math.max(0, ASSISTANT_RUBRIC_HINTS_MAX_CHARS - 1)).trim()}…`;
 }
 
+function normalizeQueryVariant(raw: string): string {
+  const v = truncate(oneLine(raw || ""), ASSISTANT_QUERY_VARIANTS_MAX_ITEM_CHARS);
+  if (!v || v.length < 3) return "";
+  if (/[<>`]/u.test(v)) return "";
+
+  const low = v.toLowerCase();
+  if (
+    /\b(ignore|disregard|jailbreak|dan)\b/u.test(low) ||
+    /(system prompt|developer message|hidden prompt)/u.test(low) ||
+    /(игнорируй|инструкц|промпт|системн(ый|ое)?\s+промпт|джейлбрейк|сними\s+ограничения)/u.test(low)
+  ) {
+    return "";
+  }
+
+  return v;
+}
+
+function buildQueryVariantsBlock(candidates: string[]): string | null {
+  const lines: string[] = [];
+  const seen = new Set<string>();
+
+  for (const raw of candidates || []) {
+    const v = normalizeQueryVariant(raw);
+    if (!v) continue;
+    const key = v.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    lines.push(`- ${v}`);
+    if (lines.length >= ASSISTANT_QUERY_VARIANTS_MAX_ITEMS) break;
+  }
+
+  if (lines.length === 0) return null;
+
+  const full = ["Query variants (generated; untrusted; best-effort):", ...lines].join("\n");
+  if (full.length <= ASSISTANT_QUERY_VARIANTS_MAX_CHARS) return full;
+  return `${full.slice(0, Math.max(0, ASSISTANT_QUERY_VARIANTS_MAX_CHARS - 1)).trim()}…`;
+}
+
 function looksLikeVendorLookupIntent(message: string): boolean {
   const text = oneLine(message).toLowerCase();
   if (!text) return false;
@@ -610,6 +652,16 @@ function looksLikeVendorLookupIntent(message: string): boolean {
   const hasSupply = /(купить|куплю|покупк|прода[её]т|поставщ|поставк|оптом|закупк|vendor|supplier|buy|sell)/u.test(text);
   const hasFind = /(где|кто|найти|подобрать|порекомендуй|where|who|find|recommend)/u.test(text);
   return hasSupply && hasFind;
+}
+
+function looksLikeSourcingIntent(message: string): boolean {
+  const text = oneLine(message).toLowerCase();
+  if (!text) return false;
+  if (looksLikeVendorLookupIntent(text)) return true;
+
+  return /(поставщ|поставк|закупк|оптом|купить|куплю|где|кто|найти|подобрать|supplier|suppliers|vendor|vendors|buy|where|find)/u.test(
+    text,
+  );
 }
 
 function dedupeVendorCandidates(companies: BiznesinfoCompanySummary[]): BiznesinfoCompanySummary[] {
@@ -852,6 +904,7 @@ function buildAssistantPrompt(params: {
   message: string;
   history?: AssistantHistoryMessage[];
   rubricHints?: string | null;
+  queryVariants?: string | null;
   vendorCandidates?: string | null;
   companyContext?: { id: string | null; name: string | null };
   companyFacts?: string | null;
@@ -872,6 +925,10 @@ function buildAssistantPrompt(params: {
 
   if (params.rubricHints) {
     prompt.push({ role: "system", content: params.rubricHints });
+  }
+
+  if (params.queryVariants) {
+    prompt.push({ role: "system", content: params.queryVariants });
   }
 
   if (params.vendorCandidates) {
@@ -1044,14 +1101,33 @@ export async function POST(request: Request) {
     ? truncate(oneLine(companyResp.company.source_id || companyResp.id || companyIdTrimmed || ""), 80)
     : (companyIdTrimmed ? truncate(oneLine(companyIdTrimmed), 80) : null);
 
+  let rubricHintItems: BiznesinfoRubricHint[] = [];
   let rubricHintsBlock: string | null = null;
   if (companyIdsTrimmed.length === 0) {
     try {
-      const hints = await biznesinfoDetectRubricHints({ text: message, limit: ASSISTANT_RUBRIC_HINTS_MAX_ITEMS });
-      rubricHintsBlock = buildRubricHintsBlock(hints);
+      rubricHintItems = await biznesinfoDetectRubricHints({ text: message, limit: ASSISTANT_RUBRIC_HINTS_MAX_ITEMS });
+      rubricHintsBlock = buildRubricHintsBlock(rubricHintItems);
     } catch {
+      rubricHintItems = [];
       rubricHintsBlock = null;
     }
+  }
+
+  let queryVariantsBlock: string | null = null;
+  if (companyIdsTrimmed.length === 0 && looksLikeSourcingIntent(message)) {
+    const candidates: string[] = [];
+    candidates.push(...suggestSourcingSynonyms(message));
+
+    for (const h of rubricHintItems) {
+      if (h.type === "rubric") {
+        candidates.push(h.name || "");
+        candidates.push(h.category_name || "");
+      } else if (h.type === "category") {
+        candidates.push(h.name || "");
+      }
+    }
+
+    queryVariantsBlock = buildQueryVariantsBlock(candidates);
   }
 
   const shouldLookupVendors =
@@ -1077,6 +1153,7 @@ export async function POST(request: Request) {
     companyScanText || "",
     shortlistScanText || "",
     rubricHintsBlock || "",
+    queryVariantsBlock || "",
     vendorCandidatesBlock || "",
   ].map((v) => v.trim()).filter(Boolean);
   const guardrails = {
@@ -1087,6 +1164,7 @@ export async function POST(request: Request) {
     message,
     history,
     rubricHints: rubricHintsBlock,
+    queryVariants: queryVariantsBlock,
     vendorCandidates: vendorCandidatesBlock,
     companyContext: { id: companyIdForPrompt, name: companyNameForPrompt },
     companyFacts,
