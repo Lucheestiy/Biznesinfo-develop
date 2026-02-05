@@ -561,153 +561,164 @@ export default function Header() {
 
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-white/30">
-            <nav className="flex flex-col gap-2 text-sm">
-              {/* Favorites (quick list) */}
-              <div className="border-b border-white/10">
+          <div className="md:hidden border-t border-white/30 pt-4 flex flex-col max-h-[70vh]">
+            <div className="flex-1 overflow-y-auto">
+              <nav className="flex flex-col gap-2 text-sm pb-4">
+                {/* Favorites (quick list) */}
+                <div className="border-b border-white/10">
+                  <Link
+                    href="/favorites"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-between py-3 px-2 hover:text-yellow-400 transition-colors text-left font-medium"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden>❤️</span>
+                      <span>{t("nav.favorites")}</span>
+                    </span>
+                    <span className="text-xs text-white/80">{favorites.length}</span>
+                  </Link>
+
+                  {favorites.length === 0 ? (
+                    <div className="pl-4 pr-2 pb-3 text-white/80 text-sm">
+                      {t("favorites.empty")}
+                    </div>
+                  ) : favoritesLoading ? (
+                    <div className="pl-4 pr-2 pb-3 text-white/80 text-sm">{t("common.loading")}</div>
+                  ) : (
+                    <div className="pl-4 pr-2 pb-3 flex flex-col gap-2">
+                      {favoritesToShowInMenu.map((company) => (
+                        <Link
+                          key={company.id}
+                          href={`/company/${encodeURIComponent(companySlugForUrl(company.id))}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-white/90 hover:text-yellow-400 transition-colors truncate"
+                          title={company.name}
+                        >
+                          {company.name}
+                        </Link>
+                      ))}
+                      {hiddenFavoritesCount > 0 && (
+                        <Link
+                          href="/favorites"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-xs text-white/80 hover:text-yellow-400 transition-colors"
+                        >
+                          {t("common.more")} {hiddenFavoritesCount}
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Contact Information Accordion */}
+                <div className="border-b border-white/10">
+                  <button
+                    onClick={() => setExpandedItem(expandedItem === "contacts" ? null : "contacts")}
+                    className="w-full flex items-center justify-between py-3 px-2 hover:text-yellow-400 transition-colors text-left font-medium"
+                  >
+                    <span>{t("nav.mobile.contacts")}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform duration-200 ${expandedItem === "contacts" ? "rotate-180" : ""}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedItem === "contacts" ? "max-h-48 opacity-100 mb-2" : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    <div className="pl-4 flex flex-col gap-3 text-white/80 py-1">
+                      <a href="mailto:surdoe@yandex.ru" className="flex items-center gap-2 hover:text-yellow-400 transition-colors">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        surdoe@yandex.ru
+                      </a>
+                      <Link
+                        href="/agreement"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="hover:text-yellow-400 transition-colors text-sm"
+                      >
+                        {t("footer.agreement")}
+                      </Link>
+                      <Link
+                        href="/offer"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="hover:text-yellow-400 transition-colors text-sm"
+                      >
+                        {t("footer.offer")}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit Request Accordion */}
+                <div className="border-b border-white/10">
+                  <button
+                    onClick={() => setExpandedItem(expandedItem === "request" ? null : "request")}
+                    className="w-full flex items-center justify-between py-3 px-2 hover:text-yellow-400 transition-colors text-left font-medium"
+                  >
+                    <span>{t("nav.mobile.submitRequest")}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform duration-200 ${expandedItem === "request" ? "rotate-180" : ""}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      expandedItem === "request" ? "max-h-24 opacity-100 mb-2" : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    <div className="pl-4 py-2">
+                      <Link
+                        href="/add-company"
+                        className="inline-flex items-center gap-2 bg-yellow-500 text-[#a0006d] px-4 py-2 rounded-lg font-bold hover:bg-yellow-400 transition-colors text-sm shadow-md"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <span>{t("nav.addCompany")}</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </nav>
+            </div>
+
+            <div className="border-t border-white/20 bg-white/10 backdrop-blur-sm p-2">
+              <div className="flex gap-2">
                 <Link
                   href="/favorites"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-between py-3 px-2 hover:text-yellow-400 transition-colors text-left font-medium"
+                  aria-label={t("nav.favorites")}
+                  className="flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/20 text-white font-semibold hover:bg-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#a0006d]"
                 >
-                  <span className="flex items-center gap-2">
-                    <span aria-hidden>❤️</span>
-                    <span>{t("nav.favorites")}</span>
+                  <span aria-hidden>❤️</span>
+                  <span>{t("nav.favorites")}</span>
+                  <span className="text-xs text-white/90 bg-white/15 border border-white/20 px-2 py-0.5 rounded-full">
+                    {favorites.length}
                   </span>
-                  <span className="text-xs text-white/80">{favorites.length}</span>
                 </Link>
-
-                {favorites.length === 0 ? (
-                  <div className="pl-4 pr-2 pb-3 text-white/80 text-sm">
-                    {t("favorites.empty")}
-                  </div>
-                ) : favoritesLoading ? (
-                  <div className="pl-4 pr-2 pb-3 text-white/80 text-sm">{t("common.loading")}</div>
-                ) : (
-                  <div className="pl-4 pr-2 pb-3 flex flex-col gap-2">
-                    {favoritesToShowInMenu.map((company) => (
-                      <Link
-                        key={company.id}
-                        href={`/company/${encodeURIComponent(companySlugForUrl(company.id))}`}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="text-white/90 hover:text-yellow-400 transition-colors truncate"
-                        title={company.name}
-                      >
-                        {company.name}
-                      </Link>
-                    ))}
-                    {hiddenFavoritesCount > 0 && (
-                      <Link
-                        href="/favorites"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="text-xs text-white/80 hover:text-yellow-400 transition-colors"
-                      >
-                        {t("common.more")} {hiddenFavoritesCount}
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Assistant */}
-              <div className="border-b border-white/10">
                 <Link
                   href="/assistant"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-between py-3 px-2 hover:text-yellow-400 transition-colors text-left font-medium"
+                  aria-label={t("ai.title")}
+                  className="flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 text-[#a0006d] font-bold hover:bg-yellow-300 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#a0006d]"
                 >
-                  <span className="flex items-center gap-2">
-                    <span aria-hidden>🤖</span>
-                    <span>{t("ai.title")}</span>
-                  </span>
-                  <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+                  <span aria-hidden>🤖</span>
+                  <span>{t("ai.title")}</span>
                 </Link>
               </div>
-
-              {/* Contact Information Accordion */}
-              <div className="border-b border-white/10">
-                <button
-                  onClick={() => setExpandedItem(expandedItem === 'contacts' ? null : 'contacts')}
-                  className="w-full flex items-center justify-between py-3 px-2 hover:text-yellow-400 transition-colors text-left font-medium"
-                >
-                  <span>{t("nav.mobile.contacts")}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${expandedItem === 'contacts' ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    expandedItem === 'contacts' ? 'max-h-48 opacity-100 mb-2' : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <div className="pl-4 flex flex-col gap-3 text-white/80 py-1">
-                    <a href="mailto:surdoe@yandex.ru" className="flex items-center gap-2 hover:text-yellow-400 transition-colors">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      surdoe@yandex.ru
-                    </a>
-                    <Link
-                      href="/agreement"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="hover:text-yellow-400 transition-colors text-sm"
-                    >
-                      {t("footer.agreement")}
-                    </Link>
-                    <Link
-                      href="/offer"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="hover:text-yellow-400 transition-colors text-sm"
-                    >
-                      {t("footer.offer")}
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              {/* Submit Request Accordion */}
-              <div className="border-b border-white/10">
-                <button
-                  onClick={() => setExpandedItem(expandedItem === 'request' ? null : 'request')}
-                  className="w-full flex items-center justify-between py-3 px-2 hover:text-yellow-400 transition-colors text-left font-medium"
-                >
-                  <span>{t("nav.mobile.submitRequest")}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${expandedItem === 'request' ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    expandedItem === 'request' ? 'max-h-24 opacity-100 mb-2' : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <div className="pl-4 py-2">
-                    <Link
-                      href="/add-company"
-                      className="inline-flex items-center gap-2 bg-yellow-500 text-[#a0006d] px-4 py-2 rounded-lg font-bold hover:bg-yellow-400 transition-colors text-sm shadow-md"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <span>{t("nav.addCompany")}</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </nav>
+            </div>
           </div>
         )}
       </div>

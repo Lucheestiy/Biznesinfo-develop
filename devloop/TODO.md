@@ -33,7 +33,7 @@ Suggested milestones (do in order; keep each run small):
 
 1. ✅ Improve the homepage/search UX — polish search result cards (hover lift/shadow + clearer “Подробнее” affordance).
 2. ✅ Improve company page layout and blocks — localized “Share” button (native share/copy link + “copied” feedback).
-3. Improve AI assistant chat quality (small steps: better prompts, context, and UX).
+3. Improve AI assistant chat quality (small steps: better prompts, context, and UX) — mobile menu: sticky bottom actions for Favorites + AI.
 
 ## Constraints
 
