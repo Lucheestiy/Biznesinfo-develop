@@ -349,7 +349,7 @@ export default function AssistantClient({
                           className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                             m.role === "user"
                               ? "bg-[#820251] text-white rounded-br-md"
-                              : "relative group bg-white border border-gray-200 text-gray-900 rounded-bl-md pr-11"
+                              : "relative group bg-white border border-gray-200 text-gray-900 rounded-bl-md pr-11 whitespace-pre-wrap break-words"
                           }`}
                         >
                           {m.role === "assistant" && (
