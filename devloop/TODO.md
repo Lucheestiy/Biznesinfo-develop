@@ -24,6 +24,7 @@ Suggested milestones (do in order; keep each run small):
    - ✅ Add a visible disclaimer in the assistant UI.
    - ✅ Add basic prompt-injection guardrails in server-side prompt assembly.
    - ✅ Chat UX polish: Enter-to-send + quick prompt chips.
+   - ✅ Better B2B system prompt + safer context injection (companyId/companyName + injection-signal note).
 5. Add real model integration (behind env vars; never commit keys):
    - ✅ Optional OpenAI realtime replies (enable with `AI_ASSISTANT_PROVIDER=openai` + `OPENAI_API_KEY`).
    - If the key is missing → keep the stub reply (do not break the site).
