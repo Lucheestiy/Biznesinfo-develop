@@ -36,7 +36,8 @@ Suggested milestones (do in order; keep each run small):
 2. ✅ Improve company page layout and blocks — localized “Share” button (native share/copy link + “copied” feedback).
 3. ✅ Improve AI assistant chat quality (small steps: better prompts, context, and UX) — mobile menu: sticky bottom actions for Favorites + AI.
 4. ✅ Improve AI assistant chat quality — add conversation history + “New chat” reset + context badge on `/assistant`.
-5. Improve AI assistant chat UX — add “Copy answer” action on assistant messages (with “Copied” feedback).
+5. ✅ Improve AI assistant chat UX — add “Copy answer” action on assistant messages (with “Copied” feedback).
+6. Improve AI assistant chat UX — preserve formatting/newlines in assistant messages (`whitespace-pre-wrap`).
 
 ## Constraints
 

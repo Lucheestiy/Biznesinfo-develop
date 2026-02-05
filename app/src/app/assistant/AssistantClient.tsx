@@ -21,6 +21,30 @@ function formatPlanLabel(plan: UserPlan): string {
   return "Partner";
 }
 
+async function writeTextToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.setAttribute("readonly", "");
+      el.style.position = "fixed";
+      el.style.top = "-1000px";
+      el.style.left = "-1000px";
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(el);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
+
 export default function AssistantClient({
   user,
   initialUsage,
@@ -36,10 +60,12 @@ export default function AssistantClient({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(initialUsage ?? null);
+  const [copiedAnswerId, setCopiedAnswerId] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
   const prefillAppliedRef = useRef(false);
+  const copiedAnswerTimeoutRef = useRef<number | null>(null);
 
   const canChat = user.plan === "paid" || user.plan === "partner";
   const planLabel = useMemo(() => formatPlanLabel(user.plan), [user.plan]);
@@ -99,9 +125,17 @@ export default function AssistantClient({
     el.scrollTop = el.scrollHeight;
   }, [messages.length, sending]);
 
+  useEffect(() => {
+    return () => {
+      if (copiedAnswerTimeoutRef.current) window.clearTimeout(copiedAnswerTimeoutRef.current);
+    };
+  }, []);
+
   const resetChat = () => {
     setSending(false);
     setError(null);
+    setCopiedAnswerId(null);
+    if (copiedAnswerTimeoutRef.current) window.clearTimeout(copiedAnswerTimeoutRef.current);
     setMessages([buildIntroMessage()]);
 
     if (companyPrefillPrompt) {
@@ -113,6 +147,16 @@ export default function AssistantClient({
     }
 
     setTimeout(() => draftRef.current?.focus(), 0);
+  };
+
+  const copyAnswer = async (message: AssistantMessage) => {
+    if (message.role !== "assistant") return;
+    const ok = await writeTextToClipboard(message.content);
+    if (!ok) return;
+
+    setCopiedAnswerId(message.id);
+    if (copiedAnswerTimeoutRef.current) window.clearTimeout(copiedAnswerTimeoutRef.current);
+    copiedAnswerTimeoutRef.current = window.setTimeout(() => setCopiedAnswerId(null), 2000);
   };
 
   const send = async () => {
@@ -300,17 +344,39 @@ export default function AssistantClient({
                     className="h-[clamp(320px,55dvh,520px)] sm:h-[420px] overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-white to-gray-50"
                   >
                     {messages.map((m) => (
-                      <div
-                        key={m.id}
-                        className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-                      >
+                      <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                         <div
                           className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                             m.role === "user"
                               ? "bg-[#820251] text-white rounded-br-md"
-                              : "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
+                              : "relative group bg-white border border-gray-200 text-gray-900 rounded-bl-md pr-11"
                           }`}
                         >
+                          {m.role === "assistant" && (
+                            <button
+                              type="button"
+                              onClick={() => void copyAnswer(m)}
+                              aria-label={copiedAnswerId === m.id ? t("ai.copied") : t("ai.copyAnswer")}
+                              title={copiedAnswerId === m.id ? t("ai.copied") : t("ai.copyAnswer")}
+                              className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition opacity-80 sm:opacity-0 sm:group-hover:opacity-100"
+                            >
+                              {copiedAnswerId === m.id ? (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 7a2 2 0 012-2h7a2 2 0 012 2v7m-1 4H8a2 2 0 01-2-2V7a2 2 0 012-2h7"
+                                  />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 5v4a2 2 0 002 2h4" />
+                                </svg>
+                              )}
+                            </button>
+                          )}
                           {m.content}
                         </div>
                       </div>
