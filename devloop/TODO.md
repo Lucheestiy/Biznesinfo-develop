@@ -39,7 +39,7 @@ Suggested milestones (do in order; keep each run small):
 5. ✅ Improve AI assistant chat UX — add “Copy answer” action on assistant messages (with “Copied” feedback).
 6. ✅ Improve AI assistant chat UX — preserve formatting/newlines in assistant messages (`whitespace-pre-wrap`).
 7. ✅ Add admin tooling / reindex UX improvements — add an auth-gated `/admin/reindex` page with a “Run reindex” button and response output.
-8. Add admin tooling / reindex UX improvements — show Meilisearch index stats (read-only) on `/admin/reindex`.
+8. ✅ Add admin tooling / reindex UX improvements — show Meilisearch index stats (read-only) on `/admin/reindex`.
 
 ## Constraints
 
