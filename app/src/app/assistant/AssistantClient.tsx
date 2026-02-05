@@ -51,14 +51,15 @@ export default function AssistantClient({
     return { companyId, companyName };
   }, [companyIdFromUrl, companyNameFromUrl]);
 
-  const [messages, setMessages] = useState<AssistantMessage[]>([
-    {
-      id: "intro",
-      role: "assistant",
-      content:
-        "Привет! Я помогу разобраться с рубриками, сформулировать запрос поставщикам и быстро найти нужные компании. (Пока в режиме заглушки.)",
-    },
-  ]);
+  const buildIntroMessage = (): AssistantMessage => ({
+    id: "intro",
+    role: "assistant",
+    content:
+      t("ai.chatIntro") ||
+      "Привет! Я помогу разобраться с рубриками, сформулировать запрос поставщикам и быстро найти нужные компании. (Пока в режиме заглушки.)",
+  });
+
+  const [messages, setMessages] = useState<AssistantMessage[]>(() => [buildIntroMessage()]);
   const showSuggestionChips = canChat && messages.length <= 1 && !draft.trim();
   const suggestionChips = useMemo(
     () => [
@@ -70,34 +71,59 @@ export default function AssistantClient({
     [t],
   );
 
-  useEffect(() => {
-    if (prefillAppliedRef.current) return;
-    if (!companyContext) return;
-
+  const companyPrefillPrompt = useMemo(() => {
+    if (!companyContext) return null;
     const label = companyContext.companyName
       ? `«${companyContext.companyName}»`
       : (companyContext.companyId ? `#${companyContext.companyId}` : "");
+    return label
+      ? `Составь краткую справку о компании ${label}: чем занимается и какие товары/услуги предлагает.`
+      : "Составь краткую справку об этой компании: чем занимается и какие товары/услуги предлагает.";
+  }, [companyContext]);
+
+  useEffect(() => {
+    if (prefillAppliedRef.current) return;
+    if (!companyPrefillPrompt) return;
 
     setDraft((prev) => {
       if (prev.trim()) return prev;
-      return label
-        ? `Составь краткую справку о компании ${label}: чем занимается и какие товары/услуги предлагает.`
-        : "Составь краткую справку об этой компании: чем занимается и какие товары/услуги предлагает.";
+      return companyPrefillPrompt;
     });
 
     prefillAppliedRef.current = true;
-  }, [companyContext]);
+  }, [companyPrefillPrompt]);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
-  }, [messages.length]);
+  }, [messages.length, sending]);
+
+  const resetChat = () => {
+    setSending(false);
+    setError(null);
+    setMessages([buildIntroMessage()]);
+
+    if (companyPrefillPrompt) {
+      setDraft(companyPrefillPrompt);
+      prefillAppliedRef.current = true;
+    } else {
+      setDraft("");
+      prefillAppliedRef.current = false;
+    }
+
+    setTimeout(() => draftRef.current?.focus(), 0);
+  };
 
   const send = async () => {
     const text = draft.trim();
     if (!text) return;
     if (!canChat) return;
+
+    const history = messages
+      .filter((m) => m.id !== "intro")
+      .slice(-12)
+      .map((m) => ({ role: m.role, content: m.content }));
 
     setDraft("");
     setError(null);
@@ -111,6 +137,7 @@ export default function AssistantClient({
 
       const requestBody: Record<string, unknown> = {
         message: text,
+        history,
         payload,
       };
       if (companyContext?.companyId) requestBody.companyId = companyContext.companyId;
@@ -234,9 +261,43 @@ export default function AssistantClient({
                 </div>
               ) : (
                 <div className="mt-6 rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                  <div className="px-4 sm:px-5 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      {companyContext ? (
+                        <div className="text-xs text-gray-600 truncate">
+                          <span className="text-gray-500">Контекст:</span>{" "}
+                          <span className="font-semibold text-[#820251]">
+                            {companyContext.companyName || (companyContext.companyId ? `#${companyContext.companyId}` : "—")}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-gray-500">
+                          {t("ai.chatMemoryHint") || "Контекст диалога: последние 12 сообщений"}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      {companyContext && (
+                        <Link
+                          href="/assistant"
+                          className="text-xs text-[#820251] hover:underline underline-offset-2"
+                        >
+                          Сбросить
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={resetChat}
+                        disabled={sending}
+                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline"
+                      >
+                        {t("ai.newChat") || "Новый чат"}
+                      </button>
+                    </div>
+                  </div>
                   <div
                     ref={scrollRef}
-                    className="h-[420px] overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-white to-gray-50"
+                    className="h-[clamp(320px,55dvh,520px)] sm:h-[420px] overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-white to-gray-50"
                   >
                     {messages.map((m) => (
                       <div
@@ -254,6 +315,13 @@ export default function AssistantClient({
                         </div>
                       </div>
                     ))}
+                    {sending && (
+                      <div className="flex justify-start">
+                        <div className="max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm bg-white border border-gray-200 text-gray-500 rounded-bl-md animate-pulse">
+                          {t("common.loading") || "Загрузка..."}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="border-t border-gray-200 p-4 bg-white">
@@ -288,7 +356,7 @@ export default function AssistantClient({
                           e.preventDefault();
                           void send();
                         }}
-                        placeholder="Напишите сообщение…"
+                        placeholder={t("ai.placeholder") || "Опишите, что вам нужно найти или заказать..."}
                         rows={2}
                         className="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a0006d]/30"
                         disabled={sending}
@@ -299,7 +367,7 @@ export default function AssistantClient({
                         disabled={sending || !draft.trim()}
                         className="inline-flex items-center justify-center rounded-xl bg-[#820251] text-white px-6 py-3 font-semibold hover:bg-[#6a0143] disabled:opacity-60 disabled:cursor-not-allowed"
                       >
-                        {sending ? (t("common.loading") || "Загрузка...") : "Отправить"}
+                        {sending ? (t("common.loading") || "Загрузка...") : (t("ai.sendRequest") || "Отправить")}
                       </button>
                     </div>
                     <div className="mt-2 text-xs text-gray-500">

@@ -25,6 +25,7 @@ Suggested milestones (do in order; keep each run small):
    - ✅ Add basic prompt-injection guardrails in server-side prompt assembly.
    - ✅ Chat UX polish: Enter-to-send + quick prompt chips.
    - ✅ Better B2B system prompt + safer context injection (companyId/companyName + injection-signal note).
+   - ✅ Keep basic conversation context (send last N messages as history; trim server-side).
 5. Add real model integration (behind env vars; never commit keys):
    - ✅ Optional OpenAI realtime replies (enable with `AI_ASSISTANT_PROVIDER=openai` + `OPENAI_API_KEY`).
    - If the key is missing → keep the stub reply (do not break the site).
@@ -33,7 +34,9 @@ Suggested milestones (do in order; keep each run small):
 
 1. ✅ Improve the homepage/search UX — polish search result cards (hover lift/shadow + clearer “Подробнее” affordance).
 2. ✅ Improve company page layout and blocks — localized “Share” button (native share/copy link + “copied” feedback).
-3. Improve AI assistant chat quality (small steps: better prompts, context, and UX) — mobile menu: sticky bottom actions for Favorites + AI.
+3. ✅ Improve AI assistant chat quality (small steps: better prompts, context, and UX) — mobile menu: sticky bottom actions for Favorites + AI.
+4. ✅ Improve AI assistant chat quality — add conversation history + “New chat” reset + context badge on `/assistant`.
+5. Improve AI assistant chat UX — add “Copy answer” action on assistant messages (with “Copied” feedback).
 
 ## Constraints
 
