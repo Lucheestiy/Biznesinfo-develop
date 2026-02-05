@@ -54,10 +54,11 @@ Recently completed:
 14. ✅ Add 👍/👎 feedback buttons for assistant messages (store in DB + show in `/admin/ai-requests`).
 15. ✅ Store a lightweight “template compliance” flag in `ai_requests.payload` for analytics (Subject/Body/WhatsApp blocks).
 16. ✅ Add streaming replies (SSE) for `/assistant` (via `POST /api/ai/request?stream=1`) with safe fallback.
+17. ✅ Add safe “rubric hints” injection for sourcing prompts (catalog-based, capped, injection-safe).
 
 Next (pick ONE):
 
-1. Add safe “rubric hints” injection for sourcing prompts (catalog-based, capped, injection-safe).
+1. Add safe “query variants” suggestions for sourcing prompts (2–3 variants with synonyms; capped; injection-safe).
 
 ## Constraints
 

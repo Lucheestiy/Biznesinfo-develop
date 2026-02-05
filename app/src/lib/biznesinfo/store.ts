@@ -909,6 +909,115 @@ export async function biznesinfoSuggest(params: {
   return { query: params.query, suggestions };
 }
 
+export type BiznesinfoRubricHint =
+  | { type: "category"; slug: string; name: string; url: string }
+  | { type: "rubric"; slug: string; name: string; url: string; category_slug: string; category_name: string };
+
+export async function biznesinfoDetectRubricHints(params: {
+  text: string;
+  limit: number;
+}): Promise<BiznesinfoRubricHint[]> {
+  const store = await getStore();
+  const limit = Math.max(1, Math.min(12, params.limit || 8));
+  const tokens = tokenizeServiceText((params.text || "").slice(0, 600)).slice(0, 8);
+  if (tokens.length === 0) return [];
+
+  type ScoredRubric = {
+    slug: string;
+    name: string;
+    categorySlug: string;
+    categoryName: string;
+    url: string;
+    score: number;
+    count: number;
+  };
+
+  const rubricMatches: ScoredRubric[] = [];
+  for (const r of store.rubricsBySlug.values()) {
+    const nameTokens = tokenizeServiceText(r.name || "");
+    const categoryTokens = tokenizeServiceText(r.category_name || r.category_slug || "");
+    const nameScore = scoreServiceTokens(nameTokens, tokens);
+    const categoryScore = scoreServiceTokens(categoryTokens, tokens);
+    const score = nameScore * 3 + categoryScore;
+    if (score <= 0) continue;
+
+    rubricMatches.push({
+      slug: r.slug,
+      name: r.name || r.slug,
+      categorySlug: r.category_slug || r.slug.split("/")[0] || "",
+      categoryName: r.category_name || r.category_slug || "",
+      url: `/catalog/${r.category_slug}/${r.slug.split("/").slice(1).join("/")}`,
+      score,
+      count: store.rubricCountAll.get(r.slug) || 0,
+    });
+  }
+
+  rubricMatches.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (b.count !== a.count) return b.count - a.count;
+    return a.slug.localeCompare(b.slug, "ru", { sensitivity: "base" });
+  });
+
+  const categoryHints: BiznesinfoRubricHint[] = [];
+  const categorySeen = new Set<string>();
+  for (const match of rubricMatches) {
+    if (categoryHints.length >= Math.min(2, limit)) break;
+    const slug = (match.categorySlug || "").trim();
+    if (!slug) continue;
+    if (categorySeen.has(slug.toLowerCase())) continue;
+    const cat = store.categoriesBySlug.get(slug);
+    if (!cat) continue;
+    categorySeen.add(slug.toLowerCase());
+    categoryHints.push({
+      type: "category",
+      slug: cat.slug,
+      name: cat.name || cat.slug,
+      url: `/catalog/${cat.slug}`,
+    });
+  }
+
+  const rubricHints: BiznesinfoRubricHint[] = rubricMatches
+    .slice(0, Math.max(0, limit - categoryHints.length))
+    .map((match) => ({
+      type: "rubric",
+      slug: match.slug,
+      name: match.name,
+      url: match.url,
+      category_slug: match.categorySlug,
+      category_name: match.categoryName,
+    }));
+
+  if (categoryHints.length > 0) return [...categoryHints, ...rubricHints].slice(0, limit);
+
+  const categoryMatches: Array<{ slug: string; name: string; url: string; score: number; count: number }> = [];
+  for (const cat of store.categoriesBySlug.values()) {
+    const score = scoreServiceTokens(tokenizeServiceText(cat.name || cat.slug), tokens);
+    if (score <= 0) continue;
+    categoryMatches.push({
+      slug: cat.slug,
+      name: cat.name || cat.slug,
+      url: `/catalog/${cat.slug}`,
+      score,
+      count: store.categoryCountAll.get(cat.slug) || 0,
+    });
+  }
+  categoryMatches.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (b.count !== a.count) return b.count - a.count;
+    return a.slug.localeCompare(b.slug, "ru", { sensitivity: "base" });
+  });
+
+  const fallbackCategories: BiznesinfoRubricHint[] = categoryMatches.slice(0, limit).map((match) => ({
+    type: "category",
+    slug: match.slug,
+    name: match.name,
+    url: match.url,
+  }));
+  if (fallbackCategories.length > 0) return fallbackCategories;
+
+  return rubricHints.slice(0, limit);
+}
+
 export async function biznesinfoSearch(params: {
   query: string;
   service?: string;
