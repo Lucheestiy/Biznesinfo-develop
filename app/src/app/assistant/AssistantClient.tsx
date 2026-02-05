@@ -19,7 +19,7 @@ type AssistantMessage = {
   feedback?: AssistantFeedback | null;
 };
 
-type AssistantCopyKind = "answer" | "email" | "whatsapp" | "subject" | "body";
+type AssistantCopyKind = "answer" | "email" | "whatsapp" | "subject" | "body" | "chat";
 
 type AssistantFeedback = { rating: "up" | "down"; reason: string | null; createdAt: string };
 
@@ -111,6 +111,7 @@ export default function AssistantClient({
 
   const canChat = user.plan === "paid" || user.plan === "partner";
   const planLabel = useMemo(() => formatPlanLabel(user.plan), [user.plan]);
+  const chatCopyMarkerId = "__chat_conversation__";
 
   const companyContext = useMemo(() => {
     const companyId = companyIdFromUrl || null;
@@ -450,6 +451,21 @@ export default function AssistantClient({
     return value;
   };
 
+  const buildChatCopyText = (): string => {
+    const userLabel = tr("ai.copyChatUserLabel", "User");
+    const assistantLabel = tr("ai.copyChatAssistantLabel", "AI Assistant");
+
+    return messages
+      .map((message) => {
+        const text = String(message.content || "").trim();
+        if (!text) return null;
+        const speaker = message.role === "user" ? userLabel : assistantLabel;
+        return `${speaker}:\n${text}`;
+      })
+      .filter(Boolean)
+      .join("\n\n");
+  };
+
   const copyRawText = async (params: { messageId: string; kind: AssistantCopyKind; text: string }) => {
     const ok = await writeTextToClipboard(params.text);
     if (!ok) return;
@@ -469,6 +485,19 @@ export default function AssistantClient({
     if (!ok) return;
 
     setCopied({ id: message.id, kind });
+    setOpenActionsId(null);
+    if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
+    copiedTimeoutRef.current = window.setTimeout(() => setCopied(null), 2000);
+  };
+
+  const copyChatConversation = async () => {
+    const text = buildChatCopyText();
+    if (!text) return;
+
+    const ok = await writeTextToClipboard(text);
+    if (!ok) return;
+
+    setCopied({ id: chatCopyMarkerId, kind: "chat" });
     setOpenActionsId(null);
     if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     copiedTimeoutRef.current = window.setTimeout(() => setCopied(null), 2000);
@@ -1023,15 +1052,25 @@ export default function AssistantClient({
 		                        </div>
 		                      )}
 	                    </div>
-	                    <div className="flex items-center gap-3 flex-shrink-0">
-	                      {(companyContext || shortlistCompanyIds.length > 0) && (
-	                        <Link
-	                          href="/assistant"
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      {(companyContext || shortlistCompanyIds.length > 0) && (
+                        <Link
+                          href="/assistant"
                           className="text-xs text-[#820251] hover:underline underline-offset-2"
                         >
                           Сбросить
                         </Link>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => void copyChatConversation()}
+                        disabled={messages.length === 0}
+                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline"
+                      >
+                        {copied?.id === chatCopyMarkerId
+                          ? (t("ai.copied") || "Скопировано!")
+                          : (t("ai.copyChat") || "Скопировать чат")}
+                      </button>
                       <button
                         type="button"
                         onClick={resetChat}
