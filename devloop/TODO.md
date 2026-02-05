@@ -43,11 +43,11 @@ Recently completed:
 3. ✅ Add outreach export helpers: “Copy as Email” (subject+body) + “Copy as WhatsApp”.
 4. ✅ Make suggestion chips context-aware (company context → outreach/questions/follow-up/alternatives).
 5. ✅ Improve assistant system prompt for outreach: when drafting messages, output explicit blocks (Subject/Body/WhatsApp).
+6. ✅ Add an “RFQ builder” mini-form (product/service, qty, city/region, deadline) that generates a prompt and fills the chat draft.
 
 Next (pick ONE):
 
-1. Add an “RFQ builder” mini-form (product/service, qty, city/region, deadline) that generates a prompt and fills the chat draft.
-2. Add “shortlist mode” (favorites → assistant): pass selected company IDs and generate an outreach plan.
+1. Add “shortlist mode” (favorites → assistant): pass selected company IDs and generate an outreach plan.
 
 ## Constraints
 

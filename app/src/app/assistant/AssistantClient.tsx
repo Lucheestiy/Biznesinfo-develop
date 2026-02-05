@@ -18,6 +18,14 @@ type AssistantMessage = {
 
 type AssistantCopyKind = "answer" | "email" | "whatsapp";
 
+type AssistantRfqForm = {
+  what: string;
+  qty: string;
+  location: string;
+  deadline: string;
+  notes: string;
+};
+
 function formatPlanLabel(plan: UserPlan): string {
   if (plan === "free") return "Free";
   if (plan === "paid") return "Paid";
@@ -65,6 +73,14 @@ export default function AssistantClient({
   const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(initialUsage ?? null);
   const [copied, setCopied] = useState<{ id: string; kind: AssistantCopyKind } | null>(null);
   const [openActionsId, setOpenActionsId] = useState<string | null>(null);
+  const [rfqOpen, setRfqOpen] = useState(false);
+  const [rfqForm, setRfqForm] = useState<AssistantRfqForm>({
+    what: "",
+    qty: "",
+    location: "",
+    deadline: "",
+    notes: "",
+  });
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
@@ -155,6 +171,7 @@ export default function AssistantClient({
     setError(null);
     setCopied(null);
     setOpenActionsId(null);
+    setRfqOpen(false);
     if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     setMessages([buildIntroMessage()]);
 
@@ -261,6 +278,51 @@ export default function AssistantClient({
     setOpenActionsId(null);
     if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     copiedTimeoutRef.current = window.setTimeout(() => setCopied(null), 2000);
+  };
+
+  const buildRfqDraft = (form: AssistantRfqForm): string => {
+    const target =
+      companyContext?.companyName || (companyContext?.companyId ? `#${companyContext.companyId}` : null);
+
+    const lines: string[] = [];
+    if (target) {
+      lines.push(`Draft an outreach/RFQ message to this company: ${target}.`);
+    } else {
+      lines.push("Draft an RFQ/outreach message to potential suppliers from the Biznesinfo directory.");
+    }
+
+    const what = form.what.trim();
+    const qty = form.qty.trim();
+    const location = form.location.trim();
+    const deadline = form.deadline.trim();
+    const notes = form.notes.trim();
+
+    if (what) lines.push(`Need: ${what}`);
+    if (qty) lines.push(`Quantity/scope: ${qty}`);
+    if (location) lines.push(`Location: ${location}`);
+    if (deadline) lines.push(`Deadline: ${deadline}`);
+    if (notes) lines.push(`Notes: ${notes}`);
+
+    lines.push("");
+    lines.push("If key info is missing, ask up to 3 clarifying questions first.");
+    lines.push("Return using exactly these blocks:");
+    lines.push("Subject: <one line>");
+    lines.push("Body:");
+    lines.push("<email body>");
+    lines.push("WhatsApp:");
+    lines.push("<short WhatsApp message>");
+
+    return lines.join("\n");
+  };
+
+  const resetRfqForm = () => {
+    setRfqForm({ what: "", qty: "", location: "", deadline: "", notes: "" });
+  };
+
+  const fillRfqIntoDraft = () => {
+    setDraft(buildRfqDraft(rfqForm));
+    setRfqOpen(false);
+    setTimeout(() => draftRef.current?.focus(), 0);
   };
 
   const send = async () => {
@@ -547,6 +609,98 @@ export default function AssistantClient({
                         ))}
                       </div>
                     )}
+                    <div className="mb-3">
+                      <button
+                        type="button"
+                        onClick={() => setRfqOpen((prev) => !prev)}
+                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2"
+                      >
+                        {rfqOpen ? `${t("common.hide") || "Скрыть"} RFQ` : (t("ai.rfq.open") || "RFQ-конструктор")}
+                      </button>
+
+                      {rfqOpen && (
+                        <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                          <div className="text-xs font-semibold text-gray-800">
+                            {t("ai.rfq.title") || "RFQ-конструктор"}
+                          </div>
+                          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">{t("ai.rfq.what") || "Что нужно"}</label>
+                              <input
+                                type="text"
+                                value={rfqForm.what}
+                                onChange={(e) => setRfqForm((prev) => ({ ...prev, what: e.target.value }))}
+                                placeholder={t("ai.rfq.whatPlaceholder") || "Например: упаковочная плёнка / бухгалтерские услуги"}
+                                className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">
+                                {t("ai.rfq.qty") || "Количество / объём"}
+                              </label>
+                              <input
+                                type="text"
+                                value={rfqForm.qty}
+                                onChange={(e) => setRfqForm((prev) => ({ ...prev, qty: e.target.value }))}
+                                placeholder={t("ai.rfq.qtyPlaceholder") || "Например: 500 шт / 3 месяца / 2 объекта"}
+                                className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">
+                                {t("ai.rfq.location") || "Город / регион"}
+                              </label>
+                              <input
+                                type="text"
+                                value={rfqForm.location}
+                                onChange={(e) => setRfqForm((prev) => ({ ...prev, location: e.target.value }))}
+                                placeholder={t("ai.rfq.locationPlaceholder") || "Например: Минск / Минская область"}
+                                className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">{t("ai.rfq.deadline") || "Дедлайн"}</label>
+                              <input
+                                type="text"
+                                value={rfqForm.deadline}
+                                onChange={(e) => setRfqForm((prev) => ({ ...prev, deadline: e.target.value }))}
+                                placeholder={t("ai.rfq.deadlinePlaceholder") || "Например: до 15 марта"}
+                                className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
+                              />
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <label className="block text-xs text-gray-600 mb-1">
+                              {t("ai.rfq.notes") || "Требования / примечания"}
+                            </label>
+                            <textarea
+                              value={rfqForm.notes}
+                              onChange={(e) => setRfqForm((prev) => ({ ...prev, notes: e.target.value }))}
+                              placeholder={t("ai.rfq.notesPlaceholder") || "Например: доставка, сертификаты, условия оплаты…"}
+                              rows={2}
+                              className="w-full resize-none rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
+                            />
+                          </div>
+                          <div className="mt-3 flex items-center justify-between gap-2">
+                            <button
+                              type="button"
+                              onClick={resetRfqForm}
+                              className="text-xs text-gray-600 hover:text-gray-800 hover:underline underline-offset-2"
+                            >
+                              {t("ai.rfq.reset") || "Очистить"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={fillRfqIntoDraft}
+                              disabled={!rfqForm.what.trim()}
+                              className="inline-flex items-center justify-center rounded-xl bg-[#820251] text-white px-4 py-2 text-xs font-semibold hover:bg-[#6a0143] disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                              {t("ai.rfq.fill") || "Заполнить в чат"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <textarea
                         ref={draftRef}
