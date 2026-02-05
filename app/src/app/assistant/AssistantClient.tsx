@@ -169,11 +169,12 @@ export default function AssistantClient({
     setTimeout(() => draftRef.current?.focus(), 0);
   };
 
-  const extractEmailParts = (text: string): { subject: string | null; body: string } => {
+  const extractEmailParts = (text: string): { subject: string | null; body: string; whatsapp: string | null } => {
     const lines = String(text || "").split(/\r?\n/u);
     let subject: string | null = null;
     let subjectIdx: number | null = null;
     let bodyIdx: number | null = null;
+    let whatsappIdx: number | null = null;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i] || "";
@@ -188,17 +189,46 @@ export default function AssistantClient({
         const m = line.match(/^\s*(body|текст|сообщение|письмо)\s*[:\-—]\s*(.*)\s*$/iu);
         if (m) bodyIdx = i;
       }
+      if (whatsappIdx === null) {
+        const m = line.match(/^\s*(whatsapp)\s*[:\-—]\s*(.*)\s*$/iu);
+        if (m) whatsappIdx = i;
+      }
     }
 
+    const bodyEnd = bodyIdx !== null && whatsappIdx !== null && whatsappIdx > bodyIdx ? whatsappIdx : lines.length;
     if (bodyIdx !== null) {
       const firstLine = lines[bodyIdx] || "";
       const first = firstLine.replace(/^\s*(body|текст|сообщение|письмо)\s*[:\-—]\s*/iu, "");
-      const rest = lines.slice(bodyIdx + 1);
-      return { subject, body: [first, ...rest].join("\n").trim() };
+      const rest = lines.slice(bodyIdx + 1, bodyEnd);
+      const body = [first, ...rest].join("\n").trim();
+
+      if (whatsappIdx !== null) {
+        const waFirstLine = lines[whatsappIdx] || "";
+        const waFirst = waFirstLine.replace(/^\s*(whatsapp)\s*[:\-—]\s*/iu, "");
+        const waRest = lines.slice(whatsappIdx + 1);
+        const whatsapp = [waFirst, ...waRest].join("\n").trim() || null;
+        return { subject, body, whatsapp };
+      }
+
+      return { subject, body, whatsapp: null };
     }
 
-    const body = subjectIdx !== null ? lines.filter((_, idx) => idx !== subjectIdx).join("\n").trim() : lines.join("\n").trim();
-    return { subject, body };
+    const fallbackEnd = whatsappIdx !== null ? whatsappIdx : lines.length;
+    const body = lines
+      .slice(0, fallbackEnd)
+      .filter((_, idx) => idx !== subjectIdx)
+      .join("\n")
+      .trim();
+
+    if (whatsappIdx !== null) {
+      const waFirstLine = lines[whatsappIdx] || "";
+      const waFirst = waFirstLine.replace(/^\s*(whatsapp)\s*[:\-—]\s*/iu, "");
+      const waRest = lines.slice(whatsappIdx + 1);
+      const whatsapp = [waFirst, ...waRest].join("\n").trim() || null;
+      return { subject, body, whatsapp };
+    }
+
+    return { subject, body, whatsapp: null };
   };
 
   const buildEmailCopy = (text: string): string => {
@@ -211,8 +241,8 @@ export default function AssistantClient({
   };
 
   const buildWhatsAppCopy = (text: string): string => {
-    const { body } = extractEmailParts(text);
-    const value = (body || String(text || "")).trim();
+    const { whatsapp, body } = extractEmailParts(text);
+    const value = (whatsapp || body || String(text || "")).trim();
     const maxChars = 1200;
     if (value.length <= maxChars) return value;
     return `${value.slice(0, Math.max(0, maxChars - 1)).trim()}…`;

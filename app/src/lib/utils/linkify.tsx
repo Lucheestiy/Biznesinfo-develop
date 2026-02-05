@@ -2,7 +2,7 @@ import React from "react";
 
 type LinkToken =
   | { type: "text"; text: string }
-  | { type: "link"; kind: "url" | "email" | "phone"; text: string; href: string; trailing: string };
+  | { type: "link"; kind: "url" | "email" | "phone" | "internal"; text: string; href: string; trailing: string };
 
 function stripTrailingPunctuation(raw: string): { core: string; trailing: string } {
   let core = raw || "";
@@ -38,6 +38,16 @@ function normalizeTel(raw: string): string | null {
   if (digits.length < 9) return null;
   if (digits.length > 20) return null;
   return normalized.startsWith("+") ? `tel:${normalized}` : `tel:${digits}`;
+}
+
+function normalizeInternalPath(raw: string): string | null {
+  const s = (raw || "").trim();
+  if (!s.startsWith("/")) return null;
+  if (!/^\/(?:company|catalog)\//u.test(s)) return null;
+  if (s.includes("..")) return null;
+  if (/[\\\u0000-\u001F]/u.test(s)) return null;
+  if (s.length > 300) return s.slice(0, 300);
+  return s;
 }
 
 function tokenizeUrlsAndEmails(text: string): LinkToken[] {
@@ -96,6 +106,45 @@ function tokenizeUrlsAndEmails(text: string): LinkToken[] {
   return out.length > 0 ? out : [{ type: "text", text: input }];
 }
 
+function linkifyInternalPaths(tokens: LinkToken[]): LinkToken[] {
+  const out: LinkToken[] = [];
+  const internalRe = /\/(?:company|catalog)\/[^\s<>()]+/giu;
+
+  for (const token of tokens) {
+    if (token.type !== "text") {
+      out.push(token);
+      continue;
+    }
+
+    const text = token.text || "";
+    if (!text) continue;
+
+    let cursor = 0;
+    for (const m of text.matchAll(internalRe)) {
+      if (typeof m.index !== "number") continue;
+      const start = m.index;
+      const raw = m[0] || "";
+      const end = start + raw.length;
+
+      const prev = start > 0 ? text[start - 1] : "";
+      if (prev && /[A-Za-z0-9_]/u.test(prev)) continue;
+
+      const { core, trailing } = stripTrailingPunctuation(raw);
+      const href = normalizeInternalPath(core);
+      if (!href) continue;
+
+      if (start > cursor) out.push({ type: "text", text: text.slice(cursor, start) });
+      out.push({ type: "link", kind: "internal", text: core, href, trailing });
+      cursor = end;
+      if (trailing) out.push({ type: "text", text: trailing });
+    }
+
+    if (cursor < text.length) out.push({ type: "text", text: text.slice(cursor) });
+  }
+
+  return out;
+}
+
 function linkifyPhones(tokens: LinkToken[]): LinkToken[] {
   const out: LinkToken[] = [];
   const phoneRe = /\+?\d[\d\s().-]{7,}\d/gu;
@@ -139,7 +188,7 @@ function linkifyPhones(tokens: LinkToken[]): LinkToken[] {
 
 export function renderLinkifiedText(text: string): React.ReactNode {
   const initial = tokenizeUrlsAndEmails(text);
-  const tokens = linkifyPhones(initial);
+  const tokens = linkifyPhones(linkifyInternalPaths(initial));
   return tokens.map((token, idx) => {
     if (token.type === "text") return token.text;
 
@@ -157,4 +206,3 @@ export function renderLinkifiedText(text: string): React.ReactNode {
     );
   });
 }
-

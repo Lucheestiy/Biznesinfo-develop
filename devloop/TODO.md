@@ -39,15 +39,15 @@ Rule of thumb: pick **ONE** small, safe, reviewable change per run.
 Recently completed:
 
 1. ✅ Inject safe company facts into the assistant prompt when `companyId` is provided (server-side fetch + whitelist + truncation).
-2. ✅ Linkify assistant answers safely (URLs/emails/phones) — no HTML injection.
+2. ✅ Linkify assistant answers safely (URLs/emails/phones + internal `/company/...` & `/catalog/...`) — no HTML injection.
 3. ✅ Add outreach export helpers: “Copy as Email” (subject+body) + “Copy as WhatsApp”.
-4. ✅ Improve assistant system prompt for outreach: when drafting messages, output explicit blocks (Subject/Body/WhatsApp).
+4. ✅ Make suggestion chips context-aware (company context → outreach/questions/follow-up/alternatives).
+5. ✅ Improve assistant system prompt for outreach: when drafting messages, output explicit blocks (Subject/Body/WhatsApp).
 
 Next (pick ONE):
 
-1. Make suggestion chips context-aware:
-   - If company context exists, show chips like “Draft message to this company”, “Questions to ask”, “Follow-up”.
-2. Linkify internal Biznesinfo paths in assistant answers (`/company/...`, `/catalog/...`) safely.
+1. Add an “RFQ builder” mini-form (product/service, qty, city/region, deadline) that generates a prompt and fills the chat draft.
+2. Add “shortlist mode” (favorites → assistant): pass selected company IDs and generate an outreach plan.
 
 ## Constraints
 
