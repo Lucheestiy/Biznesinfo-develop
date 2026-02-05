@@ -45,12 +45,11 @@ Recently completed:
 5. ✅ Improve assistant system prompt for outreach: when drafting messages, output explicit blocks (Subject/Body/WhatsApp).
 6. ✅ Add an “RFQ builder” mini-form (product/service, qty, city/region, deadline) that generates a prompt and fills the chat draft.
 7. ✅ Add “shortlist mode” (favorites → assistant): pass selected company IDs and generate an outreach plan.
+8. ✅ In `/assistant`, show shortlist UI when `companyIds` are provided (company names + links + shortlist chips).
 
 Next (pick ONE):
 
-1. In `/assistant`, show shortlist UI when `companyIds` are provided:
-   - Display the shortlisted company names + links
-   - Add shortlist-specific chips (“Draft outreach plan”, “Compare”, “Find gaps”)
+1. Improve quick prompt chips: insert “ready-to-send” prompts (not only short labels), especially for shortlist mode (outreach plan / compare / find gaps).
 
 ## Constraints
 

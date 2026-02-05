@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { renderLinkifiedText } from "@/lib/utils/linkify";
+import type { BiznesinfoCompanySummary } from "@/lib/biznesinfo/types";
 
 type UserPlan = "free" | "paid" | "partner";
 
@@ -82,6 +83,8 @@ export default function AssistantClient({
     deadline: "",
     notes: "",
   });
+  const [shortlistCompanies, setShortlistCompanies] = useState<BiznesinfoCompanySummary[]>([]);
+  const [shortlistCompaniesLoading, setShortlistCompaniesLoading] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
@@ -116,6 +119,14 @@ export default function AssistantClient({
     return out;
   }, [companyIdsFromUrl, companyContext?.companyId]);
 
+  const shortlistCompaniesById = useMemo(() => {
+    const map = new Map<string, BiznesinfoCompanySummary>();
+    for (const c of shortlistCompanies) {
+      map.set(c.id, c);
+    }
+    return map;
+  }, [shortlistCompanies]);
+
   const buildIntroMessage = (): AssistantMessage => ({
     id: "intro",
     role: "assistant",
@@ -134,13 +145,20 @@ export default function AssistantClient({
         { id: "findAlternatives", text: t("ai.quick.findAlternatives") },
       ];
     }
+    if (shortlistCompanyIds.length > 0) {
+      return [
+        { id: "shortlistOutreachPlan", text: t("ai.quick.shortlistOutreachPlan") },
+        { id: "shortlistCompare", text: t("ai.quick.shortlistCompare") },
+        { id: "shortlistFindGaps", text: t("ai.quick.shortlistFindGaps") },
+      ];
+    }
     return [
       { id: "findSuppliers", text: t("ai.quick.findSuppliers") },
       { id: "draftOutreach", text: t("ai.quick.draftOutreach") },
       { id: "explainRubrics", text: t("ai.quick.explainRubrics") },
       { id: "checkCompany", text: t("ai.quick.checkCompany") },
     ];
-  }, [t, companyContext]);
+  }, [t, companyContext, shortlistCompanyIds.length]);
 
   const companyPrefillPrompt = useMemo(() => {
     if (!companyContext) return null;
@@ -165,6 +183,33 @@ export default function AssistantClient({
 
     prefillAppliedRef.current = true;
   }, [companyPrefillPrompt]);
+
+  useEffect(() => {
+    if (shortlistCompanyIds.length === 0) {
+      setShortlistCompanies([]);
+      setShortlistCompaniesLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    setShortlistCompaniesLoading(true);
+    fetch(`/api/biznesinfo/companies?ids=${encodeURIComponent(shortlistCompanyIds.join(","))}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((resp: { companies?: BiznesinfoCompanySummary[] } | null) => {
+        if (!isMounted) return;
+        setShortlistCompanies(resp?.companies || []);
+        setShortlistCompaniesLoading(false);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setShortlistCompanies([]);
+        setShortlistCompaniesLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [shortlistCompanyIds]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -494,30 +539,56 @@ export default function AssistantClient({
                 </div>
               ) : (
                 <div className="mt-6 rounded-2xl border border-gray-200 bg-white overflow-hidden">
-                  <div className="px-4 sm:px-5 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      {companyContext ? (
-                        <div className="text-xs text-gray-600 truncate">
-                          <span className="text-gray-500">Контекст:</span>{" "}
-                          <span className="font-semibold text-[#820251]">
-                            {companyContext.companyName || (companyContext.companyId ? `#${companyContext.companyId}` : "—")}
-                          </span>
-                        </div>
-                      ) : shortlistCompanyIds.length > 0 ? (
-                        <div className="text-xs text-gray-600 truncate">
-                          <span className="text-gray-500">{t("ai.shortlistLabel") || "Шортлист"}:</span>{" "}
-                          <span className="font-semibold text-[#820251]">{shortlistCompanyIds.length}</span>
-                        </div>
-                      ) : (
-                        <div className="text-xs text-gray-500">
-                          {t("ai.chatMemoryHint") || "Контекст диалога: последние 12 сообщений"}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      {(companyContext || shortlistCompanyIds.length > 0) && (
-                        <Link
-                          href="/assistant"
+	                  <div className="px-4 sm:px-5 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between gap-3">
+	                    <div className="min-w-0">
+	                      {companyContext && (
+	                        <div className="text-xs text-gray-600 truncate">
+	                          <span className="text-gray-500">Контекст:</span>{" "}
+	                          <span className="font-semibold text-[#820251]">
+	                            {companyContext.companyName || (companyContext.companyId ? `#${companyContext.companyId}` : "—")}
+	                          </span>
+	                        </div>
+	                      )}
+
+	                      {shortlistCompanyIds.length > 0 && (
+	                        <div className={`text-xs text-gray-600 truncate ${companyContext ? "mt-1" : ""}`}>
+	                          <span className="text-gray-500">{t("ai.shortlistLabel") || "Шортлист"}:</span>{" "}
+	                          <span className="font-semibold text-[#820251]">{shortlistCompanyIds.length}</span>
+	                          {shortlistCompaniesLoading && (
+	                            <span className="ml-2 text-gray-400">{t("common.loading") || "Загрузка..."}</span>
+	                          )}
+	                        </div>
+	                      )}
+
+	                      {!companyContext && shortlistCompanyIds.length === 0 && (
+	                        <div className="text-xs text-gray-500">
+	                          {t("ai.chatMemoryHint") || "Контекст диалога: последние 12 сообщений"}
+	                        </div>
+	                      )}
+
+	                      {shortlistCompanyIds.length > 0 && (
+	                        <div className="mt-2 flex flex-wrap gap-2">
+	                          {shortlistCompanyIds.map((id) => {
+	                            const company = shortlistCompaniesById.get(id);
+	                            const label = company?.name || `#${id}`;
+	                            return (
+	                              <Link
+	                                key={id}
+	                                href={`/company/${id}`}
+	                                title={company?.name || id}
+	                                className="inline-flex max-w-[16rem] items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-700 hover:border-[#820251] hover:text-[#820251] truncate"
+	                              >
+	                                {label}
+	                              </Link>
+	                            );
+	                          })}
+	                        </div>
+	                      )}
+	                    </div>
+	                    <div className="flex items-center gap-3 flex-shrink-0">
+	                      {(companyContext || shortlistCompanyIds.length > 0) && (
+	                        <Link
+	                          href="/assistant"
                           className="text-xs text-[#820251] hover:underline underline-offset-2"
                         >
                           Сбросить

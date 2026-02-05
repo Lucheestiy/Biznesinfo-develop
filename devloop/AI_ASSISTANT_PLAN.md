@@ -137,6 +137,8 @@ Each step should be doable in one safe PR-sized change.
 
 5. Add an RFQ builder mini-form (product/service, qty, region, deadline) that generates a prompt and fills placeholders.
 6. Add “shortlist mode” (favorites → assistant): pass a list of selected companies (IDs only) and generate outreach plan.
+   - In `/assistant`, show the shortlisted company names + links when `companyIds` are provided.
+   - Add shortlist-specific chips: “Draft outreach plan”, “Compare”, “Find gaps”.
 
 ### Phase 3 — Provider + reliability upgrades
 
@@ -151,4 +153,3 @@ Each step should be doable in one safe PR-sized change.
 - Doesn’t break non-assistant pages.
 - Guardrails remain in place (no fabrication; injection-resistant context handling).
 - Builds and passes TypeScript.
-
