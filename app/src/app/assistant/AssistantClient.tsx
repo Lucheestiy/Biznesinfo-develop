@@ -617,24 +617,36 @@ export default function AssistantClient({
 	                        </div>
 	                      )}
 
-	                      {shortlistCompanyIds.length > 0 && (
-	                        <div className="mt-2 flex flex-wrap gap-2">
-	                          {shortlistCompanyIds.map((id) => {
-	                            const company = shortlistCompaniesById.get(id);
-	                            const label = company?.name || `#${id}`;
-	                            return (
-	                              <Link
-	                                key={id}
-	                                href={`/company/${id}`}
-	                                title={company?.name || id}
-	                                className="inline-flex max-w-[16rem] items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-700 hover:border-[#820251] hover:text-[#820251] truncate"
-	                              >
-	                                {label}
-	                              </Link>
-	                            );
-	                          })}
-	                        </div>
-	                      )}
+		                      {shortlistCompanyIds.length > 0 && (
+		                        <div className="mt-2 flex flex-wrap gap-2">
+		                          {shortlistCompanyIds.map((id) => {
+		                            const company = shortlistCompaniesById.get(id);
+		                            const label = company?.name || `#${id}`;
+		                            const metaParts: string[] = [];
+		                            if (company?.primary_category_name) metaParts.push(company.primary_category_name);
+		                            if (company?.region) metaParts.push(company.region);
+		                            const meta = metaParts.join(" • ");
+		                            const title = company ? [company.name, meta].filter(Boolean).join(" — ") : id;
+		                            return (
+		                              <Link
+		                                key={id}
+		                                href={`/company/${id}`}
+		                                title={title}
+		                                className="group inline-flex max-w-[16rem] min-w-0 flex-col gap-0.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-left hover:border-[#820251] transition-colors"
+		                              >
+		                                <span className="truncate text-xs font-semibold text-gray-800 group-hover:text-[#820251]">
+		                                  {label}
+		                                </span>
+		                                {meta && (
+		                                  <span className="truncate text-[11px] text-gray-500">
+		                                    {meta}
+		                                  </span>
+		                                )}
+		                              </Link>
+		                            );
+		                          })}
+		                        </div>
+		                      )}
 	                    </div>
 	                    <div className="flex items-center gap-3 flex-shrink-0">
 	                      {(companyContext || shortlistCompanyIds.length > 0) && (

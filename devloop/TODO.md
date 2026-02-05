@@ -47,10 +47,11 @@ Recently completed:
 7. ✅ Add “shortlist mode” (favorites → assistant): pass selected company IDs and generate an outreach plan.
 8. ✅ In `/assistant`, show shortlist UI when `companyIds` are provided (company names + links + shortlist chips).
 9. ✅ Improve quick prompt chips: insert “ready-to-send” prompts (not only short labels), especially for shortlist mode.
+10. ✅ Shortlist mode: show a tiny meta line per company (category + region) in the shortlist UI to help compare faster.
 
 Next (pick ONE):
 
-1. Shortlist mode: show a tiny meta line per company (category + region) in the shortlist UI to help compare faster.
+1. Shortlist mode: add a “remove” (×) action on shortlist chips (URL-only; doesn’t change favorites).
 
 ## Constraints
 
