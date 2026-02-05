@@ -27,6 +27,12 @@ type AssistantRfqForm = {
   notes: string;
 };
 
+type AssistantSuggestionChip = {
+  id: string;
+  label: string;
+  prompt: string;
+};
+
 function formatPlanLabel(plan: UserPlan): string {
   if (plan === "free") return "Free";
   if (plan === "paid") return "Paid";
@@ -136,27 +142,72 @@ export default function AssistantClient({
   });
 
   const [messages, setMessages] = useState<AssistantMessage[]>(() => [buildIntroMessage()]);
-  const suggestionChips = useMemo(() => {
+  const suggestionChips = useMemo<AssistantSuggestionChip[]>(() => {
+    const promptOr = (key: string, fallback: string): string => {
+      const v = t(key);
+      if (!v || v === key) return fallback;
+      return v;
+    };
+
     if (companyContext) {
+      const draftLabel = t("ai.quick.draftToThisCompany");
+      const questionsLabel = t("ai.quick.questionsToThisCompany");
+      const followUpLabel = t("ai.quick.followUpToThisCompany");
+      const alternativesLabel = t("ai.quick.findAlternatives");
       return [
-        { id: "draftToThisCompany", text: t("ai.quick.draftToThisCompany") },
-        { id: "questionsToThisCompany", text: t("ai.quick.questionsToThisCompany") },
-        { id: "followUpToThisCompany", text: t("ai.quick.followUpToThisCompany") },
-        { id: "findAlternatives", text: t("ai.quick.findAlternatives") },
+        {
+          id: "draftToThisCompany",
+          label: draftLabel,
+          prompt: promptOr("ai.prompt.draftToThisCompany", draftLabel),
+        },
+        {
+          id: "questionsToThisCompany",
+          label: questionsLabel,
+          prompt: promptOr("ai.prompt.questionsToThisCompany", questionsLabel),
+        },
+        {
+          id: "followUpToThisCompany",
+          label: followUpLabel,
+          prompt: promptOr("ai.prompt.followUpToThisCompany", followUpLabel),
+        },
+        {
+          id: "findAlternatives",
+          label: alternativesLabel,
+          prompt: promptOr("ai.prompt.findAlternatives", alternativesLabel),
+        },
       ];
     }
     if (shortlistCompanyIds.length > 0) {
+      const outreachLabel = t("ai.quick.shortlistOutreachPlan");
+      const compareLabel = t("ai.quick.shortlistCompare");
+      const gapsLabel = t("ai.quick.shortlistFindGaps");
       return [
-        { id: "shortlistOutreachPlan", text: t("ai.quick.shortlistOutreachPlan") },
-        { id: "shortlistCompare", text: t("ai.quick.shortlistCompare") },
-        { id: "shortlistFindGaps", text: t("ai.quick.shortlistFindGaps") },
+        {
+          id: "shortlistOutreachPlan",
+          label: outreachLabel,
+          prompt: promptOr("ai.prompt.shortlistOutreachPlan", outreachLabel),
+        },
+        {
+          id: "shortlistCompare",
+          label: compareLabel,
+          prompt: promptOr("ai.prompt.shortlistCompare", compareLabel),
+        },
+        {
+          id: "shortlistFindGaps",
+          label: gapsLabel,
+          prompt: promptOr("ai.prompt.shortlistFindGaps", gapsLabel),
+        },
       ];
     }
+    const findLabel = t("ai.quick.findSuppliers");
+    const draftOutreachLabel = t("ai.quick.draftOutreach");
+    const rubricsLabel = t("ai.quick.explainRubrics");
+    const checkLabel = t("ai.quick.checkCompany");
     return [
-      { id: "findSuppliers", text: t("ai.quick.findSuppliers") },
-      { id: "draftOutreach", text: t("ai.quick.draftOutreach") },
-      { id: "explainRubrics", text: t("ai.quick.explainRubrics") },
-      { id: "checkCompany", text: t("ai.quick.checkCompany") },
+      { id: "findSuppliers", label: findLabel, prompt: promptOr("ai.prompt.findSuppliers", findLabel) },
+      { id: "draftOutreach", label: draftOutreachLabel, prompt: promptOr("ai.prompt.draftOutreach", draftOutreachLabel) },
+      { id: "explainRubrics", label: rubricsLabel, prompt: promptOr("ai.prompt.explainRubrics", rubricsLabel) },
+      { id: "checkCompany", label: checkLabel, prompt: promptOr("ai.prompt.checkCompany", checkLabel) },
     ];
   }, [t, companyContext, shortlistCompanyIds.length]);
 
@@ -698,12 +749,12 @@ export default function AssistantClient({
                             key={chip.id}
                             type="button"
                             onClick={() => {
-                              setDraft(chip.text);
+                              setDraft(chip.prompt || chip.label);
                               draftRef.current?.focus();
                             }}
                             className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition-colors border border-gray-200"
                           >
-                            {chip.text}
+                            {chip.label}
                           </button>
                         ))}
                       </div>

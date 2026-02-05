@@ -46,10 +46,11 @@ Recently completed:
 6. ✅ Add an “RFQ builder” mini-form (product/service, qty, city/region, deadline) that generates a prompt and fills the chat draft.
 7. ✅ Add “shortlist mode” (favorites → assistant): pass selected company IDs and generate an outreach plan.
 8. ✅ In `/assistant`, show shortlist UI when `companyIds` are provided (company names + links + shortlist chips).
+9. ✅ Improve quick prompt chips: insert “ready-to-send” prompts (not only short labels), especially for shortlist mode.
 
 Next (pick ONE):
 
-1. Improve quick prompt chips: insert “ready-to-send” prompts (not only short labels), especially for shortlist mode (outreach plan / compare / find gaps).
+1. Shortlist mode: show a tiny meta line per company (category + region) in the shortlist UI to help compare faster.
 
 ## Constraints
 
