@@ -220,7 +220,7 @@ export async function appendAssistantSessionTurn(params: {
         turnIndex,
         params.requestId || null,
         params.userMessage,
-        params.assistantMessage || null,
+        params.assistantMessage ?? null,
         params.rankingSeedText || null,
         Array.isArray(params.vendorCandidateIds) ? params.vendorCandidateIds : null,
         Array.isArray(params.vendorCandidateSlugs) ? params.vendorCandidateSlugs : null,
@@ -249,6 +249,318 @@ export async function appendAssistantSessionTurn(params: {
     }
 
     if (isUndefinedTableError(error) || isUndefinedColumnError(error)) return null;
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function beginAssistantSessionTurn(params: {
+  sessionId: string | null;
+  userId: string;
+  requestId: string;
+  userMessage: string;
+  assistantMessage?: string | null;
+  rankingSeedText?: string | null;
+  vendorCandidateIds?: string[];
+  vendorCandidateSlugs?: string[];
+  requestMeta?: unknown;
+  responseMeta?: unknown;
+}): Promise<AssistantTurnRef | null> {
+  const sessionId = normalizeUuid(params.sessionId);
+  if (!sessionId) return null;
+
+  await ensureAiChatsDbSchema();
+  const pool = getAiChatsDbPool();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const session = await client.query<{ id: string }>(
+      "SELECT id FROM ai_assistant_sessions WHERE id = $1 AND user_id = $2 FOR UPDATE",
+      [sessionId, params.userId],
+    );
+    if (!session.rows[0]?.id) {
+      await client.query("ROLLBACK");
+      return null;
+    }
+
+    const existing = await client.query<{ id: string; turn_index: number }>(
+      `
+        SELECT id, turn_index
+        FROM ai_assistant_turns
+        WHERE session_id = $1
+          AND user_id = $2
+          AND request_id = $3
+        ORDER BY turn_index DESC
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [sessionId, params.userId, params.requestId || null],
+    );
+    if (existing.rows[0]?.id) {
+      await client.query("COMMIT");
+      return {
+        id: existing.rows[0].id,
+        turnIndex: existing.rows[0].turn_index || 0,
+      };
+    }
+
+    const nextTurn = await client.query<{ turn_index: number }>(
+      "SELECT COALESCE(MAX(turn_index), 0) + 1 AS turn_index FROM ai_assistant_turns WHERE session_id = $1",
+      [sessionId],
+    );
+    const turnIndex = nextTurn.rows[0]?.turn_index || 1;
+    const turnId = randomUUID();
+
+    await client.query(
+      `
+        INSERT INTO ai_assistant_turns (
+          id,
+          session_id,
+          user_id,
+          turn_index,
+          request_id,
+          user_message,
+          assistant_message,
+          ranking_seed_text,
+          vendor_candidate_ids,
+          vendor_candidate_slugs,
+          request_meta,
+          response_meta
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      `,
+      [
+        turnId,
+        sessionId,
+        params.userId,
+        turnIndex,
+        params.requestId || null,
+        params.userMessage,
+        params.assistantMessage ?? "",
+        params.rankingSeedText || null,
+        Array.isArray(params.vendorCandidateIds) ? params.vendorCandidateIds : null,
+        Array.isArray(params.vendorCandidateSlugs) ? params.vendorCandidateSlugs : null,
+        params.requestMeta ?? null,
+        params.responseMeta ?? null,
+      ],
+    );
+
+    await client.query(
+      `
+        UPDATE ai_assistant_sessions
+           SET updated_at = now(),
+               last_message_at = now()
+         WHERE id = $1
+      `,
+      [sessionId],
+    );
+
+    await client.query("COMMIT");
+    return { id: turnId, turnIndex };
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      // ignore
+    }
+
+    if (isUndefinedTableError(error) || isUndefinedColumnError(error)) return null;
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function appendAssistantSessionTurnDelta(params: {
+  sessionId: string | null;
+  userId: string;
+  turnId: string | null;
+  delta: string;
+}): Promise<boolean> {
+  const sessionId = normalizeUuid(params.sessionId);
+  const turnId = normalizeUuid(params.turnId);
+  const delta = String(params.delta || "");
+  if (!sessionId || !turnId || !delta) return false;
+
+  await ensureAiChatsDbSchema();
+  const pool = getAiChatsDbPool();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const updated = await client.query(
+      `
+        UPDATE ai_assistant_turns
+           SET assistant_message = COALESCE(assistant_message, '') || $1
+         WHERE id = $2
+           AND session_id = $3
+           AND user_id = $4
+      `,
+      [delta, turnId, sessionId, params.userId],
+    );
+
+    if (Number(updated.rowCount || 0) > 0) {
+      await client.query(
+        `
+          UPDATE ai_assistant_sessions
+             SET updated_at = now(),
+                 last_message_at = now()
+           WHERE id = $1
+        `,
+        [sessionId],
+      );
+      await client.query("COMMIT");
+      return true;
+    }
+
+    await client.query("ROLLBACK");
+    return false;
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      // ignore
+    }
+
+    if (isUndefinedTableError(error) || isUndefinedColumnError(error)) return false;
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function finalizeAssistantSessionTurn(params: {
+  sessionId: string | null;
+  userId: string;
+  turnId: string | null;
+  assistantMessage: string;
+  responseMeta?: unknown;
+}): Promise<boolean> {
+  const sessionId = normalizeUuid(params.sessionId);
+  const turnId = normalizeUuid(params.turnId);
+  if (!sessionId || !turnId) return false;
+
+  await ensureAiChatsDbSchema();
+  const pool = getAiChatsDbPool();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const updated = await client.query(
+      `
+        UPDATE ai_assistant_turns
+           SET assistant_message = $1,
+               response_meta = CASE
+                 WHEN $2::jsonb IS NULL THEN response_meta
+                 ELSE COALESCE(response_meta, '{}'::jsonb) || $2::jsonb
+               END
+         WHERE id = $3
+           AND session_id = $4
+           AND user_id = $5
+      `,
+      [params.assistantMessage ?? "", params.responseMeta ?? null, turnId, sessionId, params.userId],
+    );
+
+    if (Number(updated.rowCount || 0) > 0) {
+      await client.query(
+        `
+          UPDATE ai_assistant_sessions
+             SET updated_at = now(),
+                 last_message_at = now()
+           WHERE id = $1
+        `,
+        [sessionId],
+      );
+      await client.query("COMMIT");
+      return true;
+    }
+
+    await client.query("ROLLBACK");
+    return false;
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      // ignore
+    }
+
+    if (isUndefinedTableError(error) || isUndefinedColumnError(error)) return false;
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function reconcileStaleAssistantTurns(params: {
+  userId: string;
+  olderThanMinutes?: number;
+  limit?: number;
+}): Promise<number> {
+  const userId = String(params.userId || "").trim();
+  if (!userId) return 0;
+
+  const olderThanMinutes = Math.max(1, Math.min(24 * 60, Math.floor(params.olderThanMinutes || 0) || 15));
+  const limit = Math.max(1, Math.min(200, Math.floor(params.limit || 0) || 10));
+
+  await ensureAiChatsDbSchema();
+  const pool = getAiChatsDbPool();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const updated = await client.query<{ session_id: string }>(
+      `
+        WITH stale AS (
+          SELECT t.id
+          FROM ai_assistant_turns t
+          WHERE t.user_id = $1
+            AND t.created_at < now() - (($2::text || ' minutes')::interval)
+            AND COALESCE(t.response_meta->>'completionState', 'pending') IN ('pending', 'streaming')
+          ORDER BY t.created_at ASC
+          LIMIT $3
+        )
+        UPDATE ai_assistant_turns t
+           SET assistant_message = COALESCE(t.assistant_message, ''),
+               response_meta = COALESCE(t.response_meta, '{}'::jsonb) || jsonb_build_object(
+                 'completionState', 'failed',
+                 'reconciled', true,
+                 'reconcileReason', 'stale_pending_timeout',
+                 'reconciledAt', now()
+               )
+        FROM stale
+        WHERE t.id = stale.id
+        RETURNING t.session_id::text AS session_id
+      `,
+      [userId, String(olderThanMinutes), limit],
+    );
+
+    const rows = updated.rows || [];
+    if (rows.length > 0) {
+      const sessionIds = Array.from(new Set(rows.map((r) => String(r.session_id || "").trim()).filter(Boolean)));
+      if (sessionIds.length > 0) {
+        await client.query(
+          `
+            UPDATE ai_assistant_sessions
+               SET updated_at = now()
+             WHERE id = ANY($1::uuid[])
+          `,
+          [sessionIds],
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    return rows.length;
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      // ignore
+    }
+
+    if (isUndefinedTableError(error) || isUndefinedColumnError(error)) return 0;
     throw error;
   } finally {
     client.release();

@@ -49,6 +49,9 @@ git config --global --add safe.directory "${REPO_DIR}" >/dev/null 2>&1 || true
 #   DEVLOOP_GEMINI_MODEL=gemini-3-pro-preview
 #   DEVLOOP_GEMINI_FALLBACK_MODEL=gemini-2.5-pro
 #   DEVLOOP_USE_KIMI=1
+#   DEVLOOP_USE_MINIMAX=1
+#   DEVLOOP_MINIMAX_MODEL=custom:MiniMax-M2.1
+#   DEVLOOP_INCLUDE_TRIAD_SNAPSHOT=1
 if [[ -f "${LOCAL_ENV_FILE}" ]]; then
   # shellcheck disable=SC1090
   source "${LOCAL_ENV_FILE}"
@@ -181,9 +184,13 @@ fi
 
 GEMINI_OK=0
 KIMI_OK=0
+MINIMAX_OK=0
+TRIAD_SNAPSHOT_OK=0
 GEMINI_ATTEMPTED=0
 GEMINI_ADVICE_FILE="${RUN_DIR}/gemini_advice.txt"
 KIMI_ADVICE_FILE="${RUN_DIR}/kimi_advice.txt"
+MINIMAX_ADVICE_FILE="${RUN_DIR}/minimax_advice.txt"
+TRIAD_SNAPSHOT_FILE="${RUN_DIR}/triad_snapshot.txt"
 
 run_gemini_advice() {
   [[ "${DEVLOOP_USE_GEMINI:-1}" == "1" ]] || return 1
@@ -320,6 +327,160 @@ run_kimi_advice() {
   fi
 }
 
+run_minimax_advice() {
+  [[ "${DEVLOOP_USE_MINIMAX:-1}" == "1" ]] || return 1
+  command -v droid >/dev/null 2>&1 || return 1
+
+  local model="${DEVLOOP_MINIMAX_MODEL:-custom:MiniMax-M2.1}"
+  local timeout_sec="${DEVLOOP_MINIMAX_TIMEOUT_SEC:-600}"
+  local ctx_file="${RUN_DIR}/minimax_context.txt"
+
+  {
+    echo "You are a strict external QA advisor for Biznesinfo AI assistant."
+    echo
+    echo "Task: propose ONE small, safe, reviewable improvement that improves real-user quality."
+    echo
+    echo "Priority areas:"
+    echo "- continuity after user clarifications"
+    echo "- avoiding generic fallback"
+    echo "- precise city/region and sourcing relevance"
+    echo
+    echo "Constraints:"
+    echo "- Dev only (biznesinfo-develop). Do NOT touch production."
+    echo "- Do NOT include secrets or datasets."
+    echo "- Keep scope minimal and implementable in a single PR."
+    echo
+    echo "Output format (use bullets):"
+    echo "- Goal"
+    echo "- Why this is high impact"
+    echo "- Files to change (paths)"
+    echo "- Concrete edits"
+    echo "- Validation scenarios / checks"
+    echo
+    echo "TODO list:"
+    echo "${TODO_TEXT}"
+  } > "${ctx_file}"
+
+  log "MiniMax advice (model=${model})..."
+  timeout "${timeout_sec}s" droid exec --output-format text --model "${model}" < "${ctx_file}" > "${MINIMAX_ADVICE_FILE}" 2>&1
+}
+
+build_triad_snapshot() {
+  [[ "${DEVLOOP_INCLUDE_TRIAD_SNAPSHOT:-1}" == "1" ]] || return 1
+  local usefulness_file="${DEVLOOP_TRIAD_USEFULNESS_FILE:-${REPO_DIR}/app/qa/ai-request/reports/latest.usefulness.json}"
+  local advice_file="${DEVLOOP_TRIAD_ADVICE_FILE:-${REPO_DIR}/app/qa/ai-request/reports/latest.advice.json}"
+
+  python3 - <<'PY' "${usefulness_file}" "${advice_file}" "${TRIAD_SNAPSHOT_FILE}" || return 1
+import json
+import sys
+from pathlib import Path
+
+usefulness_path = Path(sys.argv[1])
+advice_path = Path(sys.argv[2])
+out_path = Path(sys.argv[3])
+
+def load_json(path: Path):
+    if not path.is_file():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8", errors="replace"))
+    except Exception:
+        return None
+
+def fmt_num(value, digits=3):
+    try:
+        return f"{float(value):.{digits}f}"
+    except Exception:
+        return "n/a"
+
+def fmt_pct(value):
+    try:
+        return f"{float(value) * 100:.1f}%"
+    except Exception:
+        return "n/a"
+
+lines = []
+usefulness = load_json(usefulness_path)
+if isinstance(usefulness, dict):
+    lines.append("Latest triad QA testers snapshot (Gemini + Kimi + MiniMax):")
+    lines.append(f"- Source: {usefulness_path}")
+    run_id = usefulness.get("runId")
+    generated_at = usefulness.get("generatedAt")
+    if run_id:
+        lines.append(f"- Judge run: {run_id}")
+    if generated_at:
+        lines.append(f"- Generated at: {generated_at}")
+    gate = usefulness.get("gate") if isinstance(usefulness.get("gate"), dict) else {}
+    if gate:
+        gate_pass = "PASS" if bool(gate.get("pass")) else "FAIL"
+        lines.append(f"- Quality gate: {gate_pass}")
+        failures = gate.get("failures") if isinstance(gate.get("failures"), list) else []
+        if failures:
+            lines.append("- Gate failures (top):")
+            for row in failures[:8]:
+                text = str(row or "").strip()
+                if text:
+                    lines.append(f"  - {text}")
+    judges = usefulness.get("judges") if isinstance(usefulness.get("judges"), list) else []
+    if judges:
+        lines.append("- Judge metrics:")
+        for judge in judges[:3]:
+            if not isinstance(judge, dict):
+                continue
+            name = str(judge.get("judge") or "").strip() or "judge"
+            summary = judge.get("summary") if isinstance(judge.get("summary"), dict) else {}
+            avg = fmt_num(summary.get("averageUsefulness"))
+            useful_rate = fmt_pct(summary.get("usefulRate"))
+            user_sat = fmt_pct(summary.get("averageUserSatisfaction"))
+            continue_rate = fmt_pct(summary.get("continueRate"))
+            fallback_rate = fmt_pct(summary.get("genericFallbackRate"))
+            lines.append(
+                f"  - {name}: avg={avg}/5, useful={useful_rate}, userSat={user_sat}, continue={continue_rate}, genericFallback={fallback_rate}"
+            )
+
+advice = load_json(advice_path)
+if isinstance(advice, dict):
+    if lines:
+        lines.append("")
+    lines.append("Latest triad advisors snapshot (Gemini + Kimi + MiniMax):")
+    lines.append(f"- Source: {advice_path}")
+    run_id = advice.get("runId")
+    generated_at = advice.get("generatedAt")
+    if run_id:
+        lines.append(f"- Advisor run: {run_id}")
+    if generated_at:
+        lines.append(f"- Generated at: {generated_at}")
+    consensus = advice.get("consensus") if isinstance(advice.get("consensus"), dict) else {}
+    top_areas = consensus.get("topAreas") if isinstance(consensus.get("topAreas"), list) else []
+    recurring = consensus.get("recurringTitles") if isinstance(consensus.get("recurringTitles"), list) else []
+    if top_areas:
+        lines.append("- Top consensus areas:")
+        for item in top_areas[:6]:
+            if not isinstance(item, dict):
+                continue
+            area = str(item.get("area") or "").strip()
+            count = item.get("count")
+            if area:
+                lines.append(f"  - {area}: {count}")
+    if recurring:
+        lines.append("- Recurring recommendations:")
+        for item in recurring[:6]:
+            if not isinstance(item, dict):
+                continue
+            title = str(item.get("title") or "").strip()
+            count = item.get("count")
+            if title:
+                lines.append(f"  - {title} ({count})")
+
+if not lines:
+    raise SystemExit(2)
+
+out_path.write_text("\n".join(lines).strip() + "\n", encoding="utf-8")
+PY
+
+  [[ -s "${TRIAD_SNAPSHOT_FILE}" ]]
+}
+
 if run_gemini_advice; then
   GEMINI_OK=1
 else
@@ -330,6 +491,18 @@ if run_kimi_advice; then
   KIMI_OK=1
 else
   rm -f "${KIMI_ADVICE_FILE}" >/dev/null 2>&1 || true
+fi
+
+if run_minimax_advice; then
+  MINIMAX_OK=1
+else
+  rm -f "${MINIMAX_ADVICE_FILE}" >/dev/null 2>&1 || true
+fi
+
+if build_triad_snapshot; then
+  TRIAD_SNAPSHOT_OK=1
+else
+  rm -f "${TRIAD_SNAPSHOT_FILE}" >/dev/null 2>&1 || true
 fi
 
 PROMPT_FILE="${RUN_DIR}/prompt.txt"
@@ -377,6 +550,26 @@ if [[ -f "${KIMI_ADVICE_FILE}" ]]; then
     echo "=== Kimi advice ==="
     echo
     cat "${KIMI_ADVICE_FILE}"
+    echo
+  } >> "${PROMPT_FILE}"
+fi
+
+if [[ -f "${MINIMAX_ADVICE_FILE}" ]]; then
+  {
+    echo
+    echo "=== MiniMax advice ==="
+    echo
+    cat "${MINIMAX_ADVICE_FILE}"
+    echo
+  } >> "${PROMPT_FILE}"
+fi
+
+if [[ -f "${TRIAD_SNAPSHOT_FILE}" ]]; then
+  {
+    echo
+    echo "=== Triad QA snapshot (latest judge + advisor reports) ==="
+    echo
+    cat "${TRIAD_SNAPSHOT_FILE}"
     echo
   } >> "${PROMPT_FILE}"
 fi
@@ -642,6 +835,8 @@ SUMMARY="${RUN_DIR}/SUMMARY.md"
   echo "- Codex ok: ${CODEX_OK}"
   echo "- Gemini advice ok: ${GEMINI_OK}"
   echo "- Kimi advice ok: ${KIMI_OK}"
+  echo "- MiniMax advice ok: ${MINIMAX_OK}"
+  echo "- Triad snapshot included: ${TRIAD_SNAPSHOT_OK}"
   echo "- Changed: ${CHANGED}"
   echo "- Build ok: ${BUILD_OK}"
   echo "- Push ok: ${PUSH_OK}"
@@ -683,6 +878,12 @@ SUMMARY="${RUN_DIR}/SUMMARY.md"
   if [[ -f "${KIMI_ADVICE_FILE}" ]]; then
     echo "- ${RUN_DIR}/kimi_advice.txt"
   fi
+  if [[ -f "${MINIMAX_ADVICE_FILE}" ]]; then
+    echo "- ${RUN_DIR}/minimax_advice.txt"
+  fi
+  if [[ -f "${TRIAD_SNAPSHOT_FILE}" ]]; then
+    echo "- ${RUN_DIR}/triad_snapshot.txt"
+  fi
   echo "- ${RUN_DIR}/docker_build.txt"
   echo "- ${RUN_DIR}/docker_up.txt"
   echo "- ${RUN_DIR}/docker_ps.txt"
@@ -698,7 +899,7 @@ SUMMARY="${RUN_DIR}/SUMMARY.md"
   fi
 } > "${SUMMARY}"
 
-SHORT_STATUS="CODEX=${CODEX_OK} GEMINI=${GEMINI_OK} KIMI=${KIMI_OK} CHANGED=${CHANGED} BUILD=${BUILD_OK} PUSH=${PUSH_OK} DEPLOY=${DEPLOY_OK}"
+SHORT_STATUS="CODEX=${CODEX_OK} GEMINI=${GEMINI_OK} KIMI=${KIMI_OK} MINIMAX=${MINIMAX_OK} TRIAD=${TRIAD_SNAPSHOT_OK} CHANGED=${CHANGED} BUILD=${BUILD_OK} PUSH=${PUSH_OK} DEPLOY=${DEPLOY_OK}"
 if [[ "${MERGE_MAIN_OK}" -eq 1 ]]; then
   SHORT_STATUS="${SHORT_STATUS} MERGE_MAIN=${MERGE_MAIN_OK} MAIN_PUSH=${MAIN_PUSH_OK}"
 fi

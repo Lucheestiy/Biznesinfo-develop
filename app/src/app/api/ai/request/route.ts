@@ -10,8 +10,12 @@ import { createAiRequest, linkAiRequestConversation } from "@/lib/ai/requests";
 import { releaseAiRequestLock, tryAcquireAiRequestLock } from "@/lib/ai/locks";
 import {
   appendAssistantSessionTurn,
+  appendAssistantSessionTurnDelta,
+  beginAssistantSessionTurn,
+  finalizeAssistantSessionTurn,
   getAssistantSessionHistory,
   getOrCreateAssistantSession,
+  reconcileStaleAssistantTurns,
   type AssistantSessionRef,
 } from "@/lib/ai/conversations";
 import { suggestSourcingSynonyms } from "@/lib/biznesinfo/keywords";
@@ -125,6 +129,49 @@ function parseAssistantUsage(raw: unknown): AssistantUsage | null {
 
   if (inputTokens == null || outputTokens == null || totalTokens == null) return null;
   return { inputTokens, outputTokens, totalTokens };
+}
+
+function extractCodexCompletedText(raw: unknown): string {
+  if (!raw || typeof raw !== "object") return "";
+  const evt = raw as Record<string, unknown>;
+  const response = (evt.response && typeof evt.response === "object" ? (evt.response as Record<string, unknown>) : null) || null;
+  if (!response) return "";
+
+  const chunks: string[] = [];
+  const pushText = (value: unknown) => {
+    if (typeof value !== "string") return;
+    const text = value.trim();
+    if (text) chunks.push(text);
+  };
+
+  const outputText = response.output_text;
+  if (Array.isArray(outputText)) {
+    for (const item of outputText) pushText(item);
+  } else {
+    pushText(outputText);
+  }
+
+  const output = response.output;
+  if (Array.isArray(output)) {
+    for (const item of output) {
+      if (!item || typeof item !== "object") continue;
+      const node = item as Record<string, unknown>;
+      pushText(node.text);
+      if (typeof node.content === "string") {
+        pushText(node.content);
+        continue;
+      }
+      if (!Array.isArray(node.content)) continue;
+      for (const part of node.content) {
+        if (!part || typeof part !== "object") continue;
+        const partNode = part as Record<string, unknown>;
+        pushText(partNode.text);
+      }
+    }
+  }
+
+  if (chunks.length === 0) return "";
+  return chunks.join("\n").trim();
 }
 
 function extractTemplateMeta(text: string): AssistantTemplateMeta {
@@ -2530,6 +2577,7 @@ async function generateCodexReply(params: {
     const decoder = new TextDecoder();
     let buffer = "";
     let out = "";
+    let completedText = "";
     let usage: AssistantUsage | null = null;
 
     try {
@@ -2562,6 +2610,7 @@ async function generateCodexReply(params: {
             }
 
             if (evt?.type === "response.completed") {
+              completedText = completedText || extractCodexCompletedText(evt);
               usage = parseAssistantUsage(evt?.response?.usage) ?? parseAssistantUsage(evt?.usage) ?? usage;
               continue;
             }
@@ -2574,12 +2623,12 @@ async function generateCodexReply(params: {
       }
     } catch (error) {
       if (params.signal?.aborted && isAbortError(error)) {
-        return { text: out.trim(), usage, canceled: true };
+        return { text: (out.trim() || completedText.trim()).trim(), usage, canceled: true };
       }
       throw error;
     }
 
-    const final = out.trim();
+    const final = (out.trim() || completedText.trim()).trim();
     if (!final) throw new Error("Codex backend returned empty response");
     return { text: final, usage, canceled: false };
   } finally {
@@ -5635,6 +5684,13 @@ export async function POST(request: Request) {
     );
   }
 
+  // Best-effort reconciler for stale turns left in pending/streaming state after crashes.
+  void reconcileStaleAssistantTurns({
+    userId: user.id,
+    olderThanMinutes: pickEnvInt("AI_STALE_TURN_TIMEOUT_MIN", 20),
+    limit: pickEnvInt("AI_STALE_TURN_RECONCILE_LIMIT", 5),
+  }).catch(() => {});
+
   const companyIdTrimmed = (companyId || "").trim() || null;
   const companyIdsTrimmed = companyIds
     .map((id) => (id || "").trim())
@@ -6183,6 +6239,43 @@ export async function POST(request: Request) {
     };
   };
 
+  const rankingSeedText = vendorLookupContext?.searchText || message;
+  const turnVendorCandidateIds = vendorCandidates.map((c) => c.id).slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX);
+  const turnVendorCandidateSlugs = vendorCandidates
+    .map((c) => companySlugForUrl(c.id))
+    .slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX);
+  const turnRequestMeta = {
+    mode: responseMode,
+    conversationId: assistantSession?.id || null,
+    vendorLookupContext,
+    guardrails,
+  };
+
+  const buildTurnResponseMeta = (params: {
+    isStub: boolean;
+    localFallbackUsed: boolean;
+    provider: AssistantProvider;
+    model: string | null;
+    providerError: { name: string; message: string } | null;
+    canceled: boolean;
+    streamed: boolean;
+    durationMs: number;
+    usage: AssistantUsage | null;
+    completionState: "pending" | "streaming" | "completed" | "canceled" | "failed";
+  }) => ({
+    isStub: params.isStub,
+    localFallbackUsed: params.localFallbackUsed,
+    provider: params.provider,
+    model: params.model,
+    providerError: params.providerError,
+    canceled: params.canceled,
+    streamed: params.streamed,
+    durationMs: params.durationMs,
+    usage: params.usage,
+    completionState: params.completionState,
+    completedAt: new Date().toISOString(),
+  });
+
   if (streamRequested) {
     const stream = new TransformStream<Uint8Array, Uint8Array>();
     const writer = stream.writable.getWriter();
@@ -6201,64 +6294,156 @@ export async function POST(request: Request) {
     request.signal.addEventListener("abort", onClientAbort, { once: true });
 
     void (async () => {
+      let pendingTurn: { id: string; turnIndex: number } | null = null;
+      let persistedTurn: { id: string; turnIndex: number } | null = null;
+      let persistDeltaQueue: Promise<void> = Promise.resolve();
+      let deltaPersistBuffer = "";
+      let deltaPersistTimer: ReturnType<typeof setTimeout> | null = null;
+
+      const enqueueDeltaPersist = (deltaRaw: string) => {
+        const delta = String(deltaRaw || "");
+        const turnId = pendingTurn?.id || null;
+        if (!delta || !turnId) return;
+        persistDeltaQueue = persistDeltaQueue
+          .then(async () => {
+            await appendAssistantSessionTurnDelta({
+              sessionId: assistantSession?.id || null,
+              userId: user.id,
+              turnId,
+              delta,
+            });
+          })
+          .catch(() => {});
+      };
+
+      const flushDeltaPersistBuffer = () => {
+        if (!deltaPersistBuffer) return;
+        enqueueDeltaPersist(deltaPersistBuffer);
+        deltaPersistBuffer = "";
+      };
+
+      const scheduleDeltaPersistFlush = () => {
+        if (deltaPersistTimer) return;
+        deltaPersistTimer = setTimeout(() => {
+          deltaPersistTimer = null;
+          flushDeltaPersistBuffer();
+        }, 350);
+      };
+
       try {
         await writeEvent("meta", { requestId, conversationId: assistantSession?.id || null });
 
+        pendingTurn = await beginAssistantSessionTurn({
+          sessionId: assistantSession?.id || null,
+          userId: user.id,
+          requestId,
+          userMessage: message,
+          assistantMessage: "",
+          rankingSeedText,
+          vendorCandidateIds: turnVendorCandidateIds,
+          vendorCandidateSlugs: turnVendorCandidateSlugs,
+          requestMeta: turnRequestMeta,
+          responseMeta: buildTurnResponseMeta({
+            isStub: false,
+            localFallbackUsed: false,
+            provider,
+            model: null,
+            providerError: null,
+            canceled: false,
+            streamed: true,
+            durationMs: 0,
+            usage: null,
+            completionState: "streaming",
+          }),
+        });
+        persistedTurn = pendingTurn;
+
         const res = await runProvider({
           signal: providerAbort.signal,
-          onDelta: (delta) => safeWriteEvent("delta", { delta }),
+          onDelta: (delta) => {
+            safeWriteEvent("delta", { delta });
+            deltaPersistBuffer += String(delta || "");
+            if (deltaPersistBuffer.length >= 200 || /\n/.test(delta)) {
+              if (deltaPersistTimer) {
+                clearTimeout(deltaPersistTimer);
+                deltaPersistTimer = null;
+              }
+              flushDeltaPersistBuffer();
+              return;
+            }
+            scheduleDeltaPersistFlush();
+          },
           streamed: true,
         });
 
+        if (deltaPersistTimer) {
+          clearTimeout(deltaPersistTimer);
+          deltaPersistTimer = null;
+        }
+        flushDeltaPersistBuffer();
+        await persistDeltaQueue;
+
         const payloadToStore = buildPayloadToStore(res);
-        await createAiRequest({
-          id: requestId,
-          userId: user.id,
-          companyId: companyIdTrimmed,
-          message,
-          assistantSessionId: assistantSession?.id || null,
-          payload: payloadToStore,
+        let requestPersisted = false;
+        try {
+          await createAiRequest({
+            id: requestId,
+            userId: user.id,
+            companyId: companyIdTrimmed,
+            message,
+            assistantSessionId: assistantSession?.id || null,
+            payload: payloadToStore,
+          });
+          requestPersisted = true;
+        } catch {
+          requestPersisted = false;
+        }
+
+        const finalResponseMeta = buildTurnResponseMeta({
+          isStub: res.isStub,
+          localFallbackUsed: res.localFallbackUsed,
+          provider: res.providerMeta.provider,
+          model: res.providerMeta.model ?? null,
+          providerError: res.providerError,
+          canceled: res.canceled,
+          streamed: true,
+          durationMs: res.durationMs,
+          usage: res.usage,
+          completionState: res.canceled ? "canceled" : "completed",
         });
 
-        let persistedTurn: { id: string; turnIndex: number } | null = null;
-        if (!res.canceled) {
+        if (pendingTurn?.id) {
+          const finalized = await finalizeAssistantSessionTurn({
+            sessionId: assistantSession?.id || null,
+            userId: user.id,
+            turnId: pendingTurn.id,
+            assistantMessage: res.replyText,
+            responseMeta: finalResponseMeta,
+          });
+          persistedTurn = finalized ? pendingTurn : null;
+        }
+
+        if (!persistedTurn) {
           persistedTurn = await appendAssistantSessionTurn({
             sessionId: assistantSession?.id || null,
             userId: user.id,
             requestId,
             userMessage: message,
             assistantMessage: res.replyText,
-            rankingSeedText: vendorLookupContext?.searchText || message,
-            vendorCandidateIds: vendorCandidates.map((c) => c.id).slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX),
-            vendorCandidateSlugs: vendorCandidates
-              .map((c) => companySlugForUrl(c.id))
-              .slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX),
-            requestMeta: {
-              mode: responseMode,
-              conversationId: assistantSession?.id || null,
-              vendorLookupContext,
-              guardrails,
-            },
-            responseMeta: {
-              isStub: res.isStub,
-              localFallbackUsed: res.localFallbackUsed,
-              provider: res.providerMeta.provider,
-              model: res.providerMeta.model ?? null,
-              providerError: res.providerError,
-              canceled: res.canceled,
-              streamed: true,
-              durationMs: res.durationMs,
-              usage: res.usage,
-            },
+            rankingSeedText,
+            vendorCandidateIds: turnVendorCandidateIds,
+            vendorCandidateSlugs: turnVendorCandidateSlugs,
+            requestMeta: turnRequestMeta,
+            responseMeta: finalResponseMeta,
           });
+        }
 
-          if (persistedTurn?.id) {
-            await linkAiRequestConversation({
-              requestId,
-              assistantSessionId: assistantSession?.id || null,
-              assistantTurnId: persistedTurn.id,
-            });
-          }
+        if (persistedTurn?.id && requestPersisted) {
+          await linkAiRequestConversation({
+            requestId,
+            assistantSessionId: assistantSession?.id || null,
+            assistantTurnId: persistedTurn.id,
+          });
         }
 
         if (res.canceled) {
@@ -6267,6 +6452,7 @@ export async function POST(request: Request) {
               success: false,
               requestId,
               conversationId: assistantSession?.id || null,
+              turnIndex: persistedTurn?.turnIndex ?? null,
               canceled: true,
               reply: {
                 text: res.replyText,
@@ -6341,7 +6527,27 @@ export async function POST(request: Request) {
           durationMs: 0,
           usage: null,
         });
+        const failedResponseMeta = buildTurnResponseMeta({
+          isStub: failedIsStub,
+          localFallbackUsed: canceled ? false : !failedIsStub,
+          provider: canceled ? provider : "stub",
+          model: null,
+          providerError: canceled ? null : { name: "StreamFailed", message: msg },
+          canceled,
+          streamed: true,
+          durationMs: 0,
+          usage: null,
+          completionState: canceled ? "canceled" : "failed",
+        });
+
+        let requestPersisted = false;
         try {
+          if (deltaPersistTimer) {
+            clearTimeout(deltaPersistTimer);
+            deltaPersistTimer = null;
+          }
+          flushDeltaPersistBuffer();
+          await persistDeltaQueue;
           await createAiRequest({
             id: requestId,
             userId: user.id,
@@ -6350,44 +6556,44 @@ export async function POST(request: Request) {
             assistantSessionId: assistantSession?.id || null,
             payload: payloadToStore,
           });
+          requestPersisted = true;
+        } catch {
+          requestPersisted = false;
+        }
 
-          if (!canceled && failedLocalReply) {
-            const failedTurn = await appendAssistantSessionTurn({
+        try {
+          if (pendingTurn?.id) {
+            const finalized = await finalizeAssistantSessionTurn({
+              sessionId: assistantSession?.id || null,
+              userId: user.id,
+              turnId: pendingTurn.id,
+              assistantMessage: failedLocalReply,
+              responseMeta: failedResponseMeta,
+            });
+            persistedTurn = finalized ? pendingTurn : null;
+          }
+
+          if (!persistedTurn) {
+            persistedTurn = await appendAssistantSessionTurn({
               sessionId: assistantSession?.id || null,
               userId: user.id,
               requestId,
               userMessage: message,
               assistantMessage: failedLocalReply,
-              rankingSeedText: vendorLookupContext?.searchText || message,
-              vendorCandidateIds: vendorCandidates.map((c) => c.id).slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX),
-              vendorCandidateSlugs: vendorCandidates
-                .map((c) => companySlugForUrl(c.id))
-                .slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX),
-              requestMeta: {
-                mode: responseMode,
-                conversationId: assistantSession?.id || null,
-                vendorLookupContext,
-                guardrails,
-              },
-              responseMeta: {
-                isStub: failedIsStub,
-                localFallbackUsed: canceled ? false : !failedIsStub,
-                provider: canceled ? provider : "stub",
-                model: null,
-                providerError: canceled ? null : { name: "StreamFailed", message: msg },
-                canceled,
-                streamed: true,
-                durationMs: 0,
-                usage: null,
-              },
+              rankingSeedText,
+              vendorCandidateIds: turnVendorCandidateIds,
+              vendorCandidateSlugs: turnVendorCandidateSlugs,
+              requestMeta: turnRequestMeta,
+              responseMeta: failedResponseMeta,
             });
-            if (failedTurn?.id) {
-              await linkAiRequestConversation({
-                requestId,
-                assistantSessionId: assistantSession?.id || null,
-                assistantTurnId: failedTurn.id,
-              });
-            }
+          }
+
+          if (persistedTurn?.id && requestPersisted) {
+            await linkAiRequestConversation({
+              requestId,
+              assistantSessionId: assistantSession?.id || null,
+              assistantTurnId: persistedTurn.id,
+            });
           }
         } catch {
           // ignore persistence errors on stream failures
@@ -6398,6 +6604,7 @@ export async function POST(request: Request) {
             success: false,
             requestId,
             conversationId: assistantSession?.id || null,
+            turnIndex: persistedTurn?.turnIndex ?? null,
             canceled,
             reply: {
               text: failedLocalReply,
@@ -6415,6 +6622,10 @@ export async function POST(request: Request) {
           });
         }
       } finally {
+        if (deltaPersistTimer) {
+          clearTimeout(deltaPersistTimer);
+          deltaPersistTimer = null;
+        }
         request.signal.removeEventListener("abort", onClientAbort);
         await releaseLockSafe();
         await writer.close().catch(() => {});
@@ -6432,52 +6643,93 @@ export async function POST(request: Request) {
   }
 
   try {
-    const res = await runProvider({ signal: request.signal, streamed: false });
-    const payloadToStore = buildPayloadToStore(res);
-    const created = await createAiRequest({
-      id: requestId,
+    const pendingTurn = await beginAssistantSessionTurn({
+      sessionId: assistantSession?.id || null,
       userId: user.id,
-      companyId: companyIdTrimmed,
-      message,
-      assistantSessionId: assistantSession?.id || null,
-      payload: payloadToStore,
+      requestId,
+      userMessage: message,
+      assistantMessage: "",
+      rankingSeedText,
+      vendorCandidateIds: turnVendorCandidateIds,
+      vendorCandidateSlugs: turnVendorCandidateSlugs,
+      requestMeta: turnRequestMeta,
+      responseMeta: buildTurnResponseMeta({
+        isStub: false,
+        localFallbackUsed: false,
+        provider,
+        model: null,
+        providerError: null,
+        canceled: false,
+        streamed: false,
+        durationMs: 0,
+        usage: null,
+        completionState: "pending",
+      }),
     });
 
-    const persistedTurn = res.canceled
-      ? null
-      : await appendAssistantSessionTurn({
-          sessionId: assistantSession?.id || null,
-          userId: user.id,
-          requestId: created.id,
-          userMessage: message,
-          assistantMessage: res.replyText,
-          rankingSeedText: vendorLookupContext?.searchText || message,
-          vendorCandidateIds: vendorCandidates.map((c) => c.id).slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX),
-          vendorCandidateSlugs: vendorCandidates
-            .map((c) => companySlugForUrl(c.id))
-            .slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX),
-          requestMeta: {
-            mode: responseMode,
-            conversationId: assistantSession?.id || null,
-            vendorLookupContext,
-            guardrails,
-          },
-          responseMeta: {
-            isStub: res.isStub,
-            localFallbackUsed: res.localFallbackUsed,
-            provider: res.providerMeta.provider,
-            model: res.providerMeta.model ?? null,
-            providerError: res.providerError,
-            canceled: res.canceled,
-            streamed: false,
-            durationMs: res.durationMs,
-            usage: res.usage,
-          },
-        });
+    const res = await runProvider({ signal: request.signal, streamed: false });
+    const payloadToStore = buildPayloadToStore(res);
+    let createdRequestId: string = requestId;
+    let requestPersisted = false;
+    try {
+      const created = await createAiRequest({
+        id: requestId,
+        userId: user.id,
+        companyId: companyIdTrimmed,
+        message,
+        assistantSessionId: assistantSession?.id || null,
+        payload: payloadToStore,
+      });
+      createdRequestId = created.id;
+      requestPersisted = true;
+    } catch {
+      createdRequestId = requestId;
+      requestPersisted = false;
+    }
 
-    if (persistedTurn?.id) {
+    const finalResponseMeta = buildTurnResponseMeta({
+      isStub: res.isStub,
+      localFallbackUsed: res.localFallbackUsed,
+      provider: res.providerMeta.provider,
+      model: res.providerMeta.model ?? null,
+      providerError: res.providerError,
+      canceled: res.canceled,
+      streamed: false,
+      durationMs: res.durationMs,
+      usage: res.usage,
+      completionState: res.canceled ? "canceled" : "completed",
+    });
+
+    let persistedTurn: { id: string; turnIndex: number } | null = null;
+    if (pendingTurn?.id) {
+      const finalized = await finalizeAssistantSessionTurn({
+        sessionId: assistantSession?.id || null,
+        userId: user.id,
+        turnId: pendingTurn.id,
+        assistantMessage: res.replyText,
+        responseMeta: finalResponseMeta,
+      });
+      persistedTurn = finalized ? pendingTurn : null;
+    }
+
+    if (!persistedTurn) {
+      persistedTurn = await appendAssistantSessionTurn({
+        sessionId: assistantSession?.id || null,
+        userId: user.id,
+        requestId: createdRequestId,
+        userMessage: message,
+        assistantMessage: res.replyText,
+        rankingSeedText,
+        vendorCandidateIds: turnVendorCandidateIds,
+        vendorCandidateSlugs: turnVendorCandidateSlugs,
+        requestMeta: turnRequestMeta,
+        responseMeta: finalResponseMeta,
+      });
+    }
+
+    if (persistedTurn?.id && requestPersisted) {
       await linkAiRequestConversation({
-        requestId: created.id,
+        requestId: createdRequestId,
         assistantSessionId: assistantSession?.id || null,
         assistantTurnId: persistedTurn.id,
       });
@@ -6487,8 +6739,9 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: "Canceled",
-          requestId: created.id,
+          requestId: createdRequestId,
           conversationId: assistantSession?.id || null,
+          turnIndex: persistedTurn?.turnIndex ?? null,
           day: quota.day,
           used: quota.used,
           limit: quota.limit,
@@ -6500,7 +6753,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      requestId: created.id,
+      requestId: createdRequestId,
       conversationId: assistantSession?.id || null,
       turnIndex: persistedTurn?.turnIndex ?? null,
       reply: {
