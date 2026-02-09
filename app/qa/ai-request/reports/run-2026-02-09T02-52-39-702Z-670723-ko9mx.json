@@ -1,0 +1,502 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-09T15:20:00Z",
+      "source": "manual-regression",
+      "description": "Geo ambiguity regressions for conflicting city/region refinements in sourcing dialogs"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-09T02-52-39-702Z-670723-ko9mx",
+    "startedAt": "2026-02-09T02:52:39.702Z",
+    "endedAt": "2026-02-09T02:53:12.001Z",
+    "durationMs": 32299,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.geo-ambiguity.json",
+    "totalScenarios": 2,
+    "passedScenarios": 1,
+    "failedScenarios": 1,
+    "passRate": 0.5,
+    "totalChecks": 17,
+    "passedChecks": 16,
+    "failedChecks": 1,
+    "checkPassRate": 0.9412,
+    "targetPassCount": 2,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:mentions_any_terms:Должен удержать тему лука после geo-коррекции",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "GA001",
+      "title": "Неоднозначный город в одном сообщении: Брест или Минск",
+      "tags": [
+        "regression",
+        "geo",
+        "ambiguity",
+        "sourcing",
+        "multi_turn"
+      ],
+      "personaGoal": "Закупщик задает sourcing-запрос сразу с двумя городами; ассистент должен вести диалог практично и прозрачно.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+          "requestBody": {
+            "message": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 11658,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "be289279-3b52-497d-9671-1a5fb76d8324",
+          "conversationId": "e1992be9-b521-419d-9d5b-a6463752248c",
+          "isStub": false,
+          "reply": "Отличный запрос — начать лучше сразу с короткого шорт-листа и параллельной рассылки.\n\nВ вашем текущем списке **сильные релевантные кандидаты в Бресте**:\n\n1. **Савушкин продукт ОАО**  \n   Почему подходит: в карточке прямо указано **«Производство молочной продукции»**, крупный профильный производитель.  \n   Контакты: +375 (162) 30 45 45, info@savushkin.com  \n   Страница: **/company/savushkin**\n\n2. **Брестское мороженое ОАО**  \n   Почему подходит: указана **молочная продукция** (сметана, творог, сыры и др.), то есть есть молочное направление, можно уточнять поставки питьевого молока/сырья.  \n   Контакты: +375 (162) 22 15 41, info@ice-cream.by  \n   Страница: **/company/brestmoroj**\n\n⚠️ По Минску в текущем срезе кандидатов нет, поэтому лучше расширить поиск в каталоге по рубрике и городу.\n\nС чего начать (практично, за 20–30 минут):\n1. Откройте рубрику: **Молочная промышленность**  \n   `/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`\n2. Фильтр по городам: сначала **Брест**, затем отдельным проходом **Минск**.\n3. Поиск по ключам: **«молоко оптом», «питьевое молоко», «молочное сырьё», «поставка молока»**.\n4. Сделайте таблицу сравнения (минимум 5 полей):  \n   - цена за литр  \n   - минимальная партия  \n   - график поставок (еженедельно 1000+ л)  \n   - тара/логистика (охлаждение, транспорт)  \n   - отсрочка/условия оплаты\n5. Разошлите одинаковый RFQ 8–12 компаниям и сравните ответы в течение 1–2 дней.\n\nМогу сразу подготовить вам готовый текст запроса (email + WhatsApp) под ваш объём **1000 л/нед**.  \nУточните только 3 пункта:  \n1) нужно именно **питьевое молоко** или сырьё для переработки?  \n2) какая жирность/спецификация нужна?  \n3) самовывоз или доставка на ваш адрес?",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "GA001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "GA001.T1.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен сохранить товарный контекст",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок"
+                ],
+                "min": 1,
+                "hits": [
+                  "молок"
+                ]
+              }
+            },
+            {
+              "id": "GA001.T1.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать оба города или явно разрулить неоднозначность",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "минск"
+                ],
+                "hits": [
+                  "брест",
+                  "минск"
+                ]
+              }
+            },
+            {
+              "id": "GA001.T1.C4",
+              "type": "any_of",
+              "description": "Должен либо запросить уточнение локации, либо сразу дать структурированный practical first-pass",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  },
+                  {
+                    "type": "question_count_min",
+                    "passed": true,
+                    "reason": "Enough questions"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "GA001.T1.C5",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Минск как базовый, но поставка в Брест тоже возможна.",
+          "requestBody": {
+            "message": "Минск как базовый, но поставка в Брест тоже возможна.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?"
+              },
+              {
+                "role": "assistant",
+                "content": "Отличный запрос — начать лучше сразу с короткого шорт-листа и параллельной рассылки.\n\nВ вашем текущем списке **сильные релевантные кандидаты в Бресте**:\n\n1. **Савушкин продукт ОАО**  \n   Почему подходит: в карточке прямо указано **«Производство молочной продукции»**, крупный профильный производитель.  \n   Контакты: +375 (162) 30 45 45, info@savushkin.com  \n   Страница: **/company/savushkin**\n\n2. **Брестское мороженое ОАО**  \n   Почему подходит: указана **молочная продукция** (сметана, творог, сыры и др.), то есть есть молочное направление, можно уточнять поставки питьевого молока/сырья.  \n   Контакты: +375 (162) 22 15 41, info@ice-cream.by  \n   Страница: **/company/brestmoroj**\n\n⚠️ По Минску в текущем срезе кандидатов нет, поэтому лучше расширить поиск в каталоге по рубрике и городу.\n\nС чего начать (практично, за 20–30 минут):\n1. Откройте рубрику: **Молочная промышленность**  \n   `/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`\n2. Фильтр по городам: сначала **Брест**, затем отдельным проходом **Минск**.\n3. Поиск по ключам: **«молоко оптом», «питьевое молоко», «молочное сырьё», «поставка молока»**.\n4. Сделайте таблицу сравнения (минимум 5 полей):  \n   - цена за литр  \n   - минимальная партия  \n   - график поставок (еженедельно 1000+ л)  \n   - тара/логистика (охлаждение, транспорт)  \n   - отсрочка/условия оплаты\n5. Разошлите одинаковый RFQ 8–12 компаниям и сравните ответы в течение 1–2 дней.\n\nМогу сразу подготовить вам готовый текст запроса (email + WhatsApp) под ваш объём **1000 л/нед**.  \nУточните только 3 пункта:  \n1) нужно именно **питьевое молоко** или сырьё для переработки?  \n2) какая жирность/спецификация нужна?  \n3) самовывоз или доставка на ваш адрес?"
+              }
+            ],
+            "conversationId": "e1992be9-b521-419d-9d5b-a6463752248c",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 7519,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "b4c150e5-a3a3-4f23-8db1-6eb8db4dfa61",
+          "conversationId": "e1992be9-b521-419d-9d5b-a6463752248c",
+          "isStub": false,
+          "reply": "Принято: **базовый город — Минск**, поставка в Брест — как дополнительный вариант.\n\nПо текущему срезу кандидатов у нас есть только **релевантные из Бреста** (минских молочных поставщиков в этом списке нет), поэтому стартуем с них и параллельно добираем Минск через рубрику:\n\n   Почему в шорт-листе: профильный производитель молочной продукции, высокий шанс закрыть объём **1000+ л/нед**.\n\n   Почему в шорт-листе: есть молочное направление (сметана/творог/сыры), можно уточнить поставку молока и условия регулярных отгрузок.\n\nЧто делать дальше (быстрый план):\n1. В каталоге пройти рубрику **«Молочная промышленность»** с фильтром **Минск** (приоритет), затем **Брест**.  \n2. Поиск по запросам: **«молоко оптом», «питьевое молоко», «молочное сырьё», «поставка молока»**.  \n3. Сразу отправлять одинаковый запрос и собирать ответы в таблицу: цена/л, минимальная партия, доставка, график, оплата.  \n4. Для надежности берите не 1, а 2–3 поставщика: основной (Минск) + резерв (Брест).\n\nЕсли хотите, подготовлю готовый короткий шаблон запроса для рассылки (email + WhatsApp) под ваш кейс «Минск базовый / Брест опционально / 1000 л в неделю».\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Арт-Образ ЧП — /company/artobraz (Школы красоты; Минск, minsk)\n2. Белгипроводхоз РУП — /company/giprovodhoz (Мелиоративные работы, механизмы, сооружения; Минск, minsk)\n3. Мел и Ткань — /company/biznesinfo-101092 (Курсы; Минск, minsk)",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "GA001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "GA001.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен сохранить тему молока",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок"
+                ],
+                "min": 1,
+                "hits": [
+                  "молок"
+                ]
+              }
+            },
+            {
+              "id": "GA001.T2.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать схему Минск + поставка в Брест",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "брест"
+                ],
+                "hits": [
+                  "минск",
+                  "брест"
+                ]
+              }
+            },
+            {
+              "id": "GA001.T2.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен practical next step по выбору поставщика",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 19178
+    },
+    {
+      "id": "GA002",
+      "title": "Конфликт регионального уточнения: город Минск -> Минская область",
+      "tags": [
+        "regression",
+        "geo",
+        "ambiguity",
+        "region",
+        "sourcing",
+        "multi_turn"
+      ],
+      "personaGoal": "Пользователь уточняет, что нужен не город, а область; ассистент не должен терять предмет закупки.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "GA002.T2.C2",
+          "type": "mentions_any_terms",
+          "description": "Должен удержать тему лука после geo-коррекции",
+          "passed": false,
+          "reason": "Not enough terms mentioned",
+          "details": {
+            "terms": [
+              "лук",
+              "репчат"
+            ],
+            "min": 1,
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить лук репчатый оптом в Минске?",
+          "requestBody": {
+            "message": "Где купить лук репчатый оптом в Минске?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 7136,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "942e4a4f-7e9e-46cb-b209-aaa97e0c67a5",
+          "conversationId": "f9232a97-044c-4eae-8635-d0c4c0aef602",
+          "isStub": false,
+          "reply": "В Минске из доступного списка есть **2 реально подходящих оптовых поставщика** лука репчатого:\n\n1. **Амифрут, ЧП**  \n   Почему подходит: в карточке указана **оптовая продажа свежих овощей и фруктов круглый год**, Минск.  \n   Страница: **/company/amifruit**\n\n2. **Агрокомбинат Ждановичи, УП**  \n   Почему подходит: сельхозпредприятие с собственной продукцией, в т.ч. **овощи**, Минск.  \n   Страница: **/company/akz**\n\nОстальные кандидаты из списка (заморозка, упаковка, розничные магазины) для оптовой закупки лука менее релевантны.\n\nЧтобы быстро выбрать «надежного», проверьте по карточке компании:\n1. Наличие именно **лука репчатого оптом** (сезон/постоянно).  \n2. Минимальную партию: объем.  \n3. Формат поставки: сетка/мешок, калибр, сорт, фасовка.  \n4. Цена с/без НДС, доставка по Минску (доставка/самовывоз), сроки.  \n5. Документы качества (декларации/сертификаты).\n\nЕсли хотите, сразу подготовлю короткий текст запроса поставщикам (email + WhatsApp), чтобы отправить в обе компании за 5 минут.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "GA002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "GA002.T1.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен сохранять предмет закупки",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "лук",
+                  "репчат"
+                ],
+                "min": 1,
+                "hits": [
+                  "лук",
+                  "репчат"
+                ]
+              }
+            },
+            {
+              "id": "GA002.T1.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать Минск",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Точнее: Минская область, не сам город Минск.",
+          "requestBody": {
+            "message": "Точнее: Минская область, не сам город Минск.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить лук репчатый оптом в Минске?"
+              },
+              {
+                "role": "assistant",
+                "content": "В Минске из доступного списка есть **2 реально подходящих оптовых поставщика** лука репчатого:\n\n1. **Амифрут, ЧП**  \n   Почему подходит: в карточке указана **оптовая продажа свежих овощей и фруктов круглый год**, Минск.  \n   Страница: **/company/amifruit**\n\n2. **Агрокомбинат Ждановичи, УП**  \n   Почему подходит: сельхозпредприятие с собственной продукцией, в т.ч. **овощи**, Минск.  \n   Страница: **/company/akz**\n\nОстальные кандидаты из списка (заморозка, упаковка, розничные магазины) для оптовой закупки лука менее релевантны.\n\nЧтобы быстро выбрать «надежного», проверьте по карточке компании:\n1. Наличие именно **лука репчатого оптом** (сезон/постоянно).  \n2. Минимальную партию: объем.  \n3. Формат поставки: сетка/мешок, калибр, сорт, фасовка.  \n4. Цена с/без НДС, доставка по Минску (доставка/самовывоз), сроки.  \n5. Документы качества (декларации/сертификаты).\n\nЕсли хотите, сразу подготовлю короткий текст запроса поставщикам (email + WhatsApp), чтобы отправить в обе компании за 5 минут."
+              }
+            ],
+            "conversationId": "f9232a97-044c-4eae-8635-d0c4c0aef602",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 5696,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "8ae182cf-144e-4c61-9804-e513c2f933d8",
+          "conversationId": "f9232a97-044c-4eae-8635-d0c4c0aef602",
+          "isStub": false,
+          "reply": "Понял, тогда уточняем: **Минская область (не г. Минск)**.\n\nИз текущих кандидатов всё ещё наиболее релевантен:\n\n1. **Агрокомбинат Ждановичи, УП** — **/company/akz**  \n   Почему оставляю: производитель/агропредприятие с направлением **овощи**, чаще проще согласовать отгрузку в область, чем у чисто городских оптовиков.\n\n2. **Амифрут, ЧП** — **/company/amifruit**  \n   Почему оставляю с оговоркой: сильный оптовик по овощам/фруктам, но карточка акцентирована на Минске — нужно отдельно подтвердить доставку в ваш район Минской области.\n\n**Что изменилось:** в приоритете теперь поставщики, готовые везти в область или отгружать со склада в области; «городские» варианты без подтверждённой логистики в область стоит сразу отсекать.\n\nЧтобы сузить до 1–2 лучших вариантов, напишите, пожалуйста:\n1) ваш район/город в Минской области,  \n2) объём (кг/тонн в неделю/месяц),  \n3) нужен самовывоз или доставка.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "GA002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "GA002.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен удержать тему лука после geo-коррекции",
+              "passed": false,
+              "reason": "Not enough terms mentioned",
+              "details": {
+                "terms": [
+                  "лук",
+                  "репчат"
+                ],
+                "min": 1,
+                "hits": []
+              }
+            },
+            {
+              "id": "GA002.T2.C3",
+              "type": "includes_any",
+              "description": "Должен отразить коррекцию city->region",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "област"
+                ],
+                "hits": [
+                  "минск",
+                  "област"
+                ]
+              }
+            },
+            {
+              "id": "GA002.T2.C4",
+              "type": "any_of",
+              "description": "Должен либо явно подтвердить новый geo-фильтр, либо задать корректный уточняющий вопрос",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  },
+                  {
+                    "type": "question_count_min",
+                    "passed": false,
+                    "reason": "Not enough questions"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "GA002.T2.C5",
+              "type": "not_refusal_only",
+              "description": "Нужен practical next step, а не отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 12833
+    }
+  ]
+}

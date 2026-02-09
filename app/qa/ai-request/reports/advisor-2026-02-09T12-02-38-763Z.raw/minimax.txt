@@ -1,0 +1,105 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Multi-step journey QA (40% pass rate) reveals 3 critical failure modes: (1) catastrophic context loss where assistant ignores supplier requests to give 'add company' instructions (MX004), (2) geo-boundary confusion where city/oblast filters are ignored (MX001, MX005), (3) template output contamination with raw placeholders. Fixing these requires adding explicit geodisambiguation rules, blocking 'add company' instructions during sourcing, and implementing placeholder validation. P0 improvements can target 80%+ pass rate in multi-step scenarios.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Add geodisambiguation rules for city vs oblast/region",
+      "why": "3 of 5 scenarios fail strict checks due to Minsk city candidates appearing in Minsk Oblast shortlists. Judges consistently report 'geo confusion' across scenarios MX001, MX002, MX005.",
+      "expectedImpact": "Reduces strict failures by 3-5 checks, improves judge usefulness from 2.4 avg to 3.2+",
+      "validationScenarios": ["MX001.T4", "MX002.T3", "MX005.T3"]
+    },
+    {
+      "priority": "P0",
+      "title": "Block 'add company to catalog' responses during sourcing workflows",
+      "why": "MX004 completely fails when turns 3-4 give 'add company' instructions instead of supplier shortlists. This is a categorical error - never suggest adding companies when user requests suppliers.",
+      "expectedImpact": "Fixes 5 strict check failures in MX004, prevents future regressions",
+      "validationScenarios": ["MX004.T3", "MX004.T4"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement template placeholder validation before response",
+      "why": "Failed checks MX001.T5, MX005.T4, MX003.T4 all show raw placeholders ({company}, {spec}, {deadline}) in final output. Template blocks should not emit unresolved placeholders.",
+      "expectedImpact": "Eliminates template placeholder contamination, passes 3-4 currently failed checks",
+      "validationScenarios": ["MX001.T5", "MX005.T4"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add explicit city/oblast disambiguation rules",
+      "action": "Add to system prompt: 'Belarus geo hierarchy: cities (Минск, Гомель, Брест, Гродно, Витебск, Могилёв) are separate from oblasts (Минская область, Гомельская область, etc.). When user specifies oblast/region without city, exclude all cities. When user specifies city, do not include in oblast results. Minsk city ≠ Minsk Oblast.'",
+      "expectedImpact": "Prevents Minsk city companies from appearing in Minsk Oblast shortlists",
+      "risk": "Low - clarifying existing intent",
+      "effort": "S",
+      "validationScenarios": ["MX001.T4", "MX005.T3"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Block catalog-add guidance during supplier sourcing",
+      "action": "Add vendor lookup guardrail: 'When user asks for suppliers/vendors/top-N options, never suggest adding companies to catalog. Focus exclusively on finding existing vendors from directory.'",
+      "expectedImpact": "Prevents MX004-style catastrophic failures",
+      "risk": "Low - narrows assistant scope appropriately",
+      "effort": "S",
+      "validationScenarios": ["MX004.T3", "MX004.T4"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add response mode continuity validation",
+      "action": "Add rule: 'For multi-turn conversations, maintain awareness of previous response modes. If Turn N was a shortlist/ranking, Turn N+1 should either continue ranking OR switch modes explicitly requested by user. Do not revert to generic rubric advice without user permission.'",
+      "expectedImpact": "Prevents context loss between turns (MX003, MX005 regressions)",
+      "risk": "Low - reinforces expected behavior",
+      "effort": "S",
+      "validationScenarios": ["MX003.T4", "MX005.T3"]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Implement placeholder validation in template output",
+      "action": "Before emitting Subject/Body/WhatsApp blocks, validate no raw template variables remain. If placeholders detected, either fill with reasonable defaults or return error with specific missing fields.",
+      "expectedImpact": "Eliminates template contamination (raw {company}, {spec} in output)",
+      "risk": "Medium - requires code change in response generation",
+      "effort": "M",
+      "validationScenarios": ["MX001.T5", "MX005.T4"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Strengthen shortlist continuity requirements",
+      "action": "Add to vendor guidance: 'If user previously received a shortlist of N companies and requests refinements, preserve the original list structure. Explain any changes or drops. Do not silently replace with different companies.'",
+      "expectedImpact": "Prevents content coherence issues (MX002.T4 duplicate rankings)",
+      "risk": "Low",
+      "effort": "S",
+      "validationScenarios": ["MX002.T4", "MX002.T5"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Add 'who to call first' prioritization requirement",
+      "action": "When user requests top-N suppliers with phone/contact info, always indicate priority order (1st, 2nd, 3rd) with rationale based on their criteria (volume, urgency, location fit).",
+      "expectedImpact": "Addresses judge feedback about missing prioritization",
+      "risk": "Low",
+      "effort": "S",
+      "validationScenarios": ["MX005.T3"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["MX004.T3", "MX004.T4", "MX005.T3", "MX005.T4", "MX001.T5"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.multi-step-journeys.json",
+      "app/qa/ai-request/scenarios.regressions.geo-ambiguity.json"
+    ],
+    "successMetrics": [
+      "Multi-step pass rate >= 0.8 (currently 0.4)",
+      "Average usefulness >= 3.0 (currently 2.8)",
+      "Template placeholder contamination = 0",
+      "Geo boundary violations = 0"
+    ]
+  }
+}
+```
+

@@ -1,0 +1,132 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "QA shows 100% strict pass rate but usefulness scores reveal critical failures in topic-switch handling (MX003 avg 2.5), template rendering (broken 'Страница: —' placeholders), and geo-continuity (Minsk city vs region confusion). The assistant fails hardest when context shifts—either via user topic switchback or internal template state corruption. Priority fixes: (1) harden template rendering against context pollution, (2) add geo-disambiguation layer before supplier selection, (3) implement turn-level context validation to detect mixed-topic outputs.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template rendering context pollution",
+      "why": "MX003 Turn 4 shows garbled output mixing milk and auto parts queries with broken placeholders—this is a template engine or prompt context leak, not a data issue",
+      "expectedImpact": "Eliminates critical 'broken output' failures that drop usefulness to 2/5; prevents mixed-topic pollution on switchback scenarios",
+      "validationScenarios": ["MX003"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add geo-disambiguation pre-filter",
+      "why": "MX001 Turn 4 ranked Minsk city suppliers for 'Minsk region' query; MX005 Turn 3 reverted to Brest after user shifted to Minsk—geo parsing conflates city vs region",
+      "expectedImpact": "Reduces geographic mismatch errors; improves continuity score in multi-turn geo refinements",
+      "validationScenarios": ["MX001", "MX005"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement turn-level output validation",
+      "why": "MX003 Turn 4 and MX002 Turn 3 had malformed outputs (missing company names, incomplete headers) that should be caught before returning to user",
+      "expectedImpact": "Catches template/rendering errors at generation time; prevents broken placeholders from reaching users",
+      "validationScenarios": ["MX002", "MX003", "MX004"]
+    },
+    {
+      "priority": "P1",
+      "title": "Harden topic switchback handling",
+      "why": "MX003 Turn 2 (switch to auto parts) returned generic rubric advice with zero concrete suppliers—topic switch triggers fallback mode incorrectly",
+      "expectedImpact": "Maintains usefulness during topic switches; prevents generic fallback when data exists",
+      "validationScenarios": ["MX003"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add ranking criteria explanation",
+      "why": "MX002 Turn 5 referenced 'риск несоответствия задаче' without per-supplier explanation—users need transparency on why rankings differ",
+      "expectedImpact": "Improves trust and actionability of shortlists; minor usefulness bump",
+      "validationScenarios": ["MX002"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Isolate template rendering context per turn",
+      "action": "Modify template engine to clear/reset all placeholder variables at turn start; implement strict mode that throws on unfilled placeholders instead of rendering '—' or partial text",
+      "implementationHint": "app/ai/templates/ or src/prompts/ — add context.reset() at turn boundary; wrap render() with placeholder validation regex",
+      "expectedImpact": "Eliminates 'Страница: —' and mixed-topic pollution in MX003-type scenarios",
+      "risk": "May break intentional partial renders; test all template types",
+      "effort": "M",
+      "validationScenarios": ["MX003"]
+    },
+    {
+      "id": "R2",
+      "area": "geo",
+      "title": "Explicit city vs region disambiguation in retrieval",
+      "action": "Add geo-classifier step before supplier query: parse user intent for 'city only', 'region only', 'city + region', or 'region excluding city'; pass as explicit filter to retrieval",
+      "implementationHint": "src/retrieval/geo-filter.ts or similar — add classifyGeoIntent(query, history) returning {city?: string, region?: string, excludeCity?: boolean}",
+      "expectedImpact": "Fixes Minsk city vs region mismatches in MX001/MX005",
+      "risk": "Classifier errors may over-constrain results; add fallback to broader search if zero results",
+      "effort": "M",
+      "validationScenarios": ["MX001", "MX005"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Post-generation format validator",
+      "action": "Add lightweight validator that checks output for: (a) placeholder patterns like '—' or '...', (b) mixed topic keywords from conversation history, (c) missing headers before 'Почему подходит:' blocks",
+      "implementationHint": "src/guardrails/output-validator.ts — integrate as middleware before response streaming; on fail, trigger retry with sanitized context",
+      "expectedImpact": "Catches MX003/MX002/MX004 formatting errors before user sees them",
+      "risk": "False positives on legitimate dash usage; tune regex carefully",
+      "effort": "S",
+      "validationScenarios": ["MX002", "MX003", "MX004"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Strengthen topic switch instructions",
+      "action": "Update system prompt: when detecting topic change (via intent classifier or explicit user shift), explicitly instruct model to run fresh retrieval for new topic rather than reusing cached context; prohibit generic rubric-only responses when supplier data exists",
+      "implementationHint": "src/prompts/system.md or equivalent — add 'Topic Switch Protocol' section with explicit retrieval trigger and ban on generic fallback for concrete product queries",
+      "expectedImpact": "Prevents MX003 Turn 2 generic response; ensures concrete suppliers on switchback",
+      "risk": "May increase latency due to extra retrieval calls",
+      "effort": "S",
+      "validationScenarios": ["MX003"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Add continuity checkpoint for geo shifts",
+      "action": "Before returning suppliers after geo-clarification, verify that returned locations match the most recent explicit geo intent in conversation history; if mismatch detected, flag for re-retrieval or add explicit disclaimer",
+      "implementationHint": "src/retrieval/continuity-check.ts — compare retrieved supplier locations against last geo entity in user messages; implement as post-filter",
+      "expectedImpact": "Prevents MX005 Turn 3 regression to Brest after Minsk shift",
+      "risk": "Over-aggressive filtering may reduce recall; tune threshold",
+      "effort": "M",
+      "validationScenarios": ["MX005"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Require per-supplier risk explanation",
+      "action": "Modify ranking prompt to require explicit 1-sentence justification for 'риск несоответствия задаче' per supplier, not just criterion mention",
+      "implementationHint": "src/prompts/ranking.md — update output format to include 'Риск: [specific reason]' for each ranked supplier",
+      "expectedImpact": "Addresses MX002 Turn 5 opacity; improves actionability",
+      "risk": "Increases output length; may hit token limits with long lists",
+      "effort": "S",
+      "validationScenarios": ["MX002"]
+    },
+    {
+      "id": "R7",
+      "area": "qa",
+      "title": "Add template integrity check to QA suite",
+      "action": "Extend scenario checks to validate: no placeholder patterns ('—', '...', '[', ']'), no mixed topic keywords from earlier turns, proper header structure before explanation blocks",
+      "implementationHint": "app/qa/ai-request/strict-checks.js or similar — add regex-based template integrity assertions",
+      "expectedImpact": "Prevents regression of fixed template issues; catches R1/R3 failures in CI",
+      "risk": "May need maintenance as output format evolves",
+      "effort": "S",
+      "validationScenarios": ["MX002", "MX003", "MX004"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["MX003", "MX001", "MX005"],
+    "regressionSuites": ["scenarios.regressions.multi-step-journeys.json", "geo-clarification-suite", "topic-switchback-suite"],
+    "successMetrics": [
+      "Usefulness >= 4.0 for all switchback scenarios (currently 2.5 in MX003)",
+      "Zero template placeholder leaks ('—', '...' in final output)",
+      "Geo continuity error rate < 5% (city/region misclassification)",
+      "Topic switch concrete response rate >= 90% (non-generic suppliers provided)"
+    ]
+  }
+}
+```

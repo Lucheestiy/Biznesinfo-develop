@@ -1,0 +1,66 @@
+```json
+{
+  "judge": "minimax",
+  "ratings": [
+    {
+      "scenarioId": "GA001",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1 provides 2 concrete Brest candidates with company names — decent start",
+        "Turn 2 claims candidates exist but never lists them after saying 'Из доступных релевантных карточек прямо сейчас'",
+        "Turn 2 response cuts off mid-thought after 'Причина:' without stating company name",
+        "Zero Minsk candidates provided despite user making Minsk the base location in Turn 2",
+        "User sees empty promise instead of actionable supplier names"
+      ],
+      "criticalIssues": [
+        "Broken promise: states candidates exist but provides zero company names",
+        "Response appears truncated or incomplete",
+        "Failed to provide any Minsk supplier despite geographic clarification",
+        "Geo confusion persists: Minsk=base, Brest=delivery, but assistant still centered on Brest"
+      ],
+      "strengths": [
+        "Turn 1 Brest candidates are specific and relevant",
+        "Turn 1 catalog URLs are actionable",
+        "Honest about no Minsk candidates in Turn 1"
+      ],
+      "nextUserProbe": "Дай конкретно минских поставщиков молока"
+    },
+    {
+      "scenarioId": "GA002",
+      "usefulness": 3,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.45,
+      "wouldContinue": true,
+      "feltGenericFallback": true,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1 provides 2 concrete onion suppliers in Minsk — Amifrut and Zhdanovichi",
+        "Turn 2 adjusts geographic filter to Minsk region as requested",
+        "Turn 2 falls back to generic checklist and asks user for their town before offering new solutions",
+        "Both turns fail to provide any region-specific onion suppliers beyond Turn 1 list",
+        "Circular dependency: assistant asks for user location instead of providing oblast candidates"
+      ],
+      "criticalIssues": [
+        "Penalty: After 'region not city' clarification, assistant falls back to same companies with 'check if they deliver'",
+        "No new Minsk oblast candidates identified — should have searched regional suppliers",
+        "Zhdanovichi is within Minsk region — assistant should have confirmed this as primary candidate",
+        "Generic fallback after concrete geographic constraint"
+      ],
+      "strengths": [
+        "Good acknowledgment of region vs city distinction",
+        "Turn 1 candidates are relevant for initial screening",
+        "Practical verification questions are useful"
+      ],
+      "nextUserProbe": "Какие именно областные поставщики лука в Минской области?"
+    }
+  ]
+}
+```
+

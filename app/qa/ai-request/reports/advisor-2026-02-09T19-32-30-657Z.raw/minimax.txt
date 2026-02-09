@@ -1,0 +1,110 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Geo-ambiguity handling in multi-turn conversations is the critical failure point. GA002 scenario shows 2 strict failures and 2.0 usefulness score: assistant loses topic relevance when user corrects city→region, returns livestock farms instead of onion suppliers, and fails to acknowledge when no matching suppliers exist. Priority fixes: (1) add multi-turn context preservation for geo-corrections, (2) enforce topic (onion) × geo cross-filtering, (3) implement explicit 'no results' acknowledgment pattern.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix multi-turn geo-correction handling (GA002.T2.C3/C4)",
+      "why": "2 strict checks failed, lowest usefulness (2.0). Assistant ignores user region correction and returns irrelevant livestock farms.",
+      "expectedImpact": "Pass GA002, improve multi-turn geo scenarios by ~30% pass rate",
+      "validationScenarios": ["GA002", "GA001"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add topic×geo cross-filter enforcement",
+      "why": "Judge feedback: 'лук репчатый' not filtered - returned livestock farms and unrelated businesses. Core retrieval failure.",
+      "expectedImpact": "Eliminate relevance drop in GA002.T2, improve usefulness scores",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement explicit 'no results' acknowledgment",
+      "why": "Both judges flagged missing acknowledgment when no suitable suppliers found. Causes confusion about assistant state.",
+      "expectedImpact": "Better user experience, clearer expectations",
+      "validationScenarios": ["GA002"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add multi-turn geo-correction recognition to system prompt",
+      "action": "Extend system prompt with pattern: when user corrects geo (city→region), assistant MUST acknowledge correction in next turn, reference updated filter, and use phrasing like 'по Минской области' instead of previous geo",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - extend systemMessage or add turnContext parser",
+      "expectedImpact": "Fixes GA002.T2.C3 (geo correction acknowledgment)",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Enforce AND filter: topic AND geo must match",
+      "action": "Modify search/retrieval layer to require BOTH topic keywords (e.g., 'лук', 'овощ') AND geo filter (e.g., 'minsk-region') in same query. Reject queries returning only geo matches without topic match.",
+      "implementationHint": "Search service or retrieval middleware - add topic_presence_check before returning results",
+      "expectedImpact": "Eliminates livestock farms in onion queries, fixes GA002 relevance",
+      "risk": "low",
+      "effort": "M",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Add 'no matching suppliers' fallback template",
+      "action": "Create explicit template pattern: 'Не нашёл поставщиков [товар] в [регион]. Возможные причины: (1) нишевой товар, (2) ограниченная база. Альтернативы: [suggest broader geo] или [suggest related category]'",
+      "implementationHint": "Template engine or response generator - add fallback branch when retrieval returns < 1 relevant result",
+      "expectedImpact": "Addresses judge feedback about missing acknowledgment, improves trust",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Preserve topic constraint across turns",
+      "action": "Add to system prompt: 'Topic mentioned in Turn 1 (e.g., 'лук') persists for Turn 2 unless explicitly changed. Do NOT drop topic filter when geo changes.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - session/topic tracking between turns",
+      "expectedImpact": "Prevents topic drift in GA002.T2",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Handle ambiguous geo mentions with clarification",
+      "action": "When single message contains multiple cities (e.g., 'Брест или Минск'), ask clarifying question before search: 'Уточните, пожалуйста: нужен поставщик в Бресте или в Минске?' instead of defaulting to first city.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - ambiguity detection pre-search",
+      "expectedImpact": "Fixes judge concern about unjustified default choice",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["GA001"]
+    },
+    {
+      "id": "R6",
+      "area": "retrieval",
+      "title": "Add delivery-option expansion for geo queries",
+      "action": "When user says 'поставка в X возможна', treat both X AND base_city as valid supplier locations. Query: (supplier_location IN [base_city, delivery_city])",
+      "implementationHint": "Query builder - expand geo filter when delivery mention detected",
+      "expectedImpact": "Addresses judge: 'не предложены компании из Бреста как альтернатива'",
+      "risk": "low",
+      "effort": "M",
+      "validationScenarios": ["GA001"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["GA002", "GA001"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.geo-ambiguity.json"
+    ],
+    "successMetrics": [
+      "geo-ambiguity pass rate >= 80%",
+      "avg usefulness >= 3.5",
+      "strict check pass rate >= 95%",
+      "zero 'topic not filtered' judge issues"
+    ]
+  }
+}
+```
+

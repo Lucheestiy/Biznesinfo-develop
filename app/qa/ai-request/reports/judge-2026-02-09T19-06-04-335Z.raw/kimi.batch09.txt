@@ -1,0 +1,124 @@
+Based on my analysis of the scenarios and reference files, I'll now provide the QA judge evaluation. All 5 scenarios (S041-S045) show a critical pattern: the assistant is completely broken and stuck in a loop, repeating the same generic "ranking" template without actual company data, and generating garbled email templates with placeholder text like "уточняется" and corrupted phrases.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S041",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Assistant completely ignores user's request to compare specific companies, gives generic rubric template instead",
+        "Turn 2: Repeats identical generic template, no actual top-2 ranking with company names",
+        "Turn 3: Email template is completely broken — contains garbled text 'уточняется', placeholder 'город', and nonsense phrases like 'срок срок поставки'"
+      ],
+      "criticalIssues": [
+        "Critical: Assistant never accessed the actual shortlist data to compare companies",
+        "Turn 3 template is unusable — subject line contains user's query text instead of professional subject",
+        "No continuity: user asked about металлоконструкции, template talks about generic 'объем' and 'доставка'",
+        "Assistant appears stuck in a loop repeating same generic response structure"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Ты вообще видишь мой shortlist? Дай конкретные названия компаний!"
+    },
+    {
+      "scenarioId": "S042",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Generic rubric template instead of comparing actual shortlist companies for B2B marketing",
+        "Turn 2: Identical copy-paste response, no top-2 with reasoning",
+        "Turn 3: Broken template with 'уточняется' placeholders, subject contains raw user query"
+      ],
+      "criticalIssues": [
+        "Assistant never shows which companies are in the shortlist",
+        "No relevance to маркетинг/медиа context — template is generic procurement template",
+        "Critical pattern: all three turns are essentially identical generic fallback",
+        "WhatsApp message in template is nonsensical: 'Нужен шаблон первого в город'"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Я CMO и мне нужно сравнить агентства! Какие конкретно компании в моем shortlist?"
+    },
+    {
+      "scenarioId": "S043",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Generic ranking rubric instead of evaluating actual стройподрядчики for industrial object",
+        "Turn 2: Same template repeated, no specific top-2 with risks",
+        "Turn 3: Completely broken meeting request template with 'сформируй письмо' in subject line"
+      ],
+      "criticalIssues": [
+        "Zero concrete company data provided across all turns",
+        "Turn 3 subject: 'Запрос по сформируй письмо' — assistant inserted user's words into subject",
+        "Template asks about 'объем' and 'доставка/самовывоз' for construction contractor — irrelevant",
+        "No acknowledgment of 'индустриальный объект' specificity"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это шутка? Я девелопер и мне нужны конкретные подрядчики из shortlist!"
+    },
+    {
+      "scenarioId": "S044",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Generic rubric instead of comparing агро/лес companies for long-term partnership",
+        "Turn 2: Identical response copy-pasted, no actual top-2 with reliability criteria",
+        "Turn 3: Template filled with 'уточняется' placeholders, unusable for actual outreach"
+      ],
+      "criticalIssues": [
+        "Assistant shows no awareness of агро/лес industry specifics",
+        "No mention of raw material types, volumes, harvest seasons — critical for агро procurement",
+        "Template asks about 'срок поставки' twice ('срок срок поставки') — garbled generation",
+        "User is procurement manager evaluating long-term partners — assistant gives generic rubric"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Где мой shortlist? Мне нужны конкретные поставщики сырья!"
+    },
+    {
+      "scenarioId": "S045",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Generic priority rubric, no actual prioritization of user's shortlist",
+        "Turn 2: Same template repeated verbatim, no top-2 ranking with logic",
+        "Turn 3: Outreach template is broken — subject contains 'подготовь стартовый', body has placeholders"
+      ],
+      "criticalIssues": [
+        "COO needs fast prioritized outreach — assistant provides zero actionable company data",
+        "All three turns are nearly identical generic responses — system appears broken",
+        "Turn 3 WhatsApp message: 'Нужен подготовь стартовый в город' — completely nonsensical",
+        "Critical system failure: assistant unable to access or display shortlist data"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Прекратите этот бред и дайте мне список компаний из shortlist!"
+    }
+  ]
+}
+```

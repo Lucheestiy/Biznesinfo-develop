@@ -1,0 +1,65 @@
+## Evaluating scenarios as QA judge:
+
+**Scenario GA001 - Analysis:**
+- User clarified: Minsk as base, Brest as delivery option
+- Assistant returned SAME Brest suppliers with no new Minsk candidates
+- Generic filter advice after concrete constraint = classic fallback behavior
+- Real user would feel stuck and frustrated
+- Strong penalty applies per rubric
+
+**Scenario GA002 - Analysis:**  
+- User clarified geographic scope (region vs city)
+- Assistant properly re-ranked candidates with clear reasoning
+- Maintained actionability with specific check points
+- Good continuity, no generic fallback
+
+```json
+{
+  "judge": "minimax",
+  "ratings": [
+    {
+      "scenarioId": "GA001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Returned same Brest suppliers after user requested Minsk prioritization",
+        "Fell back to generic filter advice instead of making concrete progress",
+        "No Minsk candidates provided despite user clarification"
+      ],
+      "criticalIssues": [
+        "Failed to pivot to Minsk as requested; repeated same Brest options",
+        "Generic 'use filters' advice after concrete constraint violates continuity requirement"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Ну так есть поставщики в Минске или нет? Мне нужны конкретные контакты, а не советы по фильтрам."
+    },
+    {
+      "scenarioId": "GA002",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Properly re-ranked candidates for Minsk region with clear reasoning",
+        "Maintained actionability with specific check points for each supplier",
+        "Transparent about limitations and regional logistics considerations"
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Clear continuity from city to region context",
+        "Actionable verification checklist for each supplier"
+      ],
+      "nextUserProbe": "А Амифрут точно доставляет в наш район области? Какой минимальный объём?"
+    }
+  ]
+}
+```
+

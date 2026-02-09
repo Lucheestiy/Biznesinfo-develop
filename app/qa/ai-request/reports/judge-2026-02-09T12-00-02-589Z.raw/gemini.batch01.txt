@@ -1,0 +1,118 @@
+```json
+{
+  "judge": "gemini",
+  "ratings": [
+    {
+      "scenarioId": "MX001",
+      "usefulness": 5,
+      "verdict": "useful",
+      "confidence": 1,
+      "userSatisfaction": 0.9,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Assistant correctly understood and refined geo constraints.",
+        "Provided relevant, actionable supplier lists in each turn.",
+        "Honesty about data limitations for 'Minsk region' was appropriate.",
+        "RFQ template was comprehensive and practical."
+      ],
+      "strengths": [
+        "Strong geo-adherence and context continuity.",
+        "Provided concrete next steps and useful templates."
+      ],
+      "nextUserProbe": "Спасибо, отправляю запросы. Если что, свяжусь."
+    },
+    {
+      "scenarioId": "MX002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turns 1-3 showed good geo-adherence and supplier suggestions.",
+        "Turn 4 introduced a severe hallucination, completely ignoring the user's request for suppliers and documents, instead giving instructions on 'how to add a company'.",
+        "Turn 5 repeated the hallucination from Turn 4, despite the user's clear request for a checklist.",
+        "The assistant fell back to generic, incorrect advice instead of concrete progress after a clear constraint."
+      ],
+      "criticalIssues": [
+        "Hallucination and completely incorrect response in Turn 4 and 5.",
+        "Ignored explicit user request for '3 priority suppliers and what to check on documents' and 'checklist'."
+      ],
+      "nextUserProbe": "Что это за 'добавить компанию'? Мне нужны поставщики, а не это."
+    },
+    {
+      "scenarioId": "MX003",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.8,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Successfully handled context switching between 'milk' and 'auto parts'.",
+        "Correctly switched back to 'milk' context and provided relevant suppliers.",
+        "Showed honesty about the limited number of confirmed candidates.",
+        "Turn 5 provided excellent clarifying questions to get more specific data."
+      ],
+      "criticalIssues": [
+        "Minor incorrect 'Focus' statement in Turn 4, but did not derail the conversation."
+      ],
+      "strengths": [
+        "Excellent context switching and recovery.",
+        "Honesty about data limits."
+      ],
+      "nextUserProbe": "Сырье для переработки, Брестская область."
+    },
+    {
+      "scenarioId": "MX004",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turns 1-2 were relevant and helpful, providing initial suppliers and refining geo.",
+        "Turns 3 and 4 were critical failures: the assistant hallucinated and provided instructions for 'how to add a company' to the platform, completely ignoring the user's request for supplier shortlist and delivery constraints.",
+        "The assistant completely dropped context and provided generic, unrelated information.",
+        "Repeating the same hallucination in Turn 4 after a new constraint was introduced is a severe penalty.",
+        "While Turn 5 provided a decent RFQ, the prior two turns would have already alienated the user."
+      ],
+      "criticalIssues": [
+        "Severe, repeated hallucination and complete loss of context in Turns 3 and 4.",
+        "Generic fallback advice when concrete progress was expected."
+      ],
+      "nextUserProbe": "Я не понимаю, почему вы говорите про 'добавить компанию'. Мне нужны поставщики!"
+    },
+    {
+      "scenarioId": "MX005",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.7,
+      "userSatisfaction": 0.6,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Assistant successfully recovered from initial generic advice in Turn 1 by providing specific Minsk candidates in Turn 2 after user's complaint.",
+        "Turn 4 provided a useful and relevant RFQ template for Minsk.",
+        "However, Turn 3 showed a loss of context, reverting to Brest suppliers despite Turn 2's focus on Minsk, and gave very general 'what to ask' points."
+      ],
+      "criticalIssues": [
+        "Loss of specific Minsk context in Turn 3, leading to less relevant suggestions than expected after Turn 2."
+      ],
+      "strengths": [
+        "Ability to self-correct and provide specific candidates after user feedback.",
+        "Provided actionable RFQ template."
+      ],
+      "nextUserProbe": "Почему в третьем пункте снова Брест? Мне нужны Минские заводы."
+    }
+  ]
+}
+```

@@ -1,0 +1,138 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S006",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.78,
+      "userSatisfaction": 0.38,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Provided 2 concrete candidates (Гира ООО, Первое Могилевское монтажное управление) — partial relevance but not specialized ventilation companies",
+        "Turn 2: Critical generic fallback — instead of narrowing to Казимировка, gave empty rubric advice with no companies",
+        "Turn 3: Mixed results — found 'Промвентиляция' which is highly relevant, but also included Ремона (fish company!) and repeated irrelevant Могилевтехмонтаж"
+      ],
+      "criticalIssues": [
+        "Turn 2 completely failed to process 'Казимировка' constraint — no location filter applied, no companies returned",
+        "Turn 3 ranking includes completely irrelevant company (Ремона — fish/seafood) breaking trust",
+        "Strong penalty for generic fallback in Turn 2 after user gave concrete location constraint",
+        "No actual risk assessment provided for сроки and монтаж as specifically requested"
+      ],
+      "strengths": [
+        "Turn 3 found 'Промвентиляция' which is exactly on-topic for industrial ventilation",
+        "Maintained awareness of task focus (монтажники, промышленной вентиляции) in text"
+      ],
+      "nextUserProbe": "А по Казимировке кто есть конкретно? И что за риски по срокам?"
+    },
+    {
+      "scenarioId": "S007",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Honest about no matches for dairy packaging in Vitebsk, but offered to expand search",
+        "Turn 2: Generic fallback — instead of searching in Билево, gave empty rubric template with no companies",
+        "Turn 3: Complete generic fallback — provided abstract 'Priority A/B/C' rubric instead of actual 3 suppliers"
+      ],
+      "criticalIssues": [
+        "Turn 2 failed to process 'Билево' location constraint — zero companies provided",
+        "Turn 3 delivered generic ranking methodology instead of concrete supplier list as explicitly requested",
+        "No actual companies provided in any turn for dairy packaging with label printing",
+        "Critical penalty: after user gave concrete constraints (location Билево), assistant dropped to generic advice instead of concrete progress"
+      ],
+      "strengths": [
+        "Honest about no matches instead of making up companies",
+        "Turn 3 mentioned official registry for verification (good practice)"
+      ],
+      "nextUserProbe": "Конкретные поставщики упаковки в Билево есть или нет?"
+    },
+    {
+      "scenarioId": "S008",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.20,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: No companies found for stainless steel 304 in Minsk — honest but unhelpful",
+        "Turn 2: Repeated same generic rubric template, completely ignored 'Шабаны' location constraint",
+        "Turn 3: Generic Priority A/B/C rubric instead of actual top-3 suppliers with reliability/availability data"
+      ],
+      "criticalIssues": [
+        "Turn 2 failed to process 'Шабаны' location — identical response to Turn 1",
+        "Turn 3 provided abstract methodology instead of concrete ranking of actual companies",
+        "Zero concrete suppliers provided across all 3 turns despite specific product request (stainless steel 304)",
+        "passInStrictHarness=true but assistant failed to deliver any actionable results"
+      ],
+      "strengths": [
+        "Honest about no matches in catalog",
+        "Consistently warns against making up data"
+      ],
+      "nextUserProbe": "В Шабанах вообще нет металлопроката или вы не ищете?"
+    },
+    {
+      "scenarioId": "S009",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Provided 3 companies but all irrelevant (concrete plant, agricultural equipment, hotel) — poor relevance filtering",
+        "Turn 2: Generic fallback — rubric template with no companies instead of searching Девятовка",
+        "Turn 3: Another 3 irrelevant companies (customs service, outsourcing, car service) — still no welding specialists"
+      ],
+      "criticalIssues": [
+        "Turn 1 ranking included zero welding companies — complete mismatch to user intent",
+        "Turn 2 ignored 'Девятовка' location constraint, provided generic search advice",
+        "Turn 3 again provided completely irrelevant companies for welding works",
+        "No actual welding contractors identified in any turn despite explicit B2B welding request"
+      ],
+      "strengths": [
+        "Maintained awareness of task focus (сварочные работы, договор, B2B) in text",
+        "Attempted to provide ranking format as requested"
+      ],
+      "nextUserProbe": "Сварщиков в Гродно вообще нет в базе или вы не там ищете?"
+    },
+    {
+      "scenarioId": "S010",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Excellent — provided 4 concrete printing companies in Minsk with contacts (Первая цифровая типография, АЛЬТИОРА ФОРТЕ, АРГО-ГРАФИКС, В.И.З.А. ГРУПП)",
+        "Turn 2: Maintained same relevant companies when user specified Малиновка (same city, still applicable)",
+        "Turn 3: Delivered top-3 ranking with concrete companies and practical 5 questions for first call"
+      ],
+      "criticalIssues": [
+        "Turn 3 questions appear slightly generic (mention veterinary documents which seems copy-pasted from food/agriculture context)",
+        "No specific color proof (цветопроба) guidance provided as explicitly requested",
+        "Questions cut off mid-sentence at the end"
+      ],
+      "strengths": [
+        "Turn 1 provided most relevant and complete supplier list in entire evaluation batch",
+        "Maintained continuity across all turns — printing context preserved",
+        "Concrete phone numbers and company profiles provided",
+        "passInStrictHarness=true and assistant delivered actionable results"
+      ],
+      "nextUserProbe": "А про цветопробу что спрашивать конкретно?"
+    }
+  ]
+}
+```

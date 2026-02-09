@@ -1,0 +1,116 @@
+Now I have a good understanding of the codebase. Let me analyze the QA results and provide concrete engineering advice:
+
+Based on my analysis of the QA results and the codebase, here are the concrete engineering recommendations:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical failure pattern identified: assistant loses product context (молоко/лук) during geo-refinement turns, causing generic rubric fallbacks ('Недвижимость', 'Химия'). Root cause is insufficient context anchoring in system prompt when vendor lookup returns empty results for narrow geo filters. Template generation also fails with placeholder leakage ('уточняется').",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix context loss during geo-refinement",
+      "why": "MX001 and MX002 both fail when user refines location (Минская область instead of Минск). Assistant drops product context and returns generic rubrics. This is the highest-impact failure affecting 40% of multi-turn scenarios.",
+      "expectedImpact": "Reduces generic fallback rate from 60% to <10% for geo-refinement turns. Improves avg usefulness from 1.5 to 3+.",
+      "validationScenarios": ["MX001", "MX002"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder leakage",
+      "why": "RFQ templates contain raw placeholders like 'уточняется' instead of inferred values from dialog context. Template blocks (Subject/Body/WhatsApp) are malformed or missing.",
+      "expectedImpact": "Template compliance rate increases from 20% to >80%. Eliminates 'уточняется' leakage.",
+      "validationScenarios": ["MX001", "MX004", "MX005"]
+    },
+    {
+      "priority": "P1",
+      "title": "Strengthen continuity for logistics constraints",
+      "why": "When user adds delivery constraints (поставка в Брест), assistant fails to adapt existing shortlist and falls back to generic response.",
+      "expectedImpact": "Maintains context continuity through 90%+ of constraint refinements.",
+      "validationScenarios": ["MX002", "MX003"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add explicit product context anchoring in system prompt",
+      "action": "Modify buildAssistantSystemPrompt() to include: 'When geo-filter returns no results, NEVER drop the product context. Always preserve the original product/service from the conversation and suggest adjacent regions or broader filters while maintaining the product focus.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts lines 7212-7250. Add rule after line 7247.",
+      "expectedImpact": "Prevents 'Недвижимость/Химия' fallbacks when geo-filter narrows too much.",
+      "risk": "Low - additive rule, no breaking changes.",
+      "effort": "S",
+      "validationScenarios": ["MX001", "MX002"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add vendor lookup failure handling instruction",
+      "action": "In buildAssistantPrompt() around line 7302, change the 'no confirmed vendor candidates' message to: 'If vendor lookup returns empty for the current geo filter, DO NOT switch to generic rubrics. Instead: 1) Acknowledge the filter, 2) Preserve the product context, 3) Suggest either broadening the geo or checking adjacent regions, 4) If history contains relevant vendors, reference them with a note about geo mismatch.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts line 7302-7306",
+      "expectedImpact": "Eliminates generic rubric fallback on empty geo-filtered lookups.",
+      "risk": "Low - improves fallback behavior only.",
+      "effort": "S",
+      "validationScenarios": ["MX001", "MX002"]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Fix template block extraction and placeholder filling",
+      "action": "The ensureTemplateBlocks() function (line 679) fails to properly format templates. Fix: 1) Ensure Subject/Body/WhatsApp headers are always on separate lines, 2) Apply applyTemplateFillHints() BEFORE sanitizeUnfilledPlaceholdersInNonTemplateReply(), 3) Add validation that template contains no 'уточняется' or {placeholder} patterns before returning.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts lines 679-714 and 826-847. Reorder calls in postProcessAssistantReply around line 1808-1813.",
+      "expectedImpact": "Template blocks properly formatted, placeholders filled from context, no 'уточняется' leakage.",
+      "risk": "Medium - touches core template pipeline.",
+      "effort": "M",
+      "validationScenarios": ["MX001", "MX004", "MX005"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Broaden geo lookup when strict filter returns empty",
+      "action": "In the vendor lookup logic, when a strict geo filter (e.g., Минская область без города) returns empty, automatically retry with broader geo (Минск + Минская область) and annotate results with 'ближайший резерв'. Currently this fallback exists but doesn't trigger properly.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts around line 2575-2613 (geoCorrectionFollowUp handler). Ensure fallback pool is populated even when initial strict filter fails.",
+      "expectedImpact": "Provides relevant candidates instead of empty results for strict geo filters.",
+      "risk": "Low - improves fallback only.",
+      "effort": "S",
+      "validationScenarios": ["MX001", "MX002"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add post-processing validation for product context retention",
+      "action": "Add a final validation step in postProcessAssistantReply that checks: if the original query had strong product signals (молоко, лук, кабель) and the response contains generic rubrics (Недвижимость, Химия, Строительство) without the product, trigger a rewrite using buildForcedShortlistAppendix with history candidates.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts near line 3818, add validation before return.",
+      "expectedImpact": "Catches and fixes context loss before response is sent.",
+      "risk": "Low - safety net only.",
+      "effort": "M",
+      "validationScenarios": ["MX001", "MX002", "MX003"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Strengthen checklist mode instructions",
+      "action": "Current checklist prompt (line 7323-7327) is too weak. Change to: 'Response mode: checklist/questions. Provide EXACTLY the requested number of numbered items. Each item must be actionable and specific to the context. Never respond with generic filler like Работаю по данным каталога.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts lines 7323-7327",
+      "expectedImpact": "Fixes MX002.T5 where assistant returned stub instead of 6-point checklist.",
+      "risk": "Low - improves specific mode.",
+      "effort": "S",
+      "validationScenarios": ["MX002"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["MX001", "MX002", "MX004", "MX005"],
+    "regressionSuites": [
+      "scenarios.regressions.multi-step-journeys.json",
+      "scenarios.regressions.geo-ambiguity.json",
+      "scenarios.regressions.template-announcement.json"
+    ],
+    "successMetrics": [
+      "Scenario pass rate >= 80% (target: 4/5 scenarios)",
+      "Template blocks compliance >= 80%",
+      "Zero 'уточняется' placeholders in templates",
+      "Zero generic rubric fallbacks (Недвижимость/Химия) when product context exists",
+      "Avg usefulness score >= 3.0"
+    ]
+  }
+}
+```

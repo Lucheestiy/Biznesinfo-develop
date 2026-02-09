@@ -288,28 +288,59 @@ function buildJudgePrompt(judgeName, scenarios) {
 
 function runJudge(judge, prompt) {
   if (judge === "gemini") {
-    const proc = spawnSync(
-      "gemini",
-      [
+    const primaryModel = String(process.env.QA_GEMINI_MODEL || "").trim();
+    const fallbackModels = String(process.env.QA_GEMINI_FALLBACK_MODELS || process.env.QA_GEMINI_FALLBACK_MODEL || "")
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean);
+    const modelQueue = [...new Set([primaryModel, ...fallbackModels].filter(Boolean))];
+    if (modelQueue.length === 0) modelQueue.push("");
+
+    let last = null;
+    for (const model of modelQueue) {
+      const args = [
         "--output-format",
         "text",
         "-p",
         "Rate the scenarios and return JSON only.",
-      ],
-      {
-        cwd: repoRoot,
-        encoding: "utf8",
-        input: prompt,
-        maxBuffer: 1024 * 1024 * 10,
-      },
-    );
+      ];
+      if (model) args.unshift("--model", model);
 
-    return {
-      ok: proc.status === 0,
-      status: proc.status,
-      stdout: String(proc.stdout || ""),
-      stderr: String(proc.stderr || ""),
-    };
+      const proc = spawnSync(
+        "gemini",
+        args,
+        {
+          cwd: repoRoot,
+          encoding: "utf8",
+          input: prompt,
+          maxBuffer: 1024 * 1024 * 10,
+        },
+      );
+
+      const res = {
+        ok: proc.status === 0,
+        status: proc.status,
+        stdout: String(proc.stdout || ""),
+        stderr: String(proc.stderr || ""),
+      };
+
+      if (res.ok) return res;
+      last = res;
+
+      const capacityError = /(429|no\s+capacity\s+available|resource[_\s-]?exhausted|quota)/iu.test(
+        `${res.stderr}\n${res.stdout}`,
+      );
+      if (!capacityError) return res;
+    }
+
+    return (
+      last || {
+        ok: false,
+        status: 1,
+        stdout: "",
+        stderr: "Gemini judge failed before execution",
+      }
+    );
   }
 
   if (judge === "kimi") {
@@ -354,17 +385,99 @@ function runJudge(judge, prompt) {
   throw new Error(`Unknown judge: ${judge}`);
 }
 
+function normalizeJudgeRatings(parsed, expectedIds = []) {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return [];
+
+  const directRatings = Array.isArray(parsed.ratings) ? parsed.ratings : [];
+  if (directRatings.length > 0) return directRatings;
+
+  const nestedArrays = [];
+  for (const key of ["evaluations", "results", "items", "scores"]) {
+    const value = parsed[key];
+    if (Array.isArray(value) && value.length > 0) nestedArrays.push(...value);
+  }
+  if (nestedArrays.length > 0) return nestedArrays;
+
+  const expectedSet = new Set((expectedIds || []).map((id) => String(id || "").trim()).filter(Boolean));
+  const looksLikeScenarioId = (raw) => {
+    const id = String(raw || "").trim();
+    if (!id) return false;
+    if (expectedSet.size > 0) return expectedSet.has(id);
+    return /^[A-Za-z]{1,6}\d{2,6}$/u.test(id);
+  };
+
+  const convertMapRow = (scenarioId, source) => {
+    const id = String(scenarioId || "").trim();
+    if (!looksLikeScenarioId(id)) return null;
+    if (!source || typeof source !== "object" || Array.isArray(source)) return null;
+    const payload =
+      source.rating && typeof source.rating === "object" && !Array.isArray(source.rating) ? source.rating : source;
+
+    const row = {
+      scenarioId: id,
+      usefulness: payload.usefulness,
+      verdict: payload.verdict,
+      confidence: payload.confidence,
+      userSatisfaction: payload.userSatisfaction,
+      wouldContinue: payload.wouldContinue,
+      feltGenericFallback: payload.feltGenericFallback,
+      continuityScore: payload.continuityScore,
+      reasons: Array.isArray(payload.reasons) ? payload.reasons : [],
+      criticalIssues: Array.isArray(payload.criticalIssues) ? payload.criticalIssues : [],
+      strengths: Array.isArray(payload.strengths) ? payload.strengths : [],
+      nextUserProbe: payload.nextUserProbe,
+    };
+
+    const keyIssue = truncate(String(payload.key_issue || payload.keyIssue || ""), 220);
+    if (keyIssue && row.criticalIssues.length === 0) row.criticalIssues = [keyIssue];
+    return row;
+  };
+
+  const mapRows = [];
+  const summary = parsed.summary;
+  if (summary && typeof summary === "object" && !Array.isArray(summary)) {
+    for (const [scenarioId, value] of Object.entries(summary)) {
+      const row = convertMapRow(scenarioId, value);
+      if (row) mapRows.push(row);
+    }
+  }
+  if (mapRows.length > 0) return mapRows;
+
+  const topLevelMapRows = [];
+  for (const [scenarioId, value] of Object.entries(parsed)) {
+    const row = convertMapRow(scenarioId, value);
+    if (row) topLevelMapRows.push(row);
+  }
+  return topLevelMapRows;
+}
+
 function validateJudgeBatch(parsed, judge, expectedIds) {
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new Error("judge output is not an object");
   }
 
-  const ratings = Array.isArray(parsed.ratings) ? parsed.ratings : [];
-  if (ratings.length === 0) throw new Error("ratings array is empty");
+  const ratings = normalizeJudgeRatings(parsed, expectedIds);
+  if (ratings.length === 0) {
+    const keys = Object.keys(parsed || {}).slice(0, 10);
+    throw new Error(`ratings array is empty (keys: ${keys.join(", ") || "none"})`);
+  }
 
   const byId = new Map();
-  for (const row of ratings) {
-    const scenarioId = String(row?.scenarioId || "").trim();
+  const expectedSet = new Set((expectedIds || []).map((id) => String(id || "").trim()).filter(Boolean));
+  for (let idx = 0; idx < ratings.length; idx++) {
+    const row = ratings[idx];
+    let scenarioId = String(row?.scenarioId || "").trim();
+    if (scenarioId && expectedSet.size > 0 && !expectedSet.has(scenarioId)) {
+      const alias = scenarioId.match(/^S0*(\d{1,4})$/iu);
+      if (alias?.[1]) {
+        const pos = Number.parseInt(alias[1], 10) - 1;
+        if (Number.isFinite(pos) && pos >= 0 && pos < expectedIds.length) {
+          scenarioId = expectedIds[pos];
+        }
+      } else if (idx < expectedIds.length) {
+        scenarioId = expectedIds[idx];
+      }
+    }
     if (!scenarioId) continue;
     const usefulnessNum = Number(row?.usefulness);
     const usefulness = Number.isFinite(usefulnessNum) ? Math.max(0, Math.min(5, Math.round(usefulnessNum))) : null;

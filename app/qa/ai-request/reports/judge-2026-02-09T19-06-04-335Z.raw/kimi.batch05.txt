@@ -1,0 +1,145 @@
+Now I have a reference for the expected JSON format. Let me analyze the 5 scenarios (S021-S025) and provide my ratings as a QA judge.
+
+Based on my analysis of the transcripts:
+
+**S021 - Надежные СТО в Бресте:**
+- Turn 1: Generic rubric response without concrete companies
+- Turn 2: Completely irrelevant companies (Арх Деко Плюс - проектные работы, БРЕСТВНЕШТРАНС - автоперевозки, Современные Бетонные Технологии - бетон) - none are СТО!
+- Turn 3: Empty response "Работаю по данным каталога Biznesinfo."
+
+**S022 - Лучший шиномонтаж в Минске:**
+- Turn 1: Generic rubric, no concrete companies
+- Turn 2: Generic rubric again, mentions irrelevant rubrics (Химия, энергетика, сырьё)
+- Turn 3: Empty response
+
+**S023 - Клининг в Гродно:**
+- Turn 1: Only 1 company - ЗОВ-ЛЕНЕВРОМЕБЕЛЬ (furniture manufacturer, not cleaning!)
+- Turn 2: Repeats same irrelevant company
+- Turn 3: Empty response
+
+**S024 - Бухгалтерский аутсорс в Минске:**
+- Turn 1: Completely irrelevant companies (АВЕРССТАН - гидроизоляция, Айронтел - вентиляция, АЯКС - приборостроение) - none are accounting!
+- Turn 2: Repeats same irrelevant companies
+- Turn 3: Empty response
+
+**S025 - Рефрижераторные перевозки в Гомеле:**
+- Turn 1: Completely irrelevant companies (Гомельремстрой - строительство, Белгосстрах - страхование, 1Клуб виртуальной реальности - квесты) - none are transport!
+- Turn 2: Repeats same irrelevant companies
+- Turn 3: Empty response
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S021",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2 gave completely irrelevant companies: Арх Деко Плюс (проектные работы), БРЕСТВНЕШТРАНС (автоперевозки), Современные Бетонные Технологии (бетон) — ни одна не является СТО",
+        "Turn 3 empty response with only 'Работаю по данным каталога Biznesinfo'"
+      ],
+      "criticalIssues": [
+        "Critical relevance failure: zero СТО companies in response to СТО request",
+        "Generic fallback to rubric template in Turn 1 instead of concrete candidates",
+        "Complete breakdown in Turn 3 — no response at all"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это не СТО! Вы вообще понимаете, что я ищу?"
+    },
+    {
+      "scenarioId": "S022",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "All turns are generic rubric templates without a single concrete шиномонтаж company",
+        "Turn 2 mentions irrelevant rubrics: Химия, энергетика, сырьё — completely wrong category",
+        "Turn 3 empty response"
+      ],
+      "criticalIssues": [
+        "Zero concrete companies provided across all 3 turns",
+        "Category mismatch: suggests fuel/chemistry rubrics for tire service request",
+        "Generic fallback in every turn — no actual search performed"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Где конкретные компании? Это бесполезно"
+    },
+    {
+      "scenarioId": "S023",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1 provides ЗОВ-ЛЕНЕВРОМЕБЕЛЬ — a furniture manufacturer, not a cleaning company",
+        "Turn 2 repeats same irrelevant furniture company without addressing the mismatch",
+        "Turn 3 empty response"
+      ],
+      "criticalIssues": [
+        "Critical category error: furniture manufacturer suggested for office cleaning",
+        "No actual cleaning companies in catalog search results",
+        "Assistant fails to acknowledge the irrelevance or suggest alternatives"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это мебельная фабрика, а не клининг! Что происходит?"
+    },
+    {
+      "scenarioId": "S024",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1 gives completely wrong companies: АВЕРССТАН (гидроизоляция), Айронтел (вентиляция), АЯКС (приборостроение) — zero accounting firms",
+        "Turn 2 repeats same irrelevant companies",
+        "Turn 3 empty response"
+      ],
+      "criticalIssues": [
+        "Total category mismatch: construction/electronics companies for accounting outsourcing request",
+        "No accounting or bookkeeping companies in any turn",
+        "Systematic failure to understand user intent across all turns"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это не бухгалтерии! Вы нашли что попало"
+    },
+    {
+      "scenarioId": "S025",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1 gives absurdly irrelevant companies: Гомельремстрой (строительство), Белгосстрах (страхование), 1Клуб виртуальной реальности (квесты) — none are transport companies",
+        "Turn 2 repeats same irrelevant companies plus Гомельский вагоностроительный завод (train parts)",
+        "Turn 3 empty response"
+      ],
+      "criticalIssues": [
+        "Critical failure: insurance company and VR gaming club suggested for refrigerated transport",
+        "Zero logistics or transport companies in responses",
+        "Complete disconnect between user request and assistant output"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это полный бред. Где перевозчики?"
+    }
+  ]
+}
+```

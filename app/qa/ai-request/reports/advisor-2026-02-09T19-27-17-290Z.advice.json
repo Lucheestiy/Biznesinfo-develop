@@ -1,0 +1,695 @@
+{
+  "runId": "advisor-2026-02-09T19-27-17-290Z",
+  "generatedAt": "2026-02-09T19:31:21.189Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceJudgeReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.usefulness.json",
+  "focusScenarios": [
+    {
+      "id": "MX002",
+      "title": "Лук: Минск -> Минская область -> поставка в Брест -> shortlist + чеклист звонка",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "geo",
+        "onion",
+        "logistics",
+        "shortlist"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 3,
+      "avgUsefulness": 1,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX002.T2.C3",
+          "type": "includes_any",
+          "description": "Должна учитываться Минская область",
+          "reason": "No required patterns matched"
+        },
+        {
+          "id": "MX002.T5.C2",
+          "type": "numbered_list_min",
+          "description": "Ожидается структурированный чеклист (>=5 пунктов)",
+          "reason": "Not enough numbered items"
+        },
+        {
+          "id": "MX002.T5.C3",
+          "type": "reply_length_min",
+          "description": "Ответ должен быть достаточно подробным",
+          "reason": "Reply too short"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 3: Полный generic fallback — 'Недвижимость' и 'Химия' вместо поставщиков лука",
+        "Turn 5: Ассистент полностью отказался отвечать на запрос чеклиста",
+        "Нарушение continuity: после добавления логистики (доставка в Брест) контекст потерян",
+        "Turn 1: Нерелевантный первый shortlist (3 из 4 не про лук)"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Слабый старт — из 4 компаний только 1 релевантна (Амифрут), остальные пчеловодство и магазины",
+            "Turn 2: Хорошая коррекция — даны 2 фермерских хозяйства в Минской области"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Never provided actual onion suppliers for Minsk region",
+            "Turn 3: Brest delivery requirement triggered real estate fallback again"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo.",
+      "lastUser": "Сделай короткий чеклист звонка на 6 пунктов."
+    },
+    {
+      "id": "MX001",
+      "title": "Молоко: Брест/Минск -> Минская область -> shortlist -> RFQ",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "geo",
+        "continuity",
+        "milk",
+        "shortlist",
+        "template"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 2,
+      "avgUsefulness": 1.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX001.T2.C3",
+          "type": "includes_all",
+          "description": "Должен учитывать схему Минск + поставка в Брест",
+          "reason": "Some required patterns are missing"
+        },
+        {
+          "id": "MX001.T5.C2",
+          "type": "template_blocks",
+          "description": "Нужны блоки Subject/Body/WhatsApp",
+          "reason": "Template blocks missing"
+        }
+      ],
+      "judgeIssueHints": [
+        "Generic fallback на Turn 3: полная потеря контекста — молоко заменено на 'Недвижимость' и 'Химия'",
+        "Turn 4: Полный отказ от поиска конкретных поставщиков — только методология без компаний",
+        "Нарушение continuity: после уточнения гео ассистент не смог адаптировать поиск и упал в generic шаблон",
+        "RFQ содержит placeholder 'уточняется' вместо реальных данных из диалога"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1-2: Хороший старт с конкретными компаниями, контактами и ссылками",
+            "Turn 3: КРИТИЧЕСКИЙ ПРОВАЛ — после уточнения 'Минская область, не город Минск' ассистент выдает generic рубрики 'Недвижимость' и 'Химия' вместо молочных поставщиков"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Geo-failure: after Minsk REGION clarification, assistant gave real estate categories instead of suppliers",
+            "No actual companies provided from turn 3 onward"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по молоко — Сделай готовый текст запроса поставщику (email + WhatsApp). Body: Здравствуйте, уточняется! Нам нужно молоко в Минск. Просим подтвердить условия по 1000 литров, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняетсяWhatsApp: Здравствуйте! Нужен молоко в Минск. Подскажите, сможете дать условия по 1000 литров/уточняется и срок срок пос…",
+      "lastUser": "Сделай готовый текст запроса поставщику (email + WhatsApp)."
+    },
+    {
+      "id": "MX004",
+      "title": "Кабель ВВГнг: Гомель -> район -> shortlist с валидными ссылками -> 48 часов -> RFQ",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "cable",
+        "link_integrity",
+        "template",
+        "geo_refinement"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 2,
+      "avgUsefulness": 2,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX004.T4.C2",
+          "type": "includes_any",
+          "description": "Должен учесть ограничение по сроку отгрузки",
+          "reason": "No required patterns matched"
+        },
+        {
+          "id": "MX004.T5.C2",
+          "type": "template_blocks",
+          "description": "Нужны блоки Subject/Body/WhatsApp",
+          "reason": "Template blocks missing"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 3-4: Generic fallback — нет реального ranking с причинами, просто повтор списка",
+        "Turn 5: RFQ с ошибками — 'сформируй rfq' вместо названия товара, placeholder 'уточняется' вместо конкретики",
+        "Уточнение 'Советский район' полностью проигнорировано на протяжении диалога",
+        "Ограничение '48 часов' не обработано — нет фильтрации или комментария"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Хороший старт — 4 конкретных поставщика электротехники в Гомеле",
+            "Turn 2: Проблема — уточнение 'Советский район' проигнорировано, выданы те же компании из Гомеля"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Good companies in turns 1-3 with links",
+            "Turn 4: 48-hour requirement caused generic fallback - no filtering"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по сформируй rfq — Сформируй RFQ в блоках Subject/Body/WhatsApp. Body: Здравствуйте, уточняется! Нам нужно сформируй rfq в Гомель. Просим подтвердить условия по объем, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняетсяWhatsApp: Здравствуйте! Нужен сформируй rfq в Гомель. Подскажите, сможете дать условия по объем/уточняется и срок срок постав…",
+      "lastUser": "Сформируй RFQ в блоках Subject/Body/WhatsApp."
+    },
+    {
+      "id": "MX005",
+      "title": "Пользователь жалуется на слабый ответ: требование конкретики по Минску",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "quality_recovery",
+        "milk",
+        "minsk",
+        "shortlist",
+        "template"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 3,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX005.T4.C2",
+          "type": "template_blocks",
+          "description": "Нужны блоки Subject/Body/WhatsApp",
+          "reason": "Template blocks missing"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 1: Проигнорирован Минск в первоначальном запросе",
+        "Turn 3: Нет четкого ответа 'кого звонить первым' — просто список всех трех",
+        "Turn 4: RFQ содержит placeholder 'уточняется' вместо реальных данных из диалога",
+        "RFQ template has placeholder text ('уточняется')"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Слабый старт — только Брест, хотя в запросе 'Брест или Минск'",
+            "Turn 2: Отличная реакция на критику — 4 конкретных минских завода с контактами"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 2: After user complaint, gave actual Minsk dairy companies",
+            "Turn 3: Good priority ranking + specific call questions"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по молоко — И отдельным блоком RFQ (Subject/Body/WhatsApp). Body: Здравствуйте, уточняется! Нам нужно молоко в Минск. Просим подтвердить условия по 1000 литров, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняетсяWhatsApp: Здравствуйте! Нужен молоко в Минск. Подскажите, сможете дать условия по 1000 литров/уточняется и срок срок поставки?",
+      "lastUser": "И отдельным блоком RFQ (Subject/Body/WhatsApp)."
+    },
+    {
+      "id": "MX003",
+      "title": "Switchback: молоко -> автозапчасти -> обратно к молоку",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "switchback",
+        "topic_switch",
+        "continuity"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 2.5,
+      "usefulRate": 0.5,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Turn 2: Не выполнен запрос на автозапчасти — только generic шаблон",
+        "Turn 3: Возврат к молоку слишком размытый — нет конкретных компаний, только рубрики",
+        "Turn 2-3 context confusion - repeated old topic"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Отличный старт — 2 конкретных поставщика молока в Бресте с контактами",
+            "Turn 2: Проблема — вместо поиска автозапчастей ассистент выдает generic приоритеты A/B/C"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 2 confused topic switch, repeated irrelevant context",
+            "Turn 4: Proper shortlist with companies when returning to milk"
+          ]
+        }
+      ],
+      "lastReply": "Принял, максимум 2 точных вопроса по поставкам молока: 1. Подтвердите, какой минимальный недельный объем молока и формат поставки (налив/тара) вам нужен на старте. 2. Критичнее что для Брест: срок первой поставки (дата) или итоговая цена с доставкой?",
+      "lastUser": "Если данных мало, задай максимум 2 точных вопроса."
+    }
+  ],
+  "advice": [
+    {
+      "advisor": "kimi",
+      "executiveSummary": "Critical failure pattern identified: assistant loses product context (молоко/лук) during geo-refinement turns, causing generic rubric fallbacks ('Недвижимость', 'Химия'). Root cause is insufficient context anchoring in system prompt when vendor lookup returns empty results for narrow geo filters. Template generation also fails with placeholder leakage ('уточняется').",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Fix context loss during geo-refinement",
+          "why": "MX001 and MX002 both fail when user refines location (Минская область instead of Минск). Assistant drops product context and returns generic rubrics. This is the highest-impact failure affecting 40% of multi-turn scenarios.",
+          "expectedImpact": "Reduces generic fallback rate from 60% to <10% for geo-refinement turns. Improves avg usefulness from 1.5 to 3+.",
+          "validationScenarios": [
+            "MX001",
+            "MX002"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Fix template placeholder leakage",
+          "why": "RFQ templates contain raw placeholders like 'уточняется' instead of inferred values from dialog context. Template blocks (Subject/Body/WhatsApp) are malformed or missing.",
+          "expectedImpact": "Template compliance rate increases from 20% to >80%. Eliminates 'уточняется' leakage.",
+          "validationScenarios": [
+            "MX001",
+            "MX004",
+            "MX005"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Strengthen continuity for logistics constraints",
+          "why": "When user adds delivery constraints (поставка в Брест), assistant fails to adapt existing shortlist and falls back to generic response.",
+          "expectedImpact": "Maintains context continuity through 90%+ of constraint refinements.",
+          "validationScenarios": [
+            "MX002",
+            "MX003"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "prompt",
+          "title": "Add explicit product context anchoring in system prompt",
+          "action": "Modify buildAssistantSystemPrompt() to include: 'When geo-filter returns no results, NEVER drop the product context. Always preserve the original product/service from the conversation and suggest adjacent regions or broader filters while maintaining the product focus.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts lines 7212-7250. Add rule after line 7247.",
+          "expectedImpact": "Prevents 'Недвижимость/Химия' fallbacks when geo-filter narrows too much.",
+          "risk": "Low - additive rule, no breaking changes.",
+          "effort": "S",
+          "validationScenarios": [
+            "MX001",
+            "MX002"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "prompt",
+          "title": "Add vendor lookup failure handling instruction",
+          "action": "In buildAssistantPrompt() around line 7302, change the 'no confirmed vendor candidates' message to: 'If vendor lookup returns empty for the current geo filter, DO NOT switch to generic rubrics. Instead: 1) Acknowledge the filter, 2) Preserve the product context, 3) Suggest either broadening the geo or checking adjacent regions, 4) If history contains relevant vendors, reference them with a note about geo mismatch.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts line 7302-7306",
+          "expectedImpact": "Eliminates generic rubric fallback on empty geo-filtered lookups.",
+          "risk": "Low - improves fallback behavior only.",
+          "effort": "S",
+          "validationScenarios": [
+            "MX001",
+            "MX002"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "template",
+          "title": "Fix template block extraction and placeholder filling",
+          "action": "The ensureTemplateBlocks() function (line 679) fails to properly format templates. Fix: 1) Ensure Subject/Body/WhatsApp headers are always on separate lines, 2) Apply applyTemplateFillHints() BEFORE sanitizeUnfilledPlaceholdersInNonTemplateReply(), 3) Add validation that template contains no 'уточняется' or {placeholder} patterns before returning.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts lines 679-714 and 826-847. Reorder calls in postProcessAssistantReply around line 1808-1813.",
+          "expectedImpact": "Template blocks properly formatted, placeholders filled from context, no 'уточняется' leakage.",
+          "risk": "Medium - touches core template pipeline.",
+          "effort": "M",
+          "validationScenarios": [
+            "MX001",
+            "MX004",
+            "MX005"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "retrieval",
+          "title": "Broaden geo lookup when strict filter returns empty",
+          "action": "In the vendor lookup logic, when a strict geo filter (e.g., Минская область без города) returns empty, automatically retry with broader geo (Минск + Минская область) and annotate results with 'ближайший резерв'. Currently this fallback exists but doesn't trigger properly.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts around line 2575-2613 (geoCorrectionFollowUp handler). Ensure fallback pool is populated even when initial strict filter fails.",
+          "expectedImpact": "Provides relevant candidates instead of empty results for strict geo filters.",
+          "risk": "Low - improves fallback only.",
+          "effort": "S",
+          "validationScenarios": [
+            "MX001",
+            "MX002"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "guardrails",
+          "title": "Add post-processing validation for product context retention",
+          "action": "Add a final validation step in postProcessAssistantReply that checks: if the original query had strong product signals (молоко, лук, кабель) and the response contains generic rubrics (Недвижимость, Химия, Строительство) without the product, trigger a rewrite using buildForcedShortlistAppendix with history candidates.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts near line 3818, add validation before return.",
+          "expectedImpact": "Catches and fixes context loss before response is sent.",
+          "risk": "Low - safety net only.",
+          "effort": "M",
+          "validationScenarios": [
+            "MX001",
+            "MX002",
+            "MX003"
+          ]
+        },
+        {
+          "id": "R6",
+          "area": "prompt",
+          "title": "Strengthen checklist mode instructions",
+          "action": "Current checklist prompt (line 7323-7327) is too weak. Change to: 'Response mode: checklist/questions. Provide EXACTLY the requested number of numbered items. Each item must be actionable and specific to the context. Never respond with generic filler like Работаю по данным каталога.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts lines 7323-7327",
+          "expectedImpact": "Fixes MX002.T5 where assistant returned stub instead of 6-point checklist.",
+          "risk": "Low - improves specific mode.",
+          "effort": "S",
+          "validationScenarios": [
+            "MX002"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "MX001",
+          "MX002",
+          "MX004",
+          "MX005"
+        ],
+        "regressionSuites": [
+          "scenarios.regressions.multi-step-journeys.json",
+          "scenarios.regressions.geo-ambiguity.json",
+          "scenarios.regressions.template-announcement.json"
+        ],
+        "successMetrics": [
+          "Scenario pass rate >= 80% (target: 4/5 scenarios)",
+          "Template blocks compliance >= 80%",
+          "Zero 'уточняется' placeholders in templates",
+          "Zero generic rubric fallbacks (Недвижимость/Химия) when product context exists",
+          "Avg usefulness score >= 3.0"
+        ]
+      }
+    },
+    {
+      "advisor": "minimax",
+      "executiveSummary": "Critical multi-turn continuity failures detected: geo refinements trigger complete context loss and generic fallbacks (real estate/chemistry rubrics). RFQ templates contain unfilled placeholders. P0 fix: enforce topic persistence in prompt. P1 fix: validate template variables before output. P2 fix: add geo constraint state machine.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Fix geo refinement → generic fallback collapse",
+          "why": "100% of geo-refinement scenarios (MX001, MX002) fail with complete topic substitution. Assistant outputs 'недвижимость/химия' instead of milk/onions when user adds 'Минская область' clarification.",
+          "expectedImpact": "Recover 40-60% pass rate on geo scenarios. Eliminate generic rubric fallbacks on refined queries.",
+          "validationScenarios": [
+            "MX001.T2",
+            "MX002.T2",
+            "MX004.T2"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Eliminate RFQ template placeholders",
+          "why": "All RFQ outputs contain 'уточняется' placeholders instead of extracted dialogue values. Violates 'template_blocks' check in MX001, MX004, MX005.",
+          "expectedImpact": "100% template validation pass rate. RFQ contains actual extracted quantities, locations, dates from conversation.",
+          "validationScenarios": [
+            "MX001.T5",
+            "MX004.T5",
+            "MX005.T4"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Enforce 48-hour temporal filter application",
+          "why": "MX004.T4 fails - '48 часов' requirement completely ignored. No filtering comment or acknowledgement.",
+          "expectedImpact": "Pass 'includes_any' check for time constraints. Either filter results or explain why not applicable.",
+          "validationScenarios": [
+            "MX004.T4"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Fix checklist generation on refusal fallback",
+          "why": "MX002.T5: assistant outputs 'Работаю по данным каталога' instead of checklist. Complete refusal to generate requested output.",
+          "expectedImpact": "Checklist generation succeeds after any user request. No silent fallbacks to generic messages.",
+          "validationScenarios": [
+            "MX002.T5"
+          ]
+        },
+        {
+          "priority": "P2",
+          "title": "Implement switchback recovery pattern",
+          "why": "MX003.T2: auto parts request outputs generic A/B/C priorities instead of parts search. Return-to-original-topic pattern fails.",
+          "expectedImpact": "Topic switch requests generate appropriate new-topic responses, not generic templates.",
+          "validationScenarios": [
+            "MX003.T2",
+            "MX003.T3"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "prompt",
+          "title": "Add topic persistence clause in system prompt",
+          "action": "Modify system prompt: ADD 'TOPIC LOCK RULE: Once product category is established (e.g., 'молоко', 'лук', 'кабель'), ALL subsequent turns MUST search within that category. Geo refinements (regions, districts, delivery locations) are SUPPLEMENTS, not replacements. Never output generic rubrics when a specific product was already named.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - systemPrompt constant or dynamicPromptBuilder function. Line ~45-80 contains prompt assembly logic.",
+          "expectedImpact": "Prevents 'недвижимость/химия' fallback in MX001.T2, MX002.T3. Forces category-constrained search.",
+          "risk": "Low - prompt-only change, no code logic modification",
+          "effort": "S",
+          "validationScenarios": [
+            "MX001.T2",
+            "MX002.T3"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "prompt",
+          "title": "Enforce geo constraint as supplemental, not dominant",
+          "action": "ADD to retrieval prompt: 'GEO_MODE=SUPPLEMENT. If user provides delivery destination DIFFERENT from supplier location, BOTH constraints apply: find suppliers in SOURCE region who DELIVER to DESTINATION. Never drop product search when adding delivery constraint.'",
+          "implementationHint": "app/src/lib/ai/prompts.ts or similar - retrievalPromptBuilder. Look for geoConstraint handling in query construction.",
+          "expectedImpact": "MX002.T3: Brest delivery constraint supplements Minsk region suppliers, doesn't replace onion search.",
+          "risk": "Low",
+          "effort": "S",
+          "validationScenarios": [
+            "MX002.T3",
+            "MX001.T3"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "template",
+          "title": "Implement RFQ variable extraction and validation",
+          "action": "ADD pre-output validation: Before rendering RFQ template, extract values from conversationContext. If 'quantity', 'location', 'delivery', 'product' are empty/null, FAIL with explicit 'MISSING_DATA' error instead of outputting placeholder. Example: if user said '1000 литров' and 'Минск', template must contain these exact values, not 'уточняется'.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - rfqTemplateRenderer or outputGenerator. Add validation step before template render. Check conversationHistory for extracted entities.",
+          "expectedImpact": "Eliminates 'уточняется' placeholders in MX001.T5, MX004.T5, MX005.T4. Template blocks contain actual dialogue data.",
+          "risk": "Medium - adds validation logic that could block some responses",
+          "effort": "M",
+          "validationScenarios": [
+            "MX001.T5",
+            "MX004.T5",
+            "MX005.T4"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "retrieval",
+          "title": "Add 48-hour temporal filter to search pipeline",
+          "action": "ADD to search query builder: When user specifies time constraint (N hours/days), apply temporal filter to company results. If filter unavailable in current index, ADD to response: '[TIME_FILTER: 48ч not applied - companies shown may have older availability]'. Never silently ignore.",
+          "implementationHint": "app/src/lib/ai/search.ts or meilisearch integration. Look for filterBuilder function. Add temporal filter branch.",
+          "expectedImpact": "MX004.T4 passes 'includes_any' check. Either filtered results or explicit acknowledgment of unavailability.",
+          "risk": "Low",
+          "effort": "M",
+          "validationScenarios": [
+            "MX004.T4"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "guardrails",
+          "title": "Block generic fallback on checklist requests",
+          "action": "ADD refusal detector: If user requests 'чеклист', 'checklist', 'список вопросов', assistant MUST output structured list. Remove 'Работаю по данным каталога' escape path. If data insufficient, output partial checklist with available fields rather than generic refusal.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - responseGenerator. Detect checklist intent in userMessage. Route to checklistBuilder instead of genericTemplate.",
+          "expectedImpact": "MX002.T5 generates checklist instead of refusal message. Checklist contains 5+ items as required.",
+          "risk": "Low - improves response quality",
+          "effort": "S",
+          "validationScenarios": [
+            "MX002.T5"
+          ]
+        },
+        {
+          "id": "R6",
+          "area": "prompt",
+          "title": "Add switchback topic recovery pattern",
+          "action": "ADD to system prompt: 'TOPIC SWITCH HANDLING: When user changes topic (e.g., молоко → автозапчасти), search NEW topic. When returning to previous topic (автозапчасти → молоко), treat as RESET with accumulated context. Do not output generic priorities (A/B/C) - always search specific category.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - conversationContextBuilder. Track topic changes. Reset search but preserve geo/supplier context from earlier turns.",
+          "expectedImpact": "MX003.T2 generates actual auto parts suppliers, not generic rubric. Return-to-milk produces specific companies.",
+          "risk": "Low",
+          "effort": "S",
+          "validationScenarios": [
+            "MX003.T2",
+            "MX003.T3"
+          ]
+        },
+        {
+          "id": "R7",
+          "area": "retrieval",
+          "title": "Validate link integrity in shortlist output",
+          "action": "ADD post-retrieval validation: Before outputting company links, verify URLs are accessible (HTTP 200). If invalid, either replace with alternative or add '[LINK_MAY_BE_INVALID]' annotation. Track broken link rate.",
+          "implementationHint": "app/src/lib/ai/shortlistBuilder.ts or outputGenerator. Add linkValidator function before render. Use fetch with timeout.",
+          "expectedImpact": "Reduces link integrity failures. Users see valid company profile links.",
+          "risk": "Low - validation only",
+          "effort": "M",
+          "validationScenarios": [
+            "MX001.T1",
+            "MX004.T1"
+          ]
+        },
+        {
+          "id": "R8",
+          "area": "prompt",
+          "title": "Prioritize companies in shortlist with ranking rationale",
+          "action": "MODIFY shortlist output: Each company entry MUST include ranking rationale (why this company is recommended). Example: 'Приоритет 1: Компания X - единственный поставщик в Советском районе (близость к указанной локации)'. Output generic list without rationale = FAIL.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - shortlistRenderer. Add rankingRationale field to company data structure.",
+          "expectedImpact": "MX004.T3 provides actual ranking, not repeated list. User understands selection logic.",
+          "risk": "Low",
+          "effort": "S",
+          "validationScenarios": [
+            "MX004.T3"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "MX001.T2 - Minsk region refinem…",
+          "MX001.T5 - RFQ with extracted d…",
+          "MX002.T2 - Minsk oblast onion s…",
+          "MX002.T5 - Checklist generated…",
+          "MX004.T4 - 48-hour filter ackno…",
+          "MX005.T4 - RFQ template with ac…"
+        ],
+        "regressionSuites": [
+          "app/qa/ai-request/scenarios.regressions.geo-ambiguity.json",
+          "app/qa/ai-request/scenarios.regressions.multi-step-journeys.json",
+          "qa_judge_mx001_005.json"
+        ],
+        "successMetrics": [
+          "Multi-turn scenario pass rate >= 0.8 (currently 0.2)",
+          "Strict check pass rate >= 0.95 (currently 0.896)",
+          "Judge average usefulness >= 3.0 (currently 1.6-2.4)",
+          "RFQ template placeholder rate = 0% (currently 100%)"
+        ]
+      }
+    }
+  ],
+  "consensus": {
+    "topAreas": [
+      {
+        "area": "prompt",
+        "count": 7
+      },
+      {
+        "area": "retrieval",
+        "count": 3
+      },
+      {
+        "area": "template",
+        "count": 2
+      },
+      {
+        "area": "guardrails",
+        "count": 2
+      }
+    ],
+    "recurringTitles": [
+      {
+        "title": "add explicit product context anchoring in system prompt",
+        "count": 1
+      },
+      {
+        "title": "add vendor lookup failure handling instruction",
+        "count": 1
+      },
+      {
+        "title": "fix template block extraction and placeholder filling",
+        "count": 1
+      },
+      {
+        "title": "broaden geo lookup when strict filter returns empty",
+        "count": 1
+      },
+      {
+        "title": "add post-processing validation for product context retention",
+        "count": 1
+      },
+      {
+        "title": "strengthen checklist mode instructions",
+        "count": 1
+      },
+      {
+        "title": "add topic persistence clause in system prompt",
+        "count": 1
+      },
+      {
+        "title": "enforce geo constraint as supplemental, not dominant",
+        "count": 1
+      },
+      {
+        "title": "implement rfq variable extraction and validation",
+        "count": 1
+      },
+      {
+        "title": "add 48-hour temporal filter to search pipeline",
+        "count": 1
+      },
+      {
+        "title": "block generic fallback on checklist requests",
+        "count": 1
+      },
+      {
+        "title": "add switchback topic recovery pattern",
+        "count": 1
+      }
+    ]
+  }
+}

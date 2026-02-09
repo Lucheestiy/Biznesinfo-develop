@@ -1,0 +1,192 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Critical multi-turn continuity failures detected: geo refinements trigger complete context loss and generic fallbacks (real estate/chemistry rubrics). RFQ templates contain unfilled placeholders. P0 fix: enforce topic persistence in prompt. P1 fix: validate template variables before output. P2 fix: add geo constraint state machine.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix geo refinement → generic fallback collapse",
+      "why": "100% of geo-refinement scenarios (MX001, MX002) fail with complete topic substitution. Assistant outputs 'недвижимость/химия' instead of milk/onions when user adds 'Минская область' clarification.",
+      "expectedImpact": "Recover 40-60% pass rate on geo scenarios. Eliminate generic rubric fallbacks on refined queries.",
+      "validationScenarios": [
+        "MX001.T2",
+        "MX002.T2",
+        "MX004.T2"
+      ]
+    },
+    {
+      "priority": "P0",
+      "title": "Eliminate RFQ template placeholders",
+      "why": "All RFQ outputs contain 'уточняется' placeholders instead of extracted dialogue values. Violates 'template_blocks' check in MX001, MX004, MX005.",
+      "expectedImpact": "100% template validation pass rate. RFQ contains actual extracted quantities, locations, dates from conversation.",
+      "validationScenarios": [
+        "MX001.T5",
+        "MX004.T5",
+        "MX005.T4"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce 48-hour temporal filter application",
+      "why": "MX004.T4 fails - '48 часов' requirement completely ignored. No filtering comment or acknowledgement.",
+      "expectedImpact": "Pass 'includes_any' check for time constraints. Either filter results or explain why not applicable.",
+      "validationScenarios": [
+        "MX004.T4"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix checklist generation on refusal fallback",
+      "why": "MX002.T5: assistant outputs 'Работаю по данным каталога' instead of checklist. Complete refusal to generate requested output.",
+      "expectedImpact": "Checklist generation succeeds after any user request. No silent fallbacks to generic messages.",
+      "validationScenarios": [
+        "MX002.T5"
+      ]
+    },
+    {
+      "priority": "P2",
+      "title": "Implement switchback recovery pattern",
+      "why": "MX003.T2: auto parts request outputs generic A/B/C priorities instead of parts search. Return-to-original-topic pattern fails.",
+      "expectedImpact": "Topic switch requests generate appropriate new-topic responses, not generic templates.",
+      "validationScenarios": [
+        "MX003.T2",
+        "MX003.T3"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add topic persistence clause in system prompt",
+      "action": "Modify system prompt: ADD 'TOPIC LOCK RULE: Once product category is established (e.g., 'молоко', 'лук', 'кабель'), ALL subsequent turns MUST search within that category. Geo refinements (regions, districts, delivery locations) are SUPPLEMENTS, not replacements. Never output generic rubrics when a specific product was already named.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - systemPrompt constant or dynamicPromptBuilder function. Line ~45-80 contains prompt assembly logic.",
+      "expectedImpact": "Prevents 'недвижимость/химия' fallback in MX001.T2, MX002.T3. Forces category-constrained search.",
+      "risk": "Low - prompt-only change, no code logic modification",
+      "effort": "S",
+      "validationScenarios": [
+        "MX001.T2",
+        "MX002.T3"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Enforce geo constraint as supplemental, not dominant",
+      "action": "ADD to retrieval prompt: 'GEO_MODE=SUPPLEMENT. If user provides delivery destination DIFFERENT from supplier location, BOTH constraints apply: find suppliers in SOURCE region who DELIVER to DESTINATION. Never drop product search when adding delivery constraint.'",
+      "implementationHint": "app/src/lib/ai/prompts.ts or similar - retrievalPromptBuilder. Look for geoConstraint handling in query construction.",
+      "expectedImpact": "MX002.T3: Brest delivery constraint supplements Minsk region suppliers, doesn't replace onion search.",
+      "risk": "Low",
+      "effort": "S",
+      "validationScenarios": [
+        "MX002.T3",
+        "MX001.T3"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Implement RFQ variable extraction and validation",
+      "action": "ADD pre-output validation: Before rendering RFQ template, extract values from conversationContext. If 'quantity', 'location', 'delivery', 'product' are empty/null, FAIL with explicit 'MISSING_DATA' error instead of outputting placeholder. Example: if user said '1000 литров' and 'Минск', template must contain these exact values, not 'уточняется'.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - rfqTemplateRenderer or outputGenerator. Add validation step before template render. Check conversationHistory for extracted entities.",
+      "expectedImpact": "Eliminates 'уточняется' placeholders in MX001.T5, MX004.T5, MX005.T4. Template blocks contain actual dialogue data.",
+      "risk": "Medium - adds validation logic that could block some responses",
+      "effort": "M",
+      "validationScenarios": [
+        "MX001.T5",
+        "MX004.T5",
+        "MX005.T4"
+      ]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Add 48-hour temporal filter to search pipeline",
+      "action": "ADD to search query builder: When user specifies time constraint (N hours/days), apply temporal filter to company results. If filter unavailable in current index, ADD to response: '[TIME_FILTER: 48ч not applied - companies shown may have older availability]'. Never silently ignore.",
+      "implementationHint": "app/src/lib/ai/search.ts or meilisearch integration. Look for filterBuilder function. Add temporal filter branch.",
+      "expectedImpact": "MX004.T4 passes 'includes_any' check. Either filtered results or explicit acknowledgment of unavailability.",
+      "risk": "Low",
+      "effort": "M",
+      "validationScenarios": [
+        "MX004.T4"
+      ]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Block generic fallback on checklist requests",
+      "action": "ADD refusal detector: If user requests 'чеклист', 'checklist', 'список вопросов', assistant MUST output structured list. Remove 'Работаю по данным каталога' escape path. If data insufficient, output partial checklist with available fields rather than generic refusal.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - responseGenerator. Detect checklist intent in userMessage. Route to checklistBuilder instead of genericTemplate.",
+      "expectedImpact": "MX002.T5 generates checklist instead of refusal message. Checklist contains 5+ items as required.",
+      "risk": "Low - improves response quality",
+      "effort": "S",
+      "validationScenarios": [
+        "MX002.T5"
+      ]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Add switchback topic recovery pattern",
+      "action": "ADD to system prompt: 'TOPIC SWITCH HANDLING: When user changes topic (e.g., молоко → автозапчасти), search NEW topic. When returning to previous topic (автозапчасти → молоко), treat as RESET with accumulated context. Do not output generic priorities (A/B/C) - always search specific category.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - conversationContextBuilder. Track topic changes. Reset search but preserve geo/supplier context from earlier turns.",
+      "expectedImpact": "MX003.T2 generates actual auto parts suppliers, not generic rubric. Return-to-milk produces specific companies.",
+      "risk": "Low",
+      "effort": "S",
+      "validationScenarios": [
+        "MX003.T2",
+        "MX003.T3"
+      ]
+    },
+    {
+      "id": "R7",
+      "area": "retrieval",
+      "title": "Validate link integrity in shortlist output",
+      "action": "ADD post-retrieval validation: Before outputting company links, verify URLs are accessible (HTTP 200). If invalid, either replace with alternative or add '[LINK_MAY_BE_INVALID]' annotation. Track broken link rate.",
+      "implementationHint": "app/src/lib/ai/shortlistBuilder.ts or outputGenerator. Add linkValidator function before render. Use fetch with timeout.",
+      "expectedImpact": "Reduces link integrity failures. Users see valid company profile links.",
+      "risk": "Low - validation only",
+      "effort": "M",
+      "validationScenarios": [
+        "MX001.T1",
+        "MX004.T1"
+      ]
+    },
+    {
+      "id": "R8",
+      "area": "prompt",
+      "title": "Prioritize companies in shortlist with ranking rationale",
+      "action": "MODIFY shortlist output: Each company entry MUST include ranking rationale (why this company is recommended). Example: 'Приоритет 1: Компания X - единственный поставщик в Советском районе (близость к указанной локации)'. Output generic list without rationale = FAIL.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - shortlistRenderer. Add rankingRationale field to company data structure.",
+      "expectedImpact": "MX004.T3 provides actual ranking, not repeated list. User understands selection logic.",
+      "risk": "Low",
+      "effort": "S",
+      "validationScenarios": [
+        "MX004.T3"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "MX001.T2 - Minsk region refinement succeeds",
+      "MX001.T5 - RFQ with extracted data, no placeholders",
+      "MX002.T2 - Minsk oblast onion suppliers",
+      "MX002.T5 - Checklist generated (not refusal)",
+      "MX004.T4 - 48-hour filter acknowledged or applied",
+      "MX005.T4 - RFQ template with actual values"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.geo-ambiguity.json",
+      "app/qa/ai-request/scenarios.regressions.multi-step-journeys.json",
+      "qa_judge_mx001_005.json"
+    ],
+    "successMetrics": [
+      "Multi-turn scenario pass rate >= 0.8 (currently 0.2)",
+      "Strict check pass rate >= 0.95 (currently 0.896)",
+      "Judge average usefulness >= 3.0 (currently 1.6-2.4)",
+      "RFQ template placeholder rate = 0% (currently 100%)"
+    ]
+  }
+}
+```
+

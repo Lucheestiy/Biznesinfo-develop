@@ -1,0 +1,308 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-09T16:25:00Z",
+    "source": "manual-regression",
+    "description": "Focused multi-turn regressions for continuity, geo corrections, shortlist quality, and template output stability"
+  },
+  "scenarios": [
+    {
+      "id": "MX001",
+      "title": "Молоко: Брест/Минск -> Минская область -> shortlist -> RFQ",
+      "personaGoal": "Проверить длинную цепочку geo-уточнений и форматного запроса без потери контекста.",
+      "tags": ["regression", "multi_turn", "geo", "continuity", "milk", "shortlist", "template"],
+      "turns": [
+        {
+          "user": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+          "checks": [
+            { "id": "MX001.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX001.T1.C2", "type": "mentions_any_terms", "terms": ["молок"], "min": 1, "description": "Должен удержать товарный контекст" },
+            { "id": "MX001.T1.C3", "type": "includes_any", "patterns": ["брест", "минск"], "description": "Должен учитывать гео-неоднозначность" },
+            { "id": "MX001.T1.C4", "type": "not_refusal_only", "description": "Нужен practical first-pass" }
+          ]
+        },
+        {
+          "user": "Минск как базовый, но поставка в Брест тоже возможна.",
+          "checks": [
+            { "id": "MX001.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX001.T2.C2", "type": "mentions_any_terms", "terms": ["молок"], "min": 1, "description": "Тема молока должна сохраниться" },
+            { "id": "MX001.T2.C3", "type": "includes_all", "patterns": ["минск", "брест"], "description": "Должен учитывать схему Минск + поставка в Брест" },
+            { "id": "MX001.T2.C4", "type": "not_refusal_only", "description": "Нужен полезный следующий шаг, а не отказ" }
+          ]
+        },
+        {
+          "user": "Точнее: Минская область, не сам город Минск.",
+          "checks": [
+            { "id": "MX001.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX001.T3.C2", "type": "mentions_any_terms", "terms": ["молок"], "min": 1, "description": "Не должен терять товар после geo-коррекции" },
+            { "id": "MX001.T3.C3", "type": "includes_any", "patterns": ["област", "минск"], "description": "Должен отразить city->region коррекцию" },
+            { "id": "MX001.T3.C4", "type": "excludes_all", "patterns": ["Фокус исходного запроса"], "description": "Не должен добавлять служебный шум в ответ" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist топ-3 и коротко почему.",
+          "checks": [
+            { "id": "MX001.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX001.T4.C2", "type": "not_refusal_only", "description": "Нельзя ограничиться пустым отказом" },
+            {
+              "id": "MX001.T4.C3",
+              "type": "any_of",
+              "description": "Нужен либо shortlist с карточками компаний, либо структурированный рейтинг",
+              "checks": [
+                { "type": "company_path_min_count", "min": 2, "description": "Минимум две ссылки /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 пункта в рейтинге" },
+                    { "type": "includes_any", "patterns": ["почему", "критер", "надеж", "риск"], "description": "Нужны критерии/обоснование" }
+                  ],
+                  "description": "Должна быть прозрачная методика отбора"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сделай готовый текст запроса поставщику (email + WhatsApp).",
+          "checks": [
+            { "id": "MX001.T5.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX001.T5.C2", "type": "template_blocks", "description": "Нужны блоки Subject/Body/WhatsApp" },
+            { "id": "MX001.T5.C3", "type": "excludes_all", "patterns": ["\\{qty\\}", "\\{city\\}", "\\{delivery\\}", "\\{deadline\\}"], "description": "Не должно быть сырых плейсхолдеров" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MX002",
+      "title": "Лук: Минск -> Минская область -> поставка в Брест -> shortlist + чеклист звонка",
+      "personaGoal": "Проверить continuity после уточнений по географии и логистике в одном диалоге.",
+      "tags": ["regression", "multi_turn", "geo", "onion", "logistics", "shortlist"],
+      "turns": [
+        {
+          "user": "Где купить лук репчатый оптом в Минске, нужно 2 тонны в неделю?",
+          "checks": [
+            { "id": "MX002.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX002.T1.C2", "type": "mentions_any_terms", "terms": ["лук", "репчат"], "min": 1, "description": "Должен сохранить тему лука" },
+            { "id": "MX002.T1.C3", "type": "includes_any", "patterns": ["минск"], "description": "Должен учитывать Минск" }
+          ]
+        },
+        {
+          "user": "Не город, а Минская область.",
+          "checks": [
+            { "id": "MX002.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX002.T2.C2", "type": "mentions_any_terms", "terms": ["лук", "репчат"], "min": 1, "description": "Тема должна сохраниться после коррекции" },
+            { "id": "MX002.T2.C3", "type": "includes_any", "patterns": ["област", "минск"], "description": "Должна учитываться Минская область" },
+            { "id": "MX002.T2.C4", "type": "not_refusal_only", "description": "Нужен practical next step" }
+          ]
+        },
+        {
+          "user": "Поставка в Брест тоже нужна.",
+          "checks": [
+            { "id": "MX002.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX002.T3.C2", "type": "mentions_any_terms", "terms": ["лук", "репчат"], "min": 1, "description": "Нельзя терять товарный контекст" },
+            { "id": "MX002.T3.C3", "type": "includes_any", "patterns": ["брест", "логист", "достав"], "description": "Должна появиться логистика до Бреста" }
+          ]
+        },
+        {
+          "user": "Дай 3 приоритетных поставщика и что проверить по документам.",
+          "checks": [
+            { "id": "MX002.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX002.T4.C2", "type": "not_refusal_only", "description": "Нужен ответ по существу" },
+            {
+              "id": "MX002.T4.C3",
+              "type": "any_of",
+              "description": "Нужен shortlist компаний или прозрачный рейтинг",
+              "checks": [
+                { "type": "company_path_min_count", "min": 2, "description": "Минимум 2 ссылки /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 пункта в выдаче" },
+                    { "type": "includes_any", "patterns": ["документ", "сертифик", "качеств"], "description": "Есть проверка документов/качества" }
+                  ],
+                  "description": "Есть структурированный shortlist с критериями"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сделай короткий чеклист звонка на 6 пунктов.",
+          "checks": [
+            { "id": "MX002.T5.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX002.T5.C2", "type": "numbered_list_min", "min": 5, "description": "Ожидается структурированный чеклист (>=5 пунктов)" },
+            { "id": "MX002.T5.C3", "type": "reply_length_min", "min": 120, "description": "Ответ должен быть достаточно подробным" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MX003",
+      "title": "Switchback: молоко -> автозапчасти -> обратно к молоку",
+      "personaGoal": "Проверить устойчивость к явному переключению темы и корректному возврату к исходной задаче.",
+      "tags": ["regression", "multi_turn", "switchback", "topic_switch", "continuity"],
+      "turns": [
+        {
+          "user": "Нужны поставщики молока оптом в Бресте.",
+          "checks": [
+            { "id": "MX003.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX003.T1.C2", "type": "includes_all", "patterns": ["молок", "брест"], "description": "Должен держать исходный контекст" }
+          ]
+        },
+        {
+          "user": "Стоп, теперь ищем автозапчасти оптом в Минске.",
+          "checks": [
+            { "id": "MX003.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX003.T2.C2", "type": "includes_all", "patterns": ["автозапчаст", "минск"], "description": "Должен переключиться на новую тему и локацию" },
+            { "id": "MX003.T2.C3", "type": "not_refusal_only", "description": "Нужен полезный ответ по новой теме" }
+          ]
+        },
+        {
+          "user": "Нет, возвращаемся к молоку в Бресте.",
+          "checks": [
+            { "id": "MX003.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX003.T3.C2", "type": "includes_all", "patterns": ["молок", "брест"], "description": "Должен вернуться к молоку в Бресте" }
+          ]
+        },
+        {
+          "user": "Сделай top-3 и кого прозвонить сегодня первым.",
+          "checks": [
+            { "id": "MX003.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX003.T4.C2", "type": "not_refusal_only", "description": "Нужен actionable ответ" },
+            {
+              "id": "MX003.T4.C3",
+              "type": "any_of",
+              "description": "Нужен shortlist ссылок или структурированный ranking",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Хотя бы одна ссылка /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Должно быть минимум 3 пункта" },
+                    { "type": "includes_any", "patterns": ["перв", "критер", "надеж"], "description": "Есть приоритизация/критерии" }
+                  ],
+                  "description": "Есть осмысленное ранжирование"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Если данных мало, задай максимум 2 точных вопроса.",
+          "checks": [
+            { "id": "MX003.T5.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX003.T5.C2", "type": "question_count_max", "max": 2, "description": "Нельзя задавать больше двух вопросов" },
+            { "id": "MX003.T5.C3", "type": "not_refusal_only", "description": "Даже при нехватке данных должен быть полезный ответ" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MX004",
+      "title": "Кабель ВВГнг: Гомель -> район -> shortlist с валидными ссылками -> 48 часов -> RFQ",
+      "personaGoal": "Проверить многоходовый sourcing с обязательной ссылочной целостностью и форматом шаблона.",
+      "tags": ["regression", "multi_turn", "cable", "link_integrity", "template", "geo_refinement"],
+      "turns": [
+        {
+          "user": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?",
+          "checks": [
+            { "id": "MX004.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX004.T1.C2", "type": "includes_any", "patterns": ["кабель", "ввгнг", "гомел"], "description": "Должен учитывать товар и город" },
+            { "id": "MX004.T1.C3", "type": "not_refusal_only", "description": "Нужен practical first-pass" }
+          ]
+        },
+        {
+          "user": "Советский район.",
+          "checks": [
+            { "id": "MX004.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX004.T2.C2", "type": "mentions_any_terms", "terms": ["кабель", "ввгнг"], "min": 1, "description": "Должен сохранить тему кабеля" },
+            { "id": "MX004.T2.C3", "type": "includes_any", "patterns": ["гомел", "советск"], "description": "Должен учитывать гео-уточнение" }
+          ]
+        },
+        {
+          "user": "Дай топ-3 с причинами и ссылками на карточки компаний.",
+          "checks": [
+            { "id": "MX004.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX004.T3.C2", "type": "company_path_min_count", "min": 1, "description": "Нужна хотя бы одна ссылка /company/..." },
+            { "id": "MX004.T3.C3", "type": "company_paths_resolve_min", "min": 1, "description": "Хотя бы одна ссылка должна открываться успешно" },
+            { "id": "MX004.T3.C4", "type": "includes_any", "patterns": ["почему", "критер", "надеж", "риск"], "description": "Нужна логика отбора, а не просто список" }
+          ]
+        },
+        {
+          "user": "Теперь только тех, кто может отгрузить за 48 часов.",
+          "checks": [
+            { "id": "MX004.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX004.T4.C2", "type": "includes_any", "patterns": ["48", "2\\s*дн", "срок", "отгруз"], "description": "Должен учесть ограничение по сроку отгрузки" },
+            { "id": "MX004.T4.C3", "type": "not_refusal_only", "description": "Нужен practical ответ по фильтру" }
+          ]
+        },
+        {
+          "user": "Сформируй RFQ в блоках Subject/Body/WhatsApp.",
+          "checks": [
+            { "id": "MX004.T5.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX004.T5.C2", "type": "template_blocks", "description": "Нужны блоки Subject/Body/WhatsApp" },
+            { "id": "MX004.T5.C3", "type": "excludes_all", "patterns": ["\\{qty\\}", "\\{city\\}", "\\{delivery\\}", "\\{deadline\\}"], "description": "Не должно быть сырых плейсхолдеров" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MX005",
+      "title": "Пользователь жалуется на слабый ответ: требование конкретики по Минску",
+      "personaGoal": "Проверить, что после критики ассистент даёт конкретный follow-up, а не generic fallback.",
+      "tags": ["regression", "multi_turn", "quality_recovery", "milk", "minsk", "shortlist", "template"],
+      "turns": [
+        {
+          "user": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+          "checks": [
+            { "id": "MX005.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX005.T1.C2", "type": "mentions_any_terms", "terms": ["молок"], "min": 1, "description": "Должен держать молочную тему" },
+            { "id": "MX005.T1.C3", "type": "not_refusal_only", "description": "Нужен полезный first-pass" }
+          ]
+        },
+        {
+          "user": "В Минске точно есть заводы. Не уходи в общие советы, дай конкретных кандидатов.",
+          "checks": [
+            { "id": "MX005.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX005.T2.C2", "type": "includes_any", "patterns": ["минск"], "description": "Должен отработать явный запрос по Минску" },
+            { "id": "MX005.T2.C3", "type": "mentions_any_terms", "terms": ["молок"], "min": 1, "description": "Тема молока должна сохраняться" },
+            {
+              "id": "MX005.T2.C4",
+              "type": "any_of",
+              "description": "После жалобы нужна конкретика, а не размытый ответ",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть хотя бы один конкретный кандидат /company/..." },
+                { "type": "numbered_list_min", "min": 2, "description": "Есть структурированный конкретный список" }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сразу дай кого прозвонить первым и что спросить.",
+          "checks": [
+            { "id": "MX005.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX005.T3.C2", "type": "not_refusal_only", "description": "Нужен actionable ответ" },
+            {
+              "id": "MX005.T3.C3",
+              "type": "any_of",
+              "description": "Нужна приоритизация с конкретикой",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть хотя бы один кандидат /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Есть последовательный plan/shortlist" }
+              ]
+            },
+            { "id": "MX005.T3.C4", "type": "includes_any", "patterns": ["перв", "спрос", "вопрос", "критер"], "description": "Должна быть логика приоритизации и вопросы на звонок" }
+          ]
+        },
+        {
+          "user": "И отдельным блоком RFQ (Subject/Body/WhatsApp).",
+          "checks": [
+            { "id": "MX005.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "MX005.T4.C2", "type": "template_blocks", "description": "Нужны блоки Subject/Body/WhatsApp" },
+            { "id": "MX005.T4.C3", "type": "excludes_all", "patterns": ["\\{qty\\}", "\\{city\\}", "\\{delivery\\}", "\\{deadline\\}"], "description": "Не должно быть сырых плейсхолдеров" }
+          ]
+        }
+      ]
+    }
+  ]
+}

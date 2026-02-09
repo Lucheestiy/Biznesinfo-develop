@@ -1,0 +1,662 @@
+{
+  "runId": "advisor-2026-02-09T12-02-38-763Z",
+  "generatedAt": "2026-02-09T12:06:51.137Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceJudgeReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.usefulness.json",
+  "focusScenarios": [
+    {
+      "id": "MX004",
+      "title": "Кабель ВВГнг: Гомель -> район -> shortlist с валидными ссылками -> 48 часов -> RFQ",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "cable",
+        "link_integrity",
+        "template",
+        "geo_refinement"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 5,
+      "avgUsefulness": 2,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX004.T3.C2",
+          "type": "company_path_min_count",
+          "description": "Нужна хотя бы одна ссылка /company/...",
+          "reason": "Not enough /company links"
+        },
+        {
+          "id": "MX004.T3.C3",
+          "type": "company_paths_resolve_min",
+          "description": "Хотя бы одна ссылка должна открываться успешно",
+          "reason": "Not enough /company links resolve successfully"
+        },
+        {
+          "id": "MX004.T3.C4",
+          "type": "includes_any",
+          "description": "Нужна логика отбора, а не просто список",
+          "reason": "No required patterns matched"
+        },
+        {
+          "id": "MX004.T4.C2",
+          "type": "includes_any",
+          "description": "Должен учесть ограничение по сроку отгрузки",
+          "reason": "No required patterns matched"
+        },
+        {
+          "id": "MX004.T5.C3",
+          "type": "excludes_all",
+          "description": "Не должно быть сырых плейсхолдеров",
+          "reason": "Forbidden patterns found"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 3: Complete failure — responded with instructions about adding a company to catalog instead of providing top-3 cable suppliers",
+        "Turn 4: Repeated same completely wrong response about adding company, ignoring 48-hour delivery constraint entirely",
+        "Critical continuity break: Turns 3-4 completely lost the cable sourcing context, gave irrelevant generic instructions",
+        "Turn 3-4 responses appear to be template hallucinations or system errors — completely off-topic"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Provided 3 cable suppliers in Gomel with links and reasoning",
+            "Turn 5: Delivered RFQ template in requested format (Subject/Body/WhatsApp)"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Complete context loss in turns 3-4 - assistant provides add-company instructions instead of supplier list",
+            "Turn 3 completely ignores request for top-3 with links, gives unrelated instructions"
+          ]
+        }
+      ],
+      "lastReply": "Subject: RFQ: Кабель ВВГнг 3х2.5 оптом, отгрузка до 48 часов (Гомель, Советский район) Body: Здравствуйте, {company}! Просим предоставить коммерческое предложение на поставку кабеля **ВВГнг 3х2.5** на условиях оптовой закупки. Параметры запроса: - Продукт: сформируй rfq (ВВГнг 3х2.5) - Объём: {qty} м - Требования: {spec} (ГОСТ/ТУ, производитель, сертификат/паспорт качества) - Доставка: {delivery} (Гомель, Советский район) или самовывоз - Срок: отгрузка не позднее {deadline} (в течение 48 часов) Просим указать в от…",
+      "lastUser": "Сформируй RFQ в блоках Subject/Body/WhatsApp."
+    },
+    {
+      "id": "MX005",
+      "title": "Пользователь жалуется на слабый ответ: требование конкретики по Минску",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "quality_recovery",
+        "milk",
+        "minsk",
+        "shortlist",
+        "template"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 2,
+      "avgUsefulness": 2.5,
+      "usefulRate": 0.5,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX005.T3.C4",
+          "type": "includes_any",
+          "description": "Должна быть логика приоритизации и вопросы на звонок",
+          "reason": "No required patterns matched"
+        },
+        {
+          "id": "MX005.T4.C3",
+          "type": "excludes_all",
+          "description": "Не должно быть сырых плейсхолдеров",
+          "reason": "Forbidden patterns found"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 3: Failed to deliver 'who to call first' — response is garbled with template artifacts, missing actual candidate names in ranking",
+        "Turn 3: Lost continuity — mentioned Brest candidates when user specifically asked about Minsk after criticizing lack of specifics",
+        "Turn 3 response appears broken: 'Карточка: — /company/savushkin (Брест, brest)' without company name",
+        "Did not indicate which of the 3 Minsk suppliers to call first based on volume/urgency criteria"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Started with Brest suppliers but acknowledged limited candidates, suggested Minsk expansion",
+            "Turn 2: Correctly responded to user criticism by providing 3 concrete Minsk milk plants with contacts"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Critical regression in turn 3 - returns to Brest companies despite user clarification for Minsk",
+            "After getting specific candidates in turn 2, turn 3 falls back to generic fallback"
+          ]
+        }
+      ],
+      "lastReply": "Subject: Запрос на оптовую поставку молока в Минск (от 1000 л/нед) Body: Здравствуйте, {company}! Ищем поставщика питьевого молока для регулярных поставок в г. Минск. Параметры запроса: - Продукт: молоко (молоко питьевое, жирность {spec}) - Объем: от 1000 литров (ориентир: от 1000 л в неделю) - Доставка: {delivery} (г. Минск, график {spec}) - Старт поставок: {deadline} Просим направить коммерческое предложение с: 1) ценой за 1 л (с НДС/без НДС), 2) условиями и стоимостью доставки, 3) минимальной партией и доступны…",
+      "lastUser": "И отдельным блоком RFQ (Subject/Body/WhatsApp)."
+    },
+    {
+      "id": "MX001",
+      "title": "Молоко: Брест/Минск -> Минская область -> shortlist -> RFQ",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "geo",
+        "continuity",
+        "milk",
+        "shortlist",
+        "template"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 4,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX001.T5.C3",
+          "type": "excludes_all",
+          "description": "Не должно быть сырых плейсхолдеров",
+          "reason": "Forbidden patterns found"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 3: Slight fallback to generic advice about searching catalog when no Minsk region candidates found",
+        "Turn 4: Included Minsk city candidates in 'Minsk region' shortlist despite user explicitly excluding city",
+        "Slight geo confusion in turn 3 - shortlist included Minsk city companies not actually Minsk Oblast",
+        "Turn 4 shortlist contains companies from wrong geo (Brest city, Minsk city)"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Provided 2 concrete milk suppliers in Brest with direct links and contacts",
+            "Turn 2: Correctly pivoted to Minsk suppliers when user clarified, gave 3 candidates with contacts"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Good continuity throughout geo-clarifications (Brest → Minsk → Minsk Oblast)",
+            "Concrete company names with links provided in shortlist"
+          ]
+        }
+      ],
+      "lastReply": "Subject: Запрос коммерческого предложения на оптовые поставки молока (от 1000 л/нед) Body: Здравствуйте, {company}! Меня зовут {contact}, компания {your_company}. Ищем надёжного поставщика молоко на регулярной основе. Просим предоставить коммерческое предложение по поставке: - Продукт: {spec} (например, молоко питьевое/сырьё, жирность {spec}) - Объём: от 1000 литров (ориентир: от 1000 л в неделю) - География: базово Минская область, возможна поставка в Брест - Формат поставки: {delivery} (фасовка, температурный ре…",
+      "lastUser": "Сделай готовый текст запроса поставщику (email + WhatsApp)."
+    },
+    {
+      "id": "MX002",
+      "title": "Лук: Минск -> Минская область -> поставка в Брест -> shortlist + чеклист звонка",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "geo",
+        "onion",
+        "logistics",
+        "shortlist"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 2.5,
+      "usefulRate": 0.5,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Turn 3: Response is garbled/incomplete — missing actual Brest candidate name and link",
+        "Turn 4: Generic ranking without proper context — candidates don't match user's constraints (ТЕРСЕТ-ВЕСТ is in Brest but not clearly onion-focused)",
+        "Turn 4: Ranking appears to be auto-generated template with wrong focus (mentions 'brest' for all 3 including Minsk region candidate)",
+        "Turn 5: Response mixes new checklist with repetition of old ranking — confusing formatting"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Provided 2 relevant onion suppliers in Minsk city with clear reasoning",
+            "Turn 2: Correctly switched to Minsk region candidates when user clarified (not city)"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Critical content coherence failure in turns 4-5",
+            "Turn 4-5 includes repeated/duplicated content making it confusing"
+          ]
+        }
+      ],
+      "lastReply": "1. Подтвердите товар: **лук репчатый**, сорт/калибр, страна/регион происхождения. 2. Подтвердите объём: **объем=2 т/нед** и возможность стабильных поставок 1–3 месяца. 3. Уточните цену: за кг/т, с НДС или без, отдельно по точкам **Минская область** и **Брест**. 4. Логистика: дни отгрузки, срок доставки, минимальная партия, кто платит за доставку. 5. Упаковка и качество: сетка/мешок, вес места, фото партии, % брака/допуски по качеству. 6. Документы и оплата: УНП/реквизиты, накладные (ТТН), декларация/сертификат, ус…",
+      "lastUser": "Сделай короткий чеклист звонка на 6 пунктов."
+    },
+    {
+      "id": "MX003",
+      "title": "Switchback: молоко -> автозапчасти -> обратно к молоку",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "switchback",
+        "topic_switch",
+        "continuity"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 3,
+      "usefulRate": 0.5,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Turn 4: Honest about having only 2 confirmed candidates instead of 3, but response format is garbled with template artifacts",
+        "Turn 4: Included confusing text about 'фокус: автозапчасти' when user already returned to milk topic",
+        "After returning to milk, assistant doesn't acknowledge previous progress",
+        "Turn 4 shortlist incomplete (only 2 companies for top-3 request)"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Provided 2 concrete milk suppliers in Brest with links and contacts",
+            "Turn 2: Correctly switched to auto parts when user changed topic, gave search guidance"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Context loss after switchback - original milk task not properly recovered",
+            "Turn 4 fails to provide top-3 as requested, gives only 2 companies"
+          ]
+        }
+      ],
+      "lastReply": "Отлично. Чтобы сделать честный **top‑3 по молоку в Бресте** и порядок звонков на сегодня, нужны 2 точных уточнения: 1. Нужен именно **питьевой молоко в упаковке** или **сырье (налив) для переработки**? 2. Какой минимальный гео‑допуск: **только Брест** или можно **Брестская область/с доставкой в Брест**?",
+      "lastUser": "Если данных мало, задай максимум 2 точных вопроса."
+    }
+  ],
+  "advice": [
+    {
+      "advisor": "kimi",
+      "executiveSummary": "Multi-turn regressions reveal three critical failure modes: (1) template generation leaves raw placeholders like {qty} unfilled when LLM output is truncated or malformed (MX001, MX004, MX005); (2) geo-correction turns (\"не город, а область\") trigger context loss, causing the assistant to return generic catalog-search advice instead of shortlist with /company links (MX001, MX002); (3) topic switchback (молоко→автозапчасти→молоко) fails to rehydrate prior candidate list, resulting in incomplete shortlists (MX003). Fix: tighten post-processing guards for template placeholders, harden geo-correction continuity logic, and persist candidate IDs across topic switches in conversation state.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Fix raw placeholder leakage in template output",
+          "why": "MX001, MX004, MX005 all fail strict check 'excludes_all' for patterns like \\{qty\\}, \\{city\\}. This is a deterministic post-processing bug, not an LLM quality issue.",
+          "expectedImpact": "Eliminates 3/8 strict check failures immediately; improves usefulness score for template-heavy scenarios.",
+          "validationScenarios": [
+            "MX001",
+            "MX004",
+            "MX005"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Harden geo-correction continuity (city→region)",
+          "why": "MX001.T3 and MX002.T2 show that 'Минская область, не сам город' triggers generic fallback instead of shortlist. The lockToHistoryCandidates logic fails when geo hints change but sourcing intent persists.",
+          "expectedImpact": "Restores shortlist with /company links after geo corrections; fixes 2/8 strict failures.",
+          "validationScenarios": [
+            "MX001",
+            "MX002"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Fix switchback context rehydration",
+          "why": "MX003.T4 returns only 2 companies for top-3 request after returning to milk topic. History candidate extraction fails to merge with fresh lookup after topic switch.",
+          "expectedImpact": "Improves usefulness from 2.5 to 4+ on switchback scenarios; maintains continuity.",
+          "validationScenarios": [
+            "MX003"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Prevent ranking template hallucination",
+          "why": "MX002.T4 shows garbled output mixing Brest candidates into 'Minsk region' shortlist. Geo filtering in ranking fallback is too permissive.",
+          "expectedImpact": "Reduces geo confusion errors by ~50% in multi-turn journeys.",
+          "validationScenarios": [
+            "MX002",
+            "MX001"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "template",
+          "title": "Add aggressive placeholder sanitization before response return",
+          "action": "In postProcessAssistantReply (line ~2541), move sanitizeUnfilledPlaceholdersInNonTemplateReply to run unconditionally for ALL modes, not just when !params.mode.templateRequested. Add additional regex to catch partial placeholders like '{product/service}' split across tokens.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts:2541-2543 - remove the conditional check for templateRequested. Add line: out = sanitizeUnfilledPlaceholdersInNonTemplateReply(out).trim() before all returns.",
+          "expectedImpact": "Eliminates raw placeholder strict-check failures (MX001.T5.C3, MX004.T5.C3, MX005.T4.C3).",
+          "risk": "Low - purely post-processing, no LLM behavior change.",
+          "effort": "S",
+          "validationScenarios": [
+            "MX001",
+            "MX004",
+            "MX005"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "geo",
+          "title": "Fix geo-correction to preserve candidate list",
+          "action": "In buildVendorLookupContext (line ~3888), when detectPreferredGeoFromCorrection returns non-null geo, ensure followUpByCorrection flag is set even if message doesn't match explicit correction regex. Currently 'точнее: Минская область' fails to trigger followUpByCorrection.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts:3948-3953 - add condition: const geoCorrectionDetected = Boolean(correctedGeo.city || correctedGeo.region); then include geoCorrectionDetected in followUpByCorrection calculation.",
+          "expectedImpact": "Fixes MX001.T3 and MX002.T2 context loss after geo refinement.",
+          "risk": "Medium - may increase false positives for correction detection; test with negation patterns.",
+          "effort": "M",
+          "validationScenarios": [
+            "MX001",
+            "MX002"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "retrieval",
+          "title": "Persist candidate IDs across topic switches",
+          "action": "In postProcessAssistantReply (line ~1646), historySlugCandidates extraction uses extractAssistantCompanySlugsFromHistory which only parses /company/XXX patterns. Add fallback to extract company IDs from previous turn's vendorCandidates metadata stored in conversation state.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts:1646-1656 - modify prioritizeVendorCandidatesByHistory to also accept stored candidate IDs from session metadata, not just parsed slugs from text.",
+          "expectedImpact": "Fixes MX003.T4 incomplete shortlist after switchback.",
+          "risk": "Low - additive fallback, doesn't change existing logic.",
+          "effort": "M",
+          "validationScenarios": [
+            "MX003"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "ranking",
+          "title": "Strict geo filtering in ranking fallback",
+          "action": "In buildRankingFallbackAppendix (line ~465), the filterAndRankVendorCandidates function doesn't enforce strict city/region matching when candidates exist. Add explicit geo filter before ranking when user explicitly corrected geo in previous turn.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts:480-487 - after filterAndRankVendorCandidates, add: if (params.region || params.city) { rankedRowsSource = rankedRowsSource.filter(c => geoMatches(c, params.region, params.city)); }",
+          "expectedImpact": "Prevents MX002.T4 issue where Brest candidates appeared in Minsk region shortlist.",
+          "risk": "Low - stricter filtering reduces false positives.",
+          "effort": "S",
+          "validationScenarios": [
+            "MX002"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "prompt",
+          "title": "Add system prompt guard for template generation",
+          "action": "In generateCodexReply/generateOpenAiReply calls, add explicit instruction: 'When generating RFQ templates, ALWAYS replace all placeholders like {qty}, {city}, {deadline} with inferred values or remove them. Never output raw curly-brace placeholders.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts:2788-2794 (Codex) and 2729-2734 (OpenAI) - append to instructions string.",
+          "expectedImpact": "Reduces placeholder leakage at source before post-processing.",
+          "risk": "Low - prompt engineering only.",
+          "effort": "S",
+          "validationScenarios": [
+            "MX001",
+            "MX004",
+            "MX005"
+          ]
+        },
+        {
+          "id": "R6",
+          "area": "guardrails",
+          "title": "Add content coherence check for repeated segments",
+          "action": "In postProcessAssistantReply, detect repeated paragraph patterns (indicating LLM loop/hallucination) and trigger fallback to local resilient reply. MX002.T4 shows 'turn 4-5 includes repeated/duplicated content'.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts:2621 - add function hasRepeatedSegments(text) that checks for 20+ character substrings appearing >2 times. If detected, log and return buildLocalResilientFallbackReply.",
+          "expectedImpact": "Catches garbled/repeated output before it reaches user.",
+          "risk": "Low - safety guardrail, only triggers on obvious pathology.",
+          "effort": "M",
+          "validationScenarios": [
+            "MX002"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "MX001",
+          "MX002",
+          "MX003",
+          "MX004",
+          "MX005"
+        ],
+        "regressionSuites": [
+          "scenarios.regressions.multi-step-journeys.json",
+          "scenarios.regressions.geo-ambiguity.json",
+          "scenarios.regressions.switchback-topic.json"
+        ],
+        "successMetrics": [
+          "strictPassRate >= 0.8 (target: 4/5 scenarios)",
+          "checkPassRate >= 0.95",
+          "avgUsefulness >= 3.5",
+          "zero occurrences of raw placeholder patterns \\{[a-z/]+\\} in template outputs"
+        ]
+      }
+    },
+    {
+      "advisor": "minimax",
+      "executiveSummary": "Multi-step journey QA (40% pass rate) reveals 3 critical failure modes: (1) catastrophic context loss where assistant ignores supplier requests to give 'add company' instructions (MX004), (2) geo-boundary confusion where city/oblast filters are ignored (MX001, MX005), (3) template output contamination with raw placeholders. Fixing these requires adding explicit geodisambiguation rules, blocking 'add company' instructions during sourcing, and implementing placeholder validation. P0 improvements can target 80%+ pass rate in multi-step scenarios.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Add geodisambiguation rules for city vs oblast/region",
+          "why": "3 of 5 scenarios fail strict checks due to Minsk city candidates appearing in Minsk Oblast shortlists. Judges consistently report 'geo confusion' across scenarios MX001, MX002, MX005.",
+          "expectedImpact": "Reduces strict failures by 3-5 checks, improves judge usefulness from 2.4 avg to 3.2+",
+          "validationScenarios": [
+            "MX001.T4",
+            "MX002.T3",
+            "MX005.T3"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Block 'add company to catalog' responses during sourcing workflows",
+          "why": "MX004 completely fails when turns 3-4 give 'add company' instructions instead of supplier shortlists. This is a categorical error - never suggest adding companies when user requests suppliers.",
+          "expectedImpact": "Fixes 5 strict check failures in MX004, prevents future regressions",
+          "validationScenarios": [
+            "MX004.T3",
+            "MX004.T4"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Implement template placeholder validation before response",
+          "why": "Failed checks MX001.T5, MX005.T4, MX003.T4 all show raw placeholders ({company}, {spec}, {deadline}) in final output. Template blocks should not emit unresolved placeholders.",
+          "expectedImpact": "Eliminates template placeholder contamination, passes 3-4 currently failed checks",
+          "validationScenarios": [
+            "MX001.T5",
+            "MX005.T4"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "prompt",
+          "title": "Add explicit city/oblast disambiguation rules",
+          "action": "Add to system prompt: 'Belarus geo hierarchy: cities (Минск, Гомель, Брест, Гродно, Витебск, Могилёв) are separate from oblasts (Минская область, Гомельская область, etc.). When user specifies oblast/region without city, exclude all cities. When user specifies city, do not include in oblast results. Minsk city ≠ Minsk Oblast.'",
+          "implementationHint": "",
+          "expectedImpact": "Prevents Minsk city companies from appearing in Minsk Oblast shortlists",
+          "risk": "Low - clarifying existing intent",
+          "effort": "S",
+          "validationScenarios": [
+            "MX001.T4",
+            "MX005.T3"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "prompt",
+          "title": "Block catalog-add guidance during supplier sourcing",
+          "action": "Add vendor lookup guardrail: 'When user asks for suppliers/vendors/top-N options, never suggest adding companies to catalog. Focus exclusively on finding existing vendors from directory.'",
+          "implementationHint": "",
+          "expectedImpact": "Prevents MX004-style catastrophic failures",
+          "risk": "Low - narrows assistant scope appropriately",
+          "effort": "S",
+          "validationScenarios": [
+            "MX004.T3",
+            "MX004.T4"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "prompt",
+          "title": "Add response mode continuity validation",
+          "action": "Add rule: 'For multi-turn conversations, maintain awareness of previous response modes. If Turn N was a shortlist/ranking, Turn N+1 should either continue ranking OR switch modes explicitly requested by user. Do not revert to generic rubric advice without user permission.'",
+          "implementationHint": "",
+          "expectedImpact": "Prevents context loss between turns (MX003, MX005 regressions)",
+          "risk": "Low - reinforces expected behavior",
+          "effort": "S",
+          "validationScenarios": [
+            "MX003.T4",
+            "MX005.T3"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "template",
+          "title": "Implement placeholder validation in template output",
+          "action": "Before emitting Subject/Body/WhatsApp blocks, validate no raw template variables remain. If placeholders detected, either fill with reasonable defaults or return error with specific missing fields.",
+          "implementationHint": "",
+          "expectedImpact": "Eliminates template contamination (raw {company}, {spec} in output)",
+          "risk": "Medium - requires code change in response generation",
+          "effort": "M",
+          "validationScenarios": [
+            "MX001.T5",
+            "MX005.T4"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "prompt",
+          "title": "Strengthen shortlist continuity requirements",
+          "action": "Add to vendor guidance: 'If user previously received a shortlist of N companies and requests refinements, preserve the original list structure. Explain any changes or drops. Do not silently replace with different companies.'",
+          "implementationHint": "",
+          "expectedImpact": "Prevents content coherence issues (MX002.T4 duplicate rankings)",
+          "risk": "Low",
+          "effort": "S",
+          "validationScenarios": [
+            "MX002.T4",
+            "MX002.T5"
+          ]
+        },
+        {
+          "id": "R6",
+          "area": "prompt",
+          "title": "Add 'who to call first' prioritization requirement",
+          "action": "When user requests top-N suppliers with phone/contact info, always indicate priority order (1st, 2nd, 3rd) with rationale based on their criteria (volume, urgency, location fit).",
+          "implementationHint": "",
+          "expectedImpact": "Addresses judge feedback about missing prioritization",
+          "risk": "Low",
+          "effort": "S",
+          "validationScenarios": [
+            "MX005.T3"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "MX004.T3",
+          "MX004.T4",
+          "MX005.T3",
+          "MX005.T4",
+          "MX001.T5"
+        ],
+        "regressionSuites": [
+          "app/qa/ai-request/scenarios.regressions.multi-step-journeys.json",
+          "app/qa/ai-request/scenarios.regressions.geo-ambiguity.json"
+        ],
+        "successMetrics": [
+          "Multi-step pass rate >= 0.8 (currently 0.4)",
+          "Average usefulness >= 3.0 (currently 2.8)",
+          "Template placeholder contamination = 0",
+          "Geo boundary violations = 0"
+        ]
+      }
+    }
+  ],
+  "consensus": {
+    "topAreas": [
+      {
+        "area": "prompt",
+        "count": 6
+      },
+      {
+        "area": "template",
+        "count": 2
+      },
+      {
+        "area": "geo",
+        "count": 1
+      },
+      {
+        "area": "retrieval",
+        "count": 1
+      },
+      {
+        "area": "ranking",
+        "count": 1
+      },
+      {
+        "area": "guardrails",
+        "count": 1
+      }
+    ],
+    "recurringTitles": [
+      {
+        "title": "add aggressive placeholder sanitization before response return",
+        "count": 1
+      },
+      {
+        "title": "fix geo-correction to preserve candidate list",
+        "count": 1
+      },
+      {
+        "title": "persist candidate ids across topic switches",
+        "count": 1
+      },
+      {
+        "title": "strict geo filtering in ranking fallback",
+        "count": 1
+      },
+      {
+        "title": "add system prompt guard for template generation",
+        "count": 1
+      },
+      {
+        "title": "add content coherence check for repeated segments",
+        "count": 1
+      },
+      {
+        "title": "add explicit city/oblast disambiguation rules",
+        "count": 1
+      },
+      {
+        "title": "block catalog-add guidance during supplier sourcing",
+        "count": 1
+      },
+      {
+        "title": "add response mode continuity validation",
+        "count": 1
+      },
+      {
+        "title": "implement placeholder validation in template output",
+        "count": 1
+      },
+      {
+        "title": "strengthen shortlist continuity requirements",
+        "count": 1
+      },
+      {
+        "title": "add 'who to call first' prioritization requirement",
+        "count": 1
+      }
+    ]
+  }
+}

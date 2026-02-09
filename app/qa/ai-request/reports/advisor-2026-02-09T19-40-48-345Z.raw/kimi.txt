@@ -1,0 +1,103 @@
+Now I have a comprehensive understanding of the codebase and the issues. Let me provide the concrete engineering advice in JSON format:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "GA002 scenario fails because geo-correction ('Минская область, не город') loses the onion commodity context. The system returns animal farms (ТИТУЛ ФХ, Олимп-Агро) instead of onion suppliers. Root cause: geo-correction follow-up logic (geoCorrectionFollowUp) filters by region but doesn't re-apply commodity filtering from the original query. The commodityTag is derived from current message only, not blended with history context. Additionally, the strict Minsk region filtering uses candidate.region which may not correctly identify district-level locations in Minsk region.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix commodity context loss on geo-correction follow-up",
+      "why": "GA002 strict check failures stem from returning irrelevant companies (animal farms) when user corrects location. The commodity context ('лук') from turn 1 is lost in turn 2 processing.",
+      "expectedImpact": "Fix GA002 pass rate from 0% to 100%, eliminate irrelevant animal farm suggestions for vegetable queries.",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add commodity-aware candidate filtering for geo-correction path",
+      "why": "The geoCorrectionFollowUp block (lines 2575-2613) filters candidates by geo but doesn't apply commodityTag filtering, causing mismatched results.",
+      "expectedImpact": "Ensure vegetable suppliers are returned for vegetable queries even after geo corrections.",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix GA001 turn 2 delivery acknowledgment gap",
+      "why": "Minimax judge notes that 'доставка в Брест тоже возможна' is ignored in turn 2. The system should acknowledge delivery flexibility.",
+      "expectedImpact": "Improve usefulness score for multi-city sourcing scenarios.",
+      "validationScenarios": ["GA001"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Preserve commodityTag from history in geo-correction follow-up",
+      "action": "In app/src/app/api/ai/request/route.ts around line 2583, change commodityTag derivation to blend with history context. Current: commodityTag is derived from params.message only. Fix: Use the same blending logic as vendorLookupIntent block (lines 2363-2376) that checks hasExplicitTopicSwitchFromHistory and falls back to historyCommodityTag.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2575-2613 geoCorrectionFollowUp block. Add: const historyCommodityTag = detectCoreCommodityTag(historySourcingSeed || ''); const currentCommodityTag = detectCoreCommodityTag(params.message || ''); const commodityTag = currentCommodityTag || historyCommodityTag;",
+      "expectedImpact": "GA002 will correctly filter for onion suppliers instead of returning animal farms when geo is corrected to Minsk region.",
+      "risk": "Low - additive change, only affects geo-correction follow-up path.",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Apply commodity filtering in geo-correction candidate selection",
+      "action": "In geoCorrectionFollowUp block (lines 2582-2600), the geoFollowUpCandidates are filtered by region but not by commodity. Add commodity filtering after geo filtering, similar to lines 2377-2386 in vendorLookupIntent block.",
+      "implementationHint": "After line 2600 in geoCorrectionFollowUp block, add: if (commodityTag && geoFollowUpCandidates.length > 0) { const commodityScoped = geoFollowUpCandidates.filter(c => candidateMatchesCoreCommodity(c, commodityTag)); if (commodityScoped.length > 0) geoFollowUpCandidates = commodityScoped; }",
+      "expectedImpact": "Eliminates animal farms from onion query results in GA002.",
+      "risk": "Low - stricter filtering reduces false positives.",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add explicit delivery acknowledgment for multi-city scenarios",
+      "action": "In postProcessAssistantReply, detect when user mentions 'доставка в X тоже возможна' pattern and ensure response acknowledges both base location and delivery option.",
+      "implementationHint": "Add pattern detection: /доставка\s+в\s+(\w+)\s+тоже\s+возможна/u. When matched and base city differs, append acknowledgment like 'Принял: базовый город - {base}, доставка в {delivery} - возможна.'",
+      "expectedImpact": "Improves GA001 turn 2 usefulness score by addressing minimax judge feedback.",
+      "risk": "Low - additive acknowledgment only.",
+      "effort": "S",
+      "validationScenarios": ["GA001"]
+    },
+    {
+      "id": "R4",
+      "area": "geo",
+      "title": "Improve Minsk region district-level candidate detection",
+      "action": "isMinskRegionOutsideCityCandidate only checks candidate.region but many district-level companies have city=Molodechno/Uzda and region=minsk. Expand to check if city is in Minsk region district list.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:6654-6657. Add district cities check: const minskRegionDistricts = new Set(['молодечно','узда','слцк','бorisов','мядель','вилейка','дрогичин','клецк','копыль','лубны','пуховичи','червень','слуцк']); return (region.includes('минск') || region.includes('minsk') || minskRegionDistricts.has(city)) && !isMinskCityCandidate(candidate);",
+      "expectedImpact": "Better geo-scoping for Minsk region queries, reducing false negatives.",
+      "risk": "Medium - may affect other region queries, needs testing.",
+      "effort": "M",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add no-relevant-suppliers acknowledgment when commodity filtering returns empty",
+      "action": "When commodity filtering eliminates all candidates (e.g., no onion suppliers in Minsk region), explicitly state this instead of returning unrelated companies or empty response.",
+      "implementationHint": "In geoCorrectionFollowUp block, after candidate filtering, if geoFollowUpCandidates.length === 0, return explicit message: 'По Минской области не найдено поставщиков лука. Расширить поиск на Минск или смежные регионы?'",
+      "expectedImpact": "Better UX - user understands why results are empty and has clear next step.",
+      "risk": "Low - improves transparency.",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["GA002", "GA001"],
+    "regressionSuites": [
+      "scenarios.regressions.geo-ambiguity.json",
+      "scenarios.regressions.milk-onion-city-switch.json",
+      "scenarios.regressions.milk-brest-mogilev.json"
+    ],
+    "successMetrics": [
+      "GA002 strictPass: true (currently false)",
+      "GA002 avgUsefulness >= 3.5 (currently 2)",
+      "GA001 avgUsefulness >= 4 (currently 3.5)",
+      "Zero animal farms in onion query results",
+      "Geo-correction responses acknowledge new geo scope explicitly"
+    ]
+  }
+}
+```

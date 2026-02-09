@@ -1,0 +1,2452 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-09T16:25:00Z",
+      "source": "manual-regression",
+      "description": "Focused multi-turn regressions for continuity, geo corrections, shortlist quality, and template output stability"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2200,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-09T19-24-48-228Z-2997260-42f4x",
+    "startedAt": "2026-02-09T19:24:48.228Z",
+    "endedAt": "2026-02-09T19:25:11.113Z",
+    "durationMs": 22885,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.multi-step-journeys.json",
+    "totalScenarios": 5,
+    "passedScenarios": 1,
+    "failedScenarios": 4,
+    "passRate": 0.2,
+    "totalChecks": 77,
+    "passedChecks": 69,
+    "failedChecks": 8,
+    "checkPassRate": 0.8961,
+    "targetPassCount": 4,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:template_blocks:Нужны блоки Subject/Body/WhatsApp",
+      "count": 3
+    },
+    {
+      "key": "check:includes_all:Должен учитывать схему Минск + поставка в Брест",
+      "count": 1
+    },
+    {
+      "key": "check:includes_any:Должна учитываться Минская область",
+      "count": 1
+    },
+    {
+      "key": "check:numbered_list_min:Ожидается структурированный чеклист (>=5 пунктов)",
+      "count": 1
+    },
+    {
+      "key": "check:reply_length_min:Ответ должен быть достаточно подробным",
+      "count": 1
+    },
+    {
+      "key": "check:includes_any:Должен учесть ограничение по сроку отгрузки",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "MX001",
+      "title": "Молоко: Брест/Минск -> Минская область -> shortlist -> RFQ",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "geo",
+        "continuity",
+        "milk",
+        "shortlist",
+        "template"
+      ],
+      "personaGoal": "Проверить длинную цепочку geo-уточнений и форматного запроса без потери контекста.",
+      "totalTurns": 5,
+      "completedTurns": 5,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX001.T2.C3",
+          "type": "includes_all",
+          "description": "Должен учитывать схему Минск + поставка в Брест",
+          "passed": false,
+          "reason": "Some required patterns are missing",
+          "details": {
+            "patterns": [
+              "минск",
+              "брест"
+            ],
+            "missed": [
+              "брест"
+            ]
+          }
+        },
+        {
+          "id": "MX001.T5.C2",
+          "type": "template_blocks",
+          "description": "Нужны блоки Subject/Body/WhatsApp",
+          "passed": false,
+          "reason": "Template blocks missing",
+          "details": {
+            "hasSubject": true,
+            "hasBody": true,
+            "hasWhatsapp": false
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+          "requestBody": {
+            "message": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 636,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "25bd2718-98b5-44da-8f37-5310d5f7dd33",
+          "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX001.T1.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен удержать товарный контекст",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок"
+                ],
+                "min": 1,
+                "hits": [
+                  "молок"
+                ]
+              }
+            },
+            {
+              "id": "MX001.T1.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать гео-неоднозначность",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "минск"
+                ],
+                "hits": [
+                  "брест"
+                ]
+              }
+            },
+            {
+              "id": "MX001.T1.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен practical first-pass",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Минск как базовый, но поставка в Брест тоже возможна.",
+          "requestBody": {
+            "message": "Минск как базовый, но поставка в Брест тоже возможна.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?"
+              }
+            ],
+            "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 770,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ad21c91d-4214-475e-ab9f-53b63e9388bf",
+          "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск, minsk; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3441182)\n4. АникаВита ИООО — /company/biznesinfo-98516 (Продукты питания; Минск, minsk; тел: (+375-17) 2878222)\n\nФокус задачи: молока, чего, начать, базовый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX001.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Тема молока должна сохраниться",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок"
+                ],
+                "min": 1,
+                "hits": [
+                  "молок"
+                ]
+              }
+            },
+            {
+              "id": "MX001.T2.C3",
+              "type": "includes_all",
+              "description": "Должен учитывать схему Минск + поставка в Брест",
+              "passed": false,
+              "reason": "Some required patterns are missing",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "брест"
+                ],
+                "missed": [
+                  "брест"
+                ]
+              }
+            },
+            {
+              "id": "MX001.T2.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен полезный следующий шаг, а не отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Точнее: Минская область, не сам город Минск.",
+          "requestBody": {
+            "message": "Точнее: Минская область, не сам город Минск.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?"
+              },
+              {
+                "role": "user",
+                "content": "Минск как базовый, но поставка в Брест тоже возможна."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск, minsk; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3441182)\n4. АникаВита ИООО — /company/biznesinfo-98516 (Продукты питания; Минск, minsk; тел: (+375-17) 2878222)\n\nФокус задачи: молока, чего, начать, базовый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ],
+            "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 590,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "654e1890-4ca0-4ff8-b0f9-8226112f66de",
+          "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: базовый, тоже, возможна, точнее.\n\nЛокация из запроса: minsk-region.\n\nПо текущей локации не нашлось достаточно релевантных карточек; не подставляю компании из другого города.\n\nРубрики для старта: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость; 4) Недвижимость - аренда, продажа, оценка / Недвижимость.\n\nПоисковые формулировки: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость - аренда, продажа, оценка.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nТоварный фокус без изменений: молока, молока чего начать, молока чего.\n\nПринял фильтр: Минская область.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX001.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX001.T3.C2",
+              "type": "mentions_any_terms",
+              "description": "Не должен терять товар после geo-коррекции",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок"
+                ],
+                "min": 1,
+                "hits": [
+                  "молок"
+                ]
+              }
+            },
+            {
+              "id": "MX001.T3.C3",
+              "type": "includes_any",
+              "description": "Должен отразить city->region коррекцию",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "област",
+                  "минск"
+                ],
+                "hits": [
+                  "област",
+                  "минск"
+                ]
+              }
+            },
+            {
+              "id": "MX001.T3.C4",
+              "type": "excludes_all",
+              "description": "Не должен добавлять служебный шум в ответ",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "Фокус исходного запроса"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "user": "Сделай shortlist топ-3 и коротко почему.",
+          "requestBody": {
+            "message": "Сделай shortlist топ-3 и коротко почему.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?"
+              },
+              {
+                "role": "user",
+                "content": "Минск как базовый, но поставка в Брест тоже возможна."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск, minsk; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3441182)\n4. АникаВита ИООО — /company/biznesinfo-98516 (Продукты питания; Минск, minsk; тел: (+375-17) 2878222)\n\nФокус задачи: молока, чего, начать, базовый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Точнее: Минская область, не сам город Минск."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: базовый, тоже, возможна, точнее.\n\nЛокация из запроса: minsk-region.\n\nПо текущей локации не нашлось достаточно релевантных карточек; не подставляю компании из другого города.\n\nРубрики для старта: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость; 4) Недвижимость - аренда, продажа, оценка / Недвижимость.\n\nПоисковые формулировки: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость - аренда, продажа, оценка.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nТоварный фокус без изменений: молока, молока чего начать, молока чего.\n\nПринял фильтр: Минская область."
+              }
+            ],
+            "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 566,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ce805d6d-2913-4117-b70a-156c1097e2de",
+          "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Точнее: Минская область, не сам город Минск.\n\nПодходящие рубрики для отбора: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость.\n\nФокус задачи: точнее, сам, город, точнее сам город.\n\nЛокация из запроса: minsk-region.\n\nЕсли нужно, уточню shortlist под ваш бюджет/срок/объем без выдумывания данных.\n\nПо товару: молоко.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX001.T4.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX001.T4.C2",
+              "type": "not_refusal_only",
+              "description": "Нельзя ограничиться пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "MX001.T4.C3",
+              "type": "any_of",
+              "description": "Нужен либо shortlist с карточками компаний, либо структурированный рейтинг",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "user": "Сделай готовый текст запроса поставщику (email + WhatsApp).",
+          "requestBody": {
+            "message": "Сделай готовый текст запроса поставщику (email + WhatsApp).",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?"
+              },
+              {
+                "role": "user",
+                "content": "Минск как базовый, но поставка в Брест тоже возможна."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск, minsk; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3441182)\n4. АникаВита ИООО — /company/biznesinfo-98516 (Продукты питания; Минск, minsk; тел: (+375-17) 2878222)\n\nФокус задачи: молока, чего, начать, базовый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Точнее: Минская область, не сам город Минск."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: базовый, тоже, возможна, точнее.\n\nЛокация из запроса: minsk-region.\n\nПо текущей локации не нашлось достаточно релевантных карточек; не подставляю компании из другого города.\n\nРубрики для старта: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость; 4) Недвижимость - аренда, продажа, оценка / Недвижимость.\n\nПоисковые формулировки: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость - аренда, продажа, оценка.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nТоварный фокус без изменений: молока, молока чего начать, молока чего.\n\nПринял фильтр: Минская область."
+              },
+              {
+                "role": "user",
+                "content": "Сделай shortlist топ-3 и коротко почему."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Точнее: Минская область, не сам город Минск.\n\nПодходящие рубрики для отбора: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость.\n\nФокус задачи: точнее, сам, город, точнее сам город.\n\nЛокация из запроса: minsk-region.\n\nЕсли нужно, уточню shortlist под ваш бюджет/срок/объем без выдумывания данных.\n\nПо товару: молоко."
+              }
+            ],
+            "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 437,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f12189ea-b170-482e-8228-eb000da3db28",
+          "conversationId": "6c0e80a7-3771-4dd0-b2ab-a7371fc95eb5",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nSubject: Запрос по молоко — Сделай готовый текст запроса поставщику (email + WhatsApp).\n\nBody:\nЗдравствуйте, уточняется!\n\nНам нужно молоко в Минск. Просим подтвердить условия по 1000 литров, уточняется, доставка/самовывоз и срок срок поставки.\nТакже уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования.\n\nС уважением,\nуточняетсяWhatsApp:\nЗдравствуйте! Нужен молоко в Минск. Подскажите, сможете дать условия по 1000 литров/уточняется и срок срок поставки?",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX001.T5.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX001.T5.C2",
+              "type": "template_blocks",
+              "description": "Нужны блоки Subject/Body/WhatsApp",
+              "passed": false,
+              "reason": "Template blocks missing",
+              "details": {
+                "hasSubject": true,
+                "hasBody": true,
+                "hasWhatsapp": false
+              }
+            },
+            {
+              "id": "MX001.T5.C3",
+              "type": "excludes_all",
+              "description": "Не должно быть сырых плейсхолдеров",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "\\{qty\\}",
+                  "\\{city\\}",
+                  "\\{delivery\\}",
+                  "\\{deadline\\}"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3002
+    },
+    {
+      "id": "MX002",
+      "title": "Лук: Минск -> Минская область -> поставка в Брест -> shortlist + чеклист звонка",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "geo",
+        "onion",
+        "logistics",
+        "shortlist"
+      ],
+      "personaGoal": "Проверить continuity после уточнений по географии и логистике в одном диалоге.",
+      "totalTurns": 5,
+      "completedTurns": 5,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX002.T2.C3",
+          "type": "includes_any",
+          "description": "Должна учитываться Минская область",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "област",
+              "минск"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "MX002.T5.C2",
+          "type": "numbered_list_min",
+          "description": "Ожидается структурированный чеклист (>=5 пунктов)",
+          "passed": false,
+          "reason": "Not enough numbered items",
+          "details": {
+            "min": 5,
+            "count": 0
+          }
+        },
+        {
+          "id": "MX002.T5.C3",
+          "type": "reply_length_min",
+          "description": "Ответ должен быть достаточно подробным",
+          "passed": false,
+          "reason": "Reply too short",
+          "details": {
+            "min": 120,
+            "len": 38
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить лук репчатый оптом в Минске, нужно 2 тонны в неделю?",
+          "requestBody": {
+            "message": "Где купить лук репчатый оптом в Минске, нужно 2 тонны в неделю?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 1186,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6c8b8b40-f3fd-4d76-805a-c0a0b1496dfa",
+          "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Агрокомбинат Ждановичи УП — /company/akz (Пчеловодство - продукция, оборудование, инвентарь; Минск, minsk; тел: +375 (17) 510 34 45)\n2. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n3. Магазин № 10 ПОСТТОРГ ОАО — /company/biznesinfo-71100 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2301491)\n4. Магазин № 18 ПОСТТОРГ ОАО — /company/biznesinfo-71213 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2453131)\n\nФокус задачи: лук, репчатый, лук репчатый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX002.T1.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен сохранить тему лука",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "лук",
+                  "репчат"
+                ],
+                "min": 1,
+                "hits": [
+                  "лук",
+                  "репчат"
+                ]
+              }
+            },
+            {
+              "id": "MX002.T1.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать Минск",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Не город, а Минская область.",
+          "requestBody": {
+            "message": "Не город, а Минская область.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить лук репчатый оптом в Минске, нужно 2 тонны в неделю?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Агрокомбинат Ждановичи УП — /company/akz (Пчеловодство - продукция, оборудование, инвентарь; Минск, minsk; тел: +375 (17) 510 34 45)\n2. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n3. Магазин № 10 ПОСТТОРГ ОАО — /company/biznesinfo-71100 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2301491)\n4. Магазин № 18 ПОСТТОРГ ОАО — /company/biznesinfo-71213 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2453131)\n\nФокус задачи: лук, репчатый, лук репчатый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ],
+            "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 532,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "848af1b0-3c36-4c42-a2d6-e73c8445399a",
+          "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. ТИТУЛ ФХ — /company/titul (Животноводство; Молодечненский р-н, minsk-region; тел: +375 (29) 506 84 86)\n2. Олимп-Агро КХ — /company/olimp-agro (Сельское хозяйство; Узденский р-н, minsk-region; тел: +375 (17) 186 21 70)\n\nФокус задачи: лук, репчатый, город, лук репчатый город.\n\nФокус по локации: minsk-region.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX002.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Тема должна сохраниться после коррекции",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "лук",
+                  "репчат"
+                ],
+                "min": 1,
+                "hits": [
+                  "лук",
+                  "репчат"
+                ]
+              }
+            },
+            {
+              "id": "MX002.T2.C3",
+              "type": "includes_any",
+              "description": "Должна учитываться Минская область",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "област",
+                  "минск"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "MX002.T2.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен practical next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Поставка в Брест тоже нужна.",
+          "requestBody": {
+            "message": "Поставка в Брест тоже нужна.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить лук репчатый оптом в Минске, нужно 2 тонны в неделю?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Агрокомбинат Ждановичи УП — /company/akz (Пчеловодство - продукция, оборудование, инвентарь; Минск, minsk; тел: +375 (17) 510 34 45)\n2. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n3. Магазин № 10 ПОСТТОРГ ОАО — /company/biznesinfo-71100 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2301491)\n4. Магазин № 18 ПОСТТОРГ ОАО — /company/biznesinfo-71213 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2453131)\n\nФокус задачи: лук, репчатый, лук репчатый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Не город, а Минская область."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. ТИТУЛ ФХ — /company/titul (Животноводство; Молодечненский р-н, minsk-region; тел: +375 (29) 506 84 86)\n2. Олимп-Агро КХ — /company/olimp-agro (Сельское хозяйство; Узденский р-н, minsk-region; тел: +375 (17) 186 21 70)\n\nФокус задачи: лук, репчатый, город, лук репчатый город.\n\nФокус по локации: minsk-region.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ],
+            "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 576,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c323fa36-4d67-4cb1-8fff-aade4b252899",
+          "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: город, тоже, город тоже.\n\nЛокация из запроса: minsk-region.\n\nПо текущей локации не нашлось достаточно релевантных карточек; не подставляю компании из другого города.\n\nРубрики для старта: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость; 4) Недвижимость - аренда, продажа, оценка / Недвижимость.\n\nПоисковые формулировки: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость - аренда, продажа, оценка.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nЛокация из запроса: Брест тоже нужна.\n\nПо товару: лук репчатый.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX002.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX002.T3.C2",
+              "type": "mentions_any_terms",
+              "description": "Нельзя терять товарный контекст",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "лук",
+                  "репчат"
+                ],
+                "min": 1,
+                "hits": [
+                  "лук",
+                  "репчат"
+                ]
+              }
+            },
+            {
+              "id": "MX002.T3.C3",
+              "type": "includes_any",
+              "description": "Должна появиться логистика до Бреста",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "логист",
+                  "достав"
+                ],
+                "hits": [
+                  "брест"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "user": "Дай 3 приоритетных поставщика и что проверить по документам.",
+          "requestBody": {
+            "message": "Дай 3 приоритетных поставщика и что проверить по документам.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить лук репчатый оптом в Минске, нужно 2 тонны в неделю?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Агрокомбинат Ждановичи УП — /company/akz (Пчеловодство - продукция, оборудование, инвентарь; Минск, minsk; тел: +375 (17) 510 34 45)\n2. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n3. Магазин № 10 ПОСТТОРГ ОАО — /company/biznesinfo-71100 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2301491)\n4. Магазин № 18 ПОСТТОРГ ОАО — /company/biznesinfo-71213 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2453131)\n\nФокус задачи: лук, репчатый, лук репчатый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Не город, а Минская область."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. ТИТУЛ ФХ — /company/titul (Животноводство; Молодечненский р-н, minsk-region; тел: +375 (29) 506 84 86)\n2. Олимп-Агро КХ — /company/olimp-agro (Сельское хозяйство; Узденский р-н, minsk-region; тел: +375 (17) 186 21 70)\n\nФокус задачи: лук, репчатый, город, лук репчатый город.\n\nФокус по локации: minsk-region.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Поставка в Брест тоже нужна."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: город, тоже, город тоже.\n\nЛокация из запроса: minsk-region.\n\nПо текущей локации не нашлось достаточно релевантных карточек; не подставляю компании из другого города.\n\nРубрики для старта: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость; 4) Недвижимость - аренда, продажа, оценка / Недвижимость.\n\nПоисковые формулировки: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость - аренда, продажа, оценка.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nЛокация из запроса: Брест тоже нужна.\n\nПо товару: лук репчатый."
+              }
+            ],
+            "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 3913,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "e80b9f53-f174-4e0c-b0ed-c642a1abf209",
+          "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Поставка в Брест тоже нужна. Дай 3 приоритетных поставщика и что проверить по документам.\n\nФокус задачи: тоже, дай, приоритетных, что.\n\nЛокация из запроса: Брест.\n\nЕсли нужно, уточню shortlist под ваш бюджет/срок/объем без выдумывания данных.\n\nОфициальный реестр для проверки статуса: egr.gov.by.\n\nПо товару: лук репчатый.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX002.T4.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX002.T4.C2",
+              "type": "not_refusal_only",
+              "description": "Нужен ответ по существу",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "MX002.T4.C3",
+              "type": "any_of",
+              "description": "Нужен shortlist компаний или прозрачный рейтинг",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "user": "Сделай короткий чеклист звонка на 6 пунктов.",
+          "requestBody": {
+            "message": "Сделай короткий чеклист звонка на 6 пунктов.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить лук репчатый оптом в Минске, нужно 2 тонны в неделю?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Агрокомбинат Ждановичи УП — /company/akz (Пчеловодство - продукция, оборудование, инвентарь; Минск, minsk; тел: +375 (17) 510 34 45)\n2. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n3. Магазин № 10 ПОСТТОРГ ОАО — /company/biznesinfo-71100 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2301491)\n4. Магазин № 18 ПОСТТОРГ ОАО — /company/biznesinfo-71213 (Магазины продовольственные; Минск, minsk; тел: (+375-17) 2453131)\n\nФокус задачи: лук, репчатый, лук репчатый.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Не город, а Минская область."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. ТИТУЛ ФХ — /company/titul (Животноводство; Молодечненский р-н, minsk-region; тел: +375 (29) 506 84 86)\n2. Олимп-Агро КХ — /company/olimp-agro (Сельское хозяйство; Узденский р-н, minsk-region; тел: +375 (17) 186 21 70)\n\nФокус задачи: лук, репчатый, город, лук репчатый город.\n\nФокус по локации: minsk-region.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Поставка в Брест тоже нужна."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: город, тоже, город тоже.\n\nЛокация из запроса: minsk-region.\n\nПо текущей локации не нашлось достаточно релевантных карточек; не подставляю компании из другого города.\n\nРубрики для старта: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость; 4) Недвижимость - аренда, продажа, оценка / Недвижимость.\n\nПоисковые формулировки: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость - аренда, продажа, оценка.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nЛокация из запроса: Брест тоже нужна.\n\nПо товару: лук репчатый."
+              },
+              {
+                "role": "user",
+                "content": "Дай 3 приоритетных поставщика и что проверить по документам."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Поставка в Брест тоже нужна. Дай 3 приоритетных поставщика и что проверить по документам.\n\nФокус задачи: тоже, дай, приоритетных, что.\n\nЛокация из запроса: Брест.\n\nЕсли нужно, уточню shortlist под ваш бюджет/срок/объем без выдумывания данных.\n\nОфициальный реестр для проверки статуса: egr.gov.by.\n\nПо товару: лук репчатый."
+              }
+            ],
+            "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 2809,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "265d1df2-b49c-40a4-98f9-7a70f682f3a5",
+          "conversationId": "a7b624b7-a70d-47f2-8333-0aacfa3724ef",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX002.T5.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX002.T5.C2",
+              "type": "numbered_list_min",
+              "description": "Ожидается структурированный чеклист (>=5 пунктов)",
+              "passed": false,
+              "reason": "Not enough numbered items",
+              "details": {
+                "min": 5,
+                "count": 0
+              }
+            },
+            {
+              "id": "MX002.T5.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть достаточно подробным",
+              "passed": false,
+              "reason": "Reply too short",
+              "details": {
+                "min": 120,
+                "len": 38
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 9019
+    },
+    {
+      "id": "MX003",
+      "title": "Switchback: молоко -> автозапчасти -> обратно к молоку",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "switchback",
+        "topic_switch",
+        "continuity"
+      ],
+      "personaGoal": "Проверить устойчивость к явному переключению темы и корректному возврату к исходной задаче.",
+      "totalTurns": 5,
+      "completedTurns": 5,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики молока оптом в Бресте.",
+          "requestBody": {
+            "message": "Нужны поставщики молока оптом в Бресте.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 439,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f8ff6a7f-09cb-4b3f-b9eb-ca692323a2ab",
+          "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX003.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX003.T1.C2",
+              "type": "includes_all",
+              "description": "Должен держать исходный контекст",
+              "passed": true,
+              "reason": "All patterns matched",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "брест"
+                ],
+                "missed": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Стоп, теперь ищем автозапчасти оптом в Минске.",
+          "requestBody": {
+            "message": "Стоп, теперь ищем автозапчасти оптом в Минске.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ],
+            "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 644,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "a8145253-e383-4fb3-a112-8ab90d211647",
+          "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+          "isStub": false,
+          "reply": "Короткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Нужны поставщики молока оптом в Бресте. Стоп, теперь ищем автозапчасти оптом в Минске. Нужны поставщики молока оптом в Бресте.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX003.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX003.T2.C2",
+              "type": "includes_all",
+              "description": "Должен переключиться на новую тему и локацию",
+              "passed": true,
+              "reason": "All patterns matched",
+              "details": {
+                "patterns": [
+                  "автозапчаст",
+                  "минск"
+                ],
+                "missed": []
+              }
+            },
+            {
+              "id": "MX003.T2.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен полезный ответ по новой теме",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Нет, возвращаемся к молоку в Бресте.",
+          "requestBody": {
+            "message": "Нет, возвращаемся к молоку в Бресте.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Стоп, теперь ищем автозапчасти оптом в Минске."
+              },
+              {
+                "role": "assistant",
+                "content": "Короткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Нужны поставщики молока оптом в Бресте. Стоп, теперь ищем автозапчасти оптом в Минске. Нужны поставщики молока оптом в Бресте."
+              }
+            ],
+            "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 422,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "376e1253-f394-44f4-a4bd-b5ffdb6f756d",
+          "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: стоп, теперь, ищем, автозапчасти.\n\nЛокация из запроса: Брест.\n\nРубрики для старта: 1) Пищевая промышленность; 2) Молочная промышленность / Пищевая промышленность.\n\nПоисковые формулировки: добавьте 2-3 синонима к основному запросу и уточните объем/срок.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nПо товару: молоко.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX003.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX003.T3.C2",
+              "type": "includes_all",
+              "description": "Должен вернуться к молоку в Бресте",
+              "passed": true,
+              "reason": "All patterns matched",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "брест"
+                ],
+                "missed": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "user": "Сделай top-3 и кого прозвонить сегодня первым.",
+          "requestBody": {
+            "message": "Сделай top-3 и кого прозвонить сегодня первым.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Стоп, теперь ищем автозапчасти оптом в Минске."
+              },
+              {
+                "role": "assistant",
+                "content": "Короткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Нужны поставщики молока оптом в Бресте. Стоп, теперь ищем автозапчасти оптом в Минске. Нужны поставщики молока оптом в Бресте."
+              },
+              {
+                "role": "user",
+                "content": "Нет, возвращаемся к молоку в Бресте."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: стоп, теперь, ищем, автозапчасти.\n\nЛокация из запроса: Брест.\n\nРубрики для старта: 1) Пищевая промышленность; 2) Молочная промышленность / Пищевая промышленность.\n\nПоисковые формулировки: добавьте 2-3 синонима к основному запросу и уточните объем/срок.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nПо товару: молоко."
+              }
+            ],
+            "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 530,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "06c6f75c-5ac2-463d-9cf3-ebe17c389183",
+          "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест; тел: +375 (162) 30 45 45)\n3. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\nПодтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nКого прозвонить первым сегодня: 1) Брестское мороженое ОАО, 2) Савушкин продукт ОАО.\nУчет ограничений: срочные сроки, локация: Брест.\nФокус: Нет, возвращаемся к молоку в Бресте. Сделай top-3 и кого прозвонить сегодня первым..\n\nКритерии отбора: релевантность профиля, надежность, риск срыва сроков, полнота контактов.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX003.T4.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX003.T4.C2",
+              "type": "not_refusal_only",
+              "description": "Нужен actionable ответ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "MX003.T4.C3",
+              "type": "any_of",
+              "description": "Нужен shortlist ссылок или структурированный ranking",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "user": "Если данных мало, задай максимум 2 точных вопроса.",
+          "requestBody": {
+            "message": "Если данных мало, задай максимум 2 точных вопроса.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Стоп, теперь ищем автозапчасти оптом в Минске."
+              },
+              {
+                "role": "assistant",
+                "content": "Короткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Нужны поставщики молока оптом в Бресте. Стоп, теперь ищем автозапчасти оптом в Минске. Нужны поставщики молока оптом в Бресте."
+              },
+              {
+                "role": "user",
+                "content": "Нет, возвращаемся к молоку в Бресте."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nФокус задачи: стоп, теперь, ищем, автозапчасти.\n\nЛокация из запроса: Брест.\n\nРубрики для старта: 1) Пищевая промышленность; 2) Молочная промышленность / Пищевая промышленность.\n\nПоисковые формулировки: добавьте 2-3 синонима к основному запросу и уточните объем/срок.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).\n\nПо товару: молоко."
+              },
+              {
+                "role": "user",
+                "content": "Сделай top-3 и кого прозвонить сегодня первым."
+              },
+              {
+                "role": "assistant",
+                "content": "Shortlist по текущим данным каталога:\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест; тел: +375 (162) 30 45 45)\n3. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\nПодтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nКого прозвонить первым сегодня: 1) Брестское мороженое ОАО, 2) Савушкин продукт ОАО.\nУчет ограничений: срочные сроки, локация: Брест.\nФокус: Нет, возвращаемся к молоку в Бресте. Сделай top-3 и кого прозвонить сегодня первым..\n\nКритерии отбора: релевантность профиля, надежность, риск срыва сроков, полнота контактов."
+              }
+            ],
+            "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 414,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2ce577c7-c81f-477f-947f-0273dcd85daf",
+          "conversationId": "520ef204-a92f-4fde-a3b0-9ec2a238780d",
+          "isStub": false,
+          "reply": "Принял, максимум 2 точных вопроса по поставкам молока:\n1. Подтвердите, какой минимальный недельный объем молока и формат поставки (налив/тара) вам нужен на старте.\n2. Критичнее что для Брест: срок первой поставки (дата) или итоговая цена с доставкой?",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX003.T5.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX003.T5.C2",
+              "type": "question_count_max",
+              "description": "Нельзя задавать больше двух вопросов",
+              "passed": true,
+              "reason": "Question count within limit",
+              "details": {
+                "max": 2,
+                "count": 1
+              }
+            },
+            {
+              "id": "MX003.T5.C3",
+              "type": "not_refusal_only",
+              "description": "Даже при нехватке данных должен быть полезный ответ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2449
+    },
+    {
+      "id": "MX004",
+      "title": "Кабель ВВГнг: Гомель -> район -> shortlist с валидными ссылками -> 48 часов -> RFQ",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "cable",
+        "link_integrity",
+        "template",
+        "geo_refinement"
+      ],
+      "personaGoal": "Проверить многоходовый sourcing с обязательной ссылочной целостностью и форматом шаблона.",
+      "totalTurns": 5,
+      "completedTurns": 5,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX004.T4.C2",
+          "type": "includes_any",
+          "description": "Должен учесть ограничение по сроку отгрузки",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "48",
+              "2\\s*дн",
+              "срок",
+              "отгруз"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "MX004.T5.C2",
+          "type": "template_blocks",
+          "description": "Нужны блоки Subject/Body/WhatsApp",
+          "passed": false,
+          "reason": "Template blocks missing",
+          "details": {
+            "hasSubject": true,
+            "hasBody": true,
+            "hasWhatsapp": false
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?",
+          "requestBody": {
+            "message": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 511,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "b2ac1fa5-840c-47da-a934-85037fa23bb4",
+          "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Завод Энергооборудование Филиал ОАО Белсельэлектросетьстрой — /company/energo-gomel (Электрооборудование; Гомель, gomel; тел: +375 (232) 50 01 03)\n\nФокус задачи: кабель, ввгнг, 3х2, кабель ввгнг 3х2.\n\nФокус по локации: Гомель.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX004.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX004.T1.C2",
+              "type": "includes_any",
+              "description": "Должен учитывать товар и город",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "кабель",
+                  "ввгнг",
+                  "гомел"
+                ],
+                "hits": [
+                  "кабель",
+                  "ввгнг",
+                  "гомел"
+                ]
+              }
+            },
+            {
+              "id": "MX004.T1.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен practical first-pass",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Советский район.",
+          "requestBody": {
+            "message": "Советский район.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Завод Энергооборудование Филиал ОАО Белсельэлектросетьстрой — /company/energo-gomel (Электрооборудование; Гомель, gomel; тел: +375 (232) 50 01 03)\n\nФокус задачи: кабель, ввгнг, 3х2, кабель ввгнг 3х2.\n\nФокус по локации: Гомель.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ],
+            "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 505,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "bcd954bb-23d8-49e5-8ebb-35d01735e64b",
+          "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Ансервуд ОДО — /company/anserwood (Строительные и отделочные материалы; Гомельский р-н, gomel; тел: +375 (29) 129 03 62)\n\nФокус задачи: кабель, ввгнг, 3х2, советский.\n\nФокус по локации: gomel.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX004.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX004.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен сохранить тему кабеля",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "кабель",
+                  "ввгнг"
+                ],
+                "min": 1,
+                "hits": [
+                  "кабель",
+                  "ввгнг"
+                ]
+              }
+            },
+            {
+              "id": "MX004.T2.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать гео-уточнение",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "гомел",
+                  "советск"
+                ],
+                "hits": [
+                  "гомел",
+                  "советск"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Дай топ-3 с причинами и ссылками на карточки компаний.",
+          "requestBody": {
+            "message": "Дай топ-3 с причинами и ссылками на карточки компаний.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Завод Энергооборудование Филиал ОАО Белсельэлектросетьстрой — /company/energo-gomel (Электрооборудование; Гомель, gomel; тел: +375 (232) 50 01 03)\n\nФокус задачи: кабель, ввгнг, 3х2, кабель ввгнг 3х2.\n\nФокус по локации: Гомель.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Советский район."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Ансервуд ОДО — /company/anserwood (Строительные и отделочные материалы; Гомельский р-н, gomel; тел: +375 (29) 129 03 62)\n\nФокус задачи: кабель, ввгнг, 3х2, советский.\n\nФокус по локации: gomel.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ],
+            "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 3353,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c5a51f24-a33e-47e0-96fc-61d46741d46f",
+          "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nКороткий прозрачный ranking (предварительно):\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel)\nКритерии: релевантность профиля, локация, полнота контактов, риск несоответствия задаче.\nФокус запроса: Где купить кабель ВВГнг 3х2.5 в Гомеле оптом? Дай топ-3 с причинами и ссылками на карточки компаний.\n\nФокус задачи: кабель, ввгнг, 3х2, дай.\n\nЕсли нужно, уточню shortlist под ваш бюджет/срок/объем без выдумывания данных.\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/bel-stroykom",
+              "/company/tvcom-gomel",
+              "/company/rozetkizdes"
+            ],
+            "probes": {
+              "/company/bel-stroykom": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/tvcom-gomel": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/rozetkizdes": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "checks": [
+            {
+              "id": "MX004.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX004.T3.C2",
+              "type": "company_path_min_count",
+              "description": "Нужна хотя бы одна ссылка /company/...",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 1,
+                "count": 3
+              }
+            },
+            {
+              "id": "MX004.T3.C3",
+              "type": "company_paths_resolve_min",
+              "description": "Хотя бы одна ссылка должна открываться успешно",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 1,
+                "pathCount": 3,
+                "resolvedCount": 3,
+                "resolvedPaths": [
+                  "/company/bel-stroykom",
+                  "/company/tvcom-gomel",
+                  "/company/rozetkizdes"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/bel-stroykom": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/tvcom-gomel": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/rozetkizdes": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            },
+            {
+              "id": "MX004.T3.C4",
+              "type": "includes_any",
+              "description": "Нужна логика отбора, а не просто список",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "почему",
+                  "критер",
+                  "надеж",
+                  "риск"
+                ],
+                "hits": [
+                  "критер",
+                  "риск"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "user": "Теперь только тех, кто может отгрузить за 48 часов.",
+          "requestBody": {
+            "message": "Теперь только тех, кто может отгрузить за 48 часов.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Завод Энергооборудование Филиал ОАО Белсельэлектросетьстрой — /company/energo-gomel (Электрооборудование; Гомель, gomel; тел: +375 (232) 50 01 03)\n\nФокус задачи: кабель, ввгнг, 3х2, кабель ввгнг 3х2.\n\nФокус по локации: Гомель.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Советский район."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Ансервуд ОДО — /company/anserwood (Строительные и отделочные материалы; Гомельский р-н, gomel; тел: +375 (29) 129 03 62)\n\nФокус задачи: кабель, ввгнг, 3х2, советский.\n\nФокус по локации: gomel.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Дай топ-3 с причинами и ссылками на карточки компаний."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nКороткий прозрачный ranking (предварительно):\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel)\nКритерии: релевантность профиля, локация, полнота контактов, риск несоответствия задаче.\nФокус запроса: Где купить кабель ВВГнг 3х2.5 в Гомеле оптом? Дай топ-3 с причинами и ссылками на карточки компаний.\n\nФокус задачи: кабель, ввгнг, 3х2, дай.\n\nЕсли нужно, уточню shortlist под ваш бюджет/срок/объем без выдумывания данных.\n\nОфициальный реестр для проверки статуса: egr.gov.by."
+              }
+            ],
+            "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 547,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1a87e0ff-5d2c-48dc-8215-e30a36f65b9a",
+          "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель; тел: +375 (44) 744 07 44)\n4. Ансервуд ОДО — /company/anserwood (Строительные и отделочные материалы; Гомельский р-н; тел: +375 (29) 129 03 62)\n\nФокус задачи: кабель, ввгнг, 3х2, теперь.\n\nФокус по локации: Гомель.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX004.T4.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX004.T4.C2",
+              "type": "includes_any",
+              "description": "Должен учесть ограничение по сроку отгрузки",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "48",
+                  "2\\s*дн",
+                  "срок",
+                  "отгруз"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "MX004.T4.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен practical ответ по фильтру",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 5,
+          "user": "Сформируй RFQ в блоках Subject/Body/WhatsApp.",
+          "requestBody": {
+            "message": "Сформируй RFQ в блоках Subject/Body/WhatsApp.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Завод Энергооборудование Филиал ОАО Белсельэлектросетьстрой — /company/energo-gomel (Электрооборудование; Гомель, gomel; тел: +375 (232) 50 01 03)\n\nФокус задачи: кабель, ввгнг, 3х2, кабель ввгнг 3х2.\n\nФокус по локации: Гомель.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Советский район."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel; тел: +375 (44) 744 07 44)\n4. Ансервуд ОДО — /company/anserwood (Строительные и отделочные материалы; Гомельский р-н, gomel; тел: +375 (29) 129 03 62)\n\nФокус задачи: кабель, ввгнг, 3х2, советский.\n\nФокус по локации: gomel.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Дай топ-3 с причинами и ссылками на карточки компаний."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nКороткий прозрачный ranking (предварительно):\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель, gomel)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель, gomel)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель, gomel)\nКритерии: релевантность профиля, локация, полнота контактов, риск несоответствия задаче.\nФокус запроса: Где купить кабель ВВГнг 3х2.5 в Гомеле оптом? Дай топ-3 с причинами и ссылками на карточки компаний.\n\nФокус задачи: кабель, ввгнг, 3х2, дай.\n\nЕсли нужно, уточню shortlist под ваш бюджет/срок/объем без выдумывания данных.\n\nОфициальный реестр для проверки статуса: egr.gov.by."
+              },
+              {
+                "role": "user",
+                "content": "Теперь только тех, кто может отгрузить за 48 часов."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. БелСтройКомплект ООО — /company/bel-stroykom (Электротехническая продукция; Гомель; тел: +375 (232) 56 24 10)\n2. ГОМЕЛЬ ТВ ком СООО — /company/tvcom-gomel (Телекоммуникации, связь; Гомель; тел: +375 (232) 56 95 12)\n3. ДимСед ООО — /company/rozetkizdes (Автоматика, АСУ; Гомель; тел: +375 (44) 744 07 44)\n4. Ансервуд ОДО — /company/anserwood (Строительные и отделочные материалы; Гомельский р-н; тел: +375 (29) 129 03 62)\n\nФокус задачи: кабель, ввгнг, 3х2, теперь.\n\nФокус по локации: Гомель.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nОфициальный реестр для проверки статуса: egr.gov.by."
+              }
+            ],
+            "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 424,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "675176df-d050-4f38-89c4-31dc6230ba1f",
+          "conversationId": "87648c10-ca83-48c9-8bc0-efe54136a5ea",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nSubject: Запрос по сформируй rfq — Сформируй RFQ в блоках Subject/Body/WhatsApp.\n\nBody:\nЗдравствуйте, уточняется!\n\nНам нужно сформируй rfq в Гомель. Просим подтвердить условия по объем, уточняется, доставка/самовывоз и срок срок поставки.\nТакже уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования.\n\nС уважением,\nуточняетсяWhatsApp:\nЗдравствуйте! Нужен сформируй rfq в Гомель. Подскажите, сможете дать условия по объем/уточняется и срок срок поставки?",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX004.T5.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX004.T5.C2",
+              "type": "template_blocks",
+              "description": "Нужны блоки Subject/Body/WhatsApp",
+              "passed": false,
+              "reason": "Template blocks missing",
+              "details": {
+                "hasSubject": true,
+                "hasBody": true,
+                "hasWhatsapp": false
+              }
+            },
+            {
+              "id": "MX004.T5.C3",
+              "type": "excludes_all",
+              "description": "Не должно быть сырых плейсхолдеров",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "\\{qty\\}",
+                  "\\{city\\}",
+                  "\\{delivery\\}",
+                  "\\{deadline\\}"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5397
+    },
+    {
+      "id": "MX005",
+      "title": "Пользователь жалуется на слабый ответ: требование конкретики по Минску",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "quality_recovery",
+        "milk",
+        "minsk",
+        "shortlist",
+        "template"
+      ],
+      "personaGoal": "Проверить, что после критики ассистент даёт конкретный follow-up, а не generic fallback.",
+      "totalTurns": 4,
+      "completedTurns": 4,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "MX005.T4.C2",
+          "type": "template_blocks",
+          "description": "Нужны блоки Subject/Body/WhatsApp",
+          "passed": false,
+          "reason": "Template blocks missing",
+          "details": {
+            "hasSubject": true,
+            "hasBody": true,
+            "hasWhatsapp": false
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+          "requestBody": {
+            "message": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 535,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "30bcb2f2-6d66-426e-a83b-bc19bc164471",
+          "conversationId": "adab6c9f-5393-42c0-9c4a-1ab4e7897df6",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX005.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX005.T1.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен держать молочную тему",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок"
+                ],
+                "min": 1,
+                "hits": [
+                  "молок"
+                ]
+              }
+            },
+            {
+              "id": "MX005.T1.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен полезный first-pass",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "В Минске точно есть заводы. Не уходи в общие советы, дай конкретных кандидатов.",
+          "requestBody": {
+            "message": "В Минске точно есть заводы. Не уходи в общие советы, дай конкретных кандидатов.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?"
+              }
+            ],
+            "conversationId": "adab6c9f-5393-42c0-9c4a-1ab4e7897df6",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 626,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "e41b596f-e4d1-42f8-82e8-3f4cd1d0a0b6",
+          "conversationId": "adab6c9f-5393-42c0-9c4a-1ab4e7897df6",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск, minsk; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3441182)\n4. АникаВита ИООО — /company/biznesinfo-98516 (Продукты питания; Минск, minsk; тел: (+375-17) 2878222)\n\nФокус задачи: молока, чего, начать, minsk.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX005.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX005.T2.C2",
+              "type": "includes_any",
+              "description": "Должен отработать явный запрос по Минску",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            },
+            {
+              "id": "MX005.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Тема молока должна сохраняться",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок"
+                ],
+                "min": 1,
+                "hits": [
+                  "молок"
+                ]
+              }
+            },
+            {
+              "id": "MX005.T2.C4",
+              "type": "any_of",
+              "description": "После жалобы нужна конкретика, а не размытый ответ",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сразу дай кого прозвонить первым и что спросить.",
+          "requestBody": {
+            "message": "Сразу дай кого прозвонить первым и что спросить.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?"
+              },
+              {
+                "role": "user",
+                "content": "В Минске точно есть заводы. Не уходи в общие советы, дай конкретных кандидатов."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск, minsk; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3441182)\n4. АникаВита ИООО — /company/biznesinfo-98516 (Продукты питания; Минск, minsk; тел: (+375-17) 2878222)\n\nФокус задачи: молока, чего, начать, minsk.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ],
+            "conversationId": "adab6c9f-5393-42c0-9c4a-1ab4e7897df6",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 1145,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1dee5e1e-ae06-4b47-8834-00c6528fd1a8",
+          "conversationId": "adab6c9f-5393-42c0-9c4a-1ab4e7897df6",
+          "isStub": false,
+          "reply": "Кого первым прозвонить по текущим условиям:\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск; тел: (+375-17) 3441182)\nПриоритет: релевантность профиля, риск срыва сроков и полнота контактов.\n5 вопросов для первого звонка:\n1. Подтвердите форму поставки и документы (ветеринарные/лабораторные) под ваш маршрут.\n2. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n3. Уточните ответственное контактное лицо для быстрого согласования.\n4. Сколько проектов вашего масштаба вы ведете сейчас и кто будет основным исполнителем?\n5. Как фиксируете сроки и ответственность в договоре (SLA, штрафы, порядок эскалации)?",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX005.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX005.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Нужен actionable ответ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "MX005.T3.C3",
+              "type": "any_of",
+              "description": "Нужна приоритизация с конкретикой",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "MX005.T3.C4",
+              "type": "includes_any",
+              "description": "Должна быть логика приоритизации и вопросы на звонок",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "перв",
+                  "спрос",
+                  "вопрос",
+                  "критер"
+                ],
+                "hits": [
+                  "перв",
+                  "вопрос"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "user": "И отдельным блоком RFQ (Subject/Body/WhatsApp).",
+          "requestBody": {
+            "message": "И отдельным блоком RFQ (Subject/Body/WhatsApp).",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest; тел: +375 (162) 22 15 41)\n2. Савушкин продукт ОАО — /company/savushkin (Молочная промышленность; Брест, brest; тел: +375 (162) 30 45 45)\n\nФокус задачи: молока, чего, начать, молока чего начать.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nПодтвердите, пожалуйста: какой город берем базовым первым?"
+              },
+              {
+                "role": "user",
+                "content": "В Минске точно есть заводы. Не уходи в общие советы, дай конкретных кандидатов."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск, minsk; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск, minsk; тел: (+375-17) 3441182)\n4. АникаВита ИООО — /company/biznesinfo-98516 (Продукты питания; Минск, minsk; тел: (+375-17) 2878222)\n\nФокус задачи: молока, чего, начать, minsk.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Сразу дай кого прозвонить первым и что спросить."
+              },
+              {
+                "role": "assistant",
+                "content": "Кого первым прозвонить по текущим условиям:\n1. Минский молочный завод №1 ОАО — /company/belmilk (Молочная промышленность; Минск; тел: +375 (17) 270 50 17)\n2. МОЛОЧНЫЙ ГОСТИНЕЦ Республиканское дочернее производственно-торговое унитарное предприятие — /company/biznesinfo-81442 (Молочная промышленность; Минск; тел: (+375-17) 3973793)\n3. ГОРМОЛЗАВОД № 2 ОАО — /company/biznesinfo-21355 (Молочная промышленность; Минск; тел: (+375-17) 3441182)\nПриоритет: релевантность профиля, риск срыва сроков и полнота контактов.\n5 вопросов для первого звонка:\n1. Подтвердите форму поставки и документы (ветеринарные/лабораторные) под ваш маршрут.\n2. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n3. Уточните ответственное контактное лицо для быстрого согласования.\n4. Сколько проектов вашего масштаба вы ведете сейчас и кто будет основным исполнителем?\n5. Как фиксируете сроки и ответственность в договоре (SLA, штрафы, порядок эскалации)?"
+              }
+            ],
+            "conversationId": "adab6c9f-5393-42c0-9c4a-1ab4e7897df6",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 399,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "67a26c56-1e3c-44a1-9656-474dc8422f65",
+          "conversationId": "adab6c9f-5393-42c0-9c4a-1ab4e7897df6",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nSubject: Запрос по молоко — И отдельным блоком RFQ (Subject/Body/WhatsApp).\n\nBody:\nЗдравствуйте, уточняется!\n\nНам нужно молоко в Минск. Просим подтвердить условия по 1000 литров, уточняется, доставка/самовывоз и срок срок поставки.\nТакже уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования.\n\nС уважением,\nуточняетсяWhatsApp:\nЗдравствуйте! Нужен молоко в Минск. Подскажите, сможете дать условия по 1000 литров/уточняется и срок срок поставки?",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "MX005.T4.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "MX005.T4.C2",
+              "type": "template_blocks",
+              "description": "Нужны блоки Subject/Body/WhatsApp",
+              "passed": false,
+              "reason": "Template blocks missing",
+              "details": {
+                "hasSubject": true,
+                "hasBody": true,
+                "hasWhatsapp": false
+              }
+            },
+            {
+              "id": "MX005.T4.C3",
+              "type": "excludes_all",
+              "description": "Не должно быть сырых плейсхолдеров",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "\\{qty\\}",
+                  "\\{city\\}",
+                  "\\{delivery\\}",
+                  "\\{deadline\\}"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2706
+    }
+  ]
+}

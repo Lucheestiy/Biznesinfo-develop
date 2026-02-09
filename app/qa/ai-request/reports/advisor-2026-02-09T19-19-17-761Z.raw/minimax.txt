@@ -1,0 +1,327 @@
+```json
+{
+  "advisor": "minimax",
+  "task": "Act as a senior AI product+prompt advisor. Propose concrete, testable improvements for Biznesinfo assistant.",
+  "outputSchema": {
+    "advisor": "minimax",
+    "executiveSummary": "The assistant has 4 systemic failures causing 64% failure rate: (1) template placeholder bug replacing context values with 'уточняется', (2) category search returning wrong vendor types, (3) multi-turn context loss on geographic refinement, (4) generic fallback loops replacing actual company data. Fix the template post-processor and search category logic first - these are P0 single-PR fixes with highest ROI.",
+    "priorityPlan": [
+      {
+        "priority": "P0",
+        "title": "Fix template placeholder post-processor replacing valid values with 'уточняется'",
+        "why": "All 9 RFQ/template scenarios (S031-S039, S041-S045) fail because the post-processor replaces ANY brace-enclosed text with 'уточняется', even valid extracted context like product names, quantities, and city names. This contradicts the system prompt instruction to 'fill concrete values from context'.",
+        "expectedImpact": "Template block compliance from 0% to 80%+; eliminates 'уточняется' gibberish in Subject/Body/WhatsApp outputs",
+        "validationScenarios": ["S031", "S032", "S033", "S034", "S035", "S036", "S039", "S041", "S042"]
+      },
+      {
+        "priority": "P0",
+        "title": "Fix vendor category matching in search logic",
+        "why": "9 sourcing scenarios (S017, S021-S025) return completely wrong companies (LED screens → tractor parts, СТО → furniture, cleaning → furniture, accounting → construction). The search is matching on keywords without proper category/rubric filtering, causing category confusion.",
+        "expectedImpact": "Category relevance from 0% to 70%+ for sourcing queries; eliminates absurd category mismatches",
+        "validationScenarios": ["S017", "S021", "S022", "S023", "S024", "S025", "S028", "S030"]
+      },
+      {
+        "priority": "P1",
+        "title": "Add multi-turn continuity guard for geographic refinement",
+        "why": "Geo refinement scenarios fail because assistant ignores district/city updates from Turn 2 onward. Current implementation treats all messages as new requests instead of refinements of previous context.",
+        "expectedImpact": "Geo constraint compliance from 0% to 60%+; reduces 'complete failure to filter by district' judge complaints",
+        "validationScenarios": ["S017", "S021", "S022", "S023", "S024", "S025"]
+      },
+      {
+        "priority": "P1",
+        "title": "Detect and break generic fallback loops",
+        "why": "Multiple scenarios show identical generic responses repeated across 3 turns (S028, S030, S041-S045). Assistant lacks self-detection when it's recycling the same rubric text without providing actual value.",
+        "expectedImpact": "Reduces repeated generic fallback rate; improves judge usefulness scores from 0.0-0.5 to 1.0+",
+        "validationScenarios": ["S028", "S030", "S041", "S042", "S043", "S044", "S045"]
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "R1",
+        "area": "template",
+        "title": "Replace catch-all placeholder replacement with whitelist approach",
+        "action": "In route.ts around line 5820-5840, change the post-processor from 'replace any {placeholder} with уточняется' to 'only replace placeholders that are truly unknown, using extracted context values when available'. Add explicit extraction of {product}, {quantity}, {city}, {deadline}, {volume} from user message before template generation, then substitute these into templates instead of 'уточняется'.",
+        "implementationHint": "route.ts function that calls out.replace(/\\{[^{}]{1,48}\\}/gu, 'уточняется'). Create a pre-processing step that extracts key RFQ fields (commodity, quantity, location, timeline) using regex patterns, then pass these as context variables to the template. Only fall back to 'уточняется' if extraction fails AND the placeholder is NOT in the user's original message.",
+        "expectedImpact": "Template compliance jumps from 0% to 80%+; eliminates 20+ 'уточняется' placeholder failures per run",
+        "risk": "Low - only affects template output format, no behavioral changes",
+        "effort": "M",
+        "validationScenarios": ["S031.T1.C2", "S031.T2.C2", "S032.T1.C2", "S032.T3.C3", "S033.T3.C3", "S034.T1.C2", "S035.T3.C3", "S036.T3.C3", "S039.T3.C3"]
+      },
+      {
+        "id": "R2",
+        "area": "retrieval",
+        "title": "Add category/rubric pre-filter before keyword search",
+        "action": "In vendor lookup logic (route.ts ~line 7000), add primary rubric filter that MUST match the user's explicit category request (e.g., 'СТО' → only return companies with СТО rubric, 'LED-экраны' → only LED screen vendors). Use biznesinfoDetectRubricHints to extract category intent, then filter results to only include companies with matching rubrics before keyword similarity scoring.",
+        "implementationHint": "route.ts runSearch() function. After getting meili/biznesinfo results, add filter: const hasMatchingRubric = company.rubrics?.some(r => detectedRubrics.includes(r)); return only companies where hasMatchingRubric === true. If no results with matching rubric, return empty rather than wrong-category results.",
+        "expectedImpact": "Category relevance improves from 0% to 70%+; eliminates tractor parts for LED screens, furniture for cleaning, construction for accounting",
+        "risk": "Medium recall if - may reduce rubric detection fails, but better than wrong-category results",
+        "effort": "M",
+        "validationScenarios": ["S017.T2.C3", "S021.T3.C2", "S022.T3.C2", "S023.T3.C2", "S024.T3.C2", "S025.T3.C2"]
+      },
+      {
+        "id": "R3",
+        "area": "prompt",
+        "title": "Add explicit Turn-2+ continuity instruction for geographic refinement",
+        "action": "In buildAssistantPrompt(), when processing messages after Turn 1 (detect via history.length > 0) AND the message contains only geographic terms (city/district names), inject a system reminder: 'This is a geographic refinement of the previous sourcing request. Apply the city/district constraint to the SAME category/rubric from Turn 1. Do not re-run category search.'",
+        "implementationHint": "buildAssistantPrompt() function, after history processing. Add condition: if (params.history?.length > 0 && isGeoOnlyRefinement(params.message)) { prompt.push({role: 'system', content: 'Geographic refinement detected. Keep category from Turn 1, apply new city/district filter only.'}); }",
+        "expectedImpact": "Geo constraint compliance improves; reduces 'complete failure to filter by district' judge issues",
+        "risk": "Low - only adds clarification, no breaking changes",
+        "effort": "S",
+        "validationScenarios": ["S017.T2.C3", "S021", "S022", "S023"]
+      },
+      {
+        "id": "R4",
+        "area": "prompt",
+        "title": "Add self-detection for generic fallback loops",
+        "action": "In handleAssistantTurn() before responding, compare current draft response against previous turn's response using text similarity. If similarity > 80% AND both are generic rubric/template text (no company names/links), trigger a fallback: 'I notice I'm repeating the same guidance. Let me try a different approach with actual company data from the catalog.' Then either (a) call vendor lookup with relaxed constraints, or (b) acknowledge catalog limitations and ask user to broaden criteria.",
+        "implementationHint": "In finalizeAssistantTurn() or response generation path. Add: const isDuplicateResponse = similarityCheck(currentResponse, lastAssistantResponse) > 0.8; if (isDuplicateResponse && hasNoCompanyData(currentResponse)) { // Force vendor lookup or explicit acknowledgment }",
+        "expectedImpact": "Reduces judge complaints about 'identical generic responses across 3 turns'; improves usefulness from 0.0 to 1.0+",
+        "risk": "Medium - may cause delays if vendor lookup fails repeatedly, needs graceful degradation",
+        "effort": "L",
+        "validationScenarios": ["S028.T3.C2", "S028.T3.C3", "S030.T3.C2", "S030.T3.C3", "S041.T3.C2", "S042.T3.C2"]
+      },
+      {
+        "id": "R5",
+        "area": "template",
+        "title": "Remove Subject line insertion of user query text",
+        "action": "The template generator is inserting user query words directly into Subject lines (e.g., 'Запрос по подготовь шаблон' instead of proper subject). This is a pattern-matching bug where the assistant treats user instructions as template content. Fix the prompt injection logic to distinguish between 'what the user wants' (template for X) and 'what goes INTO the template' (X itself).",
+        "implementationHint": "buildAssistantPrompt() template mode section. Change from 'Subject: {user_message_truncated}' to 'Subject: [Professional RFQ subject line for {user_intent_type}]' where user_intent_type is extracted from message intent classification.",
+        "expectedImpact": "Subject lines become professional and usable; eliminates 'Запрос по сформируй письмо' nonsense",
+        "risk": "Low - improves output quality only",
+        "effort": "M",
+        "validationScenarios": ["S041.T3.C2", "S042.T3.C2", "S043.T3.C2", "S044.T3.C2", "S045.T3.C2"]
+      },
+      {
+        "id": "R6",
+        "area": "template",
+        "title": "Fix WhatsApp template generation to produce mobile-native messages",
+        "action": "Current WhatsApp templates are identical to email Body (same length, same structure). Add specific instruction for template mode: 'WhatsApp version must be 3-4 sentences max, conversational tone, include one specific question, no bullet points.' Also strip 'доставка/самовывоз' for service-only templates (cleaning, security, SEO).",
+        "implementationHint": "Response mode: template system message. Add: 'WhatsApp: max 4 sentences, 1 specific question, conversational. For services without physical delivery (cleaning, security, SEO), omit delivery/shipping questions.'",
+        "expectedImpact": "WhatsApp templates become actually usable on mobile; reduces judge complaints about irrelevant delivery questions",
+        "risk": "Low - output quality improvement only",
+        "effort": "S",
+        "validationScenarios": ["S033.T3.C3", "S035.T3.C3", "S039.T3.C3"]
+      },
+      {
+        "id": "R7",
+        "area": "retrieval",
+        "title": "Add shortlist data persistence check before template generation",
+        "action": "Shortlist scenarios (S041-S045) fail because assistant never accesses the actual shortlist data - it generates generic templates without showing company comparisons. Before entering template mode for shortlist requests, verify shortlistFacts are populated. If empty, return error: 'Shortlist data not found - please provide company list to compare.'",
+        "implementationHint": "handleTemplateMode() or response generation. Add: if (!params.shortlistFacts || params.shortlistFacts.length < 10) { return 'Shortlist comparison requires actual company data. Please provide company names or selection criteria.'; }",
+        "expectedImpact": "Eliminates templates without company context; reduces 'never compared any companies' judge complaints",
+        "risk": "Low - adds graceful failure instead of gibberish",
+        "effort": "S",
+        "validationScenarios": ["S041", "S042", "S043", "S044", "S045"]
+      }
+    ],
+    "testPlan": {
+      "mustPassScenarios": [
+        "S031.T1.C2",
+        "S031.T2.C2",
+        "S031.T3.C2",
+        "S032.T1.C2",
+        "S032.T3.C3",
+        "S033.T3.C3",
+        "S034.T1.C2",
+        "S035.T3.C3",
+        "S036.T3.C3",
+        "S039.T3.C3",
+        "S041.T3.C2",
+        "S017.T2.C3",
+        "S021.T3.C2",
+        "S022.T3.C2",
+        "S023.T3.C2",
+        "S024.T3.C2",
+        "S025.T3.C2"
+      ],
+      "regressionSuites": [
+        "app/qa/ai-request/scenarios.json (core 50 scenarios)",
+        "app/qa/ai-request/scenarios.regressions.geo-ambiguity.json",
+        "app/qa/ai-request/scenarios.regressions.multi-step-journeys.json"
+      ],
+      "successMetrics": [
+        "Core scenario pass rate: from 36% to 65%+ (current 18/50 → 33+ passing)",
+        "Template block compliance: from 0% to 75%+ (eliminate 'уточняется' placeholders)",
+        "Category relevance: from 0-10% to 65%+ (eliminate tractor parts for LED screens)",
+        "Average usefulness score: from 0.5 to 1.2+ (judge scores)",
+        "Zero identical generic fallback responses across 3 turns"
+      ]
+    }
+  },
+  "currentState": {
+    "qaSummary": {
+      "runId": "run-2026-02-09T19-02-49-610Z-2943005-jcbel",
+      "startedAt": "2026-02-09T19:02:49.610Z",
+      "endedAt": "2026-02-09T19:06:04.201Z",
+      "durationMs": 194591,
+      "baseUrl": "http://127.0.0.1:8131",
+      "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.json",
+      "totalScenarios": 50,
+      "passedScenarios": 18,
+      "failedScenarios": 32,
+      "passRate": 0.36,
+      "totalChecks": 452,
+      "passedChecks": 382,
+      "failedChecks": 70,
+      "checkPassRate": 0.8451,
+      "targetPassCount": 45,
+      "targetPassRate": 0.9,
+      "targetReached": false,
+      "authUser": {
+        "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+        "email": "qa.ai.runner@example.com",
+        "name": "AI QA Runner",
+        "role": "user",
+        "plan": "paid"
+      },
+      "stoppedEarly": false,
+      "stopReason": null
+    },
+    "judgeSummary": {
+      "runId": "judge-2026-02-09T19-06-04-335Z",
+      "totalScenarios": 50,
+      "byJudge": [
+        {
+          "judge": "kimi",
+          "averageUsefulness": 1.04,
+          "usefulRate": 0.1,
+          "topIssues": [
+            {
+              "issue": "complete failure to filter by district after user clarification — сухарево completely ignored",
+              "count": 1
+            },
+            {
+              "issue": "generic fallback: instead of narrowing to district-relevant suppliers, repeated same list",
+              "count": 1
+            },
+            {
+              "issue": "no acknowledgment that none of the companies may actually be in/serve сухарево",
+              "count": 1
+            },
+            {
+              "issue": "added wrong district company (ансервуд from гомельский р-н instead of советский)",
+              "count": 1
+            },
+            {
+              "issue": "no specific guidance on certificates despite explicit request",
+              "count": 1
+            },
+            {
+              "issue": "did not filter out irrelevant companies (гомель тв ком — telecom, not cable supplier)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "judge": "minimax",
+          "averageUsefulness": 1.04,
+          "usefulRate": 0.06,
+          "topIssues": [
+            {
+              "issue": "geographic constraint ignored - major continuity failure",
+              "count": 1
+            },
+            {
+              "issue": "companies lack clear пнд трубы specialization",
+              "count": 1
+            },
+            {
+              "issue": "no delivery timeline assessment for 2-3 day requirement",
+              "count": 1
+            },
+            {
+              "issue": "wrong service categories recommended (telecommunications, automation)",
+              "count": 1
+            },
+            {
+              "issue": "no ввгнг cable specialization evidence",
+              "count": 1
+            },
+            {
+              "issue": "certificate advice is empty generic statement",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    "focusScenarios": [
+      {
+        "id": "S034",
+        "title": "RFQ: SEO service",
+        "tags": ["outreach", "template", "multi_turn", "rfq"],
+        "strictPass": false,
+        "strictFailedCheckCount": 4,
+        "avgUsefulness": 0,
+        "usefulRate": 0,
+        "hardError": null,
+        "failedChecks": [
+          {"id": "S034.T1.C2", "type": "template_blocks", "description": "Должны быть блоки Subject / Body / WhatsApp", "reason": "Template blocks missing"},
+          {"id": "S034.T2.C2", "type": "template_blocks", "description": "Должны быть блоки Subject / Body / WhatsApp", "reason": "Template blocks missing"},
+          {"id": "S034.T3.C2", "type": "template_blocks", "description": "Должны быть блоки Subject / Body / WhatsApp", "reason": "Template blocks missing"},
+          {"id": "S034.T3.C3", "type": "includes_any", "description": "Должны быть placeholders в фигурных скобках", "reason": "No required patterns matched"}
+        ],
+        "judgeIssueHints": [
+          "Template mentions 'доставка/самовывоз' for SEO service - complete category mismatch",
+          "Turn 2 suggests real estate categories for SEO service request - nonsensical",
+          "No formal tone adjustment made despite request",
+          "No KPI placeholders added as requested in turn 3"
+        ],
+        "judgeReasons": [
+          {"judge": "kimi", "usefulness": 0, "verdict": "not_useful", "reasons": ["Complete failure - template is gibberish with 'уточняется' placeholders, not SEO outreach", "Turn 2 falls back to completely irrelevant real estate categories instead of formal template"]},
+          {"judge": "minimax", "usefulness": 0, "verdict": "not_useful", "reasons": ["User requested English template, assistant produces mixed Russian with 'объем/уclarify'", "Each turn: same broken template or generic rubric"]}
+        ],
+        "lastReply": "Работаю по данным каталога Biznesinfo. Быстрый first-pass по каталогу Biznesinfo: Фокус задачи: вариант, формальнее, слишком, длинный. Рубрики для старта: профильная рубрика услуги/товара + 1-2 смежные. Поисковые формулировки: добавьте 2-3 синонима к основному запросу и уточните объем/срок. Чтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена). Шаблон сравнения поставщиков: 1. Цена за единицу и условия оплаты. 2. Срок изготовления/отгрузки и доступность доставки. 3.…",
+        "lastUser": "Добавь placeholders по KPI и срокам."
+      },
+      {
+        "id": "S017",
+        "title": "LED-экраны для ивентов: Минск -> Немига",
+        "tags": ["sourcing", "geo_refinement", "multi_turn", "ranking"],
+        "strictPass": false,
+        "strictFailedCheckCount": 1,
+        "avgUsefulness": 0,
+        "usefulRate": 0,
+        "hardError": null,
+        "failedChecks": [{"id": "S017.T2.C3", "type": "includes_any", "description": "Должно учитываться гео-уточнение (город/район)", "reason": "No required patterns matched"}],
+        "judgeIssueHints": [
+          "Катастрофическая нерелевантность: запчасти для сельхозтехники вместо LED-экранов",
+          "Никакого прогресса в диалоге по существу задачи",
+          "Полное отсутствие понимания предметной области",
+          "Wrong vendor type: ЯСМА sells tractor parts, not LED screens for events"
+        ],
+        "judgeReasons": [
+          {"judge": "kimi", "usefulness": 0, "verdict": "not_useful", "reasons": ["Turn 1: не нашел компаний по LED-экранам в Минске - честно, но не полезно", "Turn 2: при уточнении 'Немига' повторил тот же generic текст без попытки найти компании в центре Минска"]},
+          {"judge": "minimax", "usefulness": 0, "verdict": "not_useful", "reasons": ["Hallucinated completely wrong vendor - LED screens requested, got agricultural parts supplier (ЯСМА)", "Never found any real LED screen vendors in catalog"]}
+        ],
+        "lastReply": "Shortlist по текущим данным каталога: 1. ЯСМА НПЧУП — /company/yasma (Запчасти к сельхозтехнике; Минск, minsk; тел: +375 (17) 242 77 46) 2. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию). 3. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию). Подтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции. Как добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карто…",
+        "lastUser": "Top-3 по надежности и скорости монтажа, пожалуйста."
+      },
+      {
+        "id": "S041",
+        "title": "Shortlist: металлоконструкции",
+        "tags": ["shortlist", "ranking", "multi_turn"],
+        "strictPass": false,
+        "strictFailedCheckCount": 1,
+        "avgUsefulness": 0,
+        "usefulRate": 0,
+        "hardError": null,
+        "failedChecks": [{"id": "S041.T3.C2", "type": "template_blocks", "description": "Должны быть блоки Subject / Body / WhatsApp", "reason": "Template blocks missing"}],
+        "judgeIssueHints": [
+          "Critical: Assistant never accessed the actual shortlist data to compare companies",
+          "Turn 3 template is unusable — subject line contains user's query text instead of professional subject",
+          "No continuity: user asked about металлоконструкции, template talks about generic 'объем' and 'доставка'",
+          "Assistant appears stuck in a loop repeating same generic response structure"
+        ],
+        "judgeReasons": [
+          {"judge": "kimi", "usefulness": 0, "verdict": "not_useful", "reasons": ["Turn 1: Assistant completely ignores user's request to compare specific companies, gives generic rubric template instead", "Turn 2: Repeats identical generic template, no actual top-2 ranking with company names"]},
+          {"judge": "minimax", "usefulness": 0, "verdict": "not_useful", "reasons": ["Assistant never actually compares any companies - only provides generic ranking methodology", "Template in turn 3 is broken with placeholders like 'уточняется' instead of real company names"]}
+        ],
+        "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по подготовь шаблон — Подготовь шаблон первого email для контакта с лидером. Body: Здравствуйте, уточняется! Нам нужно подготовь шаблон в город. Просим подтвердить условия по объем, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняетсяWhatsApp: Здравствуйте! Нужен подготовь шаблон в город. Подскажите, сможете дать условия по объем/уточняется и…",
+        "lastUser": "Подготовь шаблон первого email для контакта с лидером."
+      }
+    ]
+  }
+}
+```
+

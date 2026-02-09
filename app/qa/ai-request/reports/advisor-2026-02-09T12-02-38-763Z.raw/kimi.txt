@@ -1,0 +1,120 @@
+Now I have a comprehensive understanding of the codebase and the QA issues. Let me provide the concrete engineering advice in the requested JSON format.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Multi-turn regressions reveal three critical failure modes: (1) template generation leaves raw placeholders like {qty} unfilled when LLM output is truncated or malformed (MX001, MX004, MX005); (2) geo-correction turns (\"не город, а область\") trigger context loss, causing the assistant to return generic catalog-search advice instead of shortlist with /company links (MX001, MX002); (3) topic switchback (молоко→автозапчасти→молоко) fails to rehydrate prior candidate list, resulting in incomplete shortlists (MX003). Fix: tighten post-processing guards for template placeholders, harden geo-correction continuity logic, and persist candidate IDs across topic switches in conversation state.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix raw placeholder leakage in template output",
+      "why": "MX001, MX004, MX005 all fail strict check 'excludes_all' for patterns like \\{qty\\}, \\{city\\}. This is a deterministic post-processing bug, not an LLM quality issue.",
+      "expectedImpact": "Eliminates 3/8 strict check failures immediately; improves usefulness score for template-heavy scenarios.",
+      "validationScenarios": ["MX001", "MX004", "MX005"]
+    },
+    {
+      "priority": "P0",
+      "title": "Harden geo-correction continuity (city→region)",
+      "why": "MX001.T3 and MX002.T2 show that 'Минская область, не сам город' triggers generic fallback instead of shortlist. The lockToHistoryCandidates logic fails when geo hints change but sourcing intent persists.",
+      "expectedImpact": "Restores shortlist with /company links after geo corrections; fixes 2/8 strict failures.",
+      "validationScenarios": ["MX001", "MX002"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix switchback context rehydration",
+      "why": "MX003.T4 returns only 2 companies for top-3 request after returning to milk topic. History candidate extraction fails to merge with fresh lookup after topic switch.",
+      "expectedImpact": "Improves usefulness from 2.5 to 4+ on switchback scenarios; maintains continuity.",
+      "validationScenarios": ["MX003"]
+    },
+    {
+      "priority": "P1",
+      "title": "Prevent ranking template hallucination",
+      "why": "MX002.T4 shows garbled output mixing Brest candidates into 'Minsk region' shortlist. Geo filtering in ranking fallback is too permissive.",
+      "expectedImpact": "Reduces geo confusion errors by ~50% in multi-turn journeys.",
+      "validationScenarios": ["MX002", "MX001"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Add aggressive placeholder sanitization before response return",
+      "action": "In postProcessAssistantReply (line ~2541), move sanitizeUnfilledPlaceholdersInNonTemplateReply to run unconditionally for ALL modes, not just when !params.mode.templateRequested. Add additional regex to catch partial placeholders like '{product/service}' split across tokens.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2541-2543 - remove the conditional check for templateRequested. Add line: out = sanitizeUnfilledPlaceholdersInNonTemplateReply(out).trim() before all returns.",
+      "expectedImpact": "Eliminates raw placeholder strict-check failures (MX001.T5.C3, MX004.T5.C3, MX005.T4.C3).",
+      "risk": "Low - purely post-processing, no LLM behavior change.",
+      "effort": "S",
+      "validationScenarios": ["MX001", "MX004", "MX005"]
+    },
+    {
+      "id": "R2",
+      "area": "geo",
+      "title": "Fix geo-correction to preserve candidate list",
+      "action": "In buildVendorLookupContext (line ~3888), when detectPreferredGeoFromCorrection returns non-null geo, ensure followUpByCorrection flag is set even if message doesn't match explicit correction regex. Currently 'точнее: Минская область' fails to trigger followUpByCorrection.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:3948-3953 - add condition: const geoCorrectionDetected = Boolean(correctedGeo.city || correctedGeo.region); then include geoCorrectionDetected in followUpByCorrection calculation.",
+      "expectedImpact": "Fixes MX001.T3 and MX002.T2 context loss after geo refinement.",
+      "risk": "Medium - may increase false positives for correction detection; test with negation patterns.",
+      "effort": "M",
+      "validationScenarios": ["MX001", "MX002"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Persist candidate IDs across topic switches",
+      "action": "In postProcessAssistantReply (line ~1646), historySlugCandidates extraction uses extractAssistantCompanySlugsFromHistory which only parses /company/XXX patterns. Add fallback to extract company IDs from previous turn's vendorCandidates metadata stored in conversation state.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1646-1656 - modify prioritizeVendorCandidatesByHistory to also accept stored candidate IDs from session metadata, not just parsed slugs from text.",
+      "expectedImpact": "Fixes MX003.T4 incomplete shortlist after switchback.",
+      "risk": "Low - additive fallback, doesn't change existing logic.",
+      "effort": "M",
+      "validationScenarios": ["MX003"]
+    },
+    {
+      "id": "R4",
+      "area": "ranking",
+      "title": "Strict geo filtering in ranking fallback",
+      "action": "In buildRankingFallbackAppendix (line ~465), the filterAndRankVendorCandidates function doesn't enforce strict city/region matching when candidates exist. Add explicit geo filter before ranking when user explicitly corrected geo in previous turn.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:480-487 - after filterAndRankVendorCandidates, add: if (params.region || params.city) { rankedRowsSource = rankedRowsSource.filter(c => geoMatches(c, params.region, params.city)); }",
+      "expectedImpact": "Prevents MX002.T4 issue where Brest candidates appeared in Minsk region shortlist.",
+      "risk": "Low - stricter filtering reduces false positives.",
+      "effort": "S",
+      "validationScenarios": ["MX002"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add system prompt guard for template generation",
+      "action": "In generateCodexReply/generateOpenAiReply calls, add explicit instruction: 'When generating RFQ templates, ALWAYS replace all placeholders like {qty}, {city}, {deadline} with inferred values or remove them. Never output raw curly-brace placeholders.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2788-2794 (Codex) and 2729-2734 (OpenAI) - append to instructions string.",
+      "expectedImpact": "Reduces placeholder leakage at source before post-processing.",
+      "risk": "Low - prompt engineering only.",
+      "effort": "S",
+      "validationScenarios": ["MX001", "MX004", "MX005"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Add content coherence check for repeated segments",
+      "action": "In postProcessAssistantReply, detect repeated paragraph patterns (indicating LLM loop/hallucination) and trigger fallback to local resilient reply. MX002.T4 shows 'turn 4-5 includes repeated/duplicated content'.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2621 - add function hasRepeatedSegments(text) that checks for 20+ character substrings appearing >2 times. If detected, log and return buildLocalResilientFallbackReply.",
+      "expectedImpact": "Catches garbled/repeated output before it reaches user.",
+      "risk": "Low - safety guardrail, only triggers on obvious pathology.",
+      "effort": "M",
+      "validationScenarios": ["MX002"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["MX001", "MX002", "MX003", "MX004", "MX005"],
+    "regressionSuites": [
+      "scenarios.regressions.multi-step-journeys.json",
+      "scenarios.regressions.geo-ambiguity.json",
+      "scenarios.regressions.switchback-topic.json"
+    ],
+    "successMetrics": [
+      "strictPassRate >= 0.8 (target: 4/5 scenarios)",
+      "checkPassRate >= 0.95",
+      "avgUsefulness >= 3.5",
+      "zero occurrences of raw placeholder patterns \\{[a-z/]+\\} in template outputs"
+    ]
+  }
+}
+```

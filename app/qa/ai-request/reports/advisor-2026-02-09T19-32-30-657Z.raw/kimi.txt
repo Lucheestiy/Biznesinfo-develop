@@ -1,0 +1,122 @@
+Now I have a comprehensive understanding of the codebase. Let me provide the advisory review in valid JSON format:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "GA002 failed because the assistant lost product context (onion) when switching from city to region scope. The retrieval pipeline returned livestock farms (ТИТУЛ ФХ, Олимп-Агро) instead of vegetable suppliers. Root cause: insufficient commodity-aware filtering in vendor candidate ranking when geo-correction occurs. GA001 passed but judges noted suboptimal handling of dual-city ambiguity. Priority fixes: (1) strengthen commodity tag persistence across geo-corrections, (2) add explicit acknowledgment phrases for geo-filter changes, (3) improve rubric-based filtering for agricultural products.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix commodity tag persistence on geo-correction (GA002)",
+      "why": "GA002 failed strict checks because 'лук репчатый' context was lost when user corrected 'Минск' → 'Минская область'. Assistant returned livestock farms instead of vegetable suppliers.",
+      "expectedImpact": "Eliminates 100% of commodity context loss in geo-correction scenarios. Improves usefulness score from 2 → 4+ for GA002.",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add explicit geo-filter acknowledgment phrases",
+      "why": "Checks GA002.T2.C3 and GA002.T2.C4 require explicit acknowledgment patterns ('учту', 'принял', 'беру', 'фильтр', 'область'). Current post-processing adds these but too late in the pipeline.",
+      "expectedImpact": "Passes strict checks for geo-correction acknowledgment. Reduces judge complaints about 'необоснованный выбор' and 'нет явного признания'.",
+      "validationScenarios": ["GA002", "GA001"]
+    },
+    {
+      "priority": "P1",
+      "title": "Strengthen agricultural rubric filtering for onion queries",
+      "why": "Judge noted 'ТИТУЛ ФХ (животноводство) и Олимп-Агро (общее СХ) не являются поставщиками лука'. Current commodity filtering doesn't properly exclude livestock-only farms.",
+      "expectedImpact": "Prevents livestock farms from appearing in vegetable sourcing results. Improves relevance scoring.",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "priority": "P1",
+      "title": "Improve dual-city ambiguity handling (GA001 Turn 2)",
+      "why": "Judge noted 'нет явного признания что поставка в Брест из Минска возможна'. Assistant switched to Minsk but didn't acknowledge the Brest delivery option.",
+      "expectedImpact": "Better multi-city sourcing handling. Usefulness 3.5 → 4+ for GA001.",
+      "validationScenarios": ["GA001"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Inject commodity tag into vendor lookup context on geo-correction",
+      "action": "In app/src/app/api/ai/request/route.ts, modify the geoCorrectionFollowUp handler (lines 2575-2613) to explicitly pass commodityTag to the candidate filtering logic. Currently continuityForVendorFlow is filtered by commodityTag but if empty, it falls back to unfiltered continuityCandidates. Change: when strictMinskRegionScope is true AND commodityTag is 'onion', add explicit filter for vegetable-growing rubrics (овощеводство, выращивание овощей) and exclude livestock-only rubrics (животноводство, мясо, молоко).",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, function postProcessAssistantReply, around line 2575-2613. Add rubric-based exclusion filter when commodityTag === 'onion' and candidate.primary_rubric_name includes 'животноводство' or excludes 'овощ'.",
+      "expectedImpact": "Prevents livestock farms from being returned for vegetable queries after geo-correction.",
+      "risk": "Low - additive filtering only.",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add explicit geo-acknowledgment system message on correction",
+      "action": "In buildAssistantPrompt function (around line 7266), detect geo-correction patterns in user message ('точнее', 'не сам город', 'область, не') and inject a system message that explicitly acknowledges the new geo scope before the user message. This ensures the model sees the acknowledgment requirement early.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, function buildAssistantPrompt. Add detection for geoCorrectionCue similar to promptInjection detection. If detected, prepend system message: 'User is correcting location scope from city to region. Explicitly acknowledge the new filter and maintain the original product focus.'",
+      "expectedImpact": "Model will generate acknowledgment phrases that pass strict checks GA002.T2.C3/C4.",
+      "risk": "Low - prompt-only change.",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Add commodity reinforcement to lateGeoCorrectionCue handler",
+      "action": "The lateGeoCorrectionCue handler (lines 3143-3165) already adds 'Принял фильтр' and 'Товарный фокус без изменений' lines. However, it only triggers when commodity is 'лук' or 'молоко'. Extend this to use the full normalizeFocusSummaryText() output for any commodity, and ensure it runs BEFORE candidate formatting, not after.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, lines 3143-3165. Move the commodity focus reinforcement earlier in the post-processing pipeline, before vendor candidate formatting. Use normalizeFocusSummaryText(summarizeSourcingFocus(lastSourcingForRanking || '')) instead of hardcoded checks.",
+      "expectedImpact": "All commodity types maintain context through geo-corrections, not just onion/milk.",
+      "risk": "Low - reordering existing logic.",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R4",
+      "area": "ranking",
+      "title": "Add rubric conflict detection for agricultural commodities",
+      "action": "In filterAndRankVendorCandidates and related ranking functions, add commodity-rubric conflict rules. If commodityTag is 'onion', deprioritize or exclude candidates where primary_rubric_name contains 'животноводство', 'мяс', 'молоч', 'скот', 'птиц'. If commodityTag is 'milk', deprioritize candidates with 'овощ', 'фрукт', 'зернов'.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, add new function isAgriculturalRubricConflict(commodityTag, rubricName) and use it in the ranking pipeline around lines 1874-1888 where commodity filtering happens.",
+      "expectedImpact": "Eliminates clearly irrelevant agricultural suppliers (livestock for vegetables, etc.).",
+      "risk": "Medium - may over-filter if rubric names are inconsistent. Needs testing.",
+      "effort": "M",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add strict check for empty commodity-aligned candidates",
+      "action": "In postProcessAssistantReply, after commodity filtering (around line 2377-2386), if commodityScoped.length === 0 AND commodityTag is set, add explicit language: 'По товару [X] в регионе [Y] подтвержденных поставщиков не найдено. Показываю ближайшие варианты по региону без гарантии наличия товара.'",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, lines 2377-2386. Add explicit 'no relevant suppliers found' acknowledgment when commodity filter eliminates all candidates.",
+      "expectedImpact": "Transparent communication when product-specific suppliers aren't found, rather than showing irrelevant alternatives silently.",
+      "risk": "Low - additive messaging only.",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Enhance dual-city delivery acknowledgment",
+      "action": "For GA001-like scenarios (минск как базовый, поставка в брест), add system prompt instruction to acknowledge both cities: 'User specified base city [X] with delivery option to [Y]. Acknowledge both locations in response.' Detect pattern in looksLikeDeliveryRouteConstraint or similar.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, enhance looksLikeDeliveryRouteConstraint or add new detector for 'base city + delivery to' pattern. Inject system message in buildAssistantPrompt.",
+      "expectedImpact": "Addresses judge feedback 'нет явного признания что поставка в Брест из Минска возможна'.",
+      "risk": "Low - prompt enhancement.",
+      "effort": "S",
+      "validationScenarios": ["GA001"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["GA002", "GA001"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.geo-ambiguity.json",
+      "app/qa/ai-request/scenarios.regressions.milk-onion-city-switch.json",
+      "app/qa/ai-request/scenarios.regressions.milk-brest-mogilev.json"
+    ],
+    "successMetrics": [
+      "GA002 strictPass: false → true",
+      "GA002 avgUsefulness: 2 → >=3.5",
+      "GA002 usefulRate: 0 → >=0.5",
+      "GA001 avgUsefulness: 3.5 → >=4",
+      "Check GA002.T2.C3 pass rate: 0% → 100%",
+      "Check GA002.T2.C4 pass rate: 0% → 100%"
+    ]
+  }
+}
+```

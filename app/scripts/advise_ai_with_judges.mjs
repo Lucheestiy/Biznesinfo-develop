@@ -439,8 +439,17 @@ function buildMarkdown(out) {
   md.push(`- QA report: ${out.sourceReport}`);
   md.push(`- Judge report: ${out.sourceJudgeReport}`);
   md.push(`- Focus scenarios: ${out.focusScenarios.length}`);
-  md.push(`- Advisors: ${out.advice.map((x) => x.advisor).join(", ")}`);
+  md.push(`- Advisors: ${out.advice.length > 0 ? out.advice.map((x) => x.advisor).join(", ") : "(none)"}`);
   md.push("");
+
+  if (Array.isArray(out.advisorWarnings) && out.advisorWarnings.length > 0) {
+    md.push("## Advisor Warnings");
+    md.push("");
+    for (const row of out.advisorWarnings) {
+      md.push(`- ${row.advisor}: ${row.message}`);
+    }
+    md.push("");
+  }
 
   md.push("## Focus Scenarios");
   md.push("");
@@ -520,43 +529,55 @@ function main() {
   fs.mkdirSync(rawDir, { recursive: true });
 
   const advice = [];
+  const advisorWarnings = [];
   for (const advisor of opts.advisors) {
-    const prompt = buildAdvisorPrompt({ advisor, runReport, judgeReport, focusScenarios });
-    const result = runAdvisor(advisor, prompt);
-    const rawFile = path.join(rawDir, `${advisor}.txt`);
-    fs.writeFileSync(rawFile, result.stdout || result.stderr || "", "utf8");
-
-    if (!result.ok) {
-      throw new Error(`${advisor} failed: exit=${result.status} ${truncate(result.stderr, 260)}`);
-    }
-
-    const candidate = stripJsonHostileControlChars(extractJsonCandidate(result.stdout));
-    let parsed;
     try {
-      parsed = JSON.parse(candidate);
-    } catch (error) {
-      const retryPrompt = [
-        prompt,
-        "",
-        "IMPORTANT: return STRICT JSON only.",
-        "Do not include markdown, comments, or any text before/after JSON.",
-      ].join("\n");
-      const retry = runAdvisor(advisor, retryPrompt);
-      const retryRawPath = path.join(rawDir, `${advisor}.retry.txt`);
-      fs.writeFileSync(retryRawPath, retry.stdout || retry.stderr || "", "utf8");
-      if (!retry.ok) {
-        throw new Error(`${advisor} returned non-JSON and retry failed: ${retry.status} ${truncate(retry.stderr, 260)}`);
-      }
-      try {
-        parsed = JSON.parse(stripJsonHostileControlChars(extractJsonCandidate(retry.stdout)));
-      } catch (retryError) {
-        throw new Error(`${advisor} returned non-JSON (after retry): ${retryError instanceof Error ? retryError.message : String(retryError)}`);
-      }
-    }
+      const prompt = buildAdvisorPrompt({ advisor, runReport, judgeReport, focusScenarios });
+      const result = runAdvisor(advisor, prompt);
+      const rawFile = path.join(rawDir, `${advisor}.txt`);
+      fs.writeFileSync(rawFile, result.stdout || result.stderr || "", "utf8");
 
-    const normalized = normalizeAdvisorOutput(advisor, parsed);
-    advice.push(normalized);
-    process.stdout.write(`[${advisor}] advice ok (${normalized.recommendations.length} recommendations)\n`);
+      if (!result.ok) {
+        throw new Error(`${advisor} failed: exit=${result.status} ${truncate(result.stderr, 260)}`);
+      }
+
+      const candidate = stripJsonHostileControlChars(extractJsonCandidate(result.stdout));
+      let parsed;
+      try {
+        parsed = JSON.parse(candidate);
+      } catch (error) {
+        const retryPrompt = [
+          prompt,
+          "",
+          "IMPORTANT: return STRICT JSON only.",
+          "Do not include markdown, comments, or any text before/after JSON.",
+        ].join("\n");
+        const retry = runAdvisor(advisor, retryPrompt);
+        const retryRawPath = path.join(rawDir, `${advisor}.retry.txt`);
+        fs.writeFileSync(retryRawPath, retry.stdout || retry.stderr || "", "utf8");
+        if (!retry.ok) {
+          throw new Error(`${advisor} returned non-JSON and retry failed: ${retry.status} ${truncate(retry.stderr, 260)}`);
+        }
+        try {
+          parsed = JSON.parse(stripJsonHostileControlChars(extractJsonCandidate(retry.stdout)));
+        } catch (retryError) {
+          throw new Error(`${advisor} returned non-JSON (after retry): ${retryError instanceof Error ? retryError.message : String(retryError)}`);
+        }
+      }
+
+      const normalized = normalizeAdvisorOutput(advisor, parsed);
+      advice.push(normalized);
+      process.stdout.write(`[${advisor}] advice ok (${normalized.recommendations.length} recommendations)\n`);
+    } catch (error) {
+      const message = truncate(error instanceof Error ? error.message : String(error), 320);
+      advisorWarnings.push({ advisor, message });
+      process.stderr.write(`[${advisor}] advice warning: ${message}\n`);
+    }
+  }
+
+  if (advice.length === 0) {
+    const warningSummary = advisorWarnings.map((x) => `${x.advisor}: ${x.message}`).join("; ");
+    throw new Error(`No valid advisor outputs. ${warningSummary}`.trim());
   }
 
   const out = {
@@ -566,6 +587,7 @@ function main() {
     sourceJudgeReport: opts.judged,
     focusScenarios,
     advice,
+    advisorWarnings,
     consensus: buildConsensus(advice),
   };
 
@@ -581,6 +603,9 @@ function main() {
 
   console.log(`Advice JSON: ${jsonFile}`);
   console.log(`Advice MD:   ${mdFile}`);
+  if (advisorWarnings.length > 0) {
+    console.warn(`Advice completed with warnings (${advisorWarnings.length}).`);
+  }
 }
 
 main();

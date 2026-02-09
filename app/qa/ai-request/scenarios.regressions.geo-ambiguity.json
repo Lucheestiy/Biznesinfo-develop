@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-09T15:20:00Z",
+    "source": "manual-regression",
+    "description": "Geo ambiguity regressions for conflicting city/region refinements in sourcing dialogs"
+  },
+  "scenarios": [
+    {
+      "id": "GA001",
+      "title": "Неоднозначный город в одном сообщении: Брест или Минск",
+      "personaGoal": "Закупщик задает sourcing-запрос сразу с двумя городами; ассистент должен вести диалог практично и прозрачно.",
+      "tags": ["regression", "geo", "ambiguity", "sourcing", "multi_turn"],
+      "turns": [
+        {
+          "user": "Нужны поставщики молока оптом в Бресте или Минске, от 1000 литров в неделю. С чего начать?",
+          "checks": [
+            { "id": "GA001.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "GA001.T1.C2", "type": "mentions_any_terms", "terms": ["молок"], "min": 1, "description": "Должен сохранить товарный контекст" },
+            { "id": "GA001.T1.C3", "type": "includes_any", "patterns": ["брест", "минск"], "description": "Должен учитывать оба города или явно разрулить неоднозначность" },
+            {
+              "id": "GA001.T1.C4",
+              "type": "any_of",
+              "description": "Должен либо запросить уточнение локации, либо сразу дать структурированный practical first-pass",
+              "checks": [
+                { "type": "includes_any", "patterns": ["уточн", "подтверд", "какой город", "выберите город"], "description": "Явное уточнение по гео" },
+                { "type": "question_count_min", "min": 1, "description": "Есть минимум один уточняющий вопрос" }
+              ]
+            },
+            { "id": "GA001.T1.C5", "type": "not_refusal_only", "description": "Ответ не должен быть пустым отказом" }
+          ]
+        },
+        {
+          "user": "Минск как базовый, но поставка в Брест тоже возможна.",
+          "checks": [
+            { "id": "GA001.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "GA001.T2.C2", "type": "mentions_any_terms", "terms": ["молок"], "min": 1, "description": "Должен сохранить тему молока" },
+            { "id": "GA001.T2.C3", "type": "includes_any", "patterns": ["минск", "брест"], "description": "Должен учитывать схему Минск + поставка в Брест" },
+            { "id": "GA001.T2.C4", "type": "not_refusal_only", "description": "Нужен practical next step по выбору поставщика" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GA002",
+      "title": "Конфликт регионального уточнения: город Минск -> Минская область",
+      "personaGoal": "Пользователь уточняет, что нужен не город, а область; ассистент не должен терять предмет закупки.",
+      "tags": ["regression", "geo", "ambiguity", "region", "sourcing", "multi_turn"],
+      "turns": [
+        {
+          "user": "Где купить лук репчатый оптом в Минске?",
+          "checks": [
+            { "id": "GA002.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "GA002.T1.C2", "type": "mentions_any_terms", "terms": ["лук", "репчат"], "min": 1, "description": "Должен сохранять предмет закупки" },
+            { "id": "GA002.T1.C3", "type": "includes_any", "patterns": ["минск"], "description": "Должен учитывать Минск" }
+          ]
+        },
+        {
+          "user": "Точнее: Минская область, не сам город Минск.",
+          "checks": [
+            { "id": "GA002.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "GA002.T2.C2", "type": "mentions_any_terms", "terms": ["лук", "репчат"], "min": 1, "description": "Должен удержать тему лука после geo-коррекции" },
+            { "id": "GA002.T2.C3", "type": "includes_any", "patterns": ["минск", "област"], "description": "Должен отразить коррекцию city->region" },
+            {
+              "id": "GA002.T2.C4",
+              "type": "any_of",
+              "description": "Должен либо явно подтвердить новый geo-фильтр, либо задать корректный уточняющий вопрос",
+              "checks": [
+                { "type": "includes_any", "patterns": ["учту", "принял", "беру", "фильтр", "область"], "description": "Явная фиксация нового фильтра" },
+                { "type": "question_count_min", "min": 1, "description": "Есть уточняющий вопрос" }
+              ]
+            },
+            { "id": "GA002.T2.C5", "type": "not_refusal_only", "description": "Нужен practical next step, а не отказ" }
+          ]
+        }
+      ]
+    }
+  ]
+}

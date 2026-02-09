@@ -1,0 +1,118 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "GA002 failed due to fundamental retrieval flaw: semantic search returns companies by geo proximity but without product-category validation. The assistant returns livestock farms (ТИТУЛ ФХ, Олимп-Агро) for 'лук репчатый' query. Root cause: missing product-to-activity filter in retrieval layer. GA001 passed but shows suboptimal geo-default logic (arbitrary Brest choice). Priority: implement activity/OKVED filtering before geo expansion.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Add product-to-activity filter in retrieval",
+      "why": "GA002 critical failure: returned livestock farms for onion query. Semantic similarity on 'сельское хозяйство' incorrectly ranks irrelevant companies.",
+      "expectedImpact": "Eliminates false positives in GA002; reduces irrelevant results by filtering at source",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "priority": "P0",
+      "title": "Implement 'no relevant suppliers' acknowledgment",
+      "why": "Both judges note assistant never admits when no matching suppliers exist. This breaks user trust and wastes time.",
+      "expectedImpact": "GA002 would fail gracefully with honest 'no onion suppliers found in region' instead of irrelevant results",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix geo-default arbitrariness (Brest vs Minsk)",
+      "why": "GA001: minimax flagged unjustified Brest default when both cities mentioned. Need deterministic tie-breaker.",
+      "expectedImpact": "More predictable behavior; prefer larger hubs or ask rather than guess",
+      "validationScenarios": ["GA001"]
+    },
+    {
+      "priority": "P1",
+      "title": "Handle multi-location sourcing intent",
+      "why": "GA001 T2: user explicitly said 'delivery to Brest also possible' but assistant ignored dual-location sourcing.",
+      "expectedImpact": "Capture broader supplier pool when user indicates flexibility",
+      "validationScenarios": ["GA001"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Add product category/OKVED pre-filter before semantic search",
+      "action": "Map 'лук репчатый' to activity codes (01.13 - овощеводство, 46.31 - оптовая торговля плодами/овощами). Filter company index by activity match before applying geo/semantic ranking.",
+      "implementationHint": "src/lib/search.ts or app/api/search/route.ts - add activity filter to Meilisearch query; create product->activities mapping in src/data/product-activities.json",
+      "expectedImpact": "Eliminates ТИТУЛ ФХ (животноводство) and Олимп-Агро (общее СХ) from onion queries",
+      "risk": "May reduce recall if activity tagging incomplete; mitigate with fallback to broader search when <3 results",
+      "effort": "M",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add explicit 'admit when no matches' instruction to system prompt",
+      "action": "Append to system prompt: 'If no companies match the specific product category in the requested region, explicitly state: \"Не найдены поставщики [продукт] в [регион]. Расширить поиск на соседние регионы?\"'",
+      "implementationHint": "app/ai/prompts/system.ts or src/prompts/assistant-system.txt - add guardrail instruction in 'Response constraints' section",
+      "expectedImpact": "Prevents irrelevant filler results; improves user trust per judge feedback",
+      "risk": "Low - pure prompt change",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Implement minimum relevance threshold with fallback message",
+      "action": "Set score threshold (e.g., 0.7) for semantic matches. If no results above threshold, return empty + trigger 'no matches' response instead of returning low-score results.",
+      "implementationHint": "src/lib/search.ts - filter results by _semanticScore > threshold before returning; handle empty in app/api/chat/route.ts",
+      "expectedImpact": "Prevents 'всё подряд из региона' as noted by minimax judge",
+      "risk": "May need threshold tuning per product category",
+      "effort": "S",
+      "validationScenarios": ["GA002"]
+    },
+    {
+      "id": "R4",
+      "area": "geo",
+      "title": "Add deterministic geo-default rule: prefer region capital or ask",
+      "action": "When multiple cities detected without clear priority, either (a) default to larger hub by population, or (b) ask 'Уточните: интересует [city1] или [city2]?' instead of arbitrary choice.",
+      "implementationHint": "src/lib/geo-resolver.ts - modify resolveLocation() to use population data from city metadata or return AMBIGUOUS status for clarification",
+      "expectedImpact": "Eliminates 'почему не Минск?' issue in GA001",
+      "risk": "Adds turn for clarification; acceptable trade-off",
+      "effort": "M",
+      "validationScenarios": ["GA001"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Parse and respect multi-location sourcing intent",
+      "action": "When user mentions 'delivery to X also possible' or 'from Y or Z', search both locations and present combined results with location tags.",
+      "implementationHint": "src/lib/intent-parser.ts - add pattern for multi-location sourcing; modify search orchestrator to query multiple geo filters in parallel",
+      "expectedImpact": "Addresses 'проигнорировано уточнение про доставку в Брест' in GA001",
+      "risk": "May increase result count; cap at top-N per location",
+      "effort": "M",
+      "validationScenarios": ["GA001"]
+    },
+    {
+      "id": "R6",
+      "area": "qa",
+      "title": "Add strict check for product-activity alignment",
+      "action": "New check type: verify returned companies' activities match product category via OKVED/activity field validation.",
+      "implementationHint": "app/qa/ai-request/checks.ts - add check_activity_match(checkId, expectedActivities[]) validator",
+      "expectedImpact": "Prevents regression on GA002-type failures",
+      "risk": "Requires maintaining product->activity mappings",
+      "effort": "M",
+      "validationScenarios": ["GA002"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["GA002", "GA001"],
+    "regressionSuites": [
+      "scenarios.regressions.geo-ambiguity.json",
+      "scenarios.sourcing.vegetables.json",
+      "scenarios.multi-turn.corrections.json"
+    ],
+    "successMetrics": [
+      "strictPassRate >= 0.9 (target 90% strict pass)",
+      "avgUsefulness >= 3.5 (target good-to-excellent)",
+      "zero false positives on product-activity mismatch",
+      "geo-ambiguity scenarios: explicit acknowledgment when no matches"
+    ]
+  }
+}
+```

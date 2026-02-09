@@ -1,0 +1,146 @@
+Now I have a comprehensive understanding of the codebase. Let me analyze the QA failures and provide concrete engineering recommendations.
+
+Based on my analysis of:
+1. The QA results showing 36% pass rate (18/50 scenarios)
+2. The focus scenarios with critical failures
+3. The `app/src/app/api/ai/request/route.ts` - the main AI request handler with ~3000 lines of complex post-processing logic
+4. The scenarios.json test definitions
+
+Here are the concrete engineering recommendations:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "The Biznesinfo assistant suffers from systematic template generation failures, category mismatch hallucinations, and broken multi-turn continuity. Root cause: overly complex post-processing logic (3000+ lines in route.ts) that attempts to compensate for weak LLM prompts through regex-based patches. The 'ensureTemplateBlocks' function produces broken templates with 'уточняется' placeholders when LLM fails. Category matching relies on weak keyword heuristics instead of rubric-aware search. Fix requires: (1) stricter LLM prompts with few-shot examples, (2) template validation before returning, (3) rubric-aware search instead of generic fallback, (4) simplified post-processing with early validation gates.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template generation - broken placeholders and missing blocks",
+      "why": "All 8 RFQ scenarios (S031-S039) fail template_blocks check. Assistant outputs 'уточняется' placeholders instead of actual RFQ content. This is the highest volume failure pattern.",
+      "expectedImpact": "Increases pass rate from 36% to ~55% by fixing 8 scenarios. Eliminates 'useless' verdicts for template requests.",
+      "validationScenarios": ["S031", "S032", "S033", "S034", "S035", "S036", "S039"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix category matching hallucinations",
+      "why": "Assistant returns agricultural parts (ЯСМА) for LED screens (S017), wallpaper factory for HDPE pipes (S032), furniture for cleaning (S023). Search is not rubric-aware.",
+      "expectedImpact": "Eliminates catastrophic relevance failures. Improves usefulness scores from ~1.0 to ~2.5.",
+      "validationScenarios": ["S017", "S021", "S023", "S024", "S025", "S032"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix multi-turn continuity for shortlist scenarios",
+      "why": "Shortlist scenarios (S041-S045) fail because assistant never accesses actual shortlist data. Repeats generic rubric template each turn.",
+      "expectedImpact": "Fixes 5 shortlist scenarios. Enables meaningful ranking/comparison functionality.",
+      "validationScenarios": ["S041", "S042", "S043", "S044", "S045"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add structured output validation layer",
+      "why": "Current post-processing tries to fix broken outputs with regex. Need validation gate that rejects non-compliant outputs and triggers retry with stronger prompt.",
+      "expectedImpact": "Prevents broken templates from reaching users. Enables systematic improvement through retry logic.",
+      "validationScenarios": ["S028", "S030", "S034", "S041"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Replace ensureTemplateBlocks with strict few-shot prompt + validation",
+      "action": "Remove the regex-based template patching in ensureTemplateBlocks() (lines 679-700). Instead: (1) Add 3 few-shot examples for Subject/Body/WhatsApp format to the LLM system prompt, (2) Add JSON schema constraint requiring all three blocks, (3) Add validation gate that rejects responses missing any block and retries with explicit 'You MUST include Subject, Body, and WhatsApp sections' instruction. Remove the 'уточняется' placeholder fallback entirely - it produces unusable output.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:679-700 - delete ensureTemplateBlocks function. Add to buildPrompt() around line 3200: include 3 RFQ template examples in system message. Add validateTemplateOutput() that checks for /^Subject:/m, /^Body:/m, /^WhatsApp:/m before returning.",
+      "expectedImpact": "Template block pass rate increases from 0% to ~80%. Eliminates 'уточняется' gibberish.",
+      "risk": "May increase latency due to retry loop. Mitigate by limiting to 2 retries.",
+      "effort": "M",
+      "validationScenarios": ["S031", "S032", "S033", "S034", "S035", "S039"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add industry-aware system prompt with rubric mapping",
+      "action": "Current search uses generic keyword matching. Add rubric-aware search: (1) Before calling biznesinfoSearch, detect industry from user query using keyword mapping (LED→electronics, ПНД трубы→construction/plumbing, клининг→services), (2) Pass rubric_id filter to search API, (3) Add explicit instruction in prompt: 'Only return companies from matching industry rubrics. If no matches found, say so explicitly rather than returning unrelated companies.'",
+      "implementationHint": "app/src/lib/biznesinfo/store.ts - enhance biznesinfoSearch to accept rubricIds parameter. app/src/app/api/ai/request/route.ts: around line 1500 - add detectIndustryRubric() using keyword→rubric mapping. Pass rubricIds to search call.",
+      "expectedImpact": "Eliminates category hallucinations (ЯСМА for LED, wallpaper for pipes). Relevance score improves significantly.",
+      "risk": "May reduce recall for edge cases. Add fallback to broad search if rubric-specific returns < 3 results.",
+      "effort": "M",
+      "validationScenarios": ["S017", "S021", "S023", "S024", "S025"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Fix shortlist context access in multi-turn",
+      "action": "Shortlist scenarios fail because assistant doesn't access shortlist data. In detectAssistantResponseMode (line 425), when hasShortlist=true and user asks for ranking/template, the system should: (1) Fetch actual company data for the shortlist IDs, (2) Include company names/rubrics in the prompt context, (3) Force template to reference specific companies from shortlist rather than generic placeholders.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: around line 445 - when params.hasShortlist && mode.rankingRequested, fetch company details for shortlist IDs. Add to prompt: 'The user has shortlisted these companies: [list]. Compare/rank THESE specific companies, do not provide generic advice.'",
+      "expectedImpact": "Fixes S041-S045 shortlist scenarios. Template generation becomes context-aware.",
+      "risk": "Requires shortlist ID persistence in session. Verify session storage has this data.",
+      "effort": "M",
+      "validationScenarios": ["S041", "S042", "S043", "S044", "S045"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Add output validation gate before returning to user",
+      "action": "Current code attempts to fix broken outputs with post-processing. Replace with validation gate: (1) Define validators per response mode (template→check blocks, ranking→check company links, checklist→check numbered items), (2) If validation fails, retry with stronger prompt (max 2 retries), (3) If still failing, return honest 'unable to generate' instead of broken output.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: after postProcessAssistantReply call (around line 3100), add validateOutput() function. Validators: hasTemplateBlocks(), hasCompanyLinks(), hasNumberedList(). If fails, increment retry counter and call generateWithPrompt(enhanced=true).",
+      "expectedImpact": "Prevents broken templates from reaching users. Enables systematic quality improvement.",
+      "risk": "May increase latency. Cap retries at 2, use cached results where possible.",
+      "effort": "S",
+      "validationScenarios": ["S028", "S030", "S034"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Fix checklist response generation for best_reliable scenarios",
+      "action": "S028, S030 fail because assistant returns generic 'Priority A/B/C' rubric instead of practical checklist. In buildChecklistFallbackAppendix (line 533), the output is too generic. Fix: (1) Add industry-specific checklist templates (fire safety→check licenses/certificates, lab testing→check accreditation/sample prep), (2) Include 2-3 specific questions per industry, (3) Never return empty 'Работаю по данным каталога' - always include actionable content.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:533-540 - rewrite buildChecklistFallbackAppendix. Add detectIndustryForChecklist() using keywords (пожарная→fire_safety, лаборатор→lab_testing). Map to specific checklists. Ensure minimum 3 numbered items always returned.",
+      "expectedImpact": "Fixes S028, S030 checklist failures. Improves usefulness for verification requests.",
+      "risk": "Low - additive change to fallback content.",
+      "effort": "S",
+      "validationScenarios": ["S028", "S030"]
+    },
+    {
+      "id": "R6",
+      "area": "geo",
+      "title": "Fix geo-refinement continuity in multi-turn",
+      "action": "S017 fails because assistant ignores 'Немига' geo-refinement. The extractLocationPhrase function (line 1200) may not detect district-level refinements. Fix: (1) Add district/район detection to extractLocationPhrase, (2) In multi-turn, merge geo hints from history with current message, (3) When geo-refinement detected, re-run search with narrowed location filter instead of repeating previous results.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1200-1227 - enhance extractLocationPhrase to detect район/микрорайон patterns. Around line 1070 - when vendorLookupContext.derivedFromHistory=true, merge geo hints from history and re-query if location changed.",
+      "expectedImpact": "Fixes S017 geo-refinement. Improves multi-turn location awareness.",
+      "risk": "May cause additional search queries. Cache results to mitigate.",
+      "effort": "S",
+      "validationScenarios": ["S017", "S001", "S002"]
+    },
+    {
+      "id": "R7",
+      "area": "ranking",
+      "title": "Remove or fix generic Priority A/B/C fallback",
+      "action": "The buildRankingFallbackAppendix (line 473) returns generic 'Priority A/B/C' rubric when no candidates found. This is consistently rated 'not_useful' by judges. Change: (1) If no candidates found, be honest: 'No matching companies found in catalog for [specific criteria]', (2) Provide 2-3 specific alternative search suggestions based on detected intent, (3) Never return abstract 'Priority A/B/C' framework without concrete companies.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:522-531 - rewrite the empty-candidates branch of buildRankingFallbackAppendix. Remove generic priority rubric. Add specific suggestions based on searchTerms analysis.",
+      "expectedImpact": "Eliminates 'useless' verdicts for empty results. Users get actionable next steps.",
+      "risk": "Low - improves transparency.",
+      "effort": "S",
+      "validationScenarios": ["S028", "S030", "S021", "S022"]
+    },
+    {
+      "id": "R8",
+      "area": "qa",
+      "title": "Add scenario-specific regression tests for template blocks",
+      "action": "Current QA catches failures but doesn't prevent regressions. Add unit tests for: (1) extractTemplateMeta - verify correct detection of Subject/Body/WhatsApp, (2) ensureTemplateBlocks - verify valid templates pass through, invalid ones get rejected not patched, (3) postProcessAssistantReply - verify each scenario type produces expected output structure.",
+      "implementationHint": "Create app/src/app/api/ai/request/route.test.ts. Use scenarios.json as test fixtures. Test each failed scenario (S031-S039) for template block compliance.",
+      "expectedImpact": "Prevents regressions in template generation. Enables confident refactoring.",
+      "risk": "None - additive testing.",
+      "effort": "M",
+      "validationScenarios": ["S031", "S032", "S033", "S034", "S035", "S039"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["S031", "S032", "S033", "S034", "S035", "S039", "S017", "S021", "S041", "S028"],
+    "regressionSuites": ["app/src/app/api/ai/request/route.test.ts", "qa_judge_ux101_105.json", "qa_judge_ux106_110.json"],
+    "successMetrics": [
+      "Template block pass rate: >80% (currently 0% for RFQ scenarios)",
+      "Category relevance: 0 hallucinations (agricultural parts for LED, etc.)",
+      "Average usefulness score: >2.0 (currently 1.04)",
+      "Overall scenario pass rate: >70% (currently 36%)"
+    ]
+  }
+}
+```

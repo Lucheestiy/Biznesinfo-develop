@@ -1,0 +1,125 @@
+{
+  "judge": "minimax",
+  "ratings": [
+    {
+      "scenarioId": "MX001",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Critical continuity failure in turn 4: after user specified Minsk REGION (not city), assistant reverted to Brest suppliers",
+        "Turn 3 correctly identified Minsk region suppliers ( Кухтичи, 17 Сентября, Агронеманский) but turn 4 discarded them",
+        "RFQ in turn 5 is well-formatted but uses wrong supplier list from turn 4",
+        "User would be frustrated seeing Brest again after explicitly clarifying Minsk region"
+      ],
+      "criticalIssues": [
+        "Complete context loss in turn 4 - ignored Minsk region clarification"
+      ],
+      "strengths": [
+        "Turns 1-3 show good geo-context awareness and supplier identification",
+        "RFQ template is practical and ready to use"
+      ],
+      "nextUserProbe": "Почему снова Брест? Я же сказал Минская область, не город!"
+    },
+    {
+      "scenarioId": "MX002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 3 adds Brest delivery requirement but assistant fails to provide ANY suppliers",
+        "Assistant says 'no confirmed cards without conflict' without explaining what's conflicting",
+        "Turn 4 provides generic ranking framework instead of actual 3 suppliers",
+        "Only turn 5 (call checklist) is genuinely useful"
+      ],
+      "criticalIssues": [
+        "Failed to maintain supplier list after adding Brest delivery constraint",
+        "Generic fallback in ranking framework instead of concrete names"
+      ],
+      "strengths": [
+        "Initial supplier identification was good (Амифрут, Ждановичи → ТИТУЛ, Олимп-Агро)",
+        "Call checklist is comprehensive and actionable"
+      ],
+      "nextUserProbe": "Где список поставщиков? Ты обещал 3 приоритетных"
+    },
+    {
+      "scenarioId": "MX003",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.8,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Handles topic switch (milk → auto parts → milk) cleanly without losing original context",
+        "Appropriately honest about data limits - doesn't invent suppliers",
+        "Good shortlist (only 2 confirmed companies, transparently stated)",
+        "Turn 5 asking 2 clarifying questions is excellent user service"
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Topic switching handled gracefully",
+        "Transparent about data limitations",
+        "Clarifying questions show user focus"
+      ],
+      "nextUserProbe": "Нам нужно питьевое молоко в упаковке, от 2 тонн в неделю"
+    },
+    {
+      "scenarioId": "MX004",
+      "usefulness": 5,
+      "verdict": "useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.9,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Excellent multi-step sourcing with full context preservation",
+        "Each turn adds constraint (Gomel → district → 48h) while maintaining supplier list",
+        "Clear reasoning for including/excluding candidates at each step",
+        "RFQ template is comprehensive and ready to send"
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Perfect continuity across all 5 turns",
+        "Logical supplier filtering with explanations",
+        "Professional RFQ format with all necessary blocks"
+      ],
+      "nextUserProbe": "А какие скидки при заказе от 10 км кабеля?"
+    },
+    {
+      "scenarioId": "MX005",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.5,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "After user complaint in turn 2, assistant correctly provides 3 specific Minsk suppliers",
+        "Turn 3 gives prioritization and call questions - useful follow-up",
+        "Turn 4 RFQ template is well-structured and practical",
+        "Good recovery after initial generic turn 1"
+      ],
+      "criticalIssues": [
+        "Initial turn 1 was generic and prompted valid user frustration"
+      ],
+      "strengths": [
+        "Good recovery after user criticism",
+        "Actionable follow-up materials (call questions, RFQ)"
+      ],
+      "nextUserProbe": "А какой завод даст лучшую цену при объёме 5000 литров в неделю?"
+    }
+  ]
+}
+

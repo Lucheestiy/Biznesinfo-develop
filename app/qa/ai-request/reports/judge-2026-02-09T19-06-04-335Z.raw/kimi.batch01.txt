@@ -1,0 +1,169 @@
+Now I have context from previous QA judge results. Let me analyze the 5 new scenarios (S001-S005) and produce the judgment.
+
+Based on my analysis of the transcripts:
+
+**S001 - ПНД трубы: Минск -> Сухарево:**
+- Turn 1: Good start with 4 concrete companies in Minsk
+- Turn 2: User specifies "Сухарево" (district), but assistant repeats the SAME 4 companies without any filtering or acknowledgment of the district constraint
+- Turn 3: User asks for top-3 with reasons, assistant provides ranking but still ignores "Сухарево" district requirement
+- Critical issue: Complete failure to filter by district after user clarification
+
+**S002 - Кабель ВВГнг: Гомель -> Советский район:**
+- Turn 1: Good start with 4 companies in Gomel
+- Turn 2: User specifies "Советский район", assistant repeats similar list but adds one company from "Гомельский р-н" (different district!)
+- Turn 3: User asks for top-3 with certificate info, assistant provides ranking but doesn't address certificates specifically
+- Issue: Added wrong district company (Ансервуд from Гомельский р-н, not Советский)
+
+**S003 - Товарный бетон: Брест -> Южный:**
+- Turn 1: Good start with 4 companies
+- Turn 2: User specifies "Южный" (district/microdistrict), assistant repeats SAME 4 companies without filtering
+- Turn 3: User asks for ranking by reliability/risks, assistant provides ranking but no actual risk analysis
+- Issue: No district filtering, no concrete risk assessment
+
+**S004 - Клининг офисов: Минск -> Уручье:**
+- Turn 1: Good start with 3 cleaning companies
+- Turn 2: User specifies "Уручье", assistant repeats same companies with phones added but no district filtering
+- Turn 3: User asks who to prioritize, assistant changes the list (adds Баярекс which is dry cleaning, not office cleaning!)
+- Issue: Added irrelevant company (Баярекс - химчистки), no district filtering
+
+**S005 - Шиномонтаж: Минск -> Каменная Горка:**
+- Turn 1: Weak start - only 1 somewhat relevant candidate (АвтоНьюСаунд), others are bus depot and generic auto service
+- Turn 2: User specifies "Каменная Горка", assistant gives COMPLETELY IRRELEVANT companies (dentistry, sewing atelier, computers, metro construction!)
+- Turn 3: User asks for practical top-3, assistant returns to auto-related companies but still ignores "Каменная Горка"
+- Critical issue: Turn 2 is catastrophic - completely wrong category results
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Good start with 4 concrete pipe suppliers in Minsk",
+        "Turn 2: Critical failure — user specified 'Сухарево' district but assistant repeated exact same 4 companies without filtering",
+        "Turn 3: Ranking provided but still ignores district constraint, no actual reasons specific to reliability"
+      ],
+      "criticalIssues": [
+        "Complete failure to filter by district after user clarification — Сухарево completely ignored",
+        "Generic fallback: instead of narrowing to district-relevant suppliers, repeated same list",
+        "No acknowledgment that none of the companies may actually be in/serve Сухарево"
+      ],
+      "strengths": [
+        "Turn 1 provided concrete companies with contacts",
+        "Maintained product context (ПНД трубы) throughout"
+      ],
+      "nextUserProbe": "А кто из этих компаний реально работает в Сухарево или рядом?"
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.60,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Good start with 4 electrical suppliers in Gomel",
+        "Turn 2: Partial district adaptation — added Ансервуд but it's from Гомельский р-н, not Советский район",
+        "Turn 3: Provided top-3 ranking but didn't address certificate question specifically"
+      ],
+      "criticalIssues": [
+        "Added wrong district company (Ансервуд from Гомельский р-н instead of Советский)",
+        "No specific guidance on certificates despite explicit request",
+        "Did not filter out irrelevant companies (ГОМЕЛЬ ТВ ком — telecom, not cable supplier)"
+      ],
+      "strengths": [
+        "Maintained product context (ВВГнг 3х2.5) throughout",
+        "Provided concrete companies with valid contacts",
+        "Attempted geographic adjustment in Turn 2"
+      ],
+      "nextUserProbe": "Кто из них точно в Советском районе и есть ли у них сертификаты на ВВГнг?"
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.78,
+      "userSatisfaction": 0.48,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Decent start with 4 companies, though relevance questionable (transport, equipment rental, road works, materials)",
+        "Turn 2: User specified 'Южный' district — assistant repeated SAME 4 companies without any filtering",
+        "Turn 3: Generic ranking without actual risk analysis or reliability assessment"
+      ],
+      "criticalIssues": [
+        "No district filtering after 'Южный' clarification — same list repeated",
+        "Companies have questionable relevance to ready-mix concrete (АгроБетон — transport, Мостоотряд — equipment rental)",
+        "Generic fallback on Turn 3 — provided generic risk rubric instead of concrete supplier assessment"
+      ],
+      "strengths": [
+        "Maintained location context (Брест)",
+        "Attempted to address volume/timing constraint in ranking"
+      ],
+      "nextUserProbe": "Кто реально производит бетон в Бресте, а не просто связан со стройкой?"
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.58,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Good start with 3 relevant cleaning companies",
+        "Turn 2: Added phone numbers but no district filtering for Уручье",
+        "Turn 3: Changed list composition — added Баярекс (dry cleaning) which is irrelevant to office cleaning"
+      ],
+      "criticalIssues": [
+        "No district filtering for Уручье after user clarification",
+        "Added irrelevant company in Turn 3 (Баярекс — химчистки, not office cleaning)",
+        "Removed Дубовский ИП from top-3 without explanation"
+      ],
+      "strengths": [
+        "Maintained service type context (office cleaning)",
+        "Provided concrete companies with contacts",
+        "Turn 1 ranking had clear criteria"
+      ],
+      "nextUserProbe": "Кто из них работает в Уручье и берется за офисы на постоянной основе?"
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Weak start — only 1 relevant candidate (АвтоНьюСаунд), others are bus depot and generic auto service",
+        "Turn 2: Catastrophic failure — returned completely irrelevant companies (dentistry, sewing atelier, computers, metro construction!)",
+        "Turn 3: Returned to auto companies but still ignored Каменная Горka location constraint"
+      ],
+      "criticalIssues": [
+        "Turn 2 is critical failure — returned companies from wrong categories entirely (стоматология, швейное ателье, компьютеры)",
+        "Complete loss of context in Turn 2 — no tire service companies at all",
+        "No location filtering for Каменная Горка in any turn",
+        "Turn 1 included Автобусный парк №2 — state bus depot, not commercial tire service"
+      ],
+      "strengths": [
+        "Turn 3 provided actionable call checklist",
+        "Turn 3 returned to relevant auto service category"
+      ],
+      "nextUserProbe": "Вы вообще понимаете что мне нужен шиномонтаж? Дайте нормальные варианты!"
+    }
+  ]
+}
+```

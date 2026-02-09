@@ -1,0 +1,679 @@
+{
+  "runId": "judge-2026-02-09T13-57-22-024Z",
+  "generatedAt": "2026-02-09T13:59:48.575Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceSummary": {
+    "runId": "run-2026-02-09T13-50-03-022Z-2169286-uruyt",
+    "startedAt": "2026-02-09T13:50:03.022Z",
+    "endedAt": "2026-02-09T13:55:31.146Z",
+    "durationMs": 328124,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.multi-step-journeys.json",
+    "totalScenarios": 5,
+    "passedScenarios": 5,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 77,
+    "passedChecks": 77,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 4,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "totalScenarios": 5,
+  "judges": [
+    {
+      "judge": "kimi",
+      "summary": {
+        "total": 5,
+        "averageUsefulness": 3,
+        "usefulCount": 3,
+        "notUsefulCount": 2,
+        "usefulRate": 0.6,
+        "zeroUsefulnessCount": 0,
+        "averageUserSatisfaction": 0.59,
+        "continueCount": 3,
+        "continueRate": 0.6,
+        "genericFallbackCount": 3,
+        "genericFallbackRate": 0.6,
+        "averageContinuityScore": 2.8,
+        "topIssues": [
+          {
+            "issue": "assistant не смог найти компании в минской области и вернулся к минску, игнорируя критерий пользователя",
+            "count": 1
+          },
+          {
+            "issue": "повторяющийся паттерн: даёт конкретику → получает уточнение → отступает к общим инструкциям",
+            "count": 1
+          },
+          {
+            "issue": "критический сбой continuity: после уточнения 'минская область' и 'поставка в брест' assistant начал предлагать поставщиков из бреста вместо минской области",
+            "count": 1
+          },
+          {
+            "issue": "в turn 4 полностью проигнорирован запрос '3 приоритетных поставщика' — дана таблица без имён компаний в начале",
+            "count": 1
+          },
+          {
+            "issue": "путаница в направлении логистики: пользователь искал поставщика в минской области для поставки в брест, но assistant предложил брестских поставщиков",
+            "count": 1
+          },
+          {
+            "issue": "turn 4: формат ответа странный — 'страница: — /company/...' без названий компаний в начале строк",
+            "count": 1
+          },
+          {
+            "issue": "мелкий дефект: в turn 4 повторяется 'фокус: нет, возвращаемся к молоку...' — похоже на дебаг-вывод",
+            "count": 1
+          },
+          {
+            "issue": "turn 4: формат ответа сломан — отсутствуют названия компаний в начале пунктов (только 'почему вероятно 48ч')",
+            "count": 1
+          },
+          {
+            "issue": "в turn 4 повторяется 'официальный реестр...' и 'быстрый fi...' — обрыв текста",
+            "count": 1
+          },
+          {
+            "issue": "полный сбой continuity: пользователь прямо потребовал 'не уходи в общие советы, дай конкретных кандидатов' по минску, но assistant выдал generic fallback с брестом",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "MX002",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.45,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Turn 1: Корректный ответ по Минску с 2 релевантными кандидатами",
+              "Turn 2: После уточнения 'Минская область' — даёт 4 кандидата, но только Аврасторг явно из Минской области"
+            ],
+            "criticalIssues": [
+              "Критический сбой continuity: после уточнения 'Минская область' и 'поставка в Брест' assistant начал предлагать поставщиков ИЗ Бреста вместо Минской области",
+              "В Turn 4 полностью проигнорирован запрос '3 приоритетных поставщика' — дана таблица без имён компаний в начале"
+            ]
+          },
+          {
+            "scenarioId": "MX005",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.35,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Turn 1: Хорошее начало с конкретными компаниями в Бресте",
+              "Turn 2: КРИТИЧЕСКИЙ СБОЙ — после жалобы 'не уходи в общие советы' assistant дал общие советы и сбросил контекст до Бреста вместо Минска"
+            ],
+            "criticalIssues": [
+              "Полный сбой continuity: пользователь прямо потребовал 'не уходи в общие советы, дай конкретных кандидатов' по Минску, но assistant выдал generic fallback с Брестом",
+              "В Turn 2-3 assistant повторяет одни и те же Брестские компании (savushkin, brestmoroj) игнорируя требование Минска"
+            ]
+          },
+          {
+            "scenarioId": "MX001",
+            "usefulness": 3,
+            "verdict": "useful",
+            "userSatisfaction": 0.6,
+            "wouldContinue": true,
+            "feltGenericFallback": true,
+            "continuityScore": 3,
+            "reasons": [
+              "Turn 1: Начало с Бреста вместо Минска — ошибка geo-фильтрации",
+              "Turn 3: После уточнения 'Минская область, не город' — fallback к общим советам поиска вместо конкретных компаний"
+            ],
+            "criticalIssues": [
+              "Assistant не смог найти компании в Минской области и вернулся к Минску, игнорируя критерий пользователя",
+              "Повторяющийся паттерн: даёт конкретику → получает уточнение → отступает к общим инструкциям"
+            ]
+          },
+          {
+            "scenarioId": "MX004",
+            "usefulness": 4,
+            "verdict": "useful",
+            "userSatisfaction": 0.8,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 4,
+            "reasons": [
+              "Turn 1: 3 конкретных поставщика с валидными ссылками и обоснованием",
+              "Turn 2: Корректное сохранение контекста при уточнении района"
+            ],
+            "criticalIssues": [
+              "Turn 4: Формат ответа сломан — отсутствуют названия компаний в начале пунктов (только 'Почему вероятно 48ч')",
+              "В Turn 4 повторяется 'Официальный реестр...' и 'Быстрый fi...' — обрыв текста"
+            ]
+          },
+          {
+            "scenarioId": "MX003",
+            "usefulness": 4,
+            "verdict": "useful",
+            "userSatisfaction": 0.75,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 4,
+            "reasons": [
+              "Turn 1: Корректный ответ по молоку в Бресте с 2 конкретными компаниями",
+              "Turn 2: Чистый switch на автозапчасти без потери контекста — корректно"
+            ],
+            "criticalIssues": [
+              "Turn 4: Формат ответа странный — 'Страница: — /company/...' без названий компаний в начале строк",
+              "Мелкий дефект: в Turn 4 повторяется 'Фокус: Нет, возвращаемся к молоку...' — похоже на дебаг-вывод"
+            ]
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "MX001",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.75,
+          "userSatisfaction": 0.6,
+          "wouldContinue": true,
+          "feltGenericFallback": true,
+          "continuityScore": 3,
+          "reasons": [
+            "Turn 1: Начало с Бреста вместо Минска — ошибка geo-фильтрации",
+            "Turn 3: После уточнения 'Минская область, не город' — fallback к общим советам поиска вместо конкретных компаний",
+            "Turn 4: Возврат к компаниям из г. Минск после прямого запроса 'не город Минск' — нарушение континuité",
+            "Turn 5: RFQ шаблон качественный и полезный"
+          ],
+          "criticalIssues": [
+            "Assistant не смог найти компании в Минской области и вернулся к Минску, игнорируя критерий пользователя",
+            "Повторяющийся паттерн: даёт конкретику → получает уточнение → отступает к общим инструкциям"
+          ],
+          "strengths": [
+            "RFQ шаблон в Turn 5 полный и готов к использованию",
+            "Сохранял контекст объёма (1000 л/нед) на протяжении диалога"
+          ],
+          "nextUserProbe": "Вы снова предлагаете компании из Минска, но мне нужна именно Минская область. Есть ли у вас данные по Смолевичскому или Минскому району?",
+          "judge": "kimi"
+        },
+        {
+          "scenarioId": "MX002",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.45,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 1: Корректный ответ по Минску с 2 релевантными кандидатами",
+            "Turn 2: После уточнения 'Минская область' — даёт 4 кандидата, но только Аврасторг явно из Минской области",
+            "Turn 3: Добавляет поставщиков из Бреста вместо фокуса на Минскую область — сброс контекста",
+            "Turn 4: Возврат к Брестским поставщикам при запросе '3 приоритетных' — полная потеря geo-контекста",
+            "Turn 5: Чеклист качественный, но приоритеты снова смешаны (Брест + Минская область)"
+          ],
+          "criticalIssues": [
+            "Критический сбой continuity: после уточнения 'Минская область' и 'поставка в Брест' assistant начал предлагать поставщиков ИЗ Бреста вместо Минской области",
+            "В Turn 4 полностью проигнорирован запрос '3 приоритетных поставщика' — дана таблица без имён компаний в начале",
+            "Путаница в направлении логистики: пользователь искал поставщика В Минской области ДЛЯ поставки в Брест, но assistant предложил Брестских поставщиков"
+          ],
+          "strengths": [
+            "Чеклист звонка в Turn 5 структурирован и практичен",
+            "Начальный ответ по Минску (Turn 1) был релевантным"
+          ],
+          "nextUserProbe": "Стоп, вы мне предлагаете компании из Бреста, но я искал поставщика в Минской области КТО МОЖЕТ доставить в Брест. Почему вы поменяли регион поиска?",
+          "judge": "kimi"
+        },
+        {
+          "scenarioId": "MX003",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.75,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Turn 1: Корректный ответ по молоку в Бресте с 2 конкретными компаниями",
+            "Turn 2: Чистый switch на автозапчасти без потери контекста — корректно",
+            "Turn 3: Успешный возврат к молоку с восстановлением предыдущего shortlist",
+            "Turn 4: Честное признание что только 2 подтверждённых кандидата вместо выдумывания третьего",
+            "Turn 5: 2 точных вопроса как запрошено, с сохранением порядка звонков"
+          ],
+          "criticalIssues": [
+            "Turn 4: Формат ответа странный — 'Страница: — /company/...' без названий компаний в начале строк",
+            "Мелкий дефект: в Turn 4 повторяется 'Фокус: Нет, возвращаемся к молоку...' — похоже на дебаг-вывод"
+          ],
+          "strengths": [
+            "Отличная обработка switchback: чётко переключился и вернулся без потери контекста",
+            "Честность о недостатке данных в Turn 4 вместо галлюцинаций",
+            "Точное выполнение инструкции 'максимум 2 вопроса' в Turn 5"
+          ],
+          "nextUserProbe": "Хорошо, отвечаю: 1) Питьевое молоко 3.2%, 2) Да, допускаю из района. Кто теперь третий кандидат?",
+          "judge": "kimi"
+        },
+        {
+          "scenarioId": "MX004",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.8,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Turn 1: 3 конкретных поставщика с валидными ссылками и обоснованием",
+            "Turn 2: Корректное сохранение контекста при уточнении района",
+            "Turn 3: Топ-3 с причинами и ссылками — полное соответствие запросу",
+            "Turn 4: Честное признание об отсутствии подтверждения SLA '48 часов' вместо выдумывания",
+            "Turn 5: RFQ в запрошенном формате Subject/Body/WhatsApp"
+          ],
+          "criticalIssues": [
+            "Turn 4: Формат ответа сломан — отсутствуют названия компаний в начале пунктов (только 'Почему вероятно 48ч')",
+            "В Turn 4 повторяется 'Официальный реестр...' и 'Быстрый fi...' — обрыв текста"
+          ],
+          "strengths": [
+            "Ссылочная целостность сохранена на всех этапах",
+            "Прозрачность об ограничениях данных в Turn 4",
+            "RFQ шаблон полный и профессиональный"
+          ],
+          "nextUserProbe": "Отправил запросы. Как быстро сравнить ответы — можете дать таблицу критериев для оценки?",
+          "judge": "kimi"
+        },
+        {
+          "scenarioId": "MX005",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.35,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Turn 1: Хорошее начало с конкретными компаниями в Бресте",
+            "Turn 2: КРИТИЧЕСКИЙ СБОЙ — после жалобы 'не уходи в общие советы' assistant дал общие советы и сбросил контекст до Бреста вместо Минска",
+            "Turn 3: Продолжает предлагать Брестские компании при явном запросе Минска",
+            "Turn 4: RFQ шаблон качественный, но для Минска, а предыдущие ответы были про Брест"
+          ],
+          "criticalIssues": [
+            "Полный сбой continuity: пользователь прямо потребовал 'не уходи в общие советы, дай конкретных кандидатов' по Минску, но assistant выдал generic fallback с Брестом",
+            "В Turn 2-3 assistant повторяет одни и те же Брестские компании (savushkin, brestmoroj) игнорируя требование Минска",
+            "Нарушение trust: пользователь явно указал на проблему, но assistant не исправил поведение"
+          ],
+          "strengths": [
+            "RFQ шаблон в Turn 4 структурирован правильно",
+            "В Turn 4 правильная локация (Минск) в RFQ, хотя предыдущие ответы были неверны"
+          ],
+          "nextUserProbe": "Вы третий раз подряд предлагаете мне Брест, хотя я просил Минск. Почему игнорируете мой запрос?",
+          "judge": "kimi"
+        }
+      ]
+    },
+    {
+      "judge": "minimax",
+      "summary": {
+        "total": 5,
+        "averageUsefulness": 2.4,
+        "usefulCount": 3,
+        "notUsefulCount": 2,
+        "usefulRate": 0.6,
+        "zeroUsefulnessCount": 0,
+        "averageUserSatisfaction": 0.37,
+        "continueCount": 3,
+        "continueRate": 0.6,
+        "genericFallbackCount": 2,
+        "genericFallbackRate": 0.4,
+        "averageContinuityScore": 3,
+        "topIssues": [
+          {
+            "issue": "no concrete supplier links for minsk region despite 5 turns",
+            "count": 1
+          },
+          {
+            "issue": "honesty about limits is undercut by giving unverified candidates",
+            "count": 1
+          },
+          {
+            "issue": "after 3 clarifying turns, user still has no actionable rfq-ready list for the correct geography",
+            "count": 1
+          },
+          {
+            "issue": "turn 4: links are malformed (missing /company/ prefix for some)",
+            "count": 1
+          },
+          {
+            "issue": "lack of phone numbers/contacts despite repeated requests for actionability",
+            "count": 1
+          },
+          {
+            "issue": "only 2 confirmed candidates after 5 turns - user expected more",
+            "count": 1
+          },
+          {
+            "issue": "lack of brest milk alternatives beyond the initial 2",
+            "count": 1
+          },
+          {
+            "issue": "limited candidate pool - only 3 options",
+            "count": 1
+          },
+          {
+            "issue": "no phone numbers or direct contacts",
+            "count": 1
+          },
+          {
+            "issue": "some candidates (anserwood) have unclear cable relevance",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "MX005",
+            "usefulness": 1,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.1,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Turn 2: After explicit Minsk demand, assistant only repeats Brest candidates",
+              "Turn 3: Only 1 company recommended with no new candidates"
+            ],
+            "criticalIssues": [
+              "Penalized generic fallback despite user criticism",
+              "No Minsk candidates provided after 4 turns"
+            ]
+          },
+          {
+            "scenarioId": "MX001",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.25,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Turn 3: Generic fallback to search instructions instead of actual region-filtered candidates",
+              "Turn 4: Shortlist contains candidates without verified Minsk region geo-tags"
+            ],
+            "criticalIssues": [
+              "No concrete supplier links for Minsk region despite 5 turns",
+              "Honesty about limits is undercut by giving unverified candidates"
+            ]
+          },
+          {
+            "scenarioId": "MX004",
+            "usefulness": 3,
+            "verdict": "useful",
+            "userSatisfaction": 0.5,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 4,
+            "reasons": [
+              "All 3 companies have valid /company/ links",
+              "Turn 4: Honest about 48h SLA uncertainty"
+            ],
+            "criticalIssues": [
+              "Limited candidate pool - only 3 options",
+              "No phone numbers or direct contacts"
+            ]
+          },
+          {
+            "scenarioId": "MX002",
+            "usefulness": 3,
+            "verdict": "useful",
+            "userSatisfaction": 0.5,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 4,
+            "reasons": [
+              "Strong geographic continuity from Minsk → Minsk region → delivery to Brest",
+              "Consistent candidate pool with reasons throughout turns"
+            ],
+            "criticalIssues": [
+              "Turn 4: Links are malformed (missing /company/ prefix for some)",
+              "Lack of phone numbers/contacts despite repeated requests for actionability"
+            ]
+          },
+          {
+            "scenarioId": "MX003",
+            "usefulness": 3,
+            "verdict": "useful",
+            "userSatisfaction": 0.5,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 4,
+            "reasons": [
+              "Turn 2: Appropriate response to topic switch - no fake auto parts candidates",
+              "Turn 3: Correct context restoration after switchback"
+            ],
+            "criticalIssues": [
+              "Only 2 confirmed candidates after 5 turns - user expected more",
+              "Lack of Brest milk alternatives beyond the initial 2"
+            ]
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "MX001",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.25,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 3: Generic fallback to search instructions instead of actual region-filtered candidates",
+            "Turn 4: Shortlist contains candidates without verified Minsk region geo-tags",
+            "Assistant repeatedly asks user to expand search instead of providing sourced data"
+          ],
+          "criticalIssues": [
+            "No concrete supplier links for Minsk region despite 5 turns",
+            "Honesty about limits is undercut by giving unverified candidates",
+            "After 3 clarifying turns, user still has no actionable RFQ-ready list for the correct geography"
+          ],
+          "strengths": [
+            "Good RFQ template in turn 5",
+            "Turns 1-2 had relevant Brest/Minsk candidates with links"
+          ],
+          "nextUserProbe": "Минская область - дай конкретные компании с номерами телефонов из каталога, а не советы по поиску",
+          "judge": "minimax"
+        },
+        {
+          "scenarioId": "MX002",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.5,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Strong geographic continuity from Minsk → Minsk region → delivery to Brest",
+            "Consistent candidate pool with reasons throughout turns",
+            "Useful 6-point call checklist"
+          ],
+          "criticalIssues": [
+            "Turn 4: Links are malformed (missing /company/ prefix for some)",
+            "Lack of phone numbers/contacts despite repeated requests for actionability"
+          ],
+          "strengths": [
+            "Good evolution of requirements across turns",
+            "Practical ranking with clear why",
+            "Checklist is genuinely usable"
+          ],
+          "nextUserProbe": "Дай прямые телефоны этих 3 поставщиков из карточек",
+          "judge": "minimax"
+        },
+        {
+          "scenarioId": "MX003",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.5,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Turn 2: Appropriate response to topic switch - no fake auto parts candidates",
+            "Turn 3: Correct context restoration after switchback",
+            "Turns 4-5: Honest about data limits, asks clarifying questions instead of hallucinating"
+          ],
+          "criticalIssues": [
+            "Only 2 confirmed candidates after 5 turns - user expected more",
+            "Lack of Brest milk alternatives beyond the initial 2"
+          ],
+          "strengths": [
+            "Excellent switchback handling - context preserved",
+            "Honest about knowledge limits",
+            "No hallucinations or generic filler"
+          ],
+          "nextUserProbe": "Расширь поиск на всю Беларусь - какие ещё молочные заводы могут поставлять в Брест?",
+          "judge": "minimax"
+        },
+        {
+          "scenarioId": "MX004",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.5,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "All 3 companies have valid /company/ links",
+            "Turn 4: Honest about 48h SLA uncertainty",
+            "Good RFQ template structure"
+          ],
+          "criticalIssues": [
+            "Limited candidate pool - only 3 options",
+            "No phone numbers or direct contacts",
+            "Some candidates (Anserwood) have unclear cable relevance"
+          ],
+          "strengths": [
+            "Consistent geo-filtering (Gomel → Soviet district)",
+            "Candid about verification needs",
+            "Practical RFQ template"
+          ],
+          "nextUserProbe": "Какие сроки отгрузки реально обещают эти поставщики? Дай их телефоны.",
+          "judge": "minimax"
+        },
+        {
+          "scenarioId": "MX005",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.1,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Turn 2: After explicit Minsk demand, assistant only repeats Brest candidates",
+            "Turn 3: Only 1 company recommended with no new candidates",
+            "Persistent refusal to acknowledge Minsk has dairy plants"
+          ],
+          "criticalIssues": [
+            "Penalized generic fallback despite user criticism",
+            "No Minsk candidates provided after 4 turns",
+            "Assistant deflects instead of sourcing from catalog"
+          ],
+          "strengths": [
+            "RFQ template format is good"
+          ],
+          "nextUserProbe": "Хватит советов. Дай конкретно 3 минских молочных завода с телефонами из /catalog",
+          "judge": "minimax"
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "geminiAvg": null,
+    "kimiAvg": 3,
+    "minimaxAvg": 2.4,
+    "geminiUserSatisfaction": null,
+    "kimiUserSatisfaction": 0.59,
+    "geminiContinueRate": null,
+    "kimiContinueRate": 0.6,
+    "geminiGenericFallbackRate": null,
+    "kimiGenericFallbackRate": 0.6,
+    "avgGap": null,
+    "usefulRateGap": null,
+    "pairwise": [
+      {
+        "left": "kimi",
+        "right": "minimax",
+        "avgGap": 0.6,
+        "usefulRateGap": 0,
+        "userSatisfactionGap": 0.22,
+        "continueRateGap": 0,
+        "genericFallbackRateGap": 0.2
+      }
+    ]
+  },
+  "gate": {
+    "enabled": true,
+    "pass": false,
+    "failures": [
+      "kimi averageUserSatisfaction 0.59 < 0.72",
+      "kimi continueRate 0.6 < 0.72",
+      "kimi genericFallbackRate 0.6 > 0.35",
+      "minimax averageUserSatisfaction 0.37 < 0.72",
+      "minimax continueRate 0.6 < 0.72",
+      "minimax genericFallbackRate 0.4 > 0.35"
+    ],
+    "checks": [
+      {
+        "judge": "kimi",
+        "metric": "averageUserSatisfaction",
+        "actual": 0.59,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "kimi",
+        "metric": "continueRate",
+        "actual": 0.6,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "kimi",
+        "metric": "genericFallbackRate",
+        "actual": 0.6,
+        "expected": "<= 0.35",
+        "pass": false
+      },
+      {
+        "judge": "minimax",
+        "metric": "averageUserSatisfaction",
+        "actual": 0.37,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "minimax",
+        "metric": "continueRate",
+        "actual": 0.6,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "minimax",
+        "metric": "genericFallbackRate",
+        "actual": 0.4,
+        "expected": "<= 0.35",
+        "pass": false
+      }
+    ]
+  }
+}

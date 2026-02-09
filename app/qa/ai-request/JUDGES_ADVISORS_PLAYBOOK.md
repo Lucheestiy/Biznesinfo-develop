@@ -12,6 +12,8 @@
 - Core regression набор: `app/qa/ai-request/scenarios.json` (50 сценариев).
 - Dirty real-world набор: `app/qa/ai-request/scenarios.dirty.realworld.json` (10 сценариев с «грязными» пользовательскими запросами).
 - Link integrity regression: `app/qa/ai-request/scenarios.regressions.link-integrity.json` (проверяет, что `/company/...` ссылки из ответа реально открываются и не ведут в `not found`).
+- Geo ambiguity regression: `app/qa/ai-request/scenarios.regressions.geo-ambiguity.json` (конфликты city/region, уточнения "город vs область", multi-turn continuity).
+- Multi-step journeys regression: `app/qa/ai-request/scenarios.regressions.multi-step-journeys.json` (длинные 4-5 ходовые диалоги: geo-corrections, switchback темы, shortlist + RFQ в одной сессии).
 - Master-набор на базе документа с вопросами из ChatGPT Pro:
   - Документ: `devloop/AI_ASSISTANT_TEST_QUESTIONS_CHATGPT_PRO.md`
   - Сценарии: `app/qa/ai-request/scenarios.chatgpt-pro.master.json` (агрегируется скриптом, 100+ кейсов).
@@ -47,6 +49,18 @@ npm run qa:run:links
 ```
 
 ```bash
+npm run qa:run:geo-ambiguity
+```
+
+```bash
+npm run qa:trend:geo-ambiguity
+```
+
+```bash
+npm run qa:run:multi-step
+```
+
+```bash
 npm run qa:run:dirty
 ```
 
@@ -77,6 +91,58 @@ npm run qa:advise:triad
 
 `qa:judge:triad` и `qa:advise:triad` добавляют MiniMax (M2.1) через `droid exec --model custom:MiniMax-M2.1`.
 Для этих команд нужен установленный и авторизованный Droid CLI.
+
+Если Gemini временно недоступен, используйте dual-контур:
+
+```bash
+npm run qa:judge:dual
+npm run qa:advise:dual
+```
+
+Для полного многоходового цикла:
+
+```bash
+npm run qa:cycle:multi-step:triad
+```
+
+или (fallback без Gemini):
+
+```bash
+npm run qa:cycle:multi-step:dual
+```
+
+Для расширенного long-цикла «всё сразу» (core + multi-step + geo + trend):
+
+```bash
+npm run qa:cycle:extended:triad
+```
+
+или (fallback без Gemini):
+
+```bash
+npm run qa:cycle:extended:dual
+```
+
+Для регулярной geo-ambiguity регрессии (nightly/pre-merge):
+
+```bash
+npm run qa:premerge:geo-ambiguity
+```
+
+```bash
+npm run qa:cycle:geo-ambiguity:triad
+```
+
+или (fallback без Gemini):
+
+```bash
+npm run qa:cycle:geo-ambiguity:dual
+```
+
+`qa:cycle:geo-ambiguity:*` теперь запускает весь длинный контур всегда
+(run + judge + advise + trend), даже если ранний шаг упал; итоговый exit code при этом остаётся fail, но все артефакты цикла обновляются.
+
+`qa:cycle:extended:*` ведёт себя так же (always-run), но покрывает расширенный набор: core (50) + multi-step (5) + geo-ambiguity (2) + geo trend.
 
 ## Расширенный прогон на 200+ кейсов
 
@@ -130,6 +196,9 @@ node scripts/advise_ai_with_judges.mjs \
 - Advisor report:
   - `app/qa/ai-request/reports/latest.advice.json`
   - `app/qa/ai-request/reports/latest.advice.md`
+- Geo ambiguity trend:
+  - `app/qa/ai-request/reports/geo-ambiguity-trend.json`
+  - `app/qa/ai-request/reports/geo-ambiguity-trend.md`
 
 ## Рекомендуемый недельный ритм
 

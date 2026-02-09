@@ -1,0 +1,613 @@
+{
+  "runId": "judge-2026-02-09T15-57-50-558Z",
+  "generatedAt": "2026-02-09T15:59:35.865Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceSummary": {
+    "runId": "run-2026-02-09T15-50-31-467Z-2458279-3fcao",
+    "startedAt": "2026-02-09T15:50:31.467Z",
+    "endedAt": "2026-02-09T15:54:09.950Z",
+    "durationMs": 218483,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.multi-step-journeys.json",
+    "totalScenarios": 5,
+    "passedScenarios": 5,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 77,
+    "passedChecks": 77,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 4,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "totalScenarios": 5,
+  "judges": [
+    {
+      "judge": "kimi",
+      "summary": {
+        "total": 5,
+        "averageUsefulness": 2.4,
+        "usefulCount": 2,
+        "notUsefulCount": 3,
+        "usefulRate": 0.4,
+        "zeroUsefulnessCount": 0,
+        "averageUserSatisfaction": 0.44,
+        "continueCount": 2,
+        "continueRate": 0.4,
+        "genericFallbackCount": 3,
+        "genericFallbackRate": 0.6,
+        "averageContinuityScore": 2.6,
+        "topIssues": [
+          {
+            "issue": "geography confusion: turn 4 shows companies from брест when user asked for минская область",
+            "count": 1
+          },
+          {
+            "issue": "generic fallback in turn 3: 'делаем прозрачный fallback' instead of concrete suppliers",
+            "count": 1
+          },
+          {
+            "issue": "memory loss between turns - assistant forgot the минская область constraint repeatedly",
+            "count": 1
+          },
+          {
+            "issue": "wrong product category in turn 3: returned mushroom/berry and general agriculture companies for onion request",
+            "count": 1
+          },
+          {
+            "issue": "geography flip: turn 3 switched to брест companies when user wanted минская область suppliers who can deliver to брест",
+            "count": 1
+          },
+          {
+            "issue": "no concrete onion suppliers found despite multiple turns",
+            "count": 1
+          },
+          {
+            "issue": "turn 5 output is garbled - mixes checklist with ranking format",
+            "count": 1
+          },
+          {
+            "issue": "turn 3 response is somewhat generic (gives search instructions rather than just the 2 known candidates)",
+            "count": 1
+          },
+          {
+            "issue": "could have been more direct in turn 3 - immediately provide the 2 known suppliers instead of search instructions",
+            "count": 1
+          },
+          {
+            "issue": "geography reset in turn 4: switched from гомель to минск without explanation",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "MX002",
+            "usefulness": 1,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.2,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Turn 3: Complete geography failure - user asked for 'Минская область' + 'поставка в Брест', but assistant returned companies from Брест (ТЕРСЕТ-ВЕСТ, Берестейское КФХ) that are mushroom/berry and agricultural companies,…",
+              "Turn 4: Assistant admits only 1 relevant candidate (Алсэдо) which is actually a food ingredients company, not an onion supplier - then gives generic search advice"
+            ],
+            "criticalIssues": [
+              "Wrong product category in Turn 3: returned mushroom/berry and general agriculture companies for onion request",
+              "Geography flip: Turn 3 switched to Брест companies when user wanted Минская область suppliers who can deliver TO Брест"
+            ]
+          },
+          {
+            "scenarioId": "MX004",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.3,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Turn 4: Critical failure - user asked for 48-hour delivery capability, but assistant returned a company from Минск (ОБО БЕТТЕРМАНН) when the entire conversation was about Гомель/Советский район",
+              "Turn 4 completely lost geographic context and returned to a generic electrical equipment company in wrong city"
+            ],
+            "criticalIssues": [
+              "Geography reset in Turn 4: switched from Гомель to Минск without explanation",
+              "Wrong company type in Turn 4: ОБО БЕТТЕРМАНН is general electrical equipment, not cable supplier"
+            ]
+          },
+          {
+            "scenarioId": "MX001",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.35,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Turn 4: Assistant completely lost track of the conversation - user explicitly requested 'Минская область, не сам город Минск' but assistant returned companies from Брест",
+              "Turn 3: After user clarified geography to 'Минская область без города Минска', assistant fell back to generic search advice instead of providing concrete candidates"
+            ],
+            "criticalIssues": [
+              "Geography confusion: Turn 4 shows companies from Брест when user asked for Минская область",
+              "Generic fallback in Turn 3: 'делаем прозрачный fallback' instead of concrete suppliers"
+            ]
+          },
+          {
+            "scenarioId": "MX003",
+            "usefulness": 3,
+            "verdict": "useful",
+            "userSatisfaction": 0.6,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 4,
+            "reasons": [
+              "Turn 3: Successfully returned to milk topic in Брест after the auto parts detour - maintained context",
+              "Turn 4: Honest about having only 2 confirmed candidates instead of 3, didn't make up companies"
+            ],
+            "criticalIssues": [
+              "Turn 3 response is somewhat generic (gives search instructions rather than just the 2 known candidates)",
+              "Could have been more direct in Turn 3 - immediately provide the 2 known suppliers instead of search instructions"
+            ]
+          },
+          {
+            "scenarioId": "MX005",
+            "usefulness": 4,
+            "verdict": "useful",
+            "userSatisfaction": 0.75,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 5,
+            "reasons": [
+              "Turn 2: After user criticism, assistant immediately pivoted to concrete candidates with valid links and clear reasoning",
+              "Turn 3: Provided specific call priority with 5 relevant questions for supplier vetting"
+            ],
+            "criticalIssues": [
+              "Turn 1 initially gave generic advice about Минск instead of concrete candidates",
+              "Turn 3 questions 2 and 3 are somewhat redundant (both about confirmation/verification)"
+            ]
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "MX001",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.35,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Turn 4: Assistant completely lost track of the conversation - user explicitly requested 'Минская область, не сам город Минск' but assistant returned companies from Брест",
+            "Turn 3: After user clarified geography to 'Минская область без города Минска', assistant fell back to generic search advice instead of providing concrete candidates",
+            "Critical continuity failure: The assistant kept flip-flopping between Брест and Минск, never respecting the Минская область constraint"
+          ],
+          "criticalIssues": [
+            "Geography confusion: Turn 4 shows companies from Брест when user asked for Минская область",
+            "Generic fallback in Turn 3: 'делаем прозрачный fallback' instead of concrete suppliers",
+            "Memory loss between turns - assistant forgot the Минская область constraint repeatedly"
+          ],
+          "strengths": [
+            "Turn 5 RFQ template is well-structured and usable",
+            "Initial Turn 1 provided concrete candidates with reasoning"
+          ],
+          "nextUserProbe": "Почему вы снова предлагаете компании из Бреста, когда я просил Минскую область?",
+          "judge": "kimi"
+        },
+        {
+          "scenarioId": "MX002",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.2,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Turn 3: Complete geography failure - user asked for 'Минская область' + 'поставка в Брест', but assistant returned companies from Брест (ТЕРСЕТ-ВЕСТ, Берестейское КФХ) that are mushroom/berry and agricultural companies,…",
+            "Turn 4: Assistant admits only 1 relevant candidate (Алсэдо) which is actually a food ingredients company, not an onion supplier - then gives generic search advice",
+            "Turn 5: Checklist is mixed with irrelevant ranking output, showing confusion in formatting"
+          ],
+          "criticalIssues": [
+            "Wrong product category in Turn 3: returned mushroom/berry and general agriculture companies for onion request",
+            "Geography flip: Turn 3 switched to Брест companies when user wanted Минская область suppliers who can deliver TO Брест",
+            "No concrete onion suppliers found despite multiple turns",
+            "Turn 5 output is garbled - mixes checklist with ranking format"
+          ],
+          "strengths": [
+            "Turn 1 and 2 initially provided relevant candidates (Аврасторг, ТИТУЛ ФХ, Олимп-Агро)",
+            "Turn 5 checklist questions are relevant for onion sourcing"
+          ],
+          "nextUserProbe": "Это не те компании - мне нужны поставщики лука, а не грибов и ягод!",
+          "judge": "kimi"
+        },
+        {
+          "scenarioId": "MX003",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.75,
+          "userSatisfaction": 0.6,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Turn 3: Successfully returned to milk topic in Брест after the auto parts detour - maintained context",
+            "Turn 4: Honest about having only 2 confirmed candidates instead of 3, didn't make up companies",
+            "Turn 5: Asked 2 precise clarification questions when data was insufficient - appropriate response"
+          ],
+          "criticalIssues": [
+            "Turn 3 response is somewhat generic (gives search instructions rather than just the 2 known candidates)",
+            "Could have been more direct in Turn 3 - immediately provide the 2 known suppliers instead of search instructions"
+          ],
+          "strengths": [
+            "Good switchback handling - correctly returned to original milk/Brest context",
+            "Honest about data limitations in Turn 4",
+            "Appropriate probing questions in Turn 5 to get more actionable information"
+          ],
+          "nextUserProbe": "Нужно питьевое пастеризованное молоко 3.2%, объем около 5000 литров в месяц",
+          "judge": "kimi"
+        },
+        {
+          "scenarioId": "MX004",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.3,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 4: Critical failure - user asked for 48-hour delivery capability, but assistant returned a company from Минск (ОБО БЕТТЕРМАНН) when the entire conversation was about Гомель/Советский район",
+            "Turn 4 completely lost geographic context and returned to a generic electrical equipment company in wrong city",
+            "Turn 4 also lost the product focus - returned general electrical equipment instead of cable-specific suppliers"
+          ],
+          "criticalIssues": [
+            "Geography reset in Turn 4: switched from Гомель to Минск without explanation",
+            "Wrong company type in Turn 4: ОБО БЕТТЕРМАНН is general electrical equipment, not cable supplier",
+            "Failed to maintain the established shortlist when adding time constraint"
+          ],
+          "strengths": [
+            "Turns 1-3 maintained good geographic and product context",
+            "Turn 3 provided valid card links with reasoning",
+            "Turn 5 RFQ template is well-structured and includes all key parameters"
+          ],
+          "nextUserProbe": "Почему вы предлагаете компанию в Минске, когда мне нужно в Гомеле?",
+          "judge": "kimi"
+        },
+        {
+          "scenarioId": "MX005",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.75,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Turn 2: After user criticism, assistant immediately pivoted to concrete candidates with valid links and clear reasoning",
+            "Turn 3: Provided specific call priority with 5 relevant questions for supplier vetting",
+            "Turn 4: Delivered well-structured RFQ in requested format (Subject/Body/WhatsApp)",
+            "Maintained continuity throughout - no geography confusion, no product mix-ups"
+          ],
+          "criticalIssues": [
+            "Turn 1 initially gave generic advice about Минск instead of concrete candidates",
+            "Turn 3 questions 2 and 3 are somewhat redundant (both about confirmation/verification)"
+          ],
+          "strengths": [
+            "Excellent recovery after user criticism in Turn 2",
+            "All 3 candidates in Turn 2 are genuinely relevant milk producers in Minsk",
+            "RFQ in Turn 4 covers all necessary business parameters",
+            "Honest in Turn 1 about not seeing strong Minsk matches in current slice"
+          ],
+          "nextUserProbe": "Отлично, спасибо! Отправлю запросы сегодня.",
+          "judge": "kimi"
+        }
+      ]
+    },
+    {
+      "judge": "minimax",
+      "summary": {
+        "total": 5,
+        "averageUsefulness": 4.2,
+        "usefulCount": 4,
+        "notUsefulCount": 1,
+        "usefulRate": 0.8,
+        "zeroUsefulnessCount": 0,
+        "averageUserSatisfaction": 0.75,
+        "continueCount": 4,
+        "continueRate": 0.8,
+        "genericFallbackCount": 1,
+        "genericFallbackRate": 0.2,
+        "averageContinuityScore": 4.4,
+        "topIssues": [
+          {
+            "issue": "полная потеря продукта: запрос лука -> получил грибы и ягоды",
+            "count": 1
+          },
+          {
+            "issue": "игнорирование требования 'лук репчатый 2 т/неделю' в turns 3-4",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "MX002",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.2,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Turn 3 полностью потерял контекст: вместо лука дал грибы/ягоды и фермерское хозяйство",
+              "Turn 4 продолжил нерелевантных кандидатов"
+            ],
+            "criticalIssues": [
+              "Полная потеря продукта: запрос лука -> получил грибы и ягоды",
+              "Игнорирование требования 'лук репчатый 2 т/неделю' в Turns 3-4"
+            ]
+          },
+          {
+            "scenarioId": "MX003",
+            "usefulness": 4,
+            "verdict": "useful",
+            "userSatisfaction": 0.8,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 5,
+            "reasons": [
+              "Безупречное переключение темы: молоко->запчасти->молоко",
+              "Конкретные действия на каждом этапе"
+            ],
+            "criticalIssues": []
+          },
+          {
+            "scenarioId": "MX001",
+            "usefulness": 5,
+            "verdict": "useful",
+            "userSatisfaction": 0.9,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 5,
+            "reasons": [
+              "Отличная geo-преемственность через все уточнения",
+              "Честный подход: признает отсутствие данных вместо выдумывания"
+            ],
+            "criticalIssues": []
+          },
+          {
+            "scenarioId": "MX004",
+            "usefulness": 5,
+            "verdict": "useful",
+            "userSatisfaction": 0.9,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 5,
+            "reasons": [
+              "Идеальная преемственность: Gomel->Советский район->48 часов",
+              "Конкретный shortlist с причинами и ссылками"
+            ],
+            "criticalIssues": []
+          },
+          {
+            "scenarioId": "MX005",
+            "usefulness": 5,
+            "verdict": "useful",
+            "userSatisfaction": 0.95,
+            "wouldContinue": true,
+            "feltGenericFallback": false,
+            "continuityScore": 5,
+            "reasons": [
+              "После критики дал конкретных кандидатов а не общие советы",
+              "Хорошо структурированный приоритетный список звонков"
+            ],
+            "criticalIssues": []
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "MX001",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.9,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Отличная geo-преемственность через все уточнения",
+            "Честный подход: признает отсутствие данных вместо выдумывания",
+            "Конкретные кандидаты с ссылками на каждом этапе",
+            "Готовый RFQ шаблон со всеми деталями контекста"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Поддержал Минск->Минская область->Брест доставка без потери данных",
+            "Конкретика вместо общих советов когда данные есть"
+          ],
+          "nextUserProbe": "Скинь готовый чек-лист оценки поставщика молока на 10 пунктов",
+          "judge": "minimax"
+        },
+        {
+          "scenarioId": "MX002",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.2,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 3 полностью потерял контекст: вместо лука дал грибы/ягоды и фермерское хозяйство",
+            "Turn 4 продолжил нерелевантных кандидатов",
+            "Критичный разрыв после явного уточнения географии"
+          ],
+          "criticalIssues": [
+            "Полная потеря продукта: запрос лука -> получил грибы и ягоды",
+            "Игнорирование требования 'лук репчатый 2 т/неделю' в Turns 3-4"
+          ],
+          "strengths": [
+            "Turns 1-2 были отличные: конкретные поставщики лука в Минске и Минской области"
+          ],
+          "nextUserProbe": "Почему вы мне предлагаете грибы когда я спрашиваю про лук?",
+          "judge": "minimax"
+        },
+        {
+          "scenarioId": "MX003",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.8,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Безупречное переключение темы: молоко->запчасти->молоко",
+            "Конкретные действия на каждом этапе",
+            "Честный fallback в Turn 5: просит уточнения вместо выдумывания"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Возврат к молоку сохранил все предыдущие уточнения",
+            "Turn 5 корректно запросил missing info"
+          ],
+          "nextUserProbe": "Какой тип молока: питьевое или для переработки?",
+          "judge": "minimax"
+        },
+        {
+          "scenarioId": "MX004",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.9,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Идеальная преемственность: Gomel->Советский район->48 часов",
+            "Конкретный shortlist с причинами и ссылками",
+            "Честный про ограничениях вместо выдумывания кандидатов",
+            "Готовый RFQ шаблон под все уточнения"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Turn 4 честно сказал 'мало подтвержденных вариантов' вместо фантазий",
+            "Все кандидаты валидные и релевантные профилю"
+          ],
+          "nextUserProbe": "Добавь тех кто может отгрузить завтра",
+          "judge": "minimax"
+        },
+        {
+          "scenarioId": "MX005",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.95,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "После критики дал конкретных кандидатов а не общие советы",
+            "Хорошо структурированный приоритетный список звонков",
+            "Отличный RFQ шаблон сразу готовый к использованию"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Turn 2: конкретика по Минску после критики 'не уходи в общие советы'",
+            "Turn 3: 3 кандидата + 5 точных вопросов для звонка"
+          ],
+          "nextUserProbe": "Сделай сравнительную таблицу этих 3 поставщиков молока",
+          "judge": "minimax"
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "geminiAvg": null,
+    "kimiAvg": 2.4,
+    "minimaxAvg": 4.2,
+    "geminiUserSatisfaction": null,
+    "kimiUserSatisfaction": 0.44,
+    "geminiContinueRate": null,
+    "kimiContinueRate": 0.4,
+    "geminiGenericFallbackRate": null,
+    "kimiGenericFallbackRate": 0.6,
+    "avgGap": null,
+    "usefulRateGap": null,
+    "pairwise": [
+      {
+        "left": "kimi",
+        "right": "minimax",
+        "avgGap": -1.8,
+        "usefulRateGap": -0.4,
+        "userSatisfactionGap": -0.31,
+        "continueRateGap": -0.4,
+        "genericFallbackRateGap": 0.4
+      }
+    ]
+  },
+  "gate": {
+    "enabled": true,
+    "pass": false,
+    "failures": [
+      "kimi averageUserSatisfaction 0.44 < 0.72",
+      "kimi continueRate 0.4 < 0.72",
+      "kimi genericFallbackRate 0.6 > 0.35"
+    ],
+    "checks": [
+      {
+        "judge": "kimi",
+        "metric": "averageUserSatisfaction",
+        "actual": 0.44,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "kimi",
+        "metric": "continueRate",
+        "actual": 0.4,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "kimi",
+        "metric": "genericFallbackRate",
+        "actual": 0.6,
+        "expected": "<= 0.35",
+        "pass": false
+      },
+      {
+        "judge": "minimax",
+        "metric": "averageUserSatisfaction",
+        "actual": 0.75,
+        "expected": ">= 0.72",
+        "pass": true
+      },
+      {
+        "judge": "minimax",
+        "metric": "continueRate",
+        "actual": 0.8,
+        "expected": ">= 0.72",
+        "pass": true
+      },
+      {
+        "judge": "minimax",
+        "metric": "genericFallbackRate",
+        "actual": 0.2,
+        "expected": "<= 0.35",
+        "pass": true
+      }
+    ]
+  }
+}

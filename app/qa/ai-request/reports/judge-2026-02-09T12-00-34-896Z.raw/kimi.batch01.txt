@@ -1,0 +1,144 @@
+Now I have the schema from the existing results file. Let me evaluate all 5 scenarios (MX001-MX005) based on the provided transcripts.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "MX001",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.78,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 2 concrete milk suppliers in Brest with direct links and contacts",
+        "Turn 2: Correctly pivoted to Minsk suppliers when user clarified, gave 3 candidates with contacts",
+        "Turn 3: Honestly acknowledged lack of candidates specifically in Minsk region (not city), maintained context",
+        "Turn 4: Delivered top-3 shortlist with clear reasoning as requested",
+        "Turn 5: Provided ready-to-use RFQ template in email/WhatsApp format with placeholders"
+      ],
+      "criticalIssues": [
+        "Turn 3: Slight fallback to generic advice about searching catalog when no Minsk region candidates found",
+        "Turn 4: Included Minsk city candidates in 'Minsk region' shortlist despite user explicitly excluding city"
+      ],
+      "strengths": [
+        "Excellent continuity across 5 turns: maintained milk, volume (1000L/week), Brest/Minsk context",
+        "Honest about data limitations instead of hallucinating companies",
+        "RFQ template is practical and complete with all necessary fields",
+        "Each response adapted to user's specific format requests (shortlist, reasons, RFQ)"
+      ],
+      "nextUserProbe": "А есть ли у них доставка именно в мою точку в Бресте?"
+    },
+    {
+      "scenarioId": "MX002",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.68,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Provided 2 relevant onion suppliers in Minsk city with clear reasoning",
+        "Turn 2: Correctly switched to Minsk region candidates when user clarified (not city)",
+        "Turn 3: Attempted to address Brest delivery requirement",
+        "Turn 5: Delivered 6-point call checklist as requested"
+      ],
+      "criticalIssues": [
+        "Turn 3: Response is garbled/incomplete — missing actual Brest candidate name and link",
+        "Turn 4: Generic ranking without proper context — candidates don't match user's constraints (ТЕРСЕТ-ВЕСТ is in Brest but not clearly onion-focused)",
+        "Turn 4: Ranking appears to be auto-generated template with wrong focus (mentions 'brest' for all 3 including Minsk region candidate)",
+        "Turn 5: Response mixes new checklist with repetition of old ranking — confusing formatting"
+      ],
+      "strengths": [
+        "Good geo-adherence: correctly distinguished Minsk city vs Minsk region",
+        "Call checklist in Turn 5 covers practical procurement questions (price, logistics, docs)",
+        "Maintained volume context (2 tons/week) across turns"
+      ],
+      "nextUserProbe": "А кто конкретно из них возит в Брест и по какой цене?"
+    },
+    {
+      "scenarioId": "MX003",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 2 concrete milk suppliers in Brest with links and contacts",
+        "Turn 2: Correctly switched to auto parts when user changed topic, gave search guidance",
+        "Turn 3: Successfully returned to milk/Brest context, recalled previous candidates",
+        "Turn 5: Asked 2 precise clarifying questions instead of generic fallback when data insufficient"
+      ],
+      "criticalIssues": [
+        "Turn 4: Honest about having only 2 confirmed candidates instead of 3, but response format is garbled with template artifacts",
+        "Turn 4: Included confusing text about 'фокус: автозапчасти' when user already returned to milk topic"
+      ],
+      "strengths": [
+        "Excellent topic switch handling: correctly followed user from milk -> auto parts -> back to milk",
+        "Maintained context continuity despite explicit topic switch — remembered original candidates",
+        "Turn 5: Instead of falling back to generic advice, asked specific clarifying questions to help user",
+        "Honest about data limitations throughout"
+      ],
+      "nextUserProbe": "Нужно питьевое молоко в упаковке, только Брест подходит."
+    },
+    {
+      "scenarioId": "MX004",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.70,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Provided 3 cable suppliers in Gomel with links and reasoning",
+        "Turn 5: Delivered RFQ template in requested format (Subject/Body/WhatsApp)"
+      ],
+      "criticalIssues": [
+        "Turn 3: Complete failure — responded with instructions about adding a company to catalog instead of providing top-3 cable suppliers",
+        "Turn 4: Repeated same completely wrong response about adding company, ignoring 48-hour delivery constraint entirely",
+        "Critical continuity break: Turns 3-4 completely lost the cable sourcing context, gave irrelevant generic instructions",
+        "Turn 3-4 responses appear to be template hallucinations or system errors — completely off-topic"
+      ],
+      "strengths": [
+        "Turn 1 initial response was relevant with concrete candidates",
+        "Turn 5 RFQ template structure is correct and usable despite earlier failures"
+      ],
+      "nextUserProbe": "Почему ты говоришь про добавление компании, когда я ищу поставщиков кабеля?"
+    },
+    {
+      "scenarioId": "MX005",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Started with Brest suppliers but acknowledged limited candidates, suggested Minsk expansion",
+        "Turn 2: Correctly responded to user criticism by providing 3 concrete Minsk milk plants with contacts",
+        "Turn 4: Delivered RFQ template in requested format (Subject/Body/WhatsApp)"
+      ],
+      "criticalIssues": [
+        "Turn 3: Failed to deliver 'who to call first' — response is garbled with template artifacts, missing actual candidate names in ranking",
+        "Turn 3: Lost continuity — mentioned Brest candidates when user specifically asked about Minsk after criticizing lack of specifics",
+        "Turn 3 response appears broken: 'Карточка: — /company/savushkin (Брест, brest)' without company name",
+        "Did not indicate which of the 3 Minsk suppliers to call first based on volume/urgency criteria"
+      ],
+      "strengths": [
+        "Good recovery in Turn 2 after user criticism — provided specific Minsk candidates as requested",
+        "Turn 2: Correctly identified 3 relevant milk producers in Minsk with full contact details",
+        "RFQ template in Turn 4 is complete and practical with all necessary fields"
+      ],
+      "nextUserProbe": "Кого из минских заводов лучше звонить первым для срочной поставки?"
+    }
+  ]
+}
+```

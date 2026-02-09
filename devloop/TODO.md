@@ -56,10 +56,16 @@ Recently completed:
 16. ✅ Add streaming replies (SSE) for `/assistant` (via `POST /api/ai/request?stream=1`) with safe fallback.
 17. ✅ Add safe “rubric hints” injection for sourcing prompts (catalog-based, capped, injection-safe).
 18. ✅ Add safe “query variants” suggestions for sourcing prompts (2–3 variants with synonyms; capped; injection-safe).
+19. ✅ Add safe “city/region extraction” hints for sourcing prompts (best-effort; capped; injection-safe), including ambiguity notes when multiple location candidates conflict across current message/history.
+20. ✅ Add geo-focused QA regressions for ambiguous location refinements (city-only follow-ups and conflicting city/region hints).
+21. ✅ Wire geo-ambiguity regression set into routine QA cycle (pre-merge/triad/dual npm cycles) and add pass-rate trend reports (`geo-ambiguity-trend.json/.md`).
+22. ✅ Make geo long cycle truly “always-run”: `qa:cycle:geo-ambiguity:{triad|dual}` now executes run+judge+advise+trend even when early steps fail.
+23. ✅ Add expanded always-run cycle: `qa:cycle:extended:{triad|dual}` now runs core + multi-step + geo + trend in one contour.
+24. ✅ Add compact 7-run sparkline + “time since last green run” metric to `geo-ambiguity-trend.md` for faster nightly triage.
 
 Next (pick ONE):
 
-1. Add safe “city/region extraction” hints for sourcing prompts (best-effort; capped; injection-safe).
+1. Add explicit “last green run id” + timestamp summary line to console output of `qa:trend:geo-ambiguity` (not only markdown/json) for quick CI logs.
 
 ## Constraints
 
