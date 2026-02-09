@@ -1,0 +1,83 @@
+The user is asking me to act as an external QA judge for Biznesinfo AI assistant. They've provided a JSON payload with scenarios (S031, S032, S033) containing multi-turn conversations where users request RFQ (Request for Quotation) templates for various business scenarios.
+
+I need to evaluate the AI assistant's responses based on the rubric provided and return ONLY valid JSON with no markdown, comments, or extra keys.
+
+Let me analyze each scenario:
+
+**S031 - RFQ: кабель ВВГнг**
+- Turn 1: User asks for RFQ for cable VVGng 3x2.5, 8 km, delivery to Minsk. Assistant provides a template with email subject/body and WhatsApp version.
+- Turn 2: User asks to make it more polite and shorter. Assistant complies but keeps {product/service} and {qty} placeholders which are redundant since values are already known.
+- Turn 3: User asks for Russian Subject and English Body. Assistant does this but WhatsApp version remains in Russian, which is inconsistent with the request.
+
+**S032 - RFQ: ПНД трубы**
+- Turn 1: User asks for template for PE100 SDR11 pipes, 20 tons. Assistant provides comprehensive template.
+- Turn 2: User asks to emphasize deadlines and certificates. Assistant adds bold emphasis on these points.
+- Turn 3: User asks for WhatsApp-ready version. Assistant provides a concise version suitable for WhatsApp.
+
+**S033 - RFQ: клининг офиса**
+- Turn 1: User asks for office cleaning RFQ for 1200 m2 in Minsk. Assistant provides template.
+- Turn 2: User asks for stricter tone and clear SLA requirements. Assistant adds detailed SLA section.
+- Turn 3: User asks for placeholders for schedule and penalties. Assistant adds {schedule}, {additional_schedule}, {penalties} placeholders.
+
+Now let me evaluate each scenario and produce the JSON output.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S031",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "reasons": [
+        "Turn 1 provides complete RFQ template with email and WhatsApp versions",
+        "Turn 3 partially fulfills request: Body in English but WhatsApp remains in Russian"
+      ],
+      "criticalIssues": [
+        "Redundant placeholders {product/service}, {qty}, {city} in Turns 2-3 when values are already known from context",
+        "Inconsistent language handling in Turn 3 - WhatsApp not translated to English as implied by request"
+      ],
+      "strengths": [
+        "Good structure with Subject/Body/WhatsApp variants",
+        "Covers all necessary RFQ elements: price, availability, delivery, payment terms"
+      ]
+    },
+    {
+      "scenarioId": "S032",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "reasons": [
+        "Comprehensive template covering technical specifications",
+        "Good adaptation to WhatsApp format in Turn 3 - concise and practical"
+      ],
+      "criticalIssues": [
+        "Minor: truncated output in Turn 2 ('Заранее благодарим за опе…')"
+      ],
+      "strengths": [
+        "Effectively emphasizes deadlines and certificates in Turn 2 with bold formatting",
+        "WhatsApp version appropriately condensed for mobile messaging"
+      ]
+    },
+    {
+      "scenarioId": "S033",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.8,
+      "reasons": [
+        "Good progression from basic template to strict SLA requirements",
+        "Properly adds placeholders for schedule and penalties in Turn 3"
+      ],
+      "criticalIssues": [
+        "Turn 2 output appears truncated",
+        "Could provide more specific SLA metric examples instead of just placeholders"
+      ],
+      "strengths": [
+        "Professional tone appropriate for tender process",
+        "Structured format with numbered items and clear sections"
+      ]
+    }
+  ]
+}
+```{"judge": "kimi", "ratings": [{"scenarioId": "S031", "usefulness": 3, "verdict": "useful", "confidence": 0.75, "reasons": ["Turn 1 provides complete RFQ template with email and WhatsApp versions", "Turn 3 partially fulfills request: Body in English but WhatsApp remains in Russian"], "criticalIssues": ["Redundant placeholders {product/service}, {qty}, {city} in Turns 2-3 when values are already known from context", "Inconsistent language handling in Turn 3 - WhatsApp not translated to English as implied by request"], "strengths": ["Good structure with Subject/Body/WhatsApp variants", "Covers all necessary RFQ elements: price, availability, delivery, payment terms"]}, {"scenarioId": "S032", "usefulness": 4, "verdict": "useful", "confidence": 0.85, "reasons": ["Comprehensive template covering technical specifications", "Good adaptation to WhatsApp format in Turn 3 - concise and practical"], "criticalIssues": ["Minor: truncated output in Turn 2 ('Заранее благодарим за опе…')"], "strengths": ["Effectively emphasizes deadlines and certificates in Turn 2 with bold formatting", "WhatsApp version appropriately condensed for mobile messaging"]}, {"scenarioId": "S033", "usefulness": 4, "verdict": "useful", "confidence": 0.8, "reasons": ["Good progression from basic template to strict SLA requirements", "Properly adds placeholders for schedule and penalties in Turn 3"], "criticalIssues": ["Turn 2 output appears truncated", "Could provide more specific SLA metric examples instead of just placeholders"], "strengths": ["Professional tone appropriate for tender process", "Structured format with numbered items and clear sections"]}]}

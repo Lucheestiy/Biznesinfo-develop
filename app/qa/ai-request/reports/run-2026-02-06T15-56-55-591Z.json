@@ -1,0 +1,303 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-06T10:45:00Z",
+      "source": "manual-regression",
+      "description": "Regression for milk sourcing with city switch and vendor validation"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-06T15-56-55-591Z",
+    "startedAt": "2026-02-06T15:56:55.591Z",
+    "endedAt": "2026-02-06T15:57:12.290Z",
+    "durationMs": 16699,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.milk-brest-mogilev.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 10,
+    "passedChecks": 10,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "R002",
+      "title": "Молоко: Брест -> Могилев + проверка нерелевантной компании",
+      "tags": [
+        "regression",
+        "milk",
+        "geo",
+        "validation",
+        "multi_turn"
+      ],
+      "personaGoal": "Закупщик оптом (тонна молока), нужен стабильный multi-turn без ухода в железные дороги",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну молока в Бресте?",
+          "requestBody": {
+            "message": "Где купить тонну молока в Бресте?",
+            "history": []
+          },
+          "latencyMs": 5550,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "82d06ba8-4f5b-4d8c-b70f-56765df59eb9",
+          "isStub": false,
+          "reply": "В Бресте по молоку подходят такие варианты (проверьте профиль компании на Biznesinfo):\n\n1) **Брестское мороженое ОАО** — молочная промышленность, могут продавать молочное сырьё/молоко. Путь: **/company/brestmoroj**  \n2) **УК холдинга Концерн Брестмясомолпром ГО** — пищевая/молочная отрасль, возможны оптовые поставки. Путь: **/company/brestmmp**\n\nЧтобы точнее сузить поиск/запрос:\n1) В каком виде нужно молоко: сырое, пастеризованное, цельное/обезжиренное?  \n2) Нужна доставка по Бресту или самовывоз?  \n3) Срок поставки и периодичность (разово или регулярно)?",
+          "checks": [
+            {
+              "id": "R002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R002.T1.C2",
+              "type": "includes_any",
+              "description": "Должен учитывать Брест",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "brest"
+                ],
+                "hits": [
+                  "брест",
+                  "brest"
+                ]
+              }
+            },
+            {
+              "id": "R002.T1.C3",
+              "type": "includes_any",
+              "description": "Нужен полезный first-pass",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "/company/",
+                  "рубрик",
+                  "поисковые формулировки"
+                ],
+                "hits": [
+                  "/company/"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "А в Могилеве?",
+          "requestBody": {
+            "message": "А в Могилеве?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "В Бресте по молоку подходят такие варианты (проверьте профиль компании на Biznesinfo):\n\n1) **Брестское мороженое ОАО** — молочная промышленность, могут продавать молочное сырьё/молоко. Путь: **/company/brestmoroj**  \n2) **УК холдинга Концерн Брестмясомолпром ГО** — пищевая/молочная отрасль, возможны оптовые поставки. Путь: **/company/brestmmp**\n\nЧтобы точнее сузить поиск/запрос:\n1) В каком виде нужно молоко: сырое, пастеризованное, цельное/обезжиренное?  \n2) Нужна доставка по Бресту или самовывоз?  \n3) Срок поставки и периодичность (разово или регулярно)?"
+              }
+            ]
+          },
+          "latencyMs": 3921,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "83a8895a-3efc-4e69-887d-e2fbcd755f08",
+          "isStub": false,
+          "reply": "В Могилёве из доступных кандидатов на Biznesinfo:\n\n1) **Авангард СДП РУП Могилёвское отделение Белорусской железной дороги** — сельхоз‑подразделение в Могилёвском р‑не, может быть поставщиком молока/сырья. Путь: **/company/avangard-sdp**\n\nЧтобы точнее подобрать поставщика, уточните:\n1) Нужен объём ровно 1 тонна или диапазон?  \n2) Молоко сырое/пастеризованное, цельное/обезжиренное?  \n3) Нужна доставка по Могилёву или самовывоз?",
+          "checks": [
+            {
+              "id": "R002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R002.T2.C2",
+              "type": "includes_any",
+              "description": "Должен переключиться на Могилев",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "могил",
+                  "mogilev"
+                ],
+                "hits": [
+                  "могил"
+                ]
+              }
+            },
+            {
+              "id": "R002.T2.C3",
+              "type": "excludes_all",
+              "description": "Не должен оставаться в Бресте",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "локация из запроса:\\s*брест",
+                  "фокус по локации:\\s*брест"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "1. Авангард СДП РУП Могилёвское отделение Белорусской железной дороги - Там что то про железные дороги. Компания точно молоко продает?",
+          "requestBody": {
+            "message": "1. Авангард СДП РУП Могилёвское отделение Белорусской железной дороги - Там что то про железные дороги. Компания точно молоко продает?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "В Бресте по молоку подходят такие варианты (проверьте профиль компании на Biznesinfo):\n\n1) **Брестское мороженое ОАО** — молочная промышленность, могут продавать молочное сырьё/молоко. Путь: **/company/brestmoroj**  \n2) **УК холдинга Концерн Брестмясомолпром ГО** — пищевая/молочная отрасль, возможны оптовые поставки. Путь: **/company/brestmmp**\n\nЧтобы точнее сузить поиск/запрос:\n1) В каком виде нужно молоко: сырое, пастеризованное, цельное/обезжиренное?  \n2) Нужна доставка по Бресту или самовывоз?  \n3) Срок поставки и периодичность (разово или регулярно)?"
+              },
+              {
+                "role": "user",
+                "content": "А в Могилеве?"
+              },
+              {
+                "role": "assistant",
+                "content": "В Могилёве из доступных кандидатов на Biznesinfo:\n\n1) **Авангард СДП РУП Могилёвское отделение Белорусской железной дороги** — сельхоз‑подразделение в Могилёвском р‑не, может быть поставщиком молока/сырья. Путь: **/company/avangard-sdp**\n\nЧтобы точнее подобрать поставщика, уточните:\n1) Нужен объём ровно 1 тонна или диапазон?  \n2) Молоко сырое/пастеризованное, цельное/обезжиренное?  \n3) Нужна доставка по Могилёву или самовывоз?"
+              }
+            ]
+          },
+          "latencyMs": 6930,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "0f624818-307d-4fcd-a742-176808f2b337",
+          "isStub": false,
+          "reply": "Вы правы сомневаться: по названию компания выглядит как подразделение ЖД, а информация в кандидате — общий профиль сельхоз‑подразделения. Я не могу подтвердить, что они действительно продают молоко. Лучше проверить карточку компании на Biznesinfo (/company/avangard-sdp) или связаться напрямую по контактам из карточки.\n\nЧтобы найти более релевантных поставщиков в Могилёве, могу подсказать рубрики/ключевые слова. Например:\n- Рубрики: **Молочная промышленность**, **Сельхозпредприятия**, **Фермерские хозяйства**, **Молочные продукты – оптовая торговля**  \n- Ключевые слова: *молоко оптом, сырое молоко, пастеризованное молоко, молокозавод, молочное сырьё*\n\nХотите, чтобы я предложил точный запрос/фильтры по рубрикатору для Могилёва или составил сообщение-запрос поставщикам?",
+          "checks": [
+            {
+              "id": "R002.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R002.T3.C2",
+              "type": "includes_any",
+              "description": "Должен вернуться к товарной теме (молоко) и валидации",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "релевант",
+                  "провер"
+                ],
+                "hits": [
+                  "молок",
+                  "релевант",
+                  "провер"
+                ]
+              }
+            },
+            {
+              "id": "R002.T3.C3",
+              "type": "excludes_all",
+              "description": "Не должен продвигать железнодорожные компании как молочных поставщиков",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "железн[а-я\\s-]*дорог",
+                  "белорусск[а-я\\s-]*железн"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "R002.T3.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен практичный ответ, а не пустой отказ",
+              "passed": true,
+              "reason": "Refusal is accompanied by useful guidance",
+              "details": {
+                "refusal": true,
+                "useful": true
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 16405
+    }
+  ]
+}

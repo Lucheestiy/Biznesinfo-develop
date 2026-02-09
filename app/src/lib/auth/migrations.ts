@@ -171,6 +171,57 @@ const MIGRATIONS: Migration[] = [
       CREATE INDEX IF NOT EXISTS ai_request_locks_expires_at_idx ON ai_request_locks(expires_at);
     `,
   },
+  {
+    id: "20260207_01_ai_assistant_conversations",
+    sql: `
+      CREATE TABLE IF NOT EXISTS ai_assistant_sessions (
+        id UUID PRIMARY KEY,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        company_id TEXT,
+        source TEXT,
+        context JSONB,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        last_message_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
+      CREATE INDEX IF NOT EXISTS ai_assistant_sessions_user_id_last_message_idx
+        ON ai_assistant_sessions(user_id, last_message_at DESC);
+
+      CREATE TABLE IF NOT EXISTS ai_assistant_turns (
+        id UUID PRIMARY KEY,
+        session_id UUID NOT NULL REFERENCES ai_assistant_sessions(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        turn_index INT NOT NULL CHECK (turn_index > 0),
+        request_id UUID REFERENCES ai_requests(id) ON DELETE SET NULL,
+        user_message TEXT NOT NULL,
+        assistant_message TEXT,
+        ranking_seed_text TEXT,
+        vendor_candidate_ids TEXT[],
+        vendor_candidate_slugs TEXT[],
+        request_meta JSONB,
+        response_meta JSONB,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        UNIQUE(session_id, turn_index)
+      );
+
+      CREATE INDEX IF NOT EXISTS ai_assistant_turns_session_turn_idx
+        ON ai_assistant_turns(session_id, turn_index DESC);
+      CREATE INDEX IF NOT EXISTS ai_assistant_turns_user_created_idx
+        ON ai_assistant_turns(user_id, created_at DESC);
+      CREATE INDEX IF NOT EXISTS ai_assistant_turns_request_id_idx
+        ON ai_assistant_turns(request_id);
+
+      ALTER TABLE ai_requests
+        ADD COLUMN IF NOT EXISTS assistant_session_id UUID,
+        ADD COLUMN IF NOT EXISTS assistant_turn_id UUID;
+
+      CREATE INDEX IF NOT EXISTS ai_requests_assistant_session_id_idx
+        ON ai_requests(assistant_session_id);
+      CREATE INDEX IF NOT EXISTS ai_requests_assistant_turn_id_idx
+        ON ai_requests(assistant_turn_id);
+    `,
+  },
 ];
 
 export async function ensureAuthDb(): Promise<{ applied: string[] }> {

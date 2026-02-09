@@ -1,0 +1,913 @@
+{
+  "runId": "advisor-2026-02-07T20-47-53-302Z",
+  "generatedAt": "2026-02-07T20:50:01.362Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceJudgeReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.usefulness.json",
+  "focusScenarios": [
+    {
+      "id": "D005",
+      "title": "Dirty query: бухучет аутсорс ООО Минск",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 2,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "D005.T2.C4",
+          "type": "includes_any",
+          "description": "Если есть гео-сигнал, он должен учитываться",
+          "reason": "No required patterns matched"
+        }
+      ],
+      "judgeIssueHints": [
+        "Assistant explicitly states it doesn't have a list of companies, which is a major missed opportunity given previous guidance.",
+        "Generic fallback after user provided concrete constraints.",
+        "Generic fallback в Turn 3: пользователь просит 'кого первым прозвонить', а ассистент отвечает 'пришлите названия' — полная потеря контекста",
+        "На протяжении всего диалога не дает ни одной конкретной бухгалтерской компании"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "In Turn 3, assistant failed to provide specific companies despite previous turns hinting at potential search results.",
+            "Forced the user to provide company names/links, which goes against the 'rushed buyer' persona."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Дает рубрики для поиска, но не конкретные компании — пользователь просил 'аутсорс бухучет'",
+            "Turn 2: Вместо компаний снова инструкции 'смотрите в карточках'"
+          ]
+        }
+      ],
+      "lastReply": "Сейчас у меня нет списка конкретных компаний из каталога. Пришлите 5–10 названий/ссылок — ранжирую и скажу, кого прозвонить первым. Пока — как выбирать приоритет на прозвон: **Кого первым прозванивать (критерии):** 1) Указано **работают с ООО, 1С и ЭДО**, есть договор/регламент. 2) **Минск**, полноценные контакты (телефон, e‑mail). 3) Есть **опыт в вашей сфере** и режимах налогообложения. **5 вопросов для звонка:** 1) «Берёте ООО на уточняется? Есть опыт с нашей сферой?» 2) «Какие версии **1С** поддерживаете? Есть…",
+      "lastUser": "кого первым прозвонить и 5 вопросов"
+    },
+    {
+      "id": "D001",
+      "title": "Dirty query: типография визитки срочно",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 3.5,
+      "usefulRate": 0.5,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "D001.T3.C3",
+          "type": "any_of",
+          "description": "Нужен практичный shortlist либо прозрачный план отбора",
+          "reason": "No sub-check passed"
+        }
+      ],
+      "judgeIssueHints": [
+        "Generic fallback: после конкретных кандидатов в Turn 1, в Turn 2 ассистент полностью сбрасывает контекст и дает инструкции 'как искать', хотя уже нашел компании",
+        "Нет фильтрации по Малиновке — пользователь дал конкретный район, но ассистент не проверил какие из 4 типографий рядом",
+        "Turn 3: Дает шаблоны вопросов вместо конкретных компаний из списка с привязкой к Малиновке"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 5,
+          "verdict": "useful",
+          "reasons": [
+            "Gave specific company suggestions in Turn 1.",
+            "Successfully integrated new constraints in Turn 2."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Дает конкретные типографии в Минске — хороший старт",
+            "Turn 2: Критический провал — вместо фильтрации списка из Turn 1 по району Малиновка, дает общие инструкции по поиску в каталоге"
+          ]
+        }
+      ],
+      "lastReply": "Вот 3 варианта того, **что спросить у типографии про сроки и тираж**, с учётом “сегодня до 18:00, Малиновка, безнал”. **Вариант 1 — коротко и по делу** 1) Сможете напечатать визитки сегодня до 18:00? 2) Какой минимальный тираж и сроки при уточняется без ламинации? 3) Принимаете безнал? Можете выставить счёт? 4) Есть ли самовывоз в Минске (Малиновка) / возможна доставка? **Вариант 2 — если нужен точный ответ по срокам** 1) Подтвердите, возможна ли печать “день-в-день” до 18:00? 2) Минимальный и оптимальный тираж дл…",
+      "lastUser": "дай 3 варианта и что спросить по срокам/тиражу"
+    },
+    {
+      "id": "D008",
+      "title": "Dirty query: уборка после ремонта",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Assistant provided a generic ranking rubric instead of a specific shortlist or practical contract advice for the companies it previously identified.",
+        "Catastrophic continuity failure - no mention of БэстКлининг, БК-ИНВЕСТ, Аклини",
+        "No contract clause recommendations for cleaning services",
+        "Generic fallback after concrete progress is worst pattern"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Generic fallback in turn 3, similar to D006.",
+            "Failed to provide a specific shortlist of companies from previous turns."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 3 completely ignored the 3 cleaning companies identified earlier",
+            "Generic priority rubric instead of shortlist + contract terms"
+          ]
+        }
+      ],
+      "lastReply": "Короткий прозрачный ranking (без выдумывания компаний): 1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация. 2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор. 3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа). Критерии: релевантность, локация, полнота контактов, риски по срокам и качеству. Фокус запроса: дай shortlist + что включить в договор",
+      "lastUser": "дай shortlist + что включить в договор"
+    },
+    {
+      "id": "D011",
+      "title": "Regression: молоко Брест -> сырье 1.5% -> вывоз в Витебск",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "continuity_candidates"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Assistant failed to incorporate specific user constraints (1.5% fat, delivery to Vitebsk) into suggested companies.",
+        "Assistant resorted to generic search advice in Turn 2 after user provided detailed constraints.",
+        "Assistant repeated initial, unfiltered suggestions in Turn 3 despite user's explicit request for relevant, filtered options or honest admission of no findings.",
+        "Регресс: после уточнения условий ассистент не нашел сырьевых поставщиков, хотя в Turn 1 обещал сузить поиск"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Ассистент игнорирует уточняющие критерии (1.5% жирности, вывоз в Витебск) при предоставлении конкретных вариантов.",
+            "В Turn 2 ассистент предлагает общие советы по поиску вместо конкретных предложений."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 2: после конкретных уточнений (сырьё 1.5%, вывоз в Витебск) ассистент дал общие рубрики вместо конкретных поставщиков",
+            "Turn 3: вместо поиска сырьевых поставщиков вернул те же 2 переработчика из Turn 1, которые явно не подходят для покупки сырого молока"
+          ]
+        }
+      ],
+      "lastReply": "Нашёл 2 релевантных варианта в Бресте; больше подходящих по сырому молоку в текущем списке нет: 1) **Брестское мороженое ОАО** — молочная продукция (в т.ч. сметана/творог/сыры), есть контакты; можно уточнить поставку сырого молока или направление к сырьевым поставщикам. /company/brestmoroj 2) **УК холдинга «Концерн Брестмясомолпром»** — объединение предприятий молочной переработки, потенциально может направить к источнику сырого молока. /company/brestmmp Больше релевантных поставщиков сырого молока в текущем списк…",
+      "lastUser": "Дай 2-3 релевантных варианта или честно скажи что не нашел, но без общих советов"
+    },
+    {
+      "id": "D006",
+      "title": "Dirty query: вентиляция склад проект+монтаж",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 2,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Assistant fell back to a generic rubric when asked for a specific ranking and risk assessment of previously identified companies.",
+        "Severe continuity break: dropped concrete suppliers to generic fallback",
+        "No actual ranking of Баир Вест, Альфа-Норд, СПМК №130",
+        "No risk analysis provided for the specific companies"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Generic fallback in turn 3 after providing concrete suggestions.",
+            "Did not rank specific contractors or address their risks as requested."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 2 gave concrete companies for Mogilev + 1200m2 warehouse ventilation",
+            "Turn 3 completely ignored the context and gave generic ranking rubric instead of rating the 3 companies"
+          ]
+        }
+      ],
+      "lastReply": "Короткий прозрачный ranking (без выдумывания компаний): 1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация. 2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор. 3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа). Критерии: релевантность, локация, полнота контактов, риски по срокам и качеству. Фокус запроса: рейтинг 3 подрядчиков и риски",
+      "lastUser": "рейтинг 3 подрядчиков и риски"
+    },
+    {
+      "id": "D003",
+      "title": "Dirty query: реф-перевозки маршрут и цена",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 3.5,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Shortlist in Turn 3 was conceptual (types of carriers) rather than specific companies, which might reduce immediate actionability for a 'rushed buyer'.",
+        "Нет конкретных компаний-перевозчиков на всем протяжении диалога",
+        "Turn 3: 'shortlist 3' интерпретирован как типы перевозчиков, а не конкретные компании — пользователь ожидал имена"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Successfully interpreted dirty query.",
+            "Maintained context and added relevant filtering advice."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Направляет в правильную рубрику, задает уточняющие вопросы по грузу",
+            "Turn 2: Подтверждает параметры, но снова дает инструкции по поиску вместо конкретных перевозчиков"
+          ]
+        }
+      ],
+      "lastReply": "Короткий шортлист (тип перевозчика, без привязки к компаниям): 1) Рефрижераторные перевозчики Минск→Гомель (2–3 т) — самый точный матч по грузоподъёмности и маршруту. 2) Логистические компании с доступом к реф-парку — могут быстро подтвердить машину «на завтра утро». 3) Сборные реф‑перевозки (если допустимо по грузу) — иногда дешевле, но зависит от окна и совместимости грузов. Вопросы по температурному контролю (чтобы корректно сравнить предложения): 1) Поддерживается ли стабильный режим +2…+6 °C по всему рейсу, е…",
+      "lastUser": "shortlist 3 и вопросы по температурному контролю"
+    },
+    {
+      "id": "D007",
+      "title": "Dirty query: сертификат соответствия",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "verification"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 4,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Never named specific certification organizations from the catalog",
+        "Response was generic guide rather than concrete local providers"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 5,
+          "verdict": "useful",
+          "reasons": [
+            "Provided a clear, actionable, step-by-step plan.",
+            "Successfully integrated user's constraints ('быстро', 'продукции РБ')."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 3 provided actionable step-by-step plan for certification",
+            "Clear structure: scheme determination → documents → testing → issuing"
+          ]
+        }
+      ],
+      "lastReply": "Ниже — **краткий план «куда идти и какие документы»** для быстрого оформления сертификата/декларации соответствия на продукцию в РБ. --- ## 1) Определить схему и требования **Куда идти:** - Орган по сертификации (ОС) по вашей категории продукции. **Что сделать:** - Определить, нужна **декларация соответствия** или **сертификат**. - Определить, какие **ТР ТС/ЕАЭС** или нац. требования РБ применимы. --- ## 2) Подготовить пакет документов **Обычно требуется:** 1. **Заявка** в ОС. 2. **Описание продукции** (назначение…",
+      "lastUser": "дай план: куда идти и какие доки"
+    },
+    {
+      "id": "D010",
+      "title": "Dirty query: как добавить компанию",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "onboarding"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 4,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Never verified actual Biznesinfo registration process - guessing based on typical patterns",
+        "No concrete link or confirmation of 'Add company' button existence"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 5,
+          "verdict": "useful",
+          "reasons": [
+            "Provided clear and actionable step-by-step instructions for adding a company.",
+            "Included a useful list of items to prepare in advance."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 3 provided clear 1-2-3 steps and preparation checklist",
+            "Honest about registration requirements in Turn 2"
+          ]
+        }
+      ],
+      "lastReply": "Кратко по шагам (универсально для каталога Biznesinfo): **1) Найдите форму добавления** — На главной или в каталоге ищите «Добавить компанию» / «Разместить организацию». — Если требует вход — зарегистрируйтесь, если есть гостевая форма — заполните её. **2) Заполните карточку** — Название, УНП/ИНН, краткое описание, товары/услуги, рубрики, регион/город. — Контакты: телефон, email, сайт, адрес, мессенджеры. **3) Отправьте на модерацию** — Дождитесь проверки и подтверждения публикации. **Что подготовить заранее:** -…",
+      "lastUser": "дай пошагово 1-2-3 и что подготовить"
+    },
+    {
+      "id": "D002",
+      "title": "Dirty query: проверка УНП",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "verification"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 4.5,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Turn 2 мог бы предложить поиск по части УНП '19...' в базе, если такая возможность есть"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 5,
+          "verdict": "useful",
+          "reasons": [
+            "Assistant correctly identified limitation and asked for clarification in Turn 1.",
+            "Provided practical self-service checking methods in Turn 2."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Честно сообщает о невозможности проверить без полного УНП — корректно",
+            "Turn 2: Дает практичные альтернативные способы поиска при недостатке данных"
+          ]
+        }
+      ],
+      "lastReply": "1. Проверьте в официальном реестре юрлиц/ИП РБ по части названия или адресу — посмотрите статус. 2. Найдите карточку в Biznesinfo по ключевому слову + город — сверяйте УНП/адрес. 3. Сверьте контактные данные (телефон/сайт/почта) на официальном сайте компании. 4. Проверьте даты регистрации и актуальность реквизитов (УНП, юр.адрес). 5. Если сомнения — запросите у компании выписку/реквизиты и сравните с реестром.",
+      "lastUser": "дай чеклист 5 пунктов без воды"
+    },
+    {
+      "id": "D004",
+      "title": "Dirty query: металлопрокат опт",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 4.5,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Turn 2: Вместо конкретного ответа про отсрочку у конкретных поставщиков дает общее 'уточняйте условия'",
+        "Мог бы дать больше деталей про логистику по РБ для каждого из топ-3"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 5,
+          "verdict": "useful",
+          "reasons": [
+            "Provided specific company suggestions in Turn 1.",
+            "Effectively integrated new constraints and reinforced previous suggestions in Turn 2."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Дает 5 конкретных поставщиков металлопроката с ссылками",
+            "Turn 2: Подтверждает условия (по РБ, от 5т), сохраняет список"
+          ]
+        }
+      ],
+      "lastReply": "Топ‑3 (по релевантности опту и локации; данные нужно сверить на карточках компаний): 1) **А ГРУПП Запад ООО** — крупный металлоцентр, широкий ассортимент. **Риски:** возможна высокая загрузка склада → риск сроков по нестандартным позициям; по качеству — проверять сертификаты на партию. 2) **АВАБИ ООО** — комплексный поставщик трубной продукции и металлопроката. **Риски:** при узкой специализации по трубам сроки на лист/сорт могут быть дольше; качество — сверка марок стали и сертификатов. 3) **АйронТрейдПлюс ООО**…",
+      "lastUser": "топ-3 и риски по качеству/срокам"
+    },
+    {
+      "id": "D009",
+      "title": "Dirty query: коробки с логотипом",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "template"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 4.5,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Only found 1 supplier when user likely needs multiple options for comparison",
+        "Templates are generic placeholders without company-specific customization"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "gemini",
+          "usefulness": 5,
+          "verdict": "useful",
+          "reasons": [
+            "Identified a specific and highly relevant supplier.",
+            "Provided a complete, well-structured, and actionable request template (email and WhatsApp)."
+          ]
+        },
+        {
+          "judge": "kimi",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 2 honestly admitted only 1 relevant supplier (Адара-трейдинг) in catalog",
+            "Turn 3 provided ready-to-use outreach templates (email subject/body, WhatsApp)"
+          ]
+        }
+      ],
+      "lastReply": "Subject: Запрос КП на коробки с логотипом, тираж 10 000 (Минск) Body: Здравствуйте, {company}! Просим направить коммерческое предложение на изготовление письмо-запрос subject: коробки с логотипом. Тираж: {qty} (ориентировочно 10 000 шт.). Город: Минск (производство/доставка). Просьба указать: - стоимость за единицу и общий бюджет; - срок производства и возможные сроки поставки; - варианты материала (гофрокартон/микрогофра/жесткий картон); - тип печати/брендинга (флексо/офсет) и количество цветов; - минимальный тир…",
+      "lastUser": "сделай письмо-запрос КП (subject/body/whatsapp)"
+    }
+  ],
+  "advice": [
+    {
+      "advisor": "gemini",
+      "executiveSummary": "The Biznesinfo AI assistant currently achieves its target pass rate for strict checks, indicating functional correctness in basic responses. However, judge evaluations reveal significantly lower usefulness scores (Gemini: 3.7/5, Kimi: 2.7/5), primarily due to: 1) Context Loss: Frequent inability to retain and apply user-provided constraints across turns, leading to generic fallbacks. 2) Lack of Specificity: Tendency to provide abstract rubrics or search instructions instead of concrete company names, rankings, or tailored advice derived from the Biznesinfo catalog, even when such data should be available. 3) Inadequate Filtering: Struggles to incorporate detailed user-specified filters (e.g., location, product attributes, time-sensitive terms) into search results. Addressing these core issues will significantly improve user satisfaction and the assistant's perceived utility.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Enhance Multi-Turn Context Retention and Application",
+          "why": "This directly addresses the primary cause of low usefulness and context loss, which undermines the assistant's intelligence. Generic fallbacks erode user trust and efficiency.",
+          "expectedImpact": "Significant reduction in generic responses, higher relevance of results, improved user satisfaction and task completion rates.",
+          "validationScenarios": [
+            "D001",
+            "D005",
+            "D006",
+            "D008",
+            "D011",
+            "D003"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Prioritize Concrete Shortlists and Specific Actionable Advice",
+          "why": "Directly addresses the 'lack of specificity' issue, making the assistant's output immediately actionable for the user. Users expect direct answers, especially in a 'rushed buyer' context.",
+          "expectedImpact": "Increased utility of responses, better alignment with the 'rushed buyer' persona, leading to quicker decision-making for users.",
+          "validationScenarios": [
+            "D001",
+            "D005",
+            "D006",
+            "D008",
+            "D011",
+            "D003"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Refine Retrieval and Filtering Mechanisms",
+          "why": "Enables the assistant to deliver more precise and relevant results based on detailed user requirements, reducing instances where specific constraints are ignored or mishandled.",
+          "expectedImpact": "Fewer instances of missed constraints, more accurate company suggestions, and higher precision in filtered results.",
+          "validationScenarios": [
+            "D001",
+            "D011"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "qa",
+          "title": "Dynamic Re-query with Accumulated Constraints",
+          "action": "Modify the prompt engineering and/or retrieval logic to explicitly construct or refine search queries by combining the initial user intent with *all subsequent, explicit constraints* (e.g., location, product specifications, delivery terms) from previous turns. When a new constraint is introduced, the system should re-execute or refine the search against the Biznesinfo catalog with the *cumulative* parameters. If no…",
+          "implementationHint": "Within the agent's logic, maintain a state object for active search parameters. On each new user turn, update this state and trigger a new search/filter operation on the Biznesinfo data based on the cumulative parameters. Ensure the underl…",
+          "expectedImpact": "Drastically reduce 'generic fallback' issues and ensure responses are highly relevant to the latest user input. Improve continuity across multi-turn conversations.",
+          "risk": "Medium (requires careful state management and robust integration with the Biznesinfo search API).",
+          "effort": "M",
+          "validationScenarios": [
+            "D001",
+            "D005",
+            "D006",
+            "D008",
+            "D011",
+            "D003"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "qa",
+          "title": "Enforce Specific Company Presentation over General Rubrics",
+          "action": "Update the main prompt and any post-processing templates to *always* attempt to present specific company names, links, and relevant attributes when search results are available, especially when ranking or shortlisting is requested. Avoid using generic 'how-to-search' instructions or abstract criteria unless *explicitly no companies match the criteria*. For example, if a user asks for 'кого прозвонить первым' after c…",
+          "implementationHint": "Modify the prompt to explicitly instruct the model: 'If Biznesinfo data provides specific companies, prioritize listing 2-5 top relevant companies with brief justifications for their ranking/relevance, and include their Biznesinfo links. O…",
+          "expectedImpact": "Increase actionability and direct usefulness for the user, fulfilling the 'rushed buyer' persona by providing immediately usable information.",
+          "risk": "Low (primarily prompt/template adjustment).",
+          "effort": "S",
+          "validationScenarios": [
+            "D001",
+            "D005",
+            "D006",
+            "D008",
+            "D011",
+            "D003"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "qa",
+          "title": "Transparent Handling of 'No Results' and Data Limitations",
+          "action": "When a highly specific query (especially after multiple turns) yields no results from the Biznesinfo catalog, the assistant should clearly and transparently state that no companies were found matching *all* the detailed criteria. It should then offer to broaden the search by removing the *least critical* constraint or suggest alternative search terms, rather than reverting to a generic, unhelpful response or claimin…",
+          "implementationHint": "Implement a check after the Biznesinfo data retrieval step. If the result set is empty or below a certain threshold (e.g., <2 companies), trigger a specific 'no results' prompt that guides the model to explain this limitation, suggest broa…",
+          "expectedImpact": "Build user trust and provide more helpful guidance even in cases of no direct matches. Avoid frustrating users with generic advice when they've provided specific constraints.",
+          "risk": "Low.",
+          "effort": "S",
+          "validationScenarios": [
+            "D005",
+            "D011"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "qa",
+          "title": "Contextualize General Advice for Identified Companies",
+          "action": "For scenarios like D008 ('уборка после ремонта') where contract clauses or checklists are requested, and specific companies have been identified in earlier turns, modify the prompt to instruct the model to *attempt* to contextualize the general advice with references to the previously identified companies (e.g., 'For [Company X], consider clause Y due to Z'). If direct contextualization is not feasible, ensure the g…",
+          "implementationHint": "Prepend a summary of previously identified companies (with their key attributes) to the prompt when general advice (like contract terms or checklists) is requested. Explicitly ask the model to integrate this context into its response if po…",
+          "expectedImpact": "Maintain continuity and increase the perceived relevance and usefulness of general advice by tying it back to specific entities previously discussed.",
+          "risk": "Low.",
+          "effort": "S",
+          "validationScenarios": [
+            "D008"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "D005",
+          "D001",
+          "D008",
+          "D011",
+          "D006",
+          "D003"
+        ],
+        "regressionSuites": [
+          "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.dirty.realworld.json"
+        ],
+        "successMetrics": [
+          "Increase judgeSummary.gemini.averageUsefulness to > 4.0",
+          "Increase judgeSummary.kimi.averageUsefulness to > 3.5",
+          "Elimination of all 'generic fallback' and 'loss of context' issues from judgeIssueHints for validated scenarios",
+          "All strictPass=false scenarios (D005, D001) must pass their strict checks",
+          "UsefulRate for both judges to be > 0.8"
+        ]
+      }
+    },
+    {
+      "advisor": "kimi",
+      "executiveSummary": "Critical pattern detected: assistant suffers from severe continuity failures in multi-turn conversations. After providing concrete company candidates in Turn 1/Turn 2, Turn 3 consistently drops context and falls back to generic rubrics instead of ranking/analyzing the previously identified companies. This affects 5/11 scenarios (D001, D005, D006, D008, D011) with usefulness scores 1-2. Root cause appears to be prompt instructions that prioritize 'avoiding hallucination' over 'continuity with retrieved candidates'.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Fix continuity context retention for ranking follow-ups",
+          "why": "5 scenarios fail with 'generic fallback' pattern where assistant forgets previously identified companies when asked to rank/analyze them. This is the #1 user-facing defect.",
+          "expectedImpact": "Increases usefulness score from 1-2 to 4-5 for D006, D008, D005; reduces genericFallbackRate from 54% to <20%",
+          "validationScenarios": [
+            "D006",
+            "D008",
+            "D005",
+            "D001",
+            "D011"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Enforce company path output in ranking/rubric responses",
+          "why": "Strict check D001.T3.C3 fails because assistant provides generic questions instead of company-specific shortlist. Users expect /company/ links or explicit references to previously found candidates.",
+          "expectedImpact": "Fixes 1 strict failure, improves user trust in actionable output",
+          "validationScenarios": [
+            "D001",
+            "D003",
+            "D004",
+            "D005",
+            "D006",
+            "D008"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Add geo-filters for micro-districts (Малиновка, Казимировка)",
+          "why": "D001 Turn 2 fails to filter 4 identified print shops by Малиновка proximity. Assistant gives generic search instructions instead of analyzing locations.",
+          "expectedImpact": "Improves usefulness for location-constrained queries; reduces 'generic fallback' rate",
+          "validationScenarios": [
+            "D001",
+            "S005",
+            "S006"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Improve constraint incorporation in follow-up turns",
+          "why": "D011 fails because assistant ignores '1.5% fat, delivery to Vitebsk' constraints and repeats same processors instead of finding raw milk suppliers.",
+          "expectedImpact": "Better handling of refined queries; improves continuity score from 1 to 4+",
+          "validationScenarios": [
+            "D011"
+          ]
+        },
+        {
+          "priority": "P2",
+          "title": "Add specific certification bodies to knowledge base",
+          "why": "D007 provides generic certification guide without naming specific Minsk certification organizations from catalog.",
+          "expectedImpact": "Increases usefulness from 3 to 4-5 for verification/service queries",
+          "validationScenarios": [
+            "D007"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "prompt",
+          "title": "Inject candidate memory into Turn 3+ ranking prompts",
+          "action": "Modify prompt template to include explicit instruction: 'If user asks for ranking/shortlist/risks and you have previously identified specific companies in this conversation, you MUST reference those exact companies by name and /company/ path. Do NOT provide generic rubrics.'",
+          "implementationHint": "File: src/lib/ai/prompts/ranking.ts or similar; add 'previouslyIdentifiedCompanies' context variable that accumulates across turns",
+          "expectedImpact": "Eliminates generic fallback in D006, D008, D005; improves continuityScore from avg 2.36 to 4+",
+          "risk": "Low - only affects multi-turn with existing candidates",
+          "effort": "S",
+          "validationScenarios": [
+            "D006",
+            "D008",
+            "D005",
+            "D001"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "prompt",
+          "title": "Add explicit company path requirement to structured output schema",
+          "action": "Update system prompt: 'When providing shortlists, rankings, or comparisons, always include at least one /company/ path OR explicitly state if previously mentioned companies don't match new constraints.'",
+          "implementationHint": "Add to response format instructions in base prompt; validate with regex check for /company/ in ranking responses",
+          "expectedImpact": "Fixes D001.T3.C3 strict failure; ensures actionable output",
+          "risk": "Low",
+          "effort": "S",
+          "validationScenarios": [
+            "D001",
+            "D003",
+            "D004",
+            "D005"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "retrieval",
+          "title": "Enable partial UNP search for verification queries",
+          "action": "Implement search by partial UNP pattern '19...' when full UNP not provided. Return candidates with matching prefix for user selection.",
+          "implementationHint": "src/lib/meilisearch/search.ts - add prefix search filter on unp field; limit to 5 results",
+          "expectedImpact": "Improves D002 Turn 2 usefulness; enables proactive assistance instead of just asking for full UNP",
+          "risk": "Low - only affects verification queries with partial data",
+          "effort": "S",
+          "validationScenarios": [
+            "D002"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "geo",
+          "title": "Add micro-district location filtering in responses",
+          "action": "When user specifies district (Малиновка, Казимировка), assistant should check company addresses for proximity keywords before responding. If no match, explicitly state 'none of the previously found companies are in X district'.",
+          "implementationHint": "Add location extractor in src/lib/utils/location.ts; check against company.address field in context",
+          "expectedImpact": "Fixes D001 Turn 2; improves geo-signal handling across all scenarios",
+          "risk": "Low",
+          "effort": "M",
+          "validationScenarios": [
+            "D001",
+            "S005",
+            "S006"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "guardrails",
+          "title": "Remove over-aggressive 'avoid hallucination' fallback triggers",
+          "action": "Current prompt likely has strong anti-hallucination instruction causing generic rubrics. Replace with: 'If you have identified companies earlier in this conversation, prioritize referencing them even if your confidence is moderate. Only fall back to generic advice if NO companies were found in previous turns.'",
+          "implementationHint": "Review base system prompt for anti-hallucination clauses; soften for continuity preservation",
+          "expectedImpact": "Reduces genericFallbackRate from 54% to <20%; fixes D006, D008, D011",
+          "risk": "Medium - monitor for hallucination increase",
+          "effort": "S",
+          "validationScenarios": [
+            "D006",
+            "D008",
+            "D011",
+            "D005"
+          ]
+        },
+        {
+          "id": "R6",
+          "area": "template",
+          "title": "Add contract clause templates for service queries",
+          "action": "When user asks 'what to include in contract' (D008), provide specific clauses for cleaning services instead of generic priority rubric.",
+          "implementationHint": "Add service-specific contract templates to knowledge base or prompt; trigger when query matches 'договор' + service type",
+          "expectedImpact": "Improves D008 usefulness from 1 to 4+",
+          "risk": "Low",
+          "effort": "M",
+          "validationScenarios": [
+            "D008"
+          ]
+        },
+        {
+          "id": "R7",
+          "area": "ranking",
+          "title": "Implement explicit candidate tracking across turns",
+          "action": "Add conversation state tracking for 'identifiedCandidates' array. When user asks for ranking/shortlist, system prompt should inject: 'Previously identified: [Company A /company/a], [Company B /company/b]'.",
+          "implementationHint": "Modify conversation history processing to extract and inject company mentions into context window",
+          "expectedImpact": "Prevents continuity failures; ensures consistent candidate references",
+          "risk": "Low",
+          "effort": "M",
+          "validationScenarios": [
+            "D006",
+            "D008",
+            "D005",
+            "D001",
+            "D011"
+          ]
+        },
+        {
+          "id": "R8",
+          "area": "qa",
+          "title": "Add automated continuity check to QA suite",
+          "action": "New check: verify that company names from Turn 1/2 appear in Turn 3 response when user asks for ranking/comparison/shortlist.",
+          "implementationHint": "Extend scripts/ai-request-qa-runner.mjs with 'continuity_candidates' check type",
+          "expectedImpact": "Catches regressions in multi-turn candidate retention",
+          "risk": "None",
+          "effort": "S",
+          "validationScenarios": [
+            "D006",
+            "D008",
+            "D005",
+            "D011"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "D006",
+          "D008",
+          "D005",
+          "D001",
+          "D011"
+        ],
+        "regressionSuites": [
+          "scenarios.dirty.realworld.json",
+          "scenarios.regressions.ranking-followups.json",
+          "scenarios.regressions.milk-brest-mogilev.json"
+        ],
+        "successMetrics": [
+          "averageUsefulness >= 4.0 (currently 2.727 Kimi, 3.727 Gemini)",
+          "usefulRate >= 0.80 (currently 0.5455 Kimi, 0.6364 Gemini)",
+          "genericFallbackRate <= 0.20 (currently 0.5455 Kimi, 0.3636 Gemini)",
+          "averageContinuityScore >= 4.0 (currently 2.364 Kimi, 3.545 Gemini)",
+          "strictPassRate >= 0.95 (currently 0.8182)"
+        ]
+      }
+    }
+  ],
+  "consensus": {
+    "topAreas": [
+      {
+        "area": "qa",
+        "count": 5
+      },
+      {
+        "area": "prompt",
+        "count": 2
+      },
+      {
+        "area": "retrieval",
+        "count": 1
+      },
+      {
+        "area": "geo",
+        "count": 1
+      },
+      {
+        "area": "guardrails",
+        "count": 1
+      },
+      {
+        "area": "template",
+        "count": 1
+      },
+      {
+        "area": "ranking",
+        "count": 1
+      }
+    ],
+    "recurringTitles": [
+      {
+        "title": "dynamic re-query with accumulated constraints",
+        "count": 1
+      },
+      {
+        "title": "enforce specific company presentation over general rubrics",
+        "count": 1
+      },
+      {
+        "title": "transparent handling of 'no results' and data limitations",
+        "count": 1
+      },
+      {
+        "title": "contextualize general advice for identified companies",
+        "count": 1
+      },
+      {
+        "title": "inject candidate memory into turn 3+ ranking prompts",
+        "count": 1
+      },
+      {
+        "title": "add explicit company path requirement to structured output schema",
+        "count": 1
+      },
+      {
+        "title": "enable partial unp search for verification queries",
+        "count": 1
+      },
+      {
+        "title": "add micro-district location filtering in responses",
+        "count": 1
+      },
+      {
+        "title": "remove over-aggressive 'avoid hallucination' fallback triggers",
+        "count": 1
+      },
+      {
+        "title": "add contract clause templates for service queries",
+        "count": 1
+      },
+      {
+        "title": "implement explicit candidate tracking across turns",
+        "count": 1
+      },
+      {
+        "title": "add automated continuity check to qa suite",
+        "count": 1
+      }
+    ]
+  }
+}

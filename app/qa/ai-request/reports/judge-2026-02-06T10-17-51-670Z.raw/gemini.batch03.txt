@@ -1,0 +1,74 @@
+```json
+{
+  "judge": "gemini",
+  "ratings": [
+    {
+      "scenarioId": "S011",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 1.0,
+      "reasons": [
+        "Critical relevance failure: 'Agriculture services' and 'Abrasives' suggested for 'IT outsourcing'.",
+        "Refining location to 'Uruchie' did not improve relevance or change the list.",
+        "The 'transparent ranking' logic in Turn 3 promoted irrelevant companies (Agriculture) to the top for an IT request."
+      ],
+      "criticalIssues": [
+        "Hallucinated relevance: returning random companies from the correct city."
+      ]
+    },
+    {
+      "scenarioId": "S012",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 1.0,
+      "reasons": [
+        "Domain mismatch: Suggested car repair shops and auto parts for office building HVAC/Air Conditioning.",
+        "Persisted in recommending auto companies even after user clarified 'office building' context implied in Turn 1.",
+        "Top-3 ranking re-confirmed the irrelevant auto companies."
+      ],
+      "criticalIssues": [
+        "Dangerous confusion between 'Auto AC' and 'Building HVAC'."
+      ]
+    },
+    {
+      "scenarioId": "S013",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "reasons": [
+        "Failed to retrieve specific entities: Returned generic rubric suggestions instead of companies.",
+        "Turn 3 response was a template ('Priority A', 'Priority B') rather than a shortlist of actual suppliers.",
+        "Did not satisfy the user's request for specific rental providers."
+      ],
+      "strengths": [
+        "Correctly identified relevant rubrics (Construction machinery)."
+      ]
+    },
+    {
+      "scenarioId": "S014",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "reasons": [
+        "Low relevance: Returned an 'Industrial equipment' supplier for a 'Coffee beans' request.",
+        "Hallucinated context: Suggested 'Medicine and pharmaceuticals' rubric for a coffee search in Turn 2.",
+        "Provided only 1 result which was likely a mismatch (Equipment vs Consumables)."
+      ]
+    },
+    {
+      "scenarioId": "S015",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 1.0,
+      "reasons": [
+        "Total semantic failure: Suggested 'Sand/Gravel', 'Design Institutes', and 'Construction' for 'Industrial Bearings'.",
+        "No actual bearing suppliers were found.",
+        "The ranking in Turn 3 claimed relevance for a 'Sand and Gravel' supplier."
+      ],
+      "criticalIssues": [
+        "Search algorithm appears to ignore semantic meaning of the product ('bearings')."
+      ]
+    }
+  ]
+}
+```

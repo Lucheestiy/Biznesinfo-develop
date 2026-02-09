@@ -1,0 +1,180 @@
+Now I have enough information to provide a comprehensive engineering advisory. Based on my analysis of the codebase and the QA judge results, I can identify the core issues and provide concrete recommendations.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "The Biznesinfo AI assistant suffers from a systemic 'generic fallback' pattern where it provides search instructions instead of concrete results. Root cause: the prompt engineering and post-processing logic prioritizes 'safe' fallback responses over proactive catalog search. The assistant has access to Meilisearch and in-memory store but fails to execute searches when user intent is ambiguous or when initial results are sparse. Critical gaps: (1) fuzzy name search returns irrelevant results, (2) filter requests ('show only with email/website') are misinterpreted as template generation, (3) context breaks between turns, (4) no actual company data in ranking responses.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix Generic Fallback Trigger Logic",
+      "why": "60% of low-usefulness scores stem from assistant giving 'how to search' instead of actual results. The postProcessAssistantReply function has 1500+ lines of fallback heuristics that override concrete responses.",
+      "expectedImpact": "Increase usefulRate from 0.6 to 0.85 by ensuring vendor candidates are always included when available",
+      "validationScenarios": ["UX101", "UX102", "UX107", "UXA001", "UXA011", "UXB029", "UXB031"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix Intent Misclassification for Filter Requests",
+      "why": "UXA013 ('show only those with email') and UXA012 ('show only those with website') completely misunderstood - assistant gave email templates and export formats instead of filtering. The looksLikeTemplateRequest regex is too broad.",
+      "expectedImpact": "Fix 100% of filter-by-field scenarios which currently score 0-2 usefulness",
+      "validationScenarios": ["UXA013", "UXA012", "UXA014"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement Fuzzy Name Search with Relevance Scoring",
+      "why": "UX102 fuzzy search for 'Бел...Транс...Сервис' returned 'Автосервис PRO-tone' - completely irrelevant. Current search lacks phonetic/levenshtein matching for partial names.",
+      "expectedImpact": "Enable accurate company lookup by partial names, fixing UX102 and similar scenarios",
+      "validationScenarios": ["UX102", "UXA002", "UXA009"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add Context Continuity Enforcement",
+      "why": "UX110 turn 3 completely broke context - user asked for coffee shop suppliers, got restaurant and newspaper. The lockToHistoryCandidates logic fails when history has company slugs but current search returns different results.",
+      "expectedImpact": "Prevent context breaks in multi-turn conversations, maintaining 80%+ continuity score",
+      "validationScenarios": ["UX110", "UX111", "UX104"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add Company Card View vs Add Intent Disambiguation",
+      "why": "UXA022 misinterpreted 'show company card' as 'how to add company card'. Missing intent classifier for view vs create operations.",
+      "expectedImpact": "Fix company lookup intent accuracy for Bank A scenarios",
+      "validationScenarios": ["UXA022", "UXA005", "UXA008"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add mandatory search execution rule to system prompt",
+      "action": "Modify the system prompt in app/src/app/api/ai/request/route.ts to include: 'When user asks to find/show/search companies, ALWAYS execute catalog search first. Never provide generic search instructions unless search returned zero results AND user explicitly asked for guidance.'",
+      "implementationHint": "Add to buildLocalResilientFallbackReply around line 821 - check if vendorCandidates.length > 0 before returning generic rubric advice",
+      "expectedImpact": "Eliminates generic fallback when companies exist in catalog",
+      "risk": "Low - only changes fallback priority",
+      "effort": "S",
+      "validationScenarios": ["UX101", "UXA001", "UXA011", "UXB029"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Fix looksLikeTemplateRequest regex for filter intents",
+      "action": "Add negative lookahead to exclude filter requests: change regex to reject patterns like 'покажи только тех' (show only those) and 'фильтр' (filter). Add explicit looksLikeFilterRequest detector.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts lines 156-162. Add: function looksLikeFilterRequest(message) { return /(покажи\s+только|фильтр|с\s+(сайтом|email|телефоном)|у\s+кого\s+есть)/ui.test(message) }",
+      "expectedImpact": "Fixes UXA013, UXA012 filter misclassification",
+      "risk": "Low - adds new intent detector",
+      "effort": "S",
+      "validationScenarios": ["UXA013", "UXA012", "UXA014"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Implement trigram/levenshtein fuzzy name matching",
+      "action": "Add fuzzy search capability to meiliSearch in src/lib/meilisearch/search.ts. Use Meilisearch typo tolerance with custom word splitting for partial names like 'Бел...Транс...Сервис'.",
+      "implementationHint": "In meiliSearch function, add attributesToSearchOn: ['name'] with matchingStrategy: 'all' and enable typo tolerance. Add name pattern expansion: split 'БелТрансСервис' into ['бел', 'транс', 'сервис'] and search with OR",
+      "expectedImpact": "Fixes UX102 fuzzy name search failure",
+      "risk": "Medium - may increase false positives",
+      "effort": "M",
+      "validationScenarios": ["UX102", "UXA002", "UXA009"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Enforce company link inclusion in ranking responses",
+      "action": "In postProcessAssistantReply ranking section (lines 1475-1618), add mandatory check: if rankingRequested && vendorCandidates.length >= 2, response MUST contain at least 2 /company/ links. Override with fallback if missing.",
+      "implementationHint": "Around line 1581, add: if (continuityCandidates.length >= 2 && !rankingHasConcreteNames) { out = buildForcedShortlistAppendix({candidates: continuityCandidates, message: params.message, requestedCount: 3}) }",
+      "expectedImpact": "Ensures concrete company data in all ranking responses",
+      "risk": "Low - enforces existing pattern",
+      "effort": "S",
+      "validationScenarios": ["UX101", "UX107", "UX108"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add company placement intent classifier",
+      "action": "Enhance looksLikeCompanyPlacementIntent to distinguish 'show/view card' (покажи карточку) from 'add card' (добавь карточку). Current regex conflates both intents.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts line 233-244. Add separate looksLikeCompanyViewIntent for patterns: /(покажи|посмотреть|открой|view|show).{0,20}(карточк|company|card)/ui",
+      "expectedImpact": "Fixes UXA022 misinterpretation",
+      "risk": "Low - adds new intent",
+      "effort": "S",
+      "validationScenarios": ["UXA022", "UXA005"]
+    },
+    {
+      "id": "R6",
+      "area": "ranking",
+      "title": "Fix continuity candidate locking for follow-ups",
+      "action": "The lockToHistoryCandidates logic (lines 1421-1450) fails when vendorLookupContext.derivedFromHistory is false but history contains relevant companies. Force lock when looksLikeCandidateListFollowUp returns true.",
+      "implementationHint": "Line 1421: change condition to const lockToHistoryCandidates = Boolean(params.vendorLookupContext?.derivedFromHistory || looksLikeCandidateListFollowUp(params.message)) && historySlugsForContinuity.length > 0",
+      "expectedImpact": "Prevents UX110-style context breaks",
+      "risk": "Medium - may over-lock in some cases",
+      "effort": "S",
+      "validationScenarios": ["UX110", "UX111", "UX104"]
+    },
+    {
+      "id": "R7",
+      "area": "template",
+      "title": "Add moderation time constant to placement appendix",
+      "action": "UX106 failed to provide specific moderation timeframe. Add concrete '24-48 hours' estimate to buildCompanyPlacementAppendix.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts line 561-589. Add: 'Срок модерации: обычно 24-48 часов (рабочие дни).'",
+      "expectedImpact": "Fixes UX106 low usefulness score",
+      "risk": "None - adds factual info",
+      "effort": "XS",
+      "validationScenarios": ["UX106"]
+    },
+    {
+      "id": "R8",
+      "area": "retrieval",
+      "title": "Add email/website filter to search API",
+      "action": "Current search has no filter for 'has email' or 'has website'. Add filters to meiliSearch and biznesinfoSearch for field existence checks.",
+      "implementationHint": "src/lib/meilisearch/search.ts line 505-654. Add params.hasEmail and hasWebsite, map to Meilisearch filter: emails IS NOT EMPTY. Same for src/lib/biznesinfo/store.ts biznesinfoSearch.",
+      "expectedImpact": "Enables proper UXA013/UXA012 filter execution",
+      "risk": "Low - additive feature",
+      "effort": "M",
+      "validationScenarios": ["UXA013", "UXA012"]
+    },
+    {
+      "id": "R9",
+      "area": "guardrails",
+      "title": "Add response truncation detection",
+      "action": "UXB030 response cut off at 'удале...'. Add check for truncated responses and request retry or graceful degradation.",
+      "implementationHint": "In POST handler around line 2800+, check if reply ends with '…' or mid-word and call generate again with shorter prompt or return fallback",
+      "expectedImpact": "Prevents truncated unusable responses",
+      "risk": "Low - improves reliability",
+      "effort": "S",
+      "validationScenarios": ["UXB030", "UXA014"]
+    },
+    {
+      "id": "R10",
+      "area": "qa",
+      "title": "Add regression test for generic fallback pattern",
+      "action": "Create test that asserts: when vendorCandidates.length > 0, response must contain at least one /company/ link or company name from candidates.",
+      "implementationHint": "Add to qa_judge_results.json validation or create new unit test in app/qa/ai-request/ that checks response structure",
+      "expectedImpact": "Prevents regression of generic fallback issue",
+      "risk": "None - test only",
+      "effort": "S",
+      "validationScenarios": ["all sourcing scenarios"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UX101",
+      "UX102",
+      "UXA013",
+      "UXA012",
+      "UX107",
+      "UX110",
+      "UXA022"
+    ],
+    "regressionSuites": [
+      "scenarios.chatgpt-pro.master.json",
+      "scenarios.regressions.user-120-bank-a-company-search.json",
+      "scenarios.regressions.user-120-bank-b-suppliers-contractors.json"
+    ],
+    "successMetrics": [
+      "kimi usefulRate >= 0.85 (from current 0.6)",
+      "minimax usefulRate >= 0.75 (from current 0.46)",
+      "generic fallback rate < 0.10 (from current ~0.35)",
+      "continuityScore >= 4 average (from current 2-3)",
+      "Zero scenarios with avgUsefulness < 2.0"
+    ]
+  }
+}
+```

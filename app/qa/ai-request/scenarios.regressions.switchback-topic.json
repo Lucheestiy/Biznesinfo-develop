@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-08T18:05:00Z",
+    "source": "manual-regression",
+    "description": "Regression for topic switchback: keep correction context, but allow explicit new topic switch"
+  },
+  "scenarios": [
+    {
+      "id": "TS001",
+      "title": "Жалоба на нерелевант -> явный switch на новую тему -> возврат к исходной теме",
+      "personaGoal": "Проверить, что ассистент не залипает на старой теме и не срывается при коррекции",
+      "tags": ["regression", "topic_switch", "switchback", "cross_domain", "multi_turn"],
+      "turns": [
+        {
+          "user": "Где купить тонну молока в Бресте?",
+          "checks": [
+            { "id": "TS001.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "TS001.T1.C2", "type": "includes_any", "patterns": ["молок", "брест"], "description": "Должен держать молочную тему и Брест" }
+          ]
+        },
+        {
+          "user": "Указана компания которая продает запчасти в Минске опять!!!",
+          "checks": [
+            { "id": "TS001.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "TS001.T2.C2", "type": "includes_any", "patterns": ["брест", "локаци"], "description": "Должен удержать коррекцию по исходной локации/контексту" },
+            { "id": "TS001.T2.C3", "type": "includes_any", "patterns": ["молок", "релевант"], "description": "Должен вернуть фокус на исходную товарную тему" },
+            {
+              "id": "TS001.T2.C4",
+              "type": "excludes_all",
+              "patterns": ["фокус:\\s*\\*\\*запчаст", "/company/avto", "/company/up-18", "/company/avtostim"],
+              "description": "Не должен снова скатываться в выдачу запчастей на шаге коррекции"
+            }
+          ]
+        },
+        {
+          "user": "Ладно, теперь реально нужны автозапчасти в Минске оптом",
+          "checks": [
+            { "id": "TS001.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "TS001.T3.C2", "type": "includes_any", "patterns": ["автозапчаст", "запчаст"], "description": "Должен переключиться на новую тему (автозапчасти)" },
+            { "id": "TS001.T3.C3", "type": "includes_any", "patterns": ["минск", "minsk"], "description": "Должен учитывать новый город (Минск)" }
+          ]
+        },
+        {
+          "user": "Ок, возвращаемся к молоку в Бресте",
+          "checks": [
+            { "id": "TS001.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "TS001.T4.C2", "type": "includes_any", "patterns": ["молок", "брест"], "description": "Должен вернуться к исходной теме (молоко в Бресте)" }
+          ]
+        }
+      ]
+    }
+  ]
+}

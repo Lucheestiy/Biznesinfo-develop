@@ -1,0 +1,439 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": 1,
+      "generatedAt": "2026-02-06T02:09:09.651Z",
+      "endpoint": "/api/ai/request",
+      "localeHint": "mostly-ru-with-mixed-en",
+      "totalScenarios": 50
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 5,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 1,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 3
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-06T05-43-47-694Z",
+    "startedAt": "2026-02-06T05:43:47.694Z",
+    "endedAt": "2026-02-06T05:43:55.955Z",
+    "durationMs": 8261,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.json",
+    "totalScenarios": 1,
+    "passedScenarios": 0,
+    "failedScenarios": 1,
+    "passRate": 0,
+    "totalChecks": 9,
+    "passedChecks": 1,
+    "failedChecks": 8,
+    "checkPassRate": 0.1111,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": true,
+    "stopReason": {
+      "type": "ProviderStubOutage",
+      "message": "Detected 3 consecutive stub replies. Stopping early because provider appears unavailable (quota/auth/backend outage).",
+      "scenarioId": "S001",
+      "scenarioTitle": "ПНД трубы: Минск -> Сухарево",
+      "turn": 3
+    }
+  },
+  "runStop": {
+    "type": "ProviderStubOutage",
+    "message": "Detected 3 consecutive stub replies. Stopping early because provider appears unavailable (quota/auth/backend outage).",
+    "scenarioId": "S001",
+    "scenarioTitle": "ПНД трубы: Минск -> Сухарево",
+    "turn": 3
+  },
+  "topFailurePatterns": [
+    {
+      "key": "check:not_stub:Ответ не должен быть stub/заглушкой",
+      "count": 3
+    },
+    {
+      "key": "check:includes_any:Ответ должен быть по теме поиска поставщиков/услуги",
+      "count": 1
+    },
+    {
+      "key": "check:reply_length_min:Ответ должен быть полезным, не односложным",
+      "count": 1
+    },
+    {
+      "key": "check:mentions_any_terms:Должна сохраниться связь с исходным товаром/услугой",
+      "count": 1
+    },
+    {
+      "key": "check:includes_any:Должно учитываться гео-уточнение (город/район)",
+      "count": 1
+    },
+    {
+      "key": "check:any_of:Нужен конкретный shortlist или прозрачное ранжирование",
+      "count": 1
+    },
+    {
+      "key": "runstop:ProviderStubOutage",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S001",
+      "title": "ПНД трубы: Минск -> Сухарево",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Закупщик стройкомпании, ищет поставщиков ПНД труб по Минску с уточнением по району.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": {
+        "status": 200,
+        "error": "ProviderStubOutage",
+        "message": "Detected 3 consecutive stub replies. Stopping early because provider appears unavailable (quota/auth/backend outage)."
+      },
+      "failedChecks": [
+        {
+          "id": "S001.T1.C1",
+          "type": "not_stub",
+          "description": "Ответ не должен быть stub/заглушкой",
+          "passed": false,
+          "reason": "Reply is stub",
+          "details": {
+            "isStub": true
+          }
+        },
+        {
+          "id": "S001.T1.C2",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "пнд|полиэтилен|труб",
+              "поставщ",
+              "supplier",
+              "рубр",
+              "ключев"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "S001.T1.C3",
+          "type": "reply_length_min",
+          "description": "Ответ должен быть полезным, не односложным",
+          "passed": false,
+          "reason": "Reply too short",
+          "details": {
+            "min": 120,
+            "len": 115
+          }
+        },
+        {
+          "id": "S001.T2.C1",
+          "type": "not_stub",
+          "description": "Ответ не должен быть stub/заглушкой",
+          "passed": false,
+          "reason": "Reply is stub",
+          "details": {
+            "isStub": true
+          }
+        },
+        {
+          "id": "S001.T2.C2",
+          "type": "mentions_any_terms",
+          "description": "Должна сохраниться связь с исходным товаром/услугой",
+          "passed": false,
+          "reason": "Not enough terms mentioned",
+          "details": {
+            "terms": [
+              "пнд",
+              "полиэтилен",
+              "труб"
+            ],
+            "min": 1,
+            "hits": []
+          }
+        },
+        {
+          "id": "S001.T2.C3",
+          "type": "includes_any",
+          "description": "Должно учитываться гео-уточнение (город/район)",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "минск",
+              "сухар"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "S001.T3.C1",
+          "type": "not_stub",
+          "description": "Ответ не должен быть stub/заглушкой",
+          "passed": false,
+          "reason": "Reply is stub",
+          "details": {
+            "isStub": true
+          }
+        },
+        {
+          "id": "S001.T3.C3",
+          "type": "any_of",
+          "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "all_of",
+                "passed": false,
+                "reason": "Some sub-checks failed"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+          "requestBody": {
+            "message": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+            "history": []
+          },
+          "latencyMs": 2750,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 1
+          },
+          "requestId": "0664168a-5339-4fc8-81bd-b2c3d5306e55",
+          "isStub": true,
+          "reply": "Запрос сохранён. Пока AI-ассистент работает в режиме заглушки — скоро здесь будут ответы в реальном времени. (stub)",
+          "checks": [
+            {
+              "id": "S001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": false,
+              "reason": "Reply is stub",
+              "details": {
+                "isStub": true
+              }
+            },
+            {
+              "id": "S001.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "пнд|полиэтилен|труб",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "S001.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": false,
+              "reason": "Reply too short",
+              "details": {
+                "min": 120,
+                "len": 115
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сухарево",
+          "requestBody": {
+            "message": "Сухарево",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "Запрос сохранён. Пока AI-ассистент работает в режиме заглушки — скоро здесь будут ответы в реальном времени. (stub)"
+              }
+            ]
+          },
+          "latencyMs": 2626,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 1
+          },
+          "requestId": "6897b4e9-dc14-4a8b-9cff-ed563ae6d76e",
+          "isStub": true,
+          "reply": "Запрос сохранён. Пока AI-ассистент работает в режиме заглушки — скоро здесь будут ответы в реальном времени. (stub)",
+          "checks": [
+            {
+              "id": "S001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": false,
+              "reason": "Reply is stub",
+              "details": {
+                "isStub": true
+              }
+            },
+            {
+              "id": "S001.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": false,
+              "reason": "Not enough terms mentioned",
+              "details": {
+                "terms": [
+                  "пнд",
+                  "полиэтилен",
+                  "труб"
+                ],
+                "min": 1,
+                "hits": []
+              }
+            },
+            {
+              "id": "S001.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "сухар"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сделай shortlist топ-3 самых надежных и коротко почему.",
+          "requestBody": {
+            "message": "Сделай shortlist топ-3 самых надежных и коротко почему.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "Запрос сохранён. Пока AI-ассистент работает в режиме заглушки — скоро здесь будут ответы в реальном времени. (stub)"
+              },
+              {
+                "role": "user",
+                "content": "Сухарево"
+              },
+              {
+                "role": "assistant",
+                "content": "Запрос сохранён. Пока AI-ассистент работает в режиме заглушки — скоро здесь будут ответы в реальном времени. (stub)"
+              }
+            ]
+          },
+          "latencyMs": 2580,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 1
+          },
+          "requestId": "3e09cb7e-802f-430d-b519-89dde91ad5ba",
+          "isStub": true,
+          "reply": "Запрос сохранён. Пока AI-ассистент работает в режиме заглушки — скоро здесь будут ответы в реальном времени. (stub)",
+          "checks": [
+            {
+              "id": "S001.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": false,
+              "reason": "Reply is stub",
+              "details": {
+                "isStub": true
+              }
+            },
+            {
+              "id": "S001.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S001.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": false,
+                    "reason": "Some sub-checks failed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 7957
+    }
+  ]
+}

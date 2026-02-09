@@ -1,0 +1,155 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Biznesinfo assistant shows critical failures in: (1) template system leaking unfilled placeholders into user-facing responses, (2) hallucinating irrelevant companies when search returns poor results, (3) fuzzy name matching failing for partial company names, (4) excessive generic fallback responses asking clarifying questions instead of providing concrete candidates. These issues affect 12% of judged scenarios with usefulness scores below 3.0. Root cause: post-processing pipeline has gaps in template sanitization, vendor candidate ranking lacks relevance scoring, and the fuzzy search threshold is too strict.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder leakage",
+      "why": "UXA013 shows raw template placeholders {city}, {qty} leaked to user. This is a critical quality failure making responses unusable.",
+      "expectedImpact": "Eliminates 100% of template leakage failures. Improves usefulness score for template scenarios from 0.0 to 4.0+",
+      "validationScenarios": ["UXA013"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add vendor candidate relevance scoring guardrail",
+      "why": "UX110 and UXB029 show hallucinated/irrelevant companies (restaurant for coffee shop supplies, seals/stamps for laser cutting). Current filter only checks category keywords without semantic relevance.",
+      "expectedImpact": "Prevents 90%+ of irrelevant company suggestions. Reduces hallucination issues in judge reports.",
+      "validationScenarios": ["UX110", "UXB029", "UX102"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement fuzzy company name search with trigram matching",
+      "why": "UX102 fails to find 'БелТех...' pattern. Current search requires exact substring match. Users expect partial name matching.",
+      "expectedImpact": "Enables successful lookup for 70%+ of partial name queries. Improves fuzzy scenario usefulness from 1.3 to 3.5+",
+      "validationScenarios": ["UX102", "UXA002", "UXA004"]
+    },
+    {
+      "priority": "P1",
+      "title": "Reduce generic fallback rate for supplier lookup intent",
+      "why": "Multiple scenarios (UXA008, UXA010, UXA012, UXB031, UXB033, UXB034) show assistant giving 'how to search' instructions instead of actual candidates. User asked 'who', not 'how'.",
+      "expectedImpact": "Reduces generic fallback rate from current ~30% to <10% for supplier queries. Increases average usefulness by 0.5-1.0 points.",
+      "validationScenarios": ["UXA008", "UXA010", "UXA012", "UXB031", "UXB033", "UXB034"]
+    },
+    {
+      "priority": "P2",
+      "title": "Fix intent classification for 'show card' vs 'add company'",
+      "why": "UXA022 and UX106 misinterpret 'покажи карточку' (show card) as request to add company. Intent classifier lacks negative lookahead for existing company context.",
+      "expectedImpact": "Corrects intent classification for 80%+ of company card view requests.",
+      "validationScenarios": ["UXA022", "UX106"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Add strict template placeholder validation before response output",
+      "action": "In postProcessAssistantReply(), add a final sanitization step that detects any remaining {placeholder} patterns and either (a) fills them with extracted context hints or (b) replaces with generic text 'уточняется'. Currently sanitizeUnfilledPlaceholdersInNonTemplateReply() runs only for non-template mode - extend to all modes.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1950-1952 - move sanitizeUnfilledPlaceholdersInNonTemplateReply() call outside the if(!params.mode.templateRequested) block, or add a mandatory final pass that strips all {.*} patterns.",
+      "expectedImpact": "Eliminates template leakage failures like UXA013 where raw Subject/Body/WhatsApp template leaked to user.",
+      "risk": "Low - only affects unfilled placeholders, no logic changes",
+      "effort": "S",
+      "validationScenarios": ["UXA013"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Add company-rubric relevance scoring to filterAndRankVendorCandidates",
+      "action": "Current filterAndRankVendorCandidates() only matches search terms against company name. Add rubric-based relevance: if user asks for 'лазерная резка металла', companies with rubric 'Печати, штампы' should get negative relevance score. Use primary_rubric_name and primary_category_name fields.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - in filterAndRankVendorCandidates(), add scoring: +10 for name match, +5 for rubric match, -20 for rubric mismatch (when rubric hints available). Reject candidates with negative scores.",
+      "expectedImpact": "Prevents UXB029-type failures where 'Печати, штампы' company suggested for laser cutting query.",
+      "risk": "Medium - may reduce candidate pool for edge cases",
+      "effort": "M",
+      "validationScenarios": ["UXB029", "UX110"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Implement trigram-based fuzzy company name search",
+      "action": "For company lookup by partial name ('БелТех...'), implement trigram similarity search using Meilisearch typo tolerance or add PostgreSQL pg_trgm extension. Current biznesinfoSearch() uses prefix/substring matching which fails on partial patterns.",
+      "implementationHint": "app/src/lib/meilisearch/search.ts - configure Meilisearch typo tolerance with minWordSizeForTypos=3, or add fuzzy matching using match operator with typo tolerance. Alternative: add trigram index on company names.",
+      "expectedImpact": "Enables UX102 scenario to find 'БелТрансСервис' from 'Бел...Транс...Сервис' pattern.",
+      "risk": "Low - additive feature, fallback to existing search",
+      "effort": "M",
+      "validationScenarios": ["UX102", "UXA002"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Strengthen system prompt to prefer concrete candidates over instructions",
+      "action": "Current system prompt allows assistant to respond with 'Ищите в рубриках...' when candidates exist. Add explicit instruction: 'If vendor candidates are available in the provided context, you MUST list them with /company/ links. Only provide search instructions if zero candidates match the query.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - in buildSystemPrompt() or inline instructions, add: 'Priority: 1) List concrete companies from context with /company/ links, 2) If no candidates, provide search guidance. Never give generic search instructions when candidates exist.'",
+      "expectedImpact": "Reduces generic fallback responses in UXA008, UXA010, UXB031-type scenarios.",
+      "risk": "Low - prompt change only",
+      "effort": "S",
+      "validationScenarios": ["UXA008", "UXA010", "UXB031", "UXB033", "UXB034"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add post-processing guardrail for company placement intent",
+      "action": "looksLikeCompanyPlacementIntent() matches 'карточка компании' which incorrectly triggers for 'покажи карточку'. Add negative lookahead: exclude if message contains 'покажи', 'посмотреть', 'открыть', 'перейти' (viewing verbs) before 'карточка'.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:225-236 - modify regex to exclude viewing intent: /(добав|размест|публикац|модерац|тариф|оплат|add\\s+company|submit\\s+company)/iu and exclude if /(покажи|посмотреть|открыть|перейти|view|show)/iu.test(message).",
+      "expectedImpact": "Fixes UXA022 and UX106 misclassification of 'покажи карточку' as add-company intent.",
+      "risk": "Low - intent classification fix",
+      "effort": "S",
+      "validationScenarios": ["UXA022", "UX106"]
+    },
+    {
+      "id": "R6",
+      "area": "ranking",
+      "title": "Enforce minimum candidate display in ranking mode",
+      "action": "In ranking mode, if continuityCandidates.length > 0 but reply contains zero /company/ links, force-append buildRankingFallbackAppendix() with actual candidates. Current code has this check but it fails when assistant gives generic ranking without candidates.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1490-1500 - strengthen the final safeguard: if ranking mode and continuityCandidates.length > 0 and extractCompanySlugsFromText(out).length === 0, replace out with rankingFallbackWithCandidates instead of appending.",
+      "expectedImpact": "Ensures ranking requests always get concrete company links when candidates exist.",
+      "risk": "Low - only affects edge case where candidates exist but not shown",
+      "effort": "S",
+      "validationScenarios": ["UX101", "UX108"]
+    },
+    {
+      "id": "R7",
+      "area": "retrieval",
+      "title": "Add 'has email' and 'has website' filter support in search",
+      "action": "UXA012 and UXA013 request filtering by 'есть email/сайт'. Current system cannot apply these filters. Add filter parameters to biznesinfoSearch() for hasEmail and hasWebsite using Meilisearch filter syntax.",
+      "implementationHint": "app/src/lib/meilisearch/search.ts - add filter expression: (emails IS NOT EMPTY) for hasEmail, (websites IS NOT EMPTY) for hasWebsite. Expose in API and consume in route.ts for filter intent detection.",
+      "expectedImpact": "Enables proper response to 'покажи только тех, у кого есть email' instead of generic instructions.",
+      "risk": "Low - additive filter capability",
+      "effort": "M",
+      "validationScenarios": ["UXA012", "UXA013"]
+    },
+    {
+      "id": "R8",
+      "area": "prompt",
+      "title": "Add conversation continuity reminder in system prompt",
+      "action": "UX101 turn 2 loses context about 'гофрокоробов' when user adds constraint 'брендирование'. Add explicit instruction: 'Always preserve the original sourcing context (product, location) across turns. When user adds constraints, filter existing candidates rather than restarting search.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - in instructions for Codex/OpenAI, add: 'Context preservation: If previous turns discussed a specific product/service, maintain that focus when user adds constraints like printing/branding/delivery. Do not revert to generic search instructions.'",
+      "expectedImpact": "Improves multi-turn continuity score from current 2.7 to 4.0+ for constraint refinement scenarios.",
+      "risk": "Low - prompt instruction only",
+      "effort": "S",
+      "validationScenarios": ["UX101", "UX107"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UXA013",
+      "UX110",
+      "UXB029",
+      "UX102",
+      "UXA022",
+      "UX106"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.chatgpt-pro.master.json",
+      "app/qa/ai-request/scenarios.regressions.user-120-bank-a-company-search.json",
+      "app/qa/ai-request/scenarios.regressions.user-120-bank-b-suppliers-contractors.json"
+    ],
+    "successMetrics": [
+      "usefulRate >= 0.85 (up from current 0.50-0.88 across judges)",
+      "averageUsefulness >= 3.5 (up from current 2.6-4.1)",
+      "zero template leakage in 100 template-related scenarios",
+      "generic fallback rate < 10% for supplier lookup intent",
+      "strictPass rate maintained >= 0.98"
+    ]
+  }
+}
+```

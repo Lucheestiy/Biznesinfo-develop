@@ -1,0 +1,189 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "source": "targeted-regression",
+      "description": "UXD079"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T02-53-59-857Z",
+    "startedAt": "2026-02-08T02:53:59.857Z",
+    "endedAt": "2026-02-08T02:54:10.622Z",
+    "durationMs": 10765,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/scenarios.uxd079.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 5,
+    "passedChecks": 5,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UXD079",
+      "title": "Банк D: Проверка контрагента и реквизиты — запрос 79",
+      "tags": [
+        "query_bank",
+        "counterparty_check",
+        "requisites",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро проверить контрагента, реквизиты и надежность данных для рабочих задач.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Есть ли связанные компании по руководителю? (если фича будет)",
+          "requestBody": {
+            "message": "Есть ли связанные компании по руководителю? (если фича будет)",
+            "history": []
+          },
+          "latencyMs": 10376,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "41278fd3-6957-4b1a-bc60-4f005d4305c3",
+          "isStub": false,
+          "reply": "Понимаю запрос. В Biznesinfo «связанные компании по руководителю» как отдельная функция может быть/не быть — зависит от конкретной карточки и доступных данных. Обычно можно проверять вручную по ФИО руководителя через поиск.\n\nЧтобы помочь точнее, уточните, пожалуйста:\n1) По какой компании/карточке нужно проверить связи (название или ID)?  \n2) Известно ли ФИО руководителя?  \n3) Нужен поиск по всей Беларуси или по конкретному региону?\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "checks": [
+            {
+              "id": "UXD079.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXD079.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXD079.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме контрагента/реквизитов/проверки данных",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "контрагент",
+                  "компан",
+                  "организац",
+                  "унп",
+                  "реквиз",
+                  "адрес",
+                  "руковод",
+                  "статус",
+                  "ликвидац",
+                  "окэд",
+                  "регистрац",
+                  "лиценз",
+                  "телефон",
+                  "источник",
+                  "обновля",
+                  "проверк",
+                  "данн",
+                  "уточнит",
+                  "идентификатор",
+                  "карточк"
+                ],
+                "hits": [
+                  "компан",
+                  "руковод",
+                  "статус",
+                  "проверк",
+                  "данн",
+                  "уточнит",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "UXD079.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован или содержать практичные следующие шаги",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXD079.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 489
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 10378
+    }
+  ]
+}

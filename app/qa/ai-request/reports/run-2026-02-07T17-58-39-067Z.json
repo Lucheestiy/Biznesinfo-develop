@@ -1,0 +1,2727 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-07T18:05:00Z",
+      "source": "user-provided",
+      "description": "Real short query bank (part C): comparison and selection intents, 18 items"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-07T17-58-39-067Z",
+    "startedAt": "2026-02-07T17:58:39.067Z",
+    "endedAt": "2026-02-07T17:59:31.547Z",
+    "durationMs": 52480,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-120-bank-c-comparison-selection.json",
+    "totalScenarios": 18,
+    "passedScenarios": 8,
+    "failedScenarios": 10,
+    "passRate": 0.4444,
+    "totalChecks": 90,
+    "passedChecks": 74,
+    "failedChecks": 16,
+    "checkPassRate": 0.8222,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:includes_any:Ответ должен быть по теме сравнения/выбора",
+      "count": 8
+    },
+    {
+      "key": "check:any_of:Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+      "count": 8
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "UXC049",
+      "title": "Банк C: Сравнение и выбор — запрос 49",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сравни 5 компаний по цене/срокам/гарантии.",
+          "requestBody": {
+            "message": "Сравни 5 компаний по цене/срокам/гарантии.",
+            "history": []
+          },
+          "latencyMs": 2845,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "89c8ebec-b801-43bf-850c-b3c0eea08dc1",
+          "isStub": false,
+          "reply": "Пожалуйста, пришлите список 5 компаний (названия/ID/ссылки из Biznesinfo) и что именно нужно сравнить по продукту/услуге.  \nТакже уточните регион/город и параметры запроса (объем, уточняется, доставка/самовывоз, срок поставки) — если есть.\n\nКак быстро сравнить варианты:\n1. УНП и форма собственности (ООО/ЗАО/ИП).\n2. Юридический адрес и город.\n3. Контакты и сайт/домен.\n4. Профиль деятельности и рубрика карточки.\n\nЛокация из запроса: цене.",
+          "checks": [
+            {
+              "id": "UXC049.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC049.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC049.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "сравн",
+                  "срок",
+                  "цен"
+                ]
+              }
+            },
+            {
+              "id": "UXC049.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC049.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 440
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2847
+    },
+    {
+      "id": "UXC050",
+      "title": "Банк C: Сравнение и выбор — запрос 50",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC050.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме сравнения/выбора",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "сравн",
+              "топ",
+              "рейтинг",
+              "шорт",
+              "short",
+              "критер",
+              "выбор",
+              "услов",
+              "гарант",
+              "срок",
+              "цен",
+              "таблиц"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "UXC050.T1.C4",
+          "type": "any_of",
+          "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "numbered_list_min",
+                "passed": false,
+                "reason": "Not enough numbered items"
+              },
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Кто из них работает 24/7?",
+          "requestBody": {
+            "message": "Кто из них работает 24/7?",
+            "history": []
+          },
+          "latencyMs": 1596,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ac29b5c6-c7ed-40d8-bbce-67d9c044cb20",
+          "isStub": false,
+          "reply": "Уточните, пожалуйста, о каком списке/поставщиках речь? Пришлите названия или ссылку на предыдущий список — тогда скажу, кто работает 24/7.\n\nЛокация из запроса: них работает 24.",
+          "checks": [
+            {
+              "id": "UXC050.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC050.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC050.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXC050.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC050.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 176
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 1597
+    },
+    {
+      "id": "UXC051",
+      "title": "Банк C: Сравнение и выбор — запрос 51",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC051.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме сравнения/выбора",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "сравн",
+              "топ",
+              "рейтинг",
+              "шорт",
+              "short",
+              "критер",
+              "выбор",
+              "услов",
+              "гарант",
+              "срок",
+              "цен",
+              "таблиц"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "UXC051.T1.C4",
+          "type": "any_of",
+          "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "numbered_list_min",
+                "passed": false,
+                "reason": "Not enough numbered items"
+              },
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "У кого есть доставка по всей РБ?",
+          "requestBody": {
+            "message": "У кого есть доставка по всей РБ?",
+            "history": []
+          },
+          "latencyMs": 2222,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ed385d8e-9d7d-443a-b23f-9c8b3ea3c10b",
+          "isStub": false,
+          "reply": "Уточните, пожалуйста, о какой услуге/товаре речь и из какого города/региона нужен выезд? Это поможет подобрать поставщиков с доставкой по всей РБ.",
+          "checks": [
+            {
+              "id": "UXC051.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC051.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC051.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXC051.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC051.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 146
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2223
+    },
+    {
+      "id": "UXC052",
+      "title": "Банк C: Сравнение и выбор — запрос 52",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи компании с самым высоким рейтингом.",
+          "requestBody": {
+            "message": "Покажи компании с самым высоким рейтингом.",
+            "history": []
+          },
+          "latencyMs": 3622,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c733089c-7352-45aa-ba77-2a894331228c",
+          "isStub": false,
+          "reply": "Нужно уточнить, по какому разделу и региону искать. Без этого я могу только объяснить, как отфильтровать «высокий рейтинг».\n\n1) В рубрикаторе выберите нужную категорию (например, уточняется).  \n2) Включите сортировку/фильтр по рейтингу (сначала высокие).  \n3) Укажите регион/город, если важна география.\n\nУточните, пожалуйста:  \n1) Какая рубрика/товар/услуга?  \n2) Регион/город?  \n3) Важен ли рейтинг как основной критерий или есть ещё (цена, сроки, наличие)?",
+          "checks": [
+            {
+              "id": "UXC052.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC052.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC052.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "рейтинг",
+                  "критер",
+                  "срок",
+                  "цен"
+                ]
+              }
+            },
+            {
+              "id": "UXC052.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC052.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 459
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3624
+    },
+    {
+      "id": "UXC053",
+      "title": "Банк C: Сравнение и выбор — запрос 53",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC053.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме сравнения/выбора",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "сравн",
+              "топ",
+              "рейтинг",
+              "шорт",
+              "short",
+              "критер",
+              "выбор",
+              "услов",
+              "гарант",
+              "срок",
+              "цен",
+              "таблиц"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "UXC053.T1.C4",
+          "type": "any_of",
+          "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "numbered_list_min",
+                "passed": false,
+                "reason": "Not enough numbered items"
+              },
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Отсортируй по популярности.",
+          "requestBody": {
+            "message": "Отсортируй по популярности.",
+            "history": []
+          },
+          "latencyMs": 1682,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6b3de25e-2757-47dc-9a19-441f5e73cb52",
+          "isStub": false,
+          "reply": "Пожалуйста, уточните: что именно нужно отсортировать по популярности — рубрики каталога, список компаний или результаты поиска? Если есть список/кандидаты, пришлите его.",
+          "checks": [
+            {
+              "id": "UXC053.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC053.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC053.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXC053.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC053.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 169
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 1683
+    },
+    {
+      "id": "UXC054",
+      "title": "Банк C: Сравнение и выбор — запрос 54",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сделай топ-10 по категории + краткое описание.",
+          "requestBody": {
+            "message": "Сделай топ-10 по категории + краткое описание.",
+            "history": []
+          },
+          "latencyMs": 2147,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ede60655-abf8-4124-8d71-4ec6cd062812",
+          "isStub": false,
+          "reply": "Уточните, по какой категории каталога сделать топ‑10 (например: «Услуги по уборке квартир и офисов», «Полиграфические услуги, типографии», «Оборудование и материалы по уборке помещений») и какой город/область учитывать.\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Сделай топ-10 по категории + краткое описание.",
+          "checks": [
+            {
+              "id": "UXC054.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC054.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC054.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "топ",
+                  "критер",
+                  "услов",
+                  "срок"
+                ]
+              }
+            },
+            {
+              "id": "UXC054.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC054.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 682
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2147
+    },
+    {
+      "id": "UXC055",
+      "title": "Банк C: Сравнение и выбор — запрос 55",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Выбери 3 лучших под мой бюджет.",
+          "requestBody": {
+            "message": "Выбери 3 лучших под мой бюджет.",
+            "history": []
+          },
+          "latencyMs": 3188,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "0bbd7da8-f5ee-4963-a4aa-4b52745316a6",
+          "isStub": false,
+          "reply": "Пожалуйста, уточните:\n1) Что именно нужно выбрать (товар/услуга)?  \n2) Ваш бюджет (сумма и валюта)?  \n3) Город/регион и ключевые требования (объём, срок, бренд/класс)?\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Выбери 3 лучших под мой бюджет.",
+          "checks": [
+            {
+              "id": "UXC055.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC055.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC055.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "критер",
+                  "услов",
+                  "срок"
+                ]
+              }
+            },
+            {
+              "id": "UXC055.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC055.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 615
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3188
+    },
+    {
+      "id": "UXC056",
+      "title": "Банк C: Сравнение и выбор — запрос 56",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC056.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме сравнения/выбора",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "сравн",
+              "топ",
+              "рейтинг",
+              "шорт",
+              "short",
+              "критер",
+              "выбор",
+              "услов",
+              "гарант",
+              "срок",
+              "цен",
+              "таблиц"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "UXC056.T1.C4",
+          "type": "any_of",
+          "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "numbered_list_min",
+                "passed": false,
+                "reason": "Not enough numbered items"
+              },
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "У кого есть опыт работы с госорганизациями?",
+          "requestBody": {
+            "message": "У кого есть опыт работы с госорганизациями?",
+            "history": []
+          },
+          "latencyMs": 2116,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "e3d627c5-c638-4b4b-a11a-1728bd448953",
+          "isStub": false,
+          "reply": "Поясните, пожалуйста: вы ищете поставщиков/подрядчиков с опытом работы с госорганизациями в какой сфере (товары/услуги)? И в каком регионе/городе Беларуси нужен опыт?",
+          "checks": [
+            {
+              "id": "UXC056.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC056.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC056.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXC056.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC056.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 166
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2116
+    },
+    {
+      "id": "UXC057",
+      "title": "Банк C: Сравнение и выбор — запрос 57",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC057.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме сравнения/выбора",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "сравн",
+              "топ",
+              "рейтинг",
+              "шорт",
+              "short",
+              "критер",
+              "выбор",
+              "услов",
+              "гарант",
+              "срок",
+              "цен",
+              "таблиц"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "UXC057.T1.C4",
+          "type": "any_of",
+          "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "numbered_list_min",
+                "passed": false,
+                "reason": "Not enough numbered items"
+              },
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Кто работает по тендерам?",
+          "requestBody": {
+            "message": "Кто работает по тендерам?",
+            "history": []
+          },
+          "latencyMs": 2010,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f80fd2b1-473f-40c7-856d-b3cfbc69fa28",
+          "isStub": false,
+          "reply": "Уточните, по каким именно тендерам нужны подрядчики (сфера/услуга/товар) и в каком регионе/городе?  \nМогу предложить рубрики и ключевые слова для поиска компаний, которые работают через тендеры.",
+          "checks": [
+            {
+              "id": "UXC057.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC057.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC057.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXC057.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC057.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 194
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2010
+    },
+    {
+      "id": "UXC058",
+      "title": "Банк C: Сравнение и выбор — запрос 58",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC058.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме сравнения/выбора",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "сравн",
+              "топ",
+              "рейтинг",
+              "шорт",
+              "short",
+              "критер",
+              "выбор",
+              "услов",
+              "гарант",
+              "срок",
+              "цен",
+              "таблиц"
+            ],
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи тех, кто может выставить счет сегодня.",
+          "requestBody": {
+            "message": "Покажи тех, кто может выставить счет сегодня.",
+            "history": []
+          },
+          "latencyMs": 3149,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "5078e606-6684-408f-9b7f-608f24d8c453",
+          "isStub": false,
+          "reply": "Чтобы показать тех, кто сможет **выставить счет сегодня**, нужно понять, **какую услугу/товар** и **какой регион** вы ищете.  \n\nПока могу подсказать общий подход:\n- выбираем рубрику по услуге/товару;\n- фильтруем по региону/городу;\n- смотрим компании с быстрыми контактами (телефон/мессенджер) — они чаще выставляют счет оперативно.\n\nУточните, пожалуйста:\n1) Что именно нужно (услуга/товар)?\n2) Город/область?\n3) Это разовая закупка или регулярная?",
+          "checks": [
+            {
+              "id": "UXC058.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC058.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC058.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXC058.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC058.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 447
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3149
+    },
+    {
+      "id": "UXC059",
+      "title": "Банк C: Сравнение и выбор — запрос 59",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "У кого есть офис в Бресте, но склад в Минске?",
+          "requestBody": {
+            "message": "У кого есть офис в Бресте, но склад в Минске?",
+            "history": []
+          },
+          "latencyMs": 4502,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "d32fa48f-31e6-41ae-93af-4ea3d6a0ef58",
+          "isStub": false,
+          "reply": "По текущему списку кандидатов нет компаний, у которых явно указано: **офис в Бресте и склад в Минске**. В карточках таких сведений нет — это нужно проверять на странице компании или уточнять напрямую.\n\nПолезный следующий шаг:\n1) В Biznesinfo откройте нужную рубрику по вашему товару/услуге.  \n2) В фильтре укажите **регион/город: Брест**, затем в запросе добавьте ключевые слова: **«склад Минск», «склад в Минске», «логистика», «филиал Минск»**.  \n3) Проверьте карточки на наличие адреса склада или задайте вопрос напрямую.\n\nУточните, пожалуйста:\n- Какой **товар/услуга** вас интересует?\n- Нужен **склад именно в Минске** или подойдет Минский район?\n- Важен ли **тип компании** (производитель/дистрибьютор/логистический оператор)?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. АРТ-МЕТ Плюс ООО — /company/artmetplus (Металлоконструкции; Брест, brest)\n2. Агентство бухгалтерского сопровождения ООО — /company/agbus (Бухгалтерские услуги, аудит; Брест, brest)\n3. Агентство Медицинского Туристического Сервиса ООО — /company/storonysveta (Туристические услуги; Брест, brest)\n4. Администрация свободной экономической зоны Брест ГУ — /company/sezbrest (Центры поддержки предпринимательства; Брест, brest)",
+          "checks": [
+            {
+              "id": "UXC059.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC059.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC059.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "цен"
+                ]
+              }
+            },
+            {
+              "id": "UXC059.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC059.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 1214
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4502
+    },
+    {
+      "id": "UXC060",
+      "title": "Банк C: Сравнение и выбор — запрос 60",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сделай таблицу сравнения (контакты + условия).",
+          "requestBody": {
+            "message": "Сделай таблицу сравнения (контакты + условия).",
+            "history": []
+          },
+          "latencyMs": 2202,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ca851fdc-1a16-4e23-84ec-03b7a1a1cf70",
+          "isStub": false,
+          "reply": "Уточните, пожалуйста, по каким компаниям нужно сделать сравнение (названия/ID или ссылки из каталога). Если условий нет, укажите, какие поля сравнивать: цены, MOQ, сроки, доставка, оплата, гарантии и т.п.\n\nШаблон сравнения поставщиков:\n1. Цена за единицу и условия оплаты.\n2. Срок изготовления/отгрузки и доступность доставки.\n3. Минимальная партия (MOQ) и ограничения по тиражу.\n4. Контакты менеджера и сайт компании для быстрой верификации.",
+          "checks": [
+            {
+              "id": "UXC060.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC060.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC060.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "сравн",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен"
+                ]
+              }
+            },
+            {
+              "id": "UXC060.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC060.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 442
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2202
+    },
+    {
+      "id": "UXC061",
+      "title": "Банк C: Сравнение и выбор — запрос 61",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Какие вопросы задать поставщику перед договором?",
+          "requestBody": {
+            "message": "Какие вопросы задать поставщику перед договором?",
+            "history": []
+          },
+          "latencyMs": 5965,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f35be80b-a7f9-4c79-a5f8-f196abe94b14",
+          "isStub": false,
+          "reply": "1. Подтвердите юридические данные: уточняется, УНП, адрес, банковские реквизиты, контакт уполномоченного лица?  \n2. Какие точные характеристики/спецификации товар/услуга и стандарты качества (сертификаты, гарантия)?  \n3. Какие условия цены и скидок: базовая цена, НДС, условия изменения цены, минимальный объём?  \n4. Сроки и условия поставки: доставка/самовывоз, график, ответственность за срыв сроков?  \n5. Условия оплаты: предоплата/отсрочка, валюта, штрафы за просрочку?  \n6. Логистика и Инкотермс/переход риска: кто оплачивает доставку, страхование, упаковка?  \n7. Процедура приёмки/брака: сроки рекламации, замена/возврат, компенсации?  \n8. Гарантийные обязательства и сервис: срок, SLA, наличие запчастей?  \n9. Конфиденциальность и IP (если применимо): кто владеет результатом, запрет на разглашение?  \n10. Форс‑мажор и расторжение: основания, уведомления, санкции?  \n\nЕсли уточните категорию товара/услуги и объём объем, дам более точный список под ваш случай.",
+          "checks": [
+            {
+              "id": "UXC061.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC061.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC061.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен"
+                ]
+              }
+            },
+            {
+              "id": "UXC061.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC061.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 967
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5965
+    },
+    {
+      "id": "UXC062",
+      "title": "Банк C: Сравнение и выбор — запрос 62",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Составь критерии выбора подрядчика.",
+          "requestBody": {
+            "message": "Составь критерии выбора подрядчика.",
+            "history": []
+          },
+          "latencyMs": 4773,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2759654b-788c-416c-9390-b54b7a75f07e",
+          "isStub": false,
+          "reply": "1. Опыт и профильная экспертиза — релевантные проекты, отрасль, портфолио, кейсы.  \n2. Качество и соответствие стандартам — сертификаты, регламенты, гарантии, SLA.  \n3. Цена и прозрачность сметы — детальная калькуляция, отсутствие скрытых платежей.  \n4. Сроки и надёжность — реалистичный график, соблюдение дедлайнов.  \n5. Ресурсы и команда — квалификация специалистов, наличие оборудования/мощностей.  \n6. Рекомендации и репутация — отзывы, референсы, повторные клиенты.  \n7. Коммуникация и сервис — скорость реакции, отчётность, единая точка контакта.  \n8. Юридические и финансовые условия — договор, ответственность, условия оплаты.  \n9. Локация и логистика — близость к объекту, расходы на доставку/выезд.  \n10. Гибкость и масштабируемость — готовность адаптировать ТЗ, увеличивать объём.  \n\nЕсли подскажете сферу/услугу, уточню критерии под ваш кейс.",
+          "checks": [
+            {
+              "id": "UXC062.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC062.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC062.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "критер",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен"
+                ]
+              }
+            },
+            {
+              "id": "UXC062.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC062.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 855
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4773
+    },
+    {
+      "id": "UXC063",
+      "title": "Банк C: Сравнение и выбор — запрос 63",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC063.T1.C4",
+          "type": "any_of",
+          "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "numbered_list_min",
+                "passed": false,
+                "reason": "Not enough numbered items"
+              },
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Кого выбрать, если важна гарантия 12 месяцев?",
+          "requestBody": {
+            "message": "Кого выбрать, если важна гарантия 12 месяцев?",
+            "history": []
+          },
+          "latencyMs": 2244,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "8db1c8a1-3a49-40e5-9964-4a1ea7ed80aa",
+          "isStub": false,
+          "reply": "Уточните, между какими вариантами/компаниями вы выбираете. Пришлите список кандидатов или ссылки — и я отмечу, у кого явно заявлена гарантия 12 месяцев.  \nЕсли кандидатов нет, скажите, что именно ищете (товар/услуга) и регион — подберу рубрики и фильтры.",
+          "checks": [
+            {
+              "id": "UXC063.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC063.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC063.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "гарант"
+                ]
+              }
+            },
+            {
+              "id": "UXC063.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC063.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 254
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2244
+    },
+    {
+      "id": "UXC064",
+      "title": "Банк C: Сравнение и выбор — запрос 64",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC064.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме сравнения/выбора",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "сравн",
+              "топ",
+              "рейтинг",
+              "шорт",
+              "short",
+              "критер",
+              "выбор",
+              "услов",
+              "гарант",
+              "срок",
+              "цен",
+              "таблиц"
+            ],
+            "hits": []
+          }
+        },
+        {
+          "id": "UXC064.T1.C4",
+          "type": "any_of",
+          "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "numbered_list_min",
+                "passed": false,
+                "reason": "Not enough numbered items"
+              },
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Выведи только тех, кто производитель.",
+          "requestBody": {
+            "message": "Выведи только тех, кто производитель.",
+            "history": []
+          },
+          "latencyMs": 1689,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6ffc7769-92f2-47be-bb02-1547d746524e",
+          "isStub": false,
+          "reply": "Уточните, по какой категории/продукту искать производителей? Напишите, что именно нужно (например, товар/услуга) и город/область — и я отфильтрую только производителей.",
+          "checks": [
+            {
+              "id": "UXC064.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC064.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC064.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXC064.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC064.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 168
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 1689
+    },
+    {
+      "id": "UXC065",
+      "title": "Банк C: Сравнение и выбор — запрос 65",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC065.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме сравнения/выбора",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "сравн",
+              "топ",
+              "рейтинг",
+              "шорт",
+              "short",
+              "критер",
+              "выбор",
+              "услов",
+              "гарант",
+              "срок",
+              "цен",
+              "таблиц"
+            ],
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи компании, которые не «однодневки» (по признакам).",
+          "requestBody": {
+            "message": "Покажи компании, которые не «однодневки» (по признакам).",
+            "history": []
+          },
+          "latencyMs": 3895,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4ed3707b-1a20-4280-9700-596b441dff80",
+          "isStub": false,
+          "reply": "Могу помочь отфильтровать «не однодневки» по прозрачным признакам, но сначала уточню, в какой категории и городе искать.\n\nЧто обычно можно проверить в каталоге (признаки надежности):\n1) Полные контакты (телефон, e‑mail, сайт), адрес.\n2) Дата регистрации/стаж (если есть в карточке).\n3) Наличие отзывов/портфолио/фото работ.\n4) Несколько способов связи, стационарный телефон.\n5) Совпадение профиля деятельности с запросом (узкая специализация).\n\nУточните, пожалуйста:\n1) Какая услуга/товар вас интересует?  \n2) Город/регион?  \n3) Какие признаки считать обязательными (например, сайт и адрес; стаж от 3 лет)?",
+          "checks": [
+            {
+              "id": "UXC065.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC065.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC065.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXC065.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC065.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 606
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3895
+    },
+    {
+      "id": "UXC066",
+      "title": "Банк C: Сравнение и выбор — запрос 66",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXC066.T1.C4",
+          "type": "any_of",
+          "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "numbered_list_min",
+                "passed": false,
+                "reason": "Not enough numbered items"
+              },
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сделай short-list из 5 вариантов.",
+          "requestBody": {
+            "message": "Сделай short-list из 5 вариантов.",
+            "history": []
+          },
+          "latencyMs": 2342,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "91686ec1-0576-4f4f-b312-cd51f184dbc7",
+          "isStub": false,
+          "reply": "Уточните, пожалуйста: short‑list из 5 вариантов каких поставщиков/услуг/товаров вы ищете (что именно нужно)? Также укажите регион/город, если важно.",
+          "checks": [
+            {
+              "id": "UXC066.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC066.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC066.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "short"
+                ]
+              }
+            },
+            {
+              "id": "UXC066.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC066.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 148
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2342
+    }
+  ]
+}

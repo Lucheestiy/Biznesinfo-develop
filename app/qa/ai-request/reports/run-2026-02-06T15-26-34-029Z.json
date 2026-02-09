@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "source": "manual",
+      "description": "Milk Vitebsk relevance guard"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-06T15-26-34-029Z",
+    "startedAt": "2026-02-06T15:26:34.029Z",
+    "endedAt": "2026-02-06T15:26:47.645Z",
+    "durationMs": 13616,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/ai-milk-vitebsk-scenario.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 3,
+    "passedChecks": 3,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "MILK_VITEBSK_001",
+      "title": "Молоко в Витебске без нерелевантных компаний",
+      "tags": [
+        "regression",
+        "sourcing",
+        "geo",
+        "relevance"
+      ],
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где можно купить тонну молока в Витебске?",
+          "requestBody": {
+            "message": "Где можно купить тонну молока в Витебске?",
+            "history": []
+          },
+          "latencyMs": 13210,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "55066373-7532-454b-82f7-27cd58596203",
+          "isStub": false,
+          "reply": "Вот ближайшие кандидаты из текущего списка (релевантность к молоку низкая, требуют проверки профиля):\n\n1) **МолХолСервис ООО** — возможно связан с сельхозсектором, стоит проверить, есть ли торговля молочной продукцией. /company/molholservis  \n2) **Витебскоблагропромтранс ОАО** — профиль не про молоко (автомойки/химчистки), маловероятно. /company/vitoblapt  \n\nЧтобы найти поставщиков молока в Витебске, попробуйте такие рубрики и ключевые слова:\n- Рубрики: **Молочные продукты**, **Продукты питания оптом**, **Сельхозпредприятия**, **Поставщики продуктов**, **Оптовые базы**\n- Ключевые слова: *молоко оптом*, *молоко 1 тонна*, *молочный завод*, *молокозавод*, *фермерское молоко*, *молочная продукция оптом*\n- Фильтр: **Витебск** уже выбран — оставляем.\n\nУточните, пожалуйста (до 3 вопросов):\n1) Вам нужно **сырое** молоко или **пастеризованное/упакованное**?  \n2) Какая **жирность** и **требования к качеству**?  \n3) Нужна **доставка** в Витебске или самовывоз?",
+          "checks": [
+            {
+              "id": "M1",
+              "type": "not_stub",
+              "description": null,
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "M2",
+              "type": "includes_any",
+              "description": null,
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "витеб",
+                  "Витеб"
+                ],
+                "hits": [
+                  "витеб",
+                  "Витеб"
+                ]
+              }
+            },
+            {
+              "id": "M3",
+              "type": "excludes_all",
+              "description": null,
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "электротех",
+                  "стекл",
+                  "мебел",
+                  "центр[ы]? занятост"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 13211
+    }
+  ]
+}

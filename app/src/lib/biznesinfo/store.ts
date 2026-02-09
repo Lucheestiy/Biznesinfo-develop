@@ -244,17 +244,62 @@ function tokenizeLocation(raw: string): string[] {
   });
 }
 
+function isGeoServiceToken(token: string): boolean {
+  const t = (token || "").trim().toLowerCase().replace(/ё/gu, "е");
+  if (!t) return false;
+  return /^(минск\p{L}*|брест\p{L}*|гомел\p{L}*|гродн\p{L}*|витебск\p{L}*|могил[её]в\p{L}*|беларус\p{L}*|рб)$/u.test(t);
+}
+
+function canonicalizeServiceQueryToken(token: string): string {
+  const t = safeLower(token)
+    .replace(/ё/gu, "е")
+    .trim();
+  if (!t) return "";
+
+  if (t.startsWith("молок") || t.startsWith("молоч") || t === "milk" || t === "dairy") return "молоко";
+  if (t.startsWith("лук") || t.startsWith("репчат") || t === "onion") return "лук";
+  if (t.startsWith("овощ") || t.startsWith("плодоовощ") || t.startsWith("vegetable")) return "овощи";
+  if (t.startsWith("клининг") || t.startsWith("cleaning")) return "клининг";
+  if (t.startsWith("уборк")) return "уборка";
+  if (t.startsWith("сертифик") || t.startsWith("сертификац") || t.startsWith("certif")) return "сертификация";
+  if (t.startsWith("декларац")) return "декларация";
+  if (t.startsWith("короб")) return "короб";
+  if (t.startsWith("гофро")) return "гофро";
+
+  return t;
+}
+
 function tokenizeServiceText(raw: string): string[] {
   // Transactional words should not block matching (e.g., "купить тетради", "заказать сантехнику").
   const QUERY_STOP_WORDS = new Set([
+    "где",
+    "кто",
+    "как",
+    "найти",
+    "подобрать",
+    "подбор",
+    "покажи",
+    "показать",
     "купить",
     "куплю",
     "заказать",
     "закажу",
+    "нужен",
+    "нужна",
+    "нужно",
+    "нужны",
+    "срочно",
+    "цена",
+    "стоимость",
     "продажа",
     "покупка",
     "оптом",
+    "опт",
     "розница",
+    "поставщик",
+    "поставщики",
+    "поставка",
+    "поставки",
     "услуга",
     "услуги",
     "работа",
@@ -263,6 +308,42 @@ function tokenizeServiceText(raw: string): string[] {
     "компании",
     "организация",
     "организации",
+    "в",
+    "во",
+    "по",
+    "на",
+    "для",
+    "из",
+    "и",
+    "или",
+    "а",
+    "но",
+    "г",
+    "город",
+    "область",
+    "обл",
+    "район",
+    "регион",
+    "тонна",
+    "тонны",
+    "тонну",
+    "кг",
+    "килограмм",
+    "килограмма",
+    "литр",
+    "литра",
+    "литров",
+    "шт",
+    "штук",
+    "the",
+    "a",
+    "an",
+    "where",
+    "who",
+    "find",
+    "buy",
+    "need",
+    "price",
   ]);
 
   const cleaned = safeLower(raw)
@@ -270,11 +351,25 @@ function tokenizeServiceText(raw: string): string[] {
     .replace(/[«»"'“”„]/gu, " ")
     .replace(/[^\p{L}\p{N}-]+/gu, " ");
 
-  return cleaned
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const token of cleaned
     .split(/\s+/u)
     .map((t) => t.trim())
-    .filter((t) => t.length >= 2)
-    .filter((t) => !QUERY_STOP_WORDS.has(t));
+    .filter((t) => t.length >= 2)) {
+    if (/^\d+$/u.test(token)) continue;
+    if (/^\d+(?:[.,]\d+)?%$/u.test(token)) continue;
+    const normalized = canonicalizeServiceQueryToken(token);
+    if (!normalized) continue;
+    if (QUERY_STOP_WORDS.has(normalized)) continue;
+    if (isGeoServiceToken(normalized)) continue;
+    if (normalized.length < 2) continue;
+    if (seen.has(normalized)) continue;
+    seen.add(normalized);
+    out.push(normalized);
+  }
+
+  return out;
 }
 
 function matchesServiceToken(companyTokens: string[], token: string): boolean {

@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-08T18:55:00Z",
+      "source": "manual-regression",
+      "description": "Regression for announcement-style template requests (\"ищем подрядчика\")"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T18-55-15-031Z-3781172-lfyk7",
+    "startedAt": "2026-02-08T18:55:15.031Z",
+    "endedAt": "2026-02-08T18:55:21.087Z",
+    "durationMs": 6056,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.template-announcement.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 5,
+    "passedChecks": 5,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "TA001",
+      "title": "Объявление: ищем подрядчика",
+      "tags": [
+        "regression",
+        "template",
+        "announcement",
+        "single_turn"
+      ],
+      "personaGoal": "Пользователь просит готовый текст объявления для публикации и ожидает структурированный first-pass",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Напиши объявление «ищем подрядчика» для публикации.",
+          "requestBody": {
+            "message": "Напиши объявление «ищем подрядчика» для публикации.",
+            "history": []
+          },
+          "latencyMs": 5709,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "07c9611a-6e95-4ffa-a593-41f840e1c455",
+          "isStub": false,
+          "reply": "Subject: Ищем подрядчика по напиши объявление в {city}\n\nBody:\nЗдравствуйте!\n\nКомпания {company} ищет подрядчика для выполнения работ/оказания услуг: **напиши объявление**.\n\n**Что требуется:**\n- Объём: {qty}\n- Технические требования/ТЗ: {spec}\n- Локация выполнения: {city}/{region}\n- Срок начала: {delivery}\n- Желаемый срок завершения: {deadline}\n\n**Просим в отклике указать:**\n- Краткую информацию о компании и релевантный опыт\n- Предварительную стоимость и условия оплаты\n- Сроки выполнения\n- Гарантии/сервисные условия\n- Контактное лицо для связи\n\nРассматриваем предложения до **{deadline}**.  \nКонтакты для отклика: {contact}.\n\nС уважением,  \n{company}\n\nWhatsApp:\nЗдравствуйте! Ищем подрядчика по напиши объявление в {city}. Объём: {qty}, требования: {spec}, старт: {delivery}, дедлайн: {deadline}. Пришлите, пожалуйста, стоимость, сроки и краткий опыт на {contact}.",
+          "checks": [
+            {
+              "id": "TA001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "TA001.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "TA001.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме объявления/шаблона",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "объявлен",
+                  "подрядчик",
+                  "шаблон",
+                  "пример",
+                  "публикац",
+                  "subject",
+                  "body",
+                  "whatsapp"
+                ],
+                "hits": [
+                  "объявлен",
+                  "подрядчик",
+                  "subject",
+                  "body",
+                  "whatsapp"
+                ]
+              }
+            },
+            {
+              "id": "TA001.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен дать структуру текста или шаблонные блоки",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "template_blocks",
+                    "passed": true,
+                    "reason": "Template blocks present"
+                  },
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "TA001.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 869
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5712
+    }
+  ]
+}

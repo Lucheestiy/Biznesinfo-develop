@@ -1,0 +1,3033 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": 1,
+      "generatedAt": "2026-02-07T20:42:04.928Z",
+      "endpoint": "/api/ai/request",
+      "localeHint": "mostly-ru-with-mixed-en",
+      "totalScenarios": 11,
+      "suite": "dirty_realworld",
+      "source": "10 real-world dirty queries (telegraphic, short, typo-like) + follow-up turns for continuity and structured output checks"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1200,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T00-32-40-256Z",
+    "startedAt": "2026-02-08T00:32:40.256Z",
+    "endedAt": "2026-02-08T00:35:57.658Z",
+    "durationMs": 197402,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.dirty.realworld.json",
+    "totalScenarios": 11,
+    "passedScenarios": 8,
+    "failedScenarios": 3,
+    "passRate": 0.7273,
+    "totalChecks": 125,
+    "passedChecks": 122,
+    "failedChecks": 3,
+    "checkPassRate": 0.976,
+    "targetPassCount": 9,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:mentions_any_terms:Должна сохраняться связь с исходной задачей",
+      "count": 2
+    },
+    {
+      "key": "check:mentions_any_terms:Должна сохраниться связь с продуктом и локацией после уточнения",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "D001",
+      "title": "Dirty query: типография визитки срочно",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Реальный быстрый запрос с минимальным контекстом и телеграфным стилем.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "нужна типография минск срочно визитки",
+          "requestBody": {
+            "message": "нужна типография минск срочно визитки",
+            "history": []
+          },
+          "latencyMs": 5087,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "d8b111fa-8150-4721-95fd-10f5dbba2485",
+          "isStub": false,
+          "reply": "Вот подходящие типографии в Минске из каталога, которые прямо упоминают визитки:\n\n1) **Аврора Принт ООО** — весь спектр полиграфии, прямо указаны визитки; Минск.  \n/​company/avrora\n\n2) **Золотой Оттиск ЧП (ПОСТПРИНТ)** — полиграфия: визитки, папки, листовки и др.; Минск.  \n/​company/postprint\n\n3) **Топпринт ООО** — типография полного цикла, фирменная и листовая продукция; Минск.  \n/​company/topprint\n\n4) **Интегралполиграф УП** — современная типография, широкий спектр печати; Минск.  \n/​company/integralpoligraf\n\nЧтобы быстро подобрать и сформировать запрос, уточните, пожалуйста:  \n1) Тираж визиток объем?  \n2) Срок «срочно» — к какой дате/времени срок поставки?  \n3) Нужна ли доставка по Минску или самовывоз?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Аврора Принт ООО — /company/avrora (Полиграфические услуги, типографии; Минск, minsk)\n2. Золотой Оттиск ЧП — /company/postprint (Полиграфические услуги, типографии; Минск, minsk)\n3. Топпринт ООО — /company/topprint (Полиграфические услуги, типографии; Минск, minsk)\n4. А-Флекс ООО — /company/aflex (Полиграфические услуги, типографии; Минск, minsk)",
+          "checks": [
+            {
+              "id": "D001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D001.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D001.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 1125
+              }
+            },
+            {
+              "id": "D001.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "типограф",
+                  "визит",
+                  "печат"
+                ],
+                "min": 1,
+                "hits": [
+                  "типограф",
+                  "визит",
+                  "печат"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "малиновка, сегодня до 18, безнал",
+          "requestBody": {
+            "message": "малиновка, сегодня до 18, безнал",
+            "history": [
+              {
+                "role": "user",
+                "content": "нужна типография минск срочно визитки"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот подходящие типографии в Минске из каталога, которые прямо упоминают визитки:\n\n1) **Аврора Принт ООО** — весь спектр полиграфии, прямо указаны визитки; Минск.  \n/​company/avrora\n\n2) **Золотой Оттиск ЧП (ПОСТПРИНТ)** — полиграфия: визитки, папки, листовки и др.; Минск.  \n/​company/postprint\n\n3) **Топпринт ООО** — типография полного цикла, фирменная и листовая продукция; Минск.  \n/​company/topprint\n\n4) **Интегралполиграф УП** — современная типография, широкий спектр печати; Минск.  \n/​company/integralpoligraf\n\nЧтобы быстро подобрать и сформировать запрос, уточните, пожалуйста:  \n1) Тираж визиток объем?  \n2) Срок «срочно» — к какой дате/времени срок поставки?  \n3) Нужна ли доставка по Минску или самовывоз?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Аврора Принт ООО — /company/avrora (Полиграфические услуги, типографии; Минск, minsk)\n2. Золотой Оттиск ЧП — /company/postprint (Полиграфические услуги, типографии; Минск, minsk)\n3. Топпринт ООО — /company/topprint (Полиграфические услуги, типографии; Минск, minsk)\n4. А-Флекс ООО — /company/aflex (Полиграфические услуги, типографии; Минск, minsk)"
+              }
+            ]
+          },
+          "latencyMs": 6269,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "a4ce0204-c2cb-497a-a0d9-ecde00ce7715",
+          "isStub": false,
+          "reply": "Понял: Малиновка, сегодня до 18:00, безнал. Ниже варианты в Минске из каталога (подтвердите у них срочность и безнал):\n\n1) **Аврора Принт ООО** — визитки, цифровая/офсетная печать; Минск.  \nТел.: +375 (17) 352 82 01 | Email: avroraplus@yandex.ru | /company/avrora\n\n2) **Золотой Оттиск ЧП (ПОСТПРИНТ)** — визитки и постпечатная обработка; Минск.  \nТел.: +375 (29) 147 70 09 | Email: manager@postprint.by | /company/postprint\n\n3) **Топпринт ООО** — типография полного цикла; Минск.  \nТел.: +375 (33) 333 25 42 | Email: info@topprint.by | /company/topprint\n\nПроверьте на их страницах адрес — кто ближе к Малиновке.\n\nЧтобы ускорить звонок/заявку, уточните:  \n1) Есть готовый макет (PDF/AI/PSD) или нужен дизайн?  \n2) Тираж и формат (классика 90×50/85×55)?  \n3) Нужна ли доставка в Малиновку или самовывоз?",
+          "checks": [
+            {
+              "id": "D001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D001.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D001.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "типограф",
+                  "визит",
+                  "печат"
+                ],
+                "min": 1,
+                "hits": [
+                  "типограф",
+                  "визит",
+                  "печат"
+                ]
+              }
+            },
+            {
+              "id": "D001.T2.C4",
+              "type": "includes_any",
+              "description": "Если есть гео-сигнал, он должен учитываться",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "малинов"
+                ],
+                "hits": [
+                  "минск",
+                  "малинов"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "дай 3 варианта и что спросить по срокам/тиражу",
+          "requestBody": {
+            "message": "дай 3 варианта и что спросить по срокам/тиражу",
+            "history": [
+              {
+                "role": "user",
+                "content": "нужна типография минск срочно визитки"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот подходящие типографии в Минске из каталога, которые прямо упоминают визитки:\n\n1) **Аврора Принт ООО** — весь спектр полиграфии, прямо указаны визитки; Минск.  \n/​company/avrora\n\n2) **Золотой Оттиск ЧП (ПОСТПРИНТ)** — полиграфия: визитки, папки, листовки и др.; Минск.  \n/​company/postprint\n\n3) **Топпринт ООО** — типография полного цикла, фирменная и листовая продукция; Минск.  \n/​company/topprint\n\n4) **Интегралполиграф УП** — современная типография, широкий спектр печати; Минск.  \n/​company/integralpoligraf\n\nЧтобы быстро подобрать и сформировать запрос, уточните, пожалуйста:  \n1) Тираж визиток объем?  \n2) Срок «срочно» — к какой дате/времени срок поставки?  \n3) Нужна ли доставка по Минску или самовывоз?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Аврора Принт ООО — /company/avrora (Полиграфические услуги, типографии; Минск, minsk)\n2. Золотой Оттиск ЧП — /company/postprint (Полиграфические услуги, типографии; Минск, minsk)\n3. Топпринт ООО — /company/topprint (Полиграфические услуги, типографии; Минск, minsk)\n4. А-Флекс ООО — /company/aflex (Полиграфические услуги, типографии; Минск, minsk)"
+              },
+              {
+                "role": "user",
+                "content": "малиновка, сегодня до 18, безнал"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял: Малиновка, сегодня до 18:00, безнал. Ниже варианты в Минске из каталога (подтвердите у них срочность и безнал):\n\n1) **Аврора Принт ООО** — визитки, цифровая/офсетная печать; Минск.  \nТел.: +375 (17) 352 82 01 | Email: avroraplus@yandex.ru | /company/avrora\n\n2) **Золотой Оттиск ЧП (ПОСТПРИНТ)** — визитки и постпечатная обработка; Минск.  \nТел.: +375 (29) 147 70 09 | Email: manager@postprint.by | /company/postprint\n\n3) **Топпринт ООО** — типография полного цикла; Минск.  \nТел.: +375 (33) 333 25 42 | Email: info@topprint.by | /company/topprint\n\nПроверьте на их страницах адрес — кто ближе к Малиновке.\n\nЧтобы ускорить звонок/заявку, уточните:  \n1) Есть готовый макет (PDF/AI/PSD) или нужен дизайн?  \n2) Тираж и формат (классика 90×50/85×55)?  \n3) Нужна ли доставка в Малиновку или самовывоз?"
+              }
+            ]
+          },
+          "latencyMs": 6135,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3c192171-1209-4ff6-b730-6279b542f7a4",
+          "isStub": false,
+          "reply": "Вот 3 варианта в Минске из каталога:\n\n1) **Аврора Принт ООО** — визитки, цифровая/офсетная печать.  \n/​company/avrora\n\n2) **Золотой Оттиск ЧП (ПОСТПРИНТ)** — визитки и постпечатная обработка.  \n/​company/postprint\n\n3) **Топпринт ООО** — типография полного цикла.  \n/​company/topprint\n\nЧто спросить по срокам/тиражу (чек‑лист):\n1) **Срочность**: «Реально ли сделать сегодня до 18:00? Какие варианты срочного производства?»  \n2) **Тираж**: «Минимальный/оптимальный тираж? Есть ли цена за объем и за уточняется?»  \n3) **Технология**: «Цифровая или офсетная для такого тиража? Что быстрее/дешевле?»  \n4) **Готовность макета**: «Нужен ли ваш дизайн/проверка макета? Сколько времени это займет?»  \n5) **Комплектация**: «Обрезка/ламинация/скругление углов включены?»  \n6) **Оплата**: «Принимаете безнал? Нужен ли предоплатный счет?»  \n7) **Самовывоз/доставка**: «Можно ли самовывоз сегодня? Сколько времени на выдачу?»  \n\nЕсли хотите, напишу короткий скрипт для звонка или текст заявки.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Avrora — /company/avrora\n2. Postprint — /company/postprint\n3. Topprint — /company/topprint\n4. А-Флекс ООО — /company/aflex (Минск, minsk)",
+          "checks": [
+            {
+              "id": "D001.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D001.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D001.T3.C3",
+              "type": "any_of",
+              "description": "Нужен практичный shortlist либо прозрачный план отбора",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 17494
+    },
+    {
+      "id": "D002",
+      "title": "Dirty query: проверка УНП",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "verification"
+      ],
+      "personaGoal": "Пользователь с обрывочным номером УНП и запросом на верификацию.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "проверь унп 19... действующая?",
+          "requestBody": {
+            "message": "проверь унп 19... действующая?",
+            "history": []
+          },
+          "latencyMs": 1482,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "46b9b22a-0e07-4e19-80db-95b3a046e7a8",
+          "isStub": false,
+          "reply": "Пожалуйста, пришлите полный номер УНП (9 цифр) и, если есть, название компании. Тогда подскажу, как проверить действующий статус в реестре.",
+          "checks": [
+            {
+              "id": "D002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D002.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D002.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 139
+              }
+            },
+            {
+              "id": "D002.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "унп",
+                  "провер",
+                  "действ"
+                ],
+                "min": 1,
+                "hits": [
+                  "унп",
+                  "провер",
+                  "действ"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "если нет exact то как проверить быстро самому",
+          "requestBody": {
+            "message": "если нет exact то как проверить быстро самому",
+            "history": [
+              {
+                "role": "user",
+                "content": "проверь унп 19... действующая?"
+              },
+              {
+                "role": "assistant",
+                "content": "Пожалуйста, пришлите полный номер УНП (9 цифр) и, если есть, название компании. Тогда подскажу, как проверить действующий статус в реестре."
+              }
+            ]
+          },
+          "latencyMs": 4083,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3a73b5b7-1a64-4a92-912d-3ff1c7542552",
+          "isStub": false,
+          "reply": "Кратко, как быстро проверить самому, если нет точного УНП:\n\n1. По названию/ключевому слову — найдите компанию в Biznesinfo (или ЕГР) по части названия. Чем точнее фраза, тем меньше совпадений.  \n2. Уточните регион/город — сузьте результаты по области/городу, чтобы не попасть на однофамильцев.  \n3. Сверьте реквизиты — сравните адрес, вид деятельности (ОКЭД), ФИО руководителя/контакты.  \n4. Найден УНП — уже по УНП проверяйте действующий статус в официальном реестре.  \n5. Если остаются сомнения — запросите у контрагента копию свидетельства/выписку или реквизиты в письме.\n\nНужна подсказка по поисковым словам/рубрике для конкретной сферы?",
+          "checks": [
+            {
+              "id": "D002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D002.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D002.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "унп",
+                  "провер",
+                  "действ"
+                ],
+                "min": 1,
+                "hits": [
+                  "унп",
+                  "провер",
+                  "действ"
+                ]
+              }
+            },
+            {
+              "id": "D002.T2.C4",
+              "type": "reply_length_min",
+              "description": "Должен быть содержательный follow-up ответ",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 80,
+                "len": 641
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "дай чеклист 5 пунктов без воды",
+          "requestBody": {
+            "message": "дай чеклист 5 пунктов без воды",
+            "history": [
+              {
+                "role": "user",
+                "content": "проверь унп 19... действующая?"
+              },
+              {
+                "role": "assistant",
+                "content": "Пожалуйста, пришлите полный номер УНП (9 цифр) и, если есть, название компании. Тогда подскажу, как проверить действующий статус в реестре."
+              },
+              {
+                "role": "user",
+                "content": "если нет exact то как проверить быстро самому"
+              },
+              {
+                "role": "assistant",
+                "content": "Кратко, как быстро проверить самому, если нет точного УНП:\n\n1. По названию/ключевому слову — найдите компанию в Biznesinfo (или ЕГР) по части названия. Чем точнее фраза, тем меньше совпадений.  \n2. Уточните регион/город — сузьте результаты по области/городу, чтобы не попасть на однофамильцев.  \n3. Сверьте реквизиты — сравните адрес, вид деятельности (ОКЭД), ФИО руководителя/контакты.  \n4. Найден УНП — уже по УНП проверяйте действующий статус в официальном реестре.  \n5. Если остаются сомнения — запросите у контрагента копию свидетельства/выписку или реквизиты в письме.\n\nНужна подсказка по поисковым словам/рубрике для конкретной сферы?"
+              }
+            ]
+          },
+          "latencyMs": 3153,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "8e36a885-f75c-45cf-ad19-877c29e5871c",
+          "isStub": false,
+          "reply": "1. Введите часть названия компании в поиск (Biznesinfo/ЕГР).  \n2. Сузьте по области/городу.  \n3. Откройте карточку и проверьте УНП.  \n4. Проверьте УНП в официальном реестре на статус «действующая».  \n5. Сверьте адрес/ОКЭД/руководителя с данными контрагента.",
+          "checks": [
+            {
+              "id": "D002.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D002.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D002.T3.C3",
+              "type": "includes_any",
+              "description": "Должны быть корректные шаги верификации",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "провер",
+                  "реестр",
+                  "источник",
+                  "официаль",
+                  "данных",
+                  "унп",
+                  "карточк"
+                ],
+                "hits": [
+                  "провер",
+                  "реестр",
+                  "официаль",
+                  "унп",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "D002.T3.C4",
+              "type": "any_of",
+              "description": "Нужен структурированный чеклист/план",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "question_count_min",
+                    "passed": false,
+                    "reason": "Not enough questions"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 8718
+    },
+    {
+      "id": "D003",
+      "title": "Dirty query: реф-перевозки маршрут и цена",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Логист задает запрос без грамматики, но с маршрутом и ценовым ожиданием.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "D003.T2.C3",
+          "type": "mentions_any_terms",
+          "description": "Должна сохраняться связь с исходной задачей",
+          "passed": false,
+          "reason": "Not enough terms mentioned",
+          "details": {
+            "terms": [
+              "грузопер",
+              "реф",
+              "темпера",
+              "достав"
+            ],
+            "min": 1,
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "грузоперевозки реф минск гомель цена",
+          "requestBody": {
+            "message": "грузоперевозки реф минск гомель цена",
+            "history": []
+          },
+          "latencyMs": 7955,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ea331c50-18b6-4c85-9374-a6cec34cb153",
+          "isStub": false,
+          "reply": "Ниже есть 1 явный кандидат по рефрижераторным перевозкам из списка (Минск, подходит под запрос “реф”). Остальные из выдачи — без явного указания “реф”, поэтому не включаю как равнозначные.\n\n**Подходящие поставщики (реф) из списка:**\n1) **А-ДенТа ООО** — рефрижераторы, изотермы, тенты; организация грузоперевозок.  \n   /company/adenta  \n   *Причина:* в описании прямо указаны **рефрижераторы**.\n\nЕсли нужно 3–5 вариантов, скажите — доберу по рубрикатору и расширю поиск.\n\n**Где искать в Biznesinfo:**\n- Рубрика: **Транспорт, логистика, перевозки → Автомобильные грузоперевозки**  \n  /catalog/transport-logistika-perevozki/avtomobilnye-gruzoperevozki  \n- Ключевые слова: **рефрижератор**, **реф**, **изотерма**, **холодильные перевозки**, **температурный режим**  \n- Фильтр города: **Минск** (и при необходимости **Гомель**)\n\nЧтобы оценить **цену**, нужны параметры. Уточните, пожалуйста (до 3 пунктов):\n1) Маршрут: Минск → Гомель (в одну сторону?) и адреса/районы.\n2) Тип груза и температурный режим (например, +2…+6°C).\n3) Объём/вес и дата/срок доставки.\n\nПосле этого подготовлю запросы к перевозчикам и/или черновик RFQ.",
+          "checks": [
+            {
+              "id": "D003.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D003.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D003.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 1122
+              }
+            },
+            {
+              "id": "D003.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "грузопер",
+                  "реф",
+                  "темпера",
+                  "достав"
+                ],
+                "min": 1,
+                "hits": [
+                  "грузопер",
+                  "реф",
+                  "темпера",
+                  "достав"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "2-3т, завтра утром, темп +2..+6",
+          "requestBody": {
+            "message": "2-3т, завтра утром, темп +2..+6",
+            "history": [
+              {
+                "role": "user",
+                "content": "грузоперевозки реф минск гомель цена"
+              },
+              {
+                "role": "assistant",
+                "content": "Ниже есть 1 явный кандидат по рефрижераторным перевозкам из списка (Минск, подходит под запрос “реф”). Остальные из выдачи — без явного указания “реф”, поэтому не включаю как равнозначные.\n\n**Подходящие поставщики (реф) из списка:**\n1) **А-ДенТа ООО** — рефрижераторы, изотермы, тенты; организация грузоперевозок.  \n   /company/adenta  \n   *Причина:* в описании прямо указаны **рефрижераторы**.\n\nЕсли нужно 3–5 вариантов, скажите — доберу по рубрикатору и расширю поиск.\n\n**Где искать в Biznesinfo:**\n- Рубрика: **Транспорт, логистика, перевозки → Автомобильные грузоперевозки**  \n  /catalog/transport-logistika-perevozki/avtomobilnye-gruzoperevozki  \n- Ключевые слова: **рефрижератор**, **реф**, **изотерма**, **холодильные перевозки**, **температурный режим**  \n- Фильтр города: **Минск** (и при необходимости **Гомель**)\n\nЧтобы оценить **цену**, нужны параметры. Уточните, пожалуйста (до 3 пунктов):\n1) Маршрут: Минск → Гомель (в одну сторону?) и адреса/районы.\n2) Тип груза и температурный режим (например, +2…+6°C).\n3) Объём/вес и дата/срок доставки.\n\nПосле этого подготовлю запросы к перевозчикам и/или черновик RFQ."
+              }
+            ]
+          },
+          "latencyMs": 4976,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "93073c25-e9c3-4c83-96b8-7de98893f79c",
+          "isStub": false,
+          "reply": "Отлично, параметры есть. Сейчас могу:\n1) Подготовить запрос (RFQ) перевозчику(ам) с вашими условиями.\n2) Подсказать, какие ещё параметры нужны для точного расчёта цены.\n\nНужны ещё 2 детали, чтобы получить точную ставку:\n- Адреса/районы загрузки и выгрузки (Минск/Гомель).\n- Тип/описание груза (например, продукты, медикаменты) и объём/паллеты.\n\nСделать текст запроса перевозчику?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Adenta — /company/adenta",
+          "checks": [
+            {
+              "id": "D003.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D003.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D003.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": false,
+              "reason": "Not enough terms mentioned",
+              "details": {
+                "terms": [
+                  "грузопер",
+                  "реф",
+                  "темпера",
+                  "достав"
+                ],
+                "min": 1,
+                "hits": []
+              }
+            },
+            {
+              "id": "D003.T2.C4",
+              "type": "includes_any",
+              "description": "Если есть гео-сигнал, он должен учитываться",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "гомел"
+                ],
+                "hits": [
+                  "минск",
+                  "гомел"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "shortlist 3 и вопросы по температурному контролю",
+          "requestBody": {
+            "message": "shortlist 3 и вопросы по температурному контролю",
+            "history": [
+              {
+                "role": "user",
+                "content": "грузоперевозки реф минск гомель цена"
+              },
+              {
+                "role": "assistant",
+                "content": "Ниже есть 1 явный кандидат по рефрижераторным перевозкам из списка (Минск, подходит под запрос “реф”). Остальные из выдачи — без явного указания “реф”, поэтому не включаю как равнозначные.\n\n**Подходящие поставщики (реф) из списка:**\n1) **А-ДенТа ООО** — рефрижераторы, изотермы, тенты; организация грузоперевозок.  \n   /company/adenta  \n   *Причина:* в описании прямо указаны **рефрижераторы**.\n\nЕсли нужно 3–5 вариантов, скажите — доберу по рубрикатору и расширю поиск.\n\n**Где искать в Biznesinfo:**\n- Рубрика: **Транспорт, логистика, перевозки → Автомобильные грузоперевозки**  \n  /catalog/transport-logistika-perevozki/avtomobilnye-gruzoperevozki  \n- Ключевые слова: **рефрижератор**, **реф**, **изотерма**, **холодильные перевозки**, **температурный режим**  \n- Фильтр города: **Минск** (и при необходимости **Гомель**)\n\nЧтобы оценить **цену**, нужны параметры. Уточните, пожалуйста (до 3 пунктов):\n1) Маршрут: Минск → Гомель (в одну сторону?) и адреса/районы.\n2) Тип груза и температурный режим (например, +2…+6°C).\n3) Объём/вес и дата/срок доставки.\n\nПосле этого подготовлю запросы к перевозчикам и/или черновик RFQ."
+              },
+              {
+                "role": "user",
+                "content": "2-3т, завтра утром, темп +2..+6"
+              },
+              {
+                "role": "assistant",
+                "content": "Отлично, параметры есть. Сейчас могу:\n1) Подготовить запрос (RFQ) перевозчику(ам) с вашими условиями.\n2) Подсказать, какие ещё параметры нужны для точного расчёта цены.\n\nНужны ещё 2 детали, чтобы получить точную ставку:\n- Адреса/районы загрузки и выгрузки (Минск/Гомель).\n- Тип/описание груза (например, продукты, медикаменты) и объём/паллеты.\n\nСделать текст запроса перевозчику?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Adenta — /company/adenta"
+              }
+            ]
+          },
+          "latencyMs": 9101,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "5ac62070-a312-47bd-9e48-6b397e002358",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. Adenta — /company/adenta\n2. Нет подтвержденного кандидата в текущей выборке каталога (не выдумываю компании).\n3. Нет подтвержденного кандидата в текущей выборке каталога (не выдумываю компании).\nПодтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции.\nФокус: грузоперевозки реф минск гомель цена shortlist 3 и вопросы по температурному контролю.",
+          "checks": [
+            {
+              "id": "D003.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D003.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D003.T3.C3",
+              "type": "any_of",
+              "description": "Нужен практичный shortlist либо прозрачный план отбора",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 22033
+    },
+    {
+      "id": "D004",
+      "title": "Dirty query: металлопрокат опт",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Закупка опта в телеграфном стиле с минимумом деталей.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "металлопрокат опт кто возит",
+          "requestBody": {
+            "message": "металлопрокат опт кто возит",
+            "history": []
+          },
+          "latencyMs": 6526,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "423b7aab-acc2-4071-b2ca-acc25bc3a14a",
+          "isStub": false,
+          "reply": "Вот кто из списка выглядит релевантным «опт металлопрокат, кто возит» (Минск/Минский р-н):\n\n1. **А ГРУПП Запад ООО** — металлоцентр, широкий ассортимент (трубы, балки, сортовой/листовой прокат). /company/agrupp  \n2. **АВАБИ ООО** — комплексный поставщик трубной продукции и металлопроката. /company/avabi  \n3. **АйронТрейдПлюс ООО** — оптовая и розничная продажа металлопроката. /company/irontrade  \n4. **АЛМИЭР ИООО** — черный металлопрокат (трубы, листы, уголок, арматура и т.д.). /company/almier  \n5. **Айвимет ООО** — металлопрокат + трубопроводная арматура, широкий перечень. /company/aivimet  \n\nЕсли нужны именно **доставка/логистика**, уточните у компаний на карточках условия «с доставкой/самовывоз».\n\nГде искать в рубрикаторе Biznesinfo:\n- **Металлы и металлообработка → Металлопрокат**  \n- Если нужен черный/цветной: **Металлопрокат черный** или **Металлопрокат цветной**\n\nУточните, чтобы сузить список:\n1) Какой город/область доставки?  \n2) Какой тип металлопроката (трубы/лист/сортовой/арматура и т.д.)?  \n3) Объемы и периодичность (разовая партия или регулярные поставки)?",
+          "checks": [
+            {
+              "id": "D004.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D004.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D004.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 1085
+              }
+            },
+            {
+              "id": "D004.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "металлопрок",
+                  "опт",
+                  "возит",
+                  "постав"
+                ],
+                "min": 1,
+                "hits": [
+                  "металлопрок",
+                  "опт",
+                  "возит",
+                  "постав"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "по рб, от 5т, можно отсрочка?",
+          "requestBody": {
+            "message": "по рб, от 5т, можно отсрочка?",
+            "history": [
+              {
+                "role": "user",
+                "content": "металлопрокат опт кто возит"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот кто из списка выглядит релевантным «опт металлопрокат, кто возит» (Минск/Минский р-н):\n\n1. **А ГРУПП Запад ООО** — металлоцентр, широкий ассортимент (трубы, балки, сортовой/листовой прокат). /company/agrupp  \n2. **АВАБИ ООО** — комплексный поставщик трубной продукции и металлопроката. /company/avabi  \n3. **АйронТрейдПлюс ООО** — оптовая и розничная продажа металлопроката. /company/irontrade  \n4. **АЛМИЭР ИООО** — черный металлопрокат (трубы, листы, уголок, арматура и т.д.). /company/almier  \n5. **Айвимет ООО** — металлопрокат + трубопроводная арматура, широкий перечень. /company/aivimet  \n\nЕсли нужны именно **доставка/логистика**, уточните у компаний на карточках условия «с доставкой/самовывоз».\n\nГде искать в рубрикаторе Biznesinfo:\n- **Металлы и металлообработка → Металлопрокат**  \n- Если нужен черный/цветной: **Металлопрокат черный** или **Металлопрокат цветной**\n\nУточните, чтобы сузить список:\n1) Какой город/область доставки?  \n2) Какой тип металлопроката (трубы/лист/сортовой/арматура и т.д.)?  \n3) Объемы и периодичность (разовая партия или регулярные поставки)?"
+              }
+            ]
+          },
+          "latencyMs": 5803,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3a4f6bef-0df8-4f3c-8578-6d75ca389aa0",
+          "isStub": false,
+          "reply": "Понял: доставка по РБ, от 5 т, нужна возможная отсрочка платежа.  \nДалее предлагаю:\n\n**Как искать в Biznesinfo (быстро):**\n- Рубрика: **Металлы и металлообработка → Металлопрокат**  \n- Ключевые слова: *“металлопрокат оптом”, “доставка по РБ”, “отсрочка платежа”, “трубы оптом”, “листовой прокат”*  \n- Фильтр региона: **вся Беларусь** (или по областям, где есть склад/логистика)\n\n**Что запросить у поставщиков в карточках:**\n- Минимальная партия (≥5 т)  \n- Условия **отсрочки** (срок, лимит, требования)  \n- Стоимость/сроки доставки по РБ  \n- Наличие на складе\n\nЧтобы подобрать конкретных поставщиков и сравнить условия, уточните:\n1) Какие позиции нужны (труба/лист/сортовой/арматура и т.д.)?  \n2) Какой город/область разгрузки?  \n3) Отсрочка на какой срок нужна (например 15/30/45 дней)?\n\nЕсли хотите, могу подготовить короткое RFQ-сообщение поставщикам (email/WhatsApp) с вашими параметрами.",
+          "checks": [
+            {
+              "id": "D004.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D004.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D004.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "металлопрок",
+                  "опт",
+                  "возит",
+                  "постав"
+                ],
+                "min": 1,
+                "hits": [
+                  "металлопрок",
+                  "опт",
+                  "постав"
+                ]
+              }
+            },
+            {
+              "id": "D004.T2.C4",
+              "type": "reply_length_min",
+              "description": "Должен быть содержательный follow-up ответ",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 80,
+                "len": 892
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "топ-3 и риски по качеству/срокам",
+          "requestBody": {
+            "message": "топ-3 и риски по качеству/срокам",
+            "history": [
+              {
+                "role": "user",
+                "content": "металлопрокат опт кто возит"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот кто из списка выглядит релевантным «опт металлопрокат, кто возит» (Минск/Минский р-н):\n\n1. **А ГРУПП Запад ООО** — металлоцентр, широкий ассортимент (трубы, балки, сортовой/листовой прокат). /company/agrupp  \n2. **АВАБИ ООО** — комплексный поставщик трубной продукции и металлопроката. /company/avabi  \n3. **АйронТрейдПлюс ООО** — оптовая и розничная продажа металлопроката. /company/irontrade  \n4. **АЛМИЭР ИООО** — черный металлопрокат (трубы, листы, уголок, арматура и т.д.). /company/almier  \n5. **Айвимет ООО** — металлопрокат + трубопроводная арматура, широкий перечень. /company/aivimet  \n\nЕсли нужны именно **доставка/логистика**, уточните у компаний на карточках условия «с доставкой/самовывоз».\n\nГде искать в рубрикаторе Biznesinfo:\n- **Металлы и металлообработка → Металлопрокат**  \n- Если нужен черный/цветной: **Металлопрокат черный** или **Металлопрокат цветной**\n\nУточните, чтобы сузить список:\n1) Какой город/область доставки?  \n2) Какой тип металлопроката (трубы/лист/сортовой/арматура и т.д.)?  \n3) Объемы и периодичность (разовая партия или регулярные поставки)?"
+              },
+              {
+                "role": "user",
+                "content": "по рб, от 5т, можно отсрочка?"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял: доставка по РБ, от 5 т, нужна возможная отсрочка платежа.  \nДалее предлагаю:\n\n**Как искать в Biznesinfo (быстро):**\n- Рубрика: **Металлы и металлообработка → Металлопрокат**  \n- Ключевые слова: *“металлопрокат оптом”, “доставка по РБ”, “отсрочка платежа”, “трубы оптом”, “листовой прокат”*  \n- Фильтр региона: **вся Беларусь** (или по областям, где есть склад/логистика)\n\n**Что запросить у поставщиков в карточках:**\n- Минимальная партия (≥5 т)  \n- Условия **отсрочки** (срок, лимит, требования)  \n- Стоимость/сроки доставки по РБ  \n- Наличие на складе\n\nЧтобы подобрать конкретных поставщиков и сравнить условия, уточните:\n1) Какие позиции нужны (труба/лист/сортовой/арматура и т.д.)?  \n2) Какой город/область разгрузки?  \n3) Отсрочка на какой срок нужна (например 15/30/45 дней)?\n\nЕсли хотите, могу подготовить короткое RFQ-сообщение поставщикам (email/WhatsApp) с вашими параметрами."
+              }
+            ]
+          },
+          "latencyMs": 9268,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "13988798-9f97-4eb4-879d-4b08b775f1b5",
+          "isStub": false,
+          "reply": "Короткий прозрачный ranking (предварительно):\n1. А ГРУПП Запад ООО — /company/agrupp\n2. АВАБИ ООО — /company/avabi\n3. АйронТрейдПлюс ООО — /company/irontrade\nКритерии: релевантность профиля, локация, полнота контактов, риск несоответствия задаче.\nФокус запроса: металлопрокат опт кто возит топ-3 и риски по качеству/срокам",
+          "checks": [
+            {
+              "id": "D004.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D004.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D004.T3.C3",
+              "type": "any_of",
+              "description": "Нужен практичный shortlist либо прозрачный план отбора",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 21597
+    },
+    {
+      "id": "D005",
+      "title": "Dirty query: бухучет аутсорс ООО Минск",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Предприниматель формулирует запрос обрывками и ожидает быстрый shortlist.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "аутсорс бух учет ооо минск",
+          "requestBody": {
+            "message": "аутсорс бух учет ооо минск",
+            "history": []
+          },
+          "latencyMs": 6884,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "37c0ac41-dd2f-4744-94b3-f2f3f809f323",
+          "isStub": false,
+          "reply": "Вот подходящие варианты в Минске по аутсорсингу бухгалтерского учета для ООО (по базе Biznesinfo). Рекомендуемые кандидаты:\n\n1) **Абакус Аккаунт ЧП** — /company/abacus  \n   Причина: в описании прямо указаны «услуги бухгалтерского учета», «аутсорсинг бухгалтерских услуг», «кадровое делопроизводство».\n\n2) **АудитБизнесКонсалт ООО** — /company/ifrs  \n   Причина: «все виды аудиторских услуг», «аутсорсинг бухгалтерских услуг», «ведение/постановка/восстановление учета».\n\n3) **Баланс Успеха ООО** — /company/byhcompany  \n   Причина: «бухгалтерское сопровождение», «восстановление учета», «кадровый учет», «аутсорсинг».\n\n4) **Айкью-консалт ЧП** — /company/iqconsult  \n   Причина: «профессиональные консалтинговые и бухгалтерские услуги», «бухгалтерские консультации».\n\n5) **Бейкер Тилли Бел ООО** — /company/bakertilly  \n   Причина: «ведение бухгалтерского и налогового учета», «аутсорсинг», «консалтинг».\n\nЧтобы сузить подбор и дать более точный список, уточните, пожалуйста:\n1) Какой режим налогообложения у вашего ООО (ОСН/УСН/НДС)?  \n2) Нужны ли дополнительные услуги (кадры, зарплата, восстановление учета, отчетность)?  \n3) Предпочтение по размеру подрядчика (небольшая бухгалтерия vs. крупная консалтинговая фирма)?",
+          "checks": [
+            {
+              "id": "D005.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D005.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D005.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 1219
+              }
+            },
+            {
+              "id": "D005.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "бух",
+                  "учет",
+                  "аутсор",
+                  "ооо"
+                ],
+                "min": 1,
+                "hits": [
+                  "бух",
+                  "учет",
+                  "аутсор",
+                  "ооо"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "нужен договор, эдо, 1с",
+          "requestBody": {
+            "message": "нужен договор, эдо, 1с",
+            "history": [
+              {
+                "role": "user",
+                "content": "аутсорс бух учет ооо минск"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот подходящие варианты в Минске по аутсорсингу бухгалтерского учета для ООО (по базе Biznesinfo). Рекомендуемые кандидаты:\n\n1) **Абакус Аккаунт ЧП** — /company/abacus  \n   Причина: в описании прямо указаны «услуги бухгалтерского учета», «аутсорсинг бухгалтерских услуг», «кадровое делопроизводство».\n\n2) **АудитБизнесКонсалт ООО** — /company/ifrs  \n   Причина: «все виды аудиторских услуг», «аутсорсинг бухгалтерских услуг», «ведение/постановка/восстановление учета».\n\n3) **Баланс Успеха ООО** — /company/byhcompany  \n   Причина: «бухгалтерское сопровождение», «восстановление учета», «кадровый учет», «аутсорсинг».\n\n4) **Айкью-консалт ЧП** — /company/iqconsult  \n   Причина: «профессиональные консалтинговые и бухгалтерские услуги», «бухгалтерские консультации».\n\n5) **Бейкер Тилли Бел ООО** — /company/bakertilly  \n   Причина: «ведение бухгалтерского и налогового учета», «аутсорсинг», «консалтинг».\n\nЧтобы сузить подбор и дать более точный список, уточните, пожалуйста:\n1) Какой режим налогообложения у вашего ООО (ОСН/УСН/НДС)?  \n2) Нужны ли дополнительные услуги (кадры, зарплата, восстановление учета, отчетность)?  \n3) Предпочтение по размеру подрядчика (небольшая бухгалтерия vs. крупная консалтинговая фирма)?"
+              }
+            ]
+          },
+          "latencyMs": 7058,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6decd176-fa9d-4a29-9d13-3e3dcd32f101",
+          "isStub": false,
+          "reply": "Понял: нужен договор, ЭДО и работа в 1С. Из доступных кандидатов (Минск) начните с этих — по профилю аутсорсинга бухучета:\n\n1) **Абакус Аккаунт ЧП** — /company/abacus  \n   Причина: в описании прямо «аутсорсинг бухгалтерских услуг», «бухгалтерское сопровождение».\n\n2) **АудитБизнесКонсалт ООО** — /company/ifrs  \n   Причина: «аутсорсинг бухгалтерских услуг», «ведение/постановка/восстановление учета».\n\n3) **Баланс Успеха ООО** — /company/byhcompany  \n   Причина: «бухгалтерское сопровождение», «аутсорсинг», «кадровый учет».\n\n4) **Бейкер Тилли Бел ООО** — /company/bakertilly  \n   Причина: «ведение бухгалтерского и налогового учета», «аутсорсинг».\n\nВажно: по ЭДО и 1С в карточках не указано — лучше уточнить у компаний напрямую (поддерживаемые операторы ЭДО и версии 1С).\n\nЧтобы подобрать точнее, уточните, пожалуйста:\n1) Какая версия 1С нужна (8.3, УПП, Бухгалтерия 3.0 и т.п.)?  \n2) Какой оператор ЭДО предпочтителен (например, Диадок, СБИС, ЭДО от 1С)?  \n3) Объем операций: ориентировочно уточняется первичных документов/мес?  \n\nЕсли хотите, могу подготовить короткий запрос (RFQ) для рассылки этим компаниям.",
+          "checks": [
+            {
+              "id": "D005.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D005.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D005.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "бух",
+                  "учет",
+                  "аутсор",
+                  "ооо"
+                ],
+                "min": 1,
+                "hits": [
+                  "бух",
+                  "учет",
+                  "аутсор",
+                  "ооо"
+                ]
+              }
+            },
+            {
+              "id": "D005.T2.C4",
+              "type": "includes_any",
+              "description": "Если есть гео-сигнал, он должен учитываться",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "кого первым прозвонить и 5 вопросов",
+          "requestBody": {
+            "message": "кого первым прозвонить и 5 вопросов",
+            "history": [
+              {
+                "role": "user",
+                "content": "аутсорс бух учет ооо минск"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот подходящие варианты в Минске по аутсорсингу бухгалтерского учета для ООО (по базе Biznesinfo). Рекомендуемые кандидаты:\n\n1) **Абакус Аккаунт ЧП** — /company/abacus  \n   Причина: в описании прямо указаны «услуги бухгалтерского учета», «аутсорсинг бухгалтерских услуг», «кадровое делопроизводство».\n\n2) **АудитБизнесКонсалт ООО** — /company/ifrs  \n   Причина: «все виды аудиторских услуг», «аутсорсинг бухгалтерских услуг», «ведение/постановка/восстановление учета».\n\n3) **Баланс Успеха ООО** — /company/byhcompany  \n   Причина: «бухгалтерское сопровождение», «восстановление учета», «кадровый учет», «аутсорсинг».\n\n4) **Айкью-консалт ЧП** — /company/iqconsult  \n   Причина: «профессиональные консалтинговые и бухгалтерские услуги», «бухгалтерские консультации».\n\n5) **Бейкер Тилли Бел ООО** — /company/bakertilly  \n   Причина: «ведение бухгалтерского и налогового учета», «аутсорсинг», «консалтинг».\n\nЧтобы сузить подбор и дать более точный список, уточните, пожалуйста:\n1) Какой режим налогообложения у вашего ООО (ОСН/УСН/НДС)?  \n2) Нужны ли дополнительные услуги (кадры, зарплата, восстановление учета, отчетность)?  \n3) Предпочтение по размеру подрядчика (небольшая бухгалтерия vs. крупная консалтинговая фирма)?"
+              },
+              {
+                "role": "user",
+                "content": "нужен договор, эдо, 1с"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял: нужен договор, ЭДО и работа в 1С. Из доступных кандидатов (Минск) начните с этих — по профилю аутсорсинга бухучета:\n\n1) **Абакус Аккаунт ЧП** — /company/abacus  \n   Причина: в описании прямо «аутсорсинг бухгалтерских услуг», «бухгалтерское сопровождение».\n\n2) **АудитБизнесКонсалт ООО** — /company/ifrs  \n   Причина: «аутсорсинг бухгалтерских услуг», «ведение/постановка/восстановление учета».\n\n3) **Баланс Успеха ООО** — /company/byhcompany  \n   Причина: «бухгалтерское сопровождение», «аутсорсинг», «кадровый учет».\n\n4) **Бейкер Тилли Бел ООО** — /company/bakertilly  \n   Причина: «ведение бухгалтерского и налогового учета», «аутсорсинг».\n\nВажно: по ЭДО и 1С в карточках не указано — лучше уточнить у компаний напрямую (поддерживаемые операторы ЭДО и версии 1С).\n\nЧтобы подобрать точнее, уточните, пожалуйста:\n1) Какая версия 1С нужна (8.3, УПП, Бухгалтерия 3.0 и т.п.)?  \n2) Какой оператор ЭДО предпочтителен (например, Диадок, СБИС, ЭДО от 1С)?  \n3) Объем операций: ориентировочно уточняется первичных документов/мес?  \n\nЕсли хотите, могу подготовить короткий запрос (RFQ) для рассылки этим компаниям."
+              }
+            ]
+          },
+          "latencyMs": 8369,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4a7f46c1-32c3-4b8a-905b-808071fd0c56",
+          "isStub": false,
+          "reply": "По текущему списку кандидатов у меня нет ни одной компании с явным профилем «аутсорсинг бухучета/1С/ЭДО», поэтому назвать «кого первым прозвонить» по конкретным карточкам пока не могу. Предлагаю быстро сформировать релевантный список в каталоге и тогда расставим приоритеты.\n\nКак выбрать, кого прозвонить первым (критерии):\n1) Есть явное «аутсорсинг бухучета» в описании + опыт с 1С.  \n2) Указан ЭДО (оператор/интеграции) или готовность подключить.  \n3) Полные контакты и сайт — выше вероятность оперативного ответа.  \n\n5 вопросов для первого звонка:\n1) Работаете ли с уточняется и есть ли у вас собственные 1С‑специалисты?  \n2) Какой ЭДО поддерживаете (Диадок/СБИС/1С‑ЭДО/другое) и помогаете ли с подключением?  \n3) Что входит в договор аутсорсинга (кадры/зарплата/отчетность/НДС/восстановление)?  \n4) Какая стоимость при уточняется и как формируется тариф?  \n5) Кто будет закреплен за нами и каков SLA по срокам ответов/отчетности?\n\nЕсли дадите 3–5 конкретных компаний/карточек из Biznesinfo, я сразу расставлю приоритеты «кого прозвонить первым».\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Абакус Аккаунт ЧП — /company/abacus\n2. АудитБизнесКонсалт ООО — /company/ifrs\n3. Баланс Успеха ООО — /company/byhcompany\n4. Бейкер Тилли Бел ООО — /company/bakertilly",
+          "checks": [
+            {
+              "id": "D005.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D005.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "Refusal is accompanied by useful guidance",
+              "details": {
+                "refusal": true,
+                "useful": true
+              }
+            },
+            {
+              "id": "D005.T3.C3",
+              "type": "any_of",
+              "description": "Нужен практичный shortlist либо прозрачный план отбора",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 22312
+    },
+    {
+      "id": "D006",
+      "title": "Dirty query: вентиляция склад проект+монтаж",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Запрос техподрядчика без пунктуации и со сжатыми требованиями.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "вентиляция склад проект монтаж",
+          "requestBody": {
+            "message": "вентиляция склад проект монтаж",
+            "history": []
+          },
+          "latencyMs": 5596,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "78109958-2262-4f5d-be2e-d15a1e100935",
+          "isStub": false,
+          "reply": "Понял запрос: «вентиляция склад проект монтаж». Для поиска по каталогу Biznesinfo рекомендую сразу 2 направления:\n\n**Рубрики для поиска:**\n1. **Вентиляция и кондиционирование воздуха** (Строительство и недвижимость)  \n   /catalog/stroitelstvo-nedvijimost/ventilyaciya-i-kondicionirovanie-vozduha  \n2. **Проектные работы** или **Архитектура и проектирование** (если нужен проект/раздел ОВ)  \n   /catalog/stroitelstvo-nedvijimost/proektnye-raboty  \n   /catalog/stroitelstvo-nedvijimost/arhitektura-i-proektirovanie  \n\n**Ключевые слова/синонимы:**\n- проект вентиляции склада\n- монтаж вентиляции\n- ОВиК для склада\n- приточно-вытяжная вентиляция\n- промышленная вентиляция\n- система дымоудаления (если актуально)\n\n**Фильтры:**\n- Регион/город объекта (чтобы найти местных подрядчиков)\n- “Проектирование” + “Монтаж” (если нужен полный цикл)\n\nЧтобы уточнить и дать точные шаги/поиск:\n1) В каком **городе/области** находится склад?  \n2) Нужен **только проект** или **проект + монтаж**?  \n3) Тип склада: **холодный/тёплый**, примерная площадь?",
+          "checks": [
+            {
+              "id": "D006.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D006.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D006.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 1032
+              }
+            },
+            {
+              "id": "D006.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "вентиляц",
+                  "склад",
+                  "проект",
+                  "монтаж"
+                ],
+                "min": 1,
+                "hits": [
+                  "вентиляц",
+                  "склад",
+                  "проект",
+                  "монтаж"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "могилев, объект 1200м2",
+          "requestBody": {
+            "message": "могилев, объект 1200м2",
+            "history": [
+              {
+                "role": "user",
+                "content": "вентиляция склад проект монтаж"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял запрос: «вентиляция склад проект монтаж». Для поиска по каталогу Biznesinfo рекомендую сразу 2 направления:\n\n**Рубрики для поиска:**\n1. **Вентиляция и кондиционирование воздуха** (Строительство и недвижимость)  \n   /catalog/stroitelstvo-nedvijimost/ventilyaciya-i-kondicionirovanie-vozduha  \n2. **Проектные работы** или **Архитектура и проектирование** (если нужен проект/раздел ОВ)  \n   /catalog/stroitelstvo-nedvijimost/proektnye-raboty  \n   /catalog/stroitelstvo-nedvijimost/arhitektura-i-proektirovanie  \n\n**Ключевые слова/синонимы:**\n- проект вентиляции склада\n- монтаж вентиляции\n- ОВиК для склада\n- приточно-вытяжная вентиляция\n- промышленная вентиляция\n- система дымоудаления (если актуально)\n\n**Фильтры:**\n- Регион/город объекта (чтобы найти местных подрядчиков)\n- “Проектирование” + “Монтаж” (если нужен полный цикл)\n\nЧтобы уточнить и дать точные шаги/поиск:\n1) В каком **городе/области** находится склад?  \n2) Нужен **только проект** или **проект + монтаж**?  \n3) Тип склада: **холодный/тёплый**, примерная площадь?"
+              }
+            ]
+          },
+          "latencyMs": 9313,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f1d4e16b-9139-4639-8250-cad4ed5abec0",
+          "isStub": false,
+          "reply": "Могилёв, склад 1200 м² — вот наиболее релевантные варианты из каталога (по вентиляции/монтажу, плюс отдельно проектирование):\n\n**Подрядчики по вентиляции/монтажу (Могилёв):**\n1) **Баир Вест ООО** — системы вентиляции и кондиционирования, приточно‑вытяжные установки  \n   /company/bair  \n   *Подходит, т.к. специализация на вентиляционных системах.*\n2) **Альфа‑Норд ЧСУП** — монтаж систем вентиляции  \n   /company/alfa-nord  \n   *Прямо указаны монтаж вентиляции и промработы.*\n3) **СПМК №130 ГУКДСП** — санитарно‑технические и монтажные работы  \n   /company/gyspmk-130  \n   *Есть монтажные работы, может быть полезно как генподряд/монтаж.*\n\n**Проектирование (если нужен отдельный проект/ОВ):**\n4) **Институт Могилевгражданпроект ОАО** — архитектурное и проектное направление  \n   /company/imgp  \n   *Может выполнить проектную часть, уточнить наличие раздела ОВ.*\n\n> Примечание: компании по «продаже/установке кондиционеров» (КЛИМАТКОНД, ХОЛОДПРОМ) менее профильны для вентиляции склада 1200 м² — их стоит рассматривать, если нужен только кондиционирование/холод.\n\nЧтобы точнее сузить и подобрать 1–2 лучших варианта:\n1) Нужен **проект + монтаж** под ключ или только **монтаж по готовому проекту**?  \n2) Тип склада: **тёплый/холодный**, есть ли тепловыделения/оборудование?  \n3) Есть ли требования по **дымоудалению** или **кратности воздухообмена**?",
+          "checks": [
+            {
+              "id": "D006.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D006.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D006.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "вентиляц",
+                  "склад",
+                  "проект",
+                  "монтаж"
+                ],
+                "min": 1,
+                "hits": [
+                  "вентиляц",
+                  "склад",
+                  "проект",
+                  "монтаж"
+                ]
+              }
+            },
+            {
+              "id": "D006.T2.C4",
+              "type": "includes_any",
+              "description": "Если есть гео-сигнал, он должен учитываться",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "могил"
+                ],
+                "hits": [
+                  "могил"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "рейтинг 3 подрядчиков и риски",
+          "requestBody": {
+            "message": "рейтинг 3 подрядчиков и риски",
+            "history": [
+              {
+                "role": "user",
+                "content": "вентиляция склад проект монтаж"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял запрос: «вентиляция склад проект монтаж». Для поиска по каталогу Biznesinfo рекомендую сразу 2 направления:\n\n**Рубрики для поиска:**\n1. **Вентиляция и кондиционирование воздуха** (Строительство и недвижимость)  \n   /catalog/stroitelstvo-nedvijimost/ventilyaciya-i-kondicionirovanie-vozduha  \n2. **Проектные работы** или **Архитектура и проектирование** (если нужен проект/раздел ОВ)  \n   /catalog/stroitelstvo-nedvijimost/proektnye-raboty  \n   /catalog/stroitelstvo-nedvijimost/arhitektura-i-proektirovanie  \n\n**Ключевые слова/синонимы:**\n- проект вентиляции склада\n- монтаж вентиляции\n- ОВиК для склада\n- приточно-вытяжная вентиляция\n- промышленная вентиляция\n- система дымоудаления (если актуально)\n\n**Фильтры:**\n- Регион/город объекта (чтобы найти местных подрядчиков)\n- “Проектирование” + “Монтаж” (если нужен полный цикл)\n\nЧтобы уточнить и дать точные шаги/поиск:\n1) В каком **городе/области** находится склад?  \n2) Нужен **только проект** или **проект + монтаж**?  \n3) Тип склада: **холодный/тёплый**, примерная площадь?"
+              },
+              {
+                "role": "user",
+                "content": "могилев, объект 1200м2"
+              },
+              {
+                "role": "assistant",
+                "content": "Могилёв, склад 1200 м² — вот наиболее релевантные варианты из каталога (по вентиляции/монтажу, плюс отдельно проектирование):\n\n**Подрядчики по вентиляции/монтажу (Могилёв):**\n1) **Баир Вест ООО** — системы вентиляции и кондиционирования, приточно‑вытяжные установки  \n   /company/bair  \n   *Подходит, т.к. специализация на вентиляционных системах.*\n2) **Альфа‑Норд ЧСУП** — монтаж систем вентиляции  \n   /company/alfa-nord  \n   *Прямо указаны монтаж вентиляции и промработы.*\n3) **СПМК №130 ГУКДСП** — санитарно‑технические и монтажные работы  \n   /company/gyspmk-130  \n   *Есть монтажные работы, может быть полезно как генподряд/монтаж.*\n\n**Проектирование (если нужен отдельный проект/ОВ):**\n4) **Институт Могилевгражданпроект ОАО** — архитектурное и проектное направление  \n   /company/imgp  \n   *Может выполнить проектную часть, уточнить наличие раздела ОВ.*\n\n> Примечание: компании по «продаже/установке кондиционеров» (КЛИМАТКОНД, ХОЛОДПРОМ) менее профильны для вентиляции склада 1200 м² — их стоит рассматривать, если нужен только кондиционирование/холод.\n\nЧтобы точнее сузить и подобрать 1–2 лучших варианта:\n1) Нужен **проект + монтаж** под ключ или только **монтаж по готовому проекту**?  \n2) Тип склада: **тёплый/холодный**, есть ли тепловыделения/оборудование?  \n3) Есть ли требования по **дымоудалению** или **кратности воздухообмена**?"
+              }
+            ]
+          },
+          "latencyMs": 10626,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "8340e098-cb9d-4155-88a3-ba6e8b3811c3",
+          "isStub": false,
+          "reply": "Короткий прозрачный ranking (предварительно):\n1. Bair — /company/bair\n2. Alfa Nord — /company/alfa-nord\n3. Gyspmk 130 — /company/gyspmk-130\nКритерии: релевантность профиля, локация, полнота контактов, риск несоответствия задаче.\nФокус запроса: вентиляция склад проект монтаж рейтинг 3 подрядчиков и риски\n\nРиски по качеству/срокам:\n1. Качество: запросите сертификаты/паспорт качества и условия рекламации.\n2. Сроки: фиксируйте дату поставки, SLA и ответственность за срыв.\n3. Контроль: согласуйте контрольную поставку/приемку и критерии брака.",
+          "checks": [
+            {
+              "id": "D006.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D006.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D006.T3.C3",
+              "type": "any_of",
+              "description": "Нужен практичный shortlist либо прозрачный план отбора",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 25536
+    },
+    {
+      "id": "D007",
+      "title": "Dirty query: сертификат соответствия",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "verification"
+      ],
+      "personaGoal": "Пользователь хочет быстро понять куда идти и какие документы нужны.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "D007.T2.C3",
+          "type": "mentions_any_terms",
+          "description": "Должна сохраняться связь с исходной задачей",
+          "passed": false,
+          "reason": "Not enough terms mentioned",
+          "details": {
+            "terms": [
+              "сертифик",
+              "соответств",
+              "док"
+            ],
+            "min": 1,
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "сертификат соответствия где сделать",
+          "requestBody": {
+            "message": "сертификат соответствия где сделать",
+            "history": []
+          },
+          "latencyMs": 6972,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2074083c-62f0-438f-90ba-480bc0f15d68",
+          "isStub": false,
+          "reply": "Понял запрос: **«сертификат соответствия — где сделать»**.  \nЧтобы найти подходящую организацию в Biznesinfo, лучше искать по рубрикам и ключевым словам, так как в текущем списке кандидатов релевантных центров сертификации нет.\n\n**Рекомендуемые рубрики/поиск:**\n- «Сертификация продукции и услуг»\n- «Испытательные лаборатории»\n- «Органы по сертификации»\n- «Стандартизация, метрология, сертификация»\n\n**Ключевые слова/синонимы для поиска:**\n- «сертификация», «сертификат соответствия»\n- «декларация о соответствии»\n- «орган по сертификации»\n- «испытательная лаборатория»\n- «Технические регламенты ТР ТС / ЕАЭС»\n- «ISO» (если нужна система менеджмента)\n\n**Фильтр по регионам/городам:** выбирайте ближайший город/область, чтобы ускорить отбор.\n\nЧтобы дать более точные рекомендации, уточните, пожалуйста:\n1) Что именно нужно сертифицировать (товар/услуга/оборудование)?  \n2) Нужен **сертификат** или **декларация о соответствии**?  \n3) В каком городе/области Беларусь вам удобнее проходить сертификацию?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. БЕЛОРУССКИЙ НАУЧНО-ИССЛЕДОВАТЕЛЬСКИЙ ИНСТИТУТ ТРАНСПОРТА ТРАНСТЕХНИКА РУП — /company/transtekhnika (Научные учреждения и организации; Минск, minsk)\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным.",
+          "checks": [
+            {
+              "id": "D007.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D007.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D007.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 1332
+              }
+            },
+            {
+              "id": "D007.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "сертифик",
+                  "соответств",
+                  "док"
+                ],
+                "min": 1,
+                "hits": [
+                  "сертифик",
+                  "соответств"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "для продукции рб, быстро",
+          "requestBody": {
+            "message": "для продукции рб, быстро",
+            "history": [
+              {
+                "role": "user",
+                "content": "сертификат соответствия где сделать"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял запрос: **«сертификат соответствия — где сделать»**.  \nЧтобы найти подходящую организацию в Biznesinfo, лучше искать по рубрикам и ключевым словам, так как в текущем списке кандидатов релевантных центров сертификации нет.\n\n**Рекомендуемые рубрики/поиск:**\n- «Сертификация продукции и услуг»\n- «Испытательные лаборатории»\n- «Органы по сертификации»\n- «Стандартизация, метрология, сертификация»\n\n**Ключевые слова/синонимы для поиска:**\n- «сертификация», «сертификат соответствия»\n- «декларация о соответствии»\n- «орган по сертификации»\n- «испытательная лаборатория»\n- «Технические регламенты ТР ТС / ЕАЭС»\n- «ISO» (если нужна система менеджмента)\n\n**Фильтр по регионам/городам:** выбирайте ближайший город/область, чтобы ускорить отбор.\n\nЧтобы дать более точные рекомендации, уточните, пожалуйста:\n1) Что именно нужно сертифицировать (товар/услуга/оборудование)?  \n2) Нужен **сертификат** или **декларация о соответствии**?  \n3) В каком городе/области Беларусь вам удобнее проходить сертификацию?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. БЕЛОРУССКИЙ НАУЧНО-ИССЛЕДОВАТЕЛЬСКИЙ ИНСТИТУТ ТРАНСПОРТА ТРАНСТЕХНИКА РУП — /company/transtekhnika (Научные учреждения и организации; Минск, minsk)\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным."
+              }
+            ]
+          },
+          "latencyMs": 6125,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "04b265f8-569a-42b5-af55-b0ad215a3273",
+          "isStub": false,
+          "reply": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. БЕЛОРУССКИЙ НАУЧНО-ИССЛЕДОВАТЕЛЬСКИЙ ИНСТИТУТ ТРАНСПОРТА ТРАНСТЕХНИКА РУП — /company/transtekhnika (Минск, minsk)\nПодтвержденных вариантов пока мало, поэтому не выдумываю дополнительные компании.\nЧто уточнить у кандидатов сейчас:\n1. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n2. Уточните ответственное контактное лицо для быстрого согласования.",
+          "checks": [
+            {
+              "id": "D007.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D007.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D007.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": false,
+              "reason": "Not enough terms mentioned",
+              "details": {
+                "terms": [
+                  "сертифик",
+                  "соответств",
+                  "док"
+                ],
+                "min": 1,
+                "hits": []
+              }
+            },
+            {
+              "id": "D007.T2.C4",
+              "type": "reply_length_min",
+              "description": "Должен быть содержательный follow-up ответ",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 80,
+                "len": 446
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "дай план: куда идти и какие доки",
+          "requestBody": {
+            "message": "дай план: куда идти и какие доки",
+            "history": [
+              {
+                "role": "user",
+                "content": "сертификат соответствия где сделать"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял запрос: **«сертификат соответствия — где сделать»**.  \nЧтобы найти подходящую организацию в Biznesinfo, лучше искать по рубрикам и ключевым словам, так как в текущем списке кандидатов релевантных центров сертификации нет.\n\n**Рекомендуемые рубрики/поиск:**\n- «Сертификация продукции и услуг»\n- «Испытательные лаборатории»\n- «Органы по сертификации»\n- «Стандартизация, метрология, сертификация»\n\n**Ключевые слова/синонимы для поиска:**\n- «сертификация», «сертификат соответствия»\n- «декларация о соответствии»\n- «орган по сертификации»\n- «испытательная лаборатория»\n- «Технические регламенты ТР ТС / ЕАЭС»\n- «ISO» (если нужна система менеджмента)\n\n**Фильтр по регионам/городам:** выбирайте ближайший город/область, чтобы ускорить отбор.\n\nЧтобы дать более точные рекомендации, уточните, пожалуйста:\n1) Что именно нужно сертифицировать (товар/услуга/оборудование)?  \n2) Нужен **сертификат** или **декларация о соответствии**?  \n3) В каком городе/области Беларусь вам удобнее проходить сертификацию?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. БЕЛОРУССКИЙ НАУЧНО-ИССЛЕДОВАТЕЛЬСКИЙ ИНСТИТУТ ТРАНСПОРТА ТРАНСТЕХНИКА РУП — /company/transtekhnika (Научные учреждения и организации; Минск, minsk)\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным."
+              },
+              {
+                "role": "user",
+                "content": "для продукции рб, быстро"
+              },
+              {
+                "role": "assistant",
+                "content": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. БЕЛОРУССКИЙ НАУЧНО-ИССЛЕДОВАТЕЛЬСКИЙ ИНСТИТУТ ТРАНСПОРТА ТРАНСТЕХНИКА РУП — /company/transtekhnika (Минск, minsk)\nПодтвержденных вариантов пока мало, поэтому не выдумываю дополнительные компании.\nЧто уточнить у кандидатов сейчас:\n1. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n2. Уточните ответственное контактное лицо для быстрого согласования."
+              }
+            ]
+          },
+          "latencyMs": 8742,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "5a398306-9dc1-4a8b-9a19-d0bf6f110fc9",
+          "isStub": false,
+          "reply": "Ниже — **общий план**, куда обращаться и какие документы обычно нужны для **сертификата/декларации соответствия на продукцию в РБ**. Дам универсально (без привязки к конкретной организации), потому что точный набор зависит от вида продукции и схемы подтверждения.\n\n## План действий (быстро)\n1. **Определить, что требуется**: сертификат или декларация соответствия (и по каким ТР ТС/ЕАЭС или ТР РБ).\n2. **Найти орган по сертификации** в реестре (или через Biznesinfo → рубрика «Органы по сертификации», «Сертификация продукции и услуг»).\n3. **Подать заявку** с пакетом документов.\n4. **Испытания/оценка** (если требуются): лабораторные испытания образцов.\n5. **Регистрация и получение документа** (сертификат/декларация).\n\n## Какие документы обычно нужны\n1. **Заявка** на сертификацию/декларирование.\n2. **Учредительные документы** заявителя (УНП, реквизиты).\n3. **Описание продукции** (наименование, назначение, состав/материалы, модель/артикул).\n4. **Техническая документация**: ТУ/СТБ/паспорт/инструкция/чертежи.\n5. **Документы на производство** (если требуется): контракт, инвойс, спецификация, сведения о производителе.\n6. **Маркировка и этикетка** (макет/образец).\n7. **Результаты испытаний** (если уже есть), или согласие на их проведение.\n8. **Договор с органом сертификации** (обычно оформляется при подаче).\n\n> Важно: точный перечень зависит от категории продукции и схемы подтверждения (серийное производство, партия, единичное изделие).\n\n---\n\nЧтобы дать максимально точную дорожную карту, уточните 3 момента:\n1) **Какая именно продукция** (категория и назначение)?  \n2) **Производитель** — ваш (РБ) или импорт?  \n3) **Форма подтверждения** — нужен сертификат или декларация (или не уверены)?\n\nЕсли хотите, могу подобрать рубрики/кандидатов в Biznesinfo под ваш тип продукции и регион.",
+          "checks": [
+            {
+              "id": "D007.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D007.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D007.T3.C3",
+              "type": "includes_any",
+              "description": "Должны быть корректные шаги верификации",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "провер",
+                  "реестр",
+                  "источник",
+                  "официаль",
+                  "данных",
+                  "унп",
+                  "карточк"
+                ],
+                "hits": [
+                  "реестр",
+                  "унп"
+                ]
+              }
+            },
+            {
+              "id": "D007.T3.C4",
+              "type": "any_of",
+              "description": "Нужен структурированный чеклист/план",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "question_count_min",
+                    "passed": true,
+                    "reason": "Enough questions"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 21839
+    },
+    {
+      "id": "D008",
+      "title": "Dirty query: уборка после ремонта",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Срочный запрос B2B-услуги в разговорном стиле.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "уборка после ремонта минск фирма",
+          "requestBody": {
+            "message": "уборка после ремонта минск фирма",
+            "history": []
+          },
+          "latencyMs": 4873,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3cfb1797-c72c-44dd-a0be-c227b5c04f79",
+          "isStub": false,
+          "reply": "Вот подходящие фирмы в Минске для **уборки после ремонта** (из доступных кандидатов):\n\n1. **БэстКлининг ООО** — уборка после ремонта прямо указана; квартиры/коттеджи/офисы.  \n   /company/bestcleaning  \n\n2. **БК-ИНВЕСТ ООО** — послестроительная уборка, мойка окон; Минск.  \n   /company/cleanoff  \n\n3. **Антония ИЧСУП** — клининговая компания в Минске (подходит как общий клининг).  \n   /company/antonia  \n\n4. **Аклини ООО** — профессиональная уборка помещений и территории; Минск.  \n   /company/aklini  \n\nЕсли нужен «лучший/самый надежный», могу ранжировать по полноте контактов и соответствию услуге, но все равно нужно уточнить детали.\n\nУточните, пожалуйста:\n1) Что именно убирать: квартира/офис/коммерческий объект?  \n2) Площадь (м²) и нужны ли окна/витрины?  \n3) Сроки/дата и разовая или регулярная уборка?",
+          "checks": [
+            {
+              "id": "D008.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D008.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D008.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 809
+              }
+            },
+            {
+              "id": "D008.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "уборк",
+                  "ремонт",
+                  "фирм",
+                  "договор"
+                ],
+                "min": 1,
+                "hits": [
+                  "уборк",
+                  "ремонт",
+                  "фирм"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "завтра утром, 300м2, юрлицо",
+          "requestBody": {
+            "message": "завтра утром, 300м2, юрлицо",
+            "history": [
+              {
+                "role": "user",
+                "content": "уборка после ремонта минск фирма"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот подходящие фирмы в Минске для **уборки после ремонта** (из доступных кандидатов):\n\n1. **БэстКлининг ООО** — уборка после ремонта прямо указана; квартиры/коттеджи/офисы.  \n   /company/bestcleaning  \n\n2. **БК-ИНВЕСТ ООО** — послестроительная уборка, мойка окон; Минск.  \n   /company/cleanoff  \n\n3. **Антония ИЧСУП** — клининговая компания в Минске (подходит как общий клининг).  \n   /company/antonia  \n\n4. **Аклини ООО** — профессиональная уборка помещений и территории; Минск.  \n   /company/aklini  \n\nЕсли нужен «лучший/самый надежный», могу ранжировать по полноте контактов и соответствию услуге, но все равно нужно уточнить детали.\n\nУточните, пожалуйста:\n1) Что именно убирать: квартира/офис/коммерческий объект?  \n2) Площадь (м²) и нужны ли окна/витрины?  \n3) Сроки/дата и разовая или регулярная уборка?"
+              }
+            ]
+          },
+          "latencyMs": 4712,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4555d2a9-60b2-40c4-87b1-dfcff8dd919d",
+          "isStub": false,
+          "reply": "Понял: **завтра утром, 300 м², юрлицо, Минск**. Подходящие варианты:\n\n1. **БэстКлининг ООО** — уборка после ремонта прямо указана. /company/bestcleaning  \n2. **БК-ИНВЕСТ ООО** — послестроительная уборка, мойка окон. /company/cleanoff  \n3. **Антония ИЧСУП** — клининг в Минске, можно уточнить послестроительную. /company/antonia  \n4. **Аклини ООО** — проф. уборка помещений, Минск. /company/aklini  \n\nМогу подготовить короткие запросы этим компаниям.\n\nУточните, пожалуйста:\n1) Адрес объекта и есть ли парковка/пропуск?  \n2) Нужны ли спецработы: вынос мусора, мойка окон, химчистка?  \n3) Нужен ли договор/безнал/НДС?",
+          "checks": [
+            {
+              "id": "D008.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D008.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D008.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "уборк",
+                  "ремонт",
+                  "фирм",
+                  "договор"
+                ],
+                "min": 1,
+                "hits": [
+                  "уборк",
+                  "ремонт",
+                  "договор"
+                ]
+              }
+            },
+            {
+              "id": "D008.T2.C4",
+              "type": "includes_any",
+              "description": "Если есть гео-сигнал, он должен учитываться",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "дай shortlist + что включить в договор",
+          "requestBody": {
+            "message": "дай shortlist + что включить в договор",
+            "history": [
+              {
+                "role": "user",
+                "content": "уборка после ремонта минск фирма"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот подходящие фирмы в Минске для **уборки после ремонта** (из доступных кандидатов):\n\n1. **БэстКлининг ООО** — уборка после ремонта прямо указана; квартиры/коттеджи/офисы.  \n   /company/bestcleaning  \n\n2. **БК-ИНВЕСТ ООО** — послестроительная уборка, мойка окон; Минск.  \n   /company/cleanoff  \n\n3. **Антония ИЧСУП** — клининговая компания в Минске (подходит как общий клининг).  \n   /company/antonia  \n\n4. **Аклини ООО** — профессиональная уборка помещений и территории; Минск.  \n   /company/aklini  \n\nЕсли нужен «лучший/самый надежный», могу ранжировать по полноте контактов и соответствию услуге, но все равно нужно уточнить детали.\n\nУточните, пожалуйста:\n1) Что именно убирать: квартира/офис/коммерческий объект?  \n2) Площадь (м²) и нужны ли окна/витрины?  \n3) Сроки/дата и разовая или регулярная уборка?"
+              },
+              {
+                "role": "user",
+                "content": "завтра утром, 300м2, юрлицо"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял: **завтра утром, 300 м², юрлицо, Минск**. Подходящие варианты:\n\n1. **БэстКлининг ООО** — уборка после ремонта прямо указана. /company/bestcleaning  \n2. **БК-ИНВЕСТ ООО** — послестроительная уборка, мойка окон. /company/cleanoff  \n3. **Антония ИЧСУП** — клининг в Минске, можно уточнить послестроительную. /company/antonia  \n4. **Аклини ООО** — проф. уборка помещений, Минск. /company/aklini  \n\nМогу подготовить короткие запросы этим компаниям.\n\nУточните, пожалуйста:\n1) Адрес объекта и есть ли парковка/пропуск?  \n2) Нужны ли спецработы: вынос мусора, мойка окон, химчистка?  \n3) Нужен ли договор/безнал/НДС?"
+              }
+            ]
+          },
+          "latencyMs": 8291,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "91968a17-a252-46b5-90ed-93b786dea44c",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. БэстКлининг ООО — /company/bestcleaning\n2. БК-ИНВЕСТ ООО — /company/cleanoff\n3. Антония ИЧСУП — /company/antonia (Минск, minsk)\nФокус: уборка после ремонта минск фирма дай shortlist + что включить в договор.\n\nЧто включить в договор (минимум):\n1. Предмет и объем работ: точный перечень услуг/результата, сроки и этапы.\n2. SLA и дедлайны: время реакции, срок выполнения, условия переноса сроков.\n3. Приемка и акты: критерии качества, порядок замечаний, сроки устранения.\n4. Цена и ответственность: что входит в стоимость, штрафы/пени, порядок расторжения.",
+          "checks": [
+            {
+              "id": "D008.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D008.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D008.T3.C3",
+              "type": "any_of",
+              "description": "Нужен практичный shortlist либо прозрачный план отбора",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 17876
+    },
+    {
+      "id": "D009",
+      "title": "Dirty query: коробки с логотипом",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "template"
+      ],
+      "personaGoal": "Закупщик упаковки хочет сразу получить поставщиков и готовый outreach.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "поставщик коробок с логотипом",
+          "requestBody": {
+            "message": "поставщик коробок с логотипом",
+            "history": []
+          },
+          "latencyMs": 4289,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "64381199-09f1-4ded-9603-8ab2c893537c",
+          "isStub": false,
+          "reply": "Для поиска поставщиков коробок с логотипом на Biznesinfo подойдут рубрики и ключевые слова:\n\n**Рубрики:**\n1) Полиграфия и упаковка → **Упаковка / упаковочные материалы**  \n2) Реклама → **Рекламно-сувенирная продукция**  \n3) Производство → **Тара и упаковка**\n\n**Ключевые слова/синонимы:**\n- коробки с логотипом  \n- упаковка с печатью / брендированная упаковка  \n- картонные коробки на заказ  \n- коробки с фирменной символикой  \n- упаковка для маркетплейсов (если нужно)\n\n**Фильтры по региону/городу:** укажите ваш город для более точной выдачи.\n\nУточните, пожалуйста:  \n1) В каком городе/области ищете?  \n2) Тип коробок (картонные, гофрокартон, подарочные, пищевые)?  \n3) Нужна печать/дизайн «под ключ» или есть макет?",
+          "checks": [
+            {
+              "id": "D009.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D009.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D009.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 718
+              }
+            },
+            {
+              "id": "D009.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "короб",
+                  "логотип",
+                  "упаков",
+                  "тираж"
+                ],
+                "min": 1,
+                "hits": [
+                  "короб",
+                  "логотип",
+                  "упаков"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "тираж 10к, минск",
+          "requestBody": {
+            "message": "тираж 10к, минск",
+            "history": [
+              {
+                "role": "user",
+                "content": "поставщик коробок с логотипом"
+              },
+              {
+                "role": "assistant",
+                "content": "Для поиска поставщиков коробок с логотипом на Biznesinfo подойдут рубрики и ключевые слова:\n\n**Рубрики:**\n1) Полиграфия и упаковка → **Упаковка / упаковочные материалы**  \n2) Реклама → **Рекламно-сувенирная продукция**  \n3) Производство → **Тара и упаковка**\n\n**Ключевые слова/синонимы:**\n- коробки с логотипом  \n- упаковка с печатью / брендированная упаковка  \n- картонные коробки на заказ  \n- коробки с фирменной символикой  \n- упаковка для маркетплейсов (если нужно)\n\n**Фильтры по региону/городу:** укажите ваш город для более точной выдачи.\n\nУточните, пожалуйста:  \n1) В каком городе/области ищете?  \n2) Тип коробок (картонные, гофрокартон, подарочные, пищевые)?  \n3) Нужна печать/дизайн «под ключ» или есть макет?"
+              }
+            ]
+          },
+          "latencyMs": 4405,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4ebdb761-348d-4449-8adf-de61a0623dda",
+          "isStub": false,
+          "reply": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. АмикПласт ООО — /company/amikplast (Тара и упаковка; Минск, minsk)\n2. Адара-трейдинг ОДО — /company/adara (Тара и упаковка; Минск, minsk)\n3. АМКОДОР-Унимод ОАО — /company/amkodor-uni (Транспортное машиностроение; Минск, minsk)\n4. ГрандРезерв ООО — /company/grand-rezerv (Автозапчасти и принадлежности; Минск, minsk)\nЧто уточнить у кандидатов сейчас:\n1. Уточните тип коробки, материал и параметры печати (цветность/технология).\n2. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n3. Уточните ответственное контактное лицо для быстрого согласования.\n\nПродолжаю по тому же запросу: коробок, логотипом, коробок логотипом.",
+          "checks": [
+            {
+              "id": "D009.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D009.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D009.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "короб",
+                  "логотип",
+                  "упаков",
+                  "тираж"
+                ],
+                "min": 1,
+                "hits": [
+                  "короб",
+                  "логотип",
+                  "упаков"
+                ]
+              }
+            },
+            {
+              "id": "D009.T2.C4",
+              "type": "includes_any",
+              "description": "Если есть гео-сигнал, он должен учитываться",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "сделай письмо-запрос КП (subject/body/whatsapp)",
+          "requestBody": {
+            "message": "сделай письмо-запрос КП (subject/body/whatsapp)",
+            "history": [
+              {
+                "role": "user",
+                "content": "поставщик коробок с логотипом"
+              },
+              {
+                "role": "assistant",
+                "content": "Для поиска поставщиков коробок с логотипом на Biznesinfo подойдут рубрики и ключевые слова:\n\n**Рубрики:**\n1) Полиграфия и упаковка → **Упаковка / упаковочные материалы**  \n2) Реклама → **Рекламно-сувенирная продукция**  \n3) Производство → **Тара и упаковка**\n\n**Ключевые слова/синонимы:**\n- коробки с логотипом  \n- упаковка с печатью / брендированная упаковка  \n- картонные коробки на заказ  \n- коробки с фирменной символикой  \n- упаковка для маркетплейсов (если нужно)\n\n**Фильтры по региону/городу:** укажите ваш город для более точной выдачи.\n\nУточните, пожалуйста:  \n1) В каком городе/области ищете?  \n2) Тип коробок (картонные, гофрокартон, подарочные, пищевые)?  \n3) Нужна печать/дизайн «под ключ» или есть макет?"
+              },
+              {
+                "role": "user",
+                "content": "тираж 10к, минск"
+              },
+              {
+                "role": "assistant",
+                "content": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. АмикПласт ООО — /company/amikplast (Тара и упаковка; Минск, minsk)\n2. Адара-трейдинг ОДО — /company/adara (Тара и упаковка; Минск, minsk)\n3. АМКОДОР-Унимод ОАО — /company/amkodor-uni (Транспортное машиностроение; Минск, minsk)\n4. ГрандРезерв ООО — /company/grand-rezerv (Автозапчасти и принадлежности; Минск, minsk)\nЧто уточнить у кандидатов сейчас:\n1. Уточните тип коробки, материал и параметры печати (цветность/технология).\n2. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n3. Уточните ответственное контактное лицо для быстрого согласования.\n\nПродолжаю по тому же запросу: коробок, логотипом, коробок логотипом."
+              }
+            ]
+          },
+          "latencyMs": 5059,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "754b4c08-1e49-4942-b63e-a1a50824ce26",
+          "isStub": false,
+          "reply": "Subject: Запрос коммерческого предложения на коробки с логотипом (тираж 10 000, Минск)\n\nBody:\nЗдравствуйте, {company}!\n\nПросим предоставить коммерческое предложение на изготовление коробок с логотипом.\nТребуется:\n- Тип коробки: {тип/материал}  \n- Размеры: {размеры}  \n- Тираж: 10 000 шт.  \n- Печать: {цветность/технология}  \n- Макет: {есть/нужна разработка}  \n- Упаковка/комплектация: {требования}  \n- Доставка: {адрес/условия}, Минск  \n- Сроки: {срок изготовления/дедлайн}\n\nПросим указать стоимость (за единицу и общую), сроки изготовления, условия оплаты, минимальный тираж и возможные варианты материалов/печати.\n\nКонтакт для связи: {contact}  \nСпасибо!\n\nWhatsApp:\nЗдравствуйте! Нужны коробки с логотипом, тираж 10 000, Минск. Тип/размеры/печать: {тип/размеры/цветность}. Макет {есть/нужна разработка}. Сроки {дедлайн}. Просьба прислать КП (цена/сроки/условия). Контакт: {contact}.",
+          "checks": [
+            {
+              "id": "D009.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D009.T3.C2",
+              "type": "template_blocks",
+              "description": "Должны быть блоки Subject / Body / WhatsApp",
+              "passed": true,
+              "reason": "Template blocks present",
+              "details": {
+                "hasSubject": true,
+                "hasBody": true,
+                "hasWhatsapp": true
+              }
+            },
+            {
+              "id": "D009.T3.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 120 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 884
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 13754
+    },
+    {
+      "id": "D010",
+      "title": "Dirty query: как добавить компанию",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "onboarding"
+      ],
+      "personaGoal": "Новый пользователь без онбординга, задает короткий вопрос.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "как добавить мою компанию сюда",
+          "requestBody": {
+            "message": "как добавить мою компанию сюда",
+            "history": []
+          },
+          "latencyMs": 4282,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "b0157a44-b1d1-4768-89b5-df24fae0875c",
+          "isStub": false,
+          "reply": "Чтобы добавить свою компанию в каталог Biznesinfo, обычно нужно воспользоваться кнопкой «Добавить компанию»/«Добавить организацию» на сайте и заполнить карточку (название, УНП, рубрики, адрес, контакты, описание, сайт, режим работы, фото/логотип). После отправки карточка проходит модерацию.\n\nЕсли подскажете:\n1) В какой сфере ваша компания?  \n2) Город/регион?  \n3) Есть сайт или только телефон/мессенджеры?\n\n— я помогу подобрать рубрики и ключевые слова для карточки.",
+          "checks": [
+            {
+              "id": "D010.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D010.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D010.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 468
+              }
+            },
+            {
+              "id": "D010.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "добав",
+                  "компан",
+                  "сюда",
+                  "регистра"
+                ],
+                "min": 1,
+                "hits": [
+                  "добав",
+                  "компан"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "без регистрации можно?",
+          "requestBody": {
+            "message": "без регистрации можно?",
+            "history": [
+              {
+                "role": "user",
+                "content": "как добавить мою компанию сюда"
+              },
+              {
+                "role": "assistant",
+                "content": "Чтобы добавить свою компанию в каталог Biznesinfo, обычно нужно воспользоваться кнопкой «Добавить компанию»/«Добавить организацию» на сайте и заполнить карточку (название, УНП, рубрики, адрес, контакты, описание, сайт, режим работы, фото/логотип). После отправки карточка проходит модерацию.\n\nЕсли подскажете:\n1) В какой сфере ваша компания?  \n2) Город/регион?  \n3) Есть сайт или только телефон/мессенджеры?\n\n— я помогу подобрать рубрики и ключевые слова для карточки."
+              }
+            ]
+          },
+          "latencyMs": 2688,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "abf06722-8000-4ea0-bb9a-82964afb6225",
+          "isStub": false,
+          "reply": "Обычно добавление компании в каталоги делается через форму с авторизацией, чтобы подтвердить владельца и управлять карточкой. Точно скажет сама форма на сайте (кнопка «Добавить компанию» → если просит войти/зарегистрироваться, значит без регистрации нельзя).\n\nЕсли пришлёте ссылку на страницу добавления или скрин, подскажу точнее.\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным.",
+          "checks": [
+            {
+              "id": "D010.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D010.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D010.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "добав",
+                  "компан",
+                  "сюда",
+                  "регистра"
+                ],
+                "min": 1,
+                "hits": [
+                  "добав",
+                  "компан",
+                  "регистра"
+                ]
+              }
+            },
+            {
+              "id": "D010.T2.C4",
+              "type": "reply_length_min",
+              "description": "Должен быть содержательный follow-up ответ",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 80,
+                "len": 454
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "дай пошагово 1-2-3 и что подготовить",
+          "requestBody": {
+            "message": "дай пошагово 1-2-3 и что подготовить",
+            "history": [
+              {
+                "role": "user",
+                "content": "как добавить мою компанию сюда"
+              },
+              {
+                "role": "assistant",
+                "content": "Чтобы добавить свою компанию в каталог Biznesinfo, обычно нужно воспользоваться кнопкой «Добавить компанию»/«Добавить организацию» на сайте и заполнить карточку (название, УНП, рубрики, адрес, контакты, описание, сайт, режим работы, фото/логотип). После отправки карточка проходит модерацию.\n\nЕсли подскажете:\n1) В какой сфере ваша компания?  \n2) Город/регион?  \n3) Есть сайт или только телефон/мессенджеры?\n\n— я помогу подобрать рубрики и ключевые слова для карточки."
+              },
+              {
+                "role": "user",
+                "content": "без регистрации можно?"
+              },
+              {
+                "role": "assistant",
+                "content": "Обычно добавление компании в каталоги делается через форму с авторизацией, чтобы подтвердить владельца и управлять карточкой. Точно скажет сама форма на сайте (кнопка «Добавить компанию» → если просит войти/зарегистрироваться, значит без регистрации нельзя).\n\nЕсли пришлёте ссылку на страницу добавления или скрин, подскажу точнее.\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным."
+              }
+            ]
+          },
+          "latencyMs": 3935,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "401707b4-3d35-4040-8918-3adda83ce1f5",
+          "isStub": false,
+          "reply": "По Biznesinfo это делается через страницу: /add-company.\nПошагово:\n1. Откройте /add-company и заполните обязательные поля компании и контактов.\n2. Выберите категорию/подкатегорию и регион, добавьте короткое описание деятельности.\n3. Отправьте форму и дождитесь модерации карточки.\nЧто подготовить заранее:\n1. Название компании, УНП/регистрационные данные.\n2. Адрес, телефон, e-mail, сайт/мессенджер.\n3. Рубрики (чем занимаетесь) и короткое описание 2-5 предложений.",
+          "checks": [
+            {
+              "id": "D010.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D010.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D010.T3.C3",
+              "type": "numbered_list_min",
+              "description": "Нужна пошаговая инструкция",
+              "passed": true,
+              "reason": "Enough numbered items",
+              "details": {
+                "min": 3,
+                "count": 6
+              }
+            },
+            {
+              "id": "D010.T3.C4",
+              "type": "includes_any",
+              "description": "Должен быть практический путь добавления компании",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "добав",
+                  "компан",
+                  "регистра",
+                  "кабинет",
+                  "форма",
+                  "заявк",
+                  "add-company"
+                ],
+                "hits": [
+                  "добав",
+                  "компан",
+                  "регистра",
+                  "add-company"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 10905
+    },
+    {
+      "id": "D011",
+      "title": "Regression: молоко Брест -> сырье 1.5% -> вывоз в Витебск",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "continuity_candidates"
+      ],
+      "personaGoal": "Реальный кейс: после уточнения условий ассистент не должен скатываться в общие рубрики без конкретики.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "D011.T3.C3",
+          "type": "mentions_any_terms",
+          "description": "Должна сохраниться связь с продуктом и локацией после уточнения",
+          "passed": false,
+          "reason": "Not enough terms mentioned",
+          "details": {
+            "terms": [
+              "молок",
+              "сыр",
+              "брест",
+              "витеб"
+            ],
+            "min": 2,
+            "hits": [
+              "брест"
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну молока в Бресте?",
+          "requestBody": {
+            "message": "Где купить тонну молока в Бресте?",
+            "history": []
+          },
+          "latencyMs": 4656,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1a21cba9-3d7a-4339-a1f1-269a91596215",
+          "isStub": false,
+          "reply": "Вот подходящие варианты в Бресте из доступных кандидатов:\n\n1) **Брестское мороженое ОАО** — молочная продукция (в т.ч. сметана, творог, сыры), есть профиль по молочной продукции.  \nПуть: **/company/brestmoroj**\n\n2) **УК холдинга Концерн Брестмясомолпром ГО** — объединение предприятий молочной переработки в РБ, подходит для оптовых закупок.  \nПуть: **/company/brestmmp**\n\nУточните, пожалуйста:\n1) Вам нужно **сырье (молоко-сырец)** или **пастеризованное/упакованное**?  \n2) Нужна **доставка по Бресту** или возможен самовывоз?  \n3) Разовая закупка 1 тонна или **регулярные поставки**?",
+          "checks": [
+            {
+              "id": "D011.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D011.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D011.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 585
+              }
+            },
+            {
+              "id": "D011.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок",
+                  "сыр",
+                  "брест",
+                  "витеб"
+                ],
+                "min": 1,
+                "hits": [
+                  "молок",
+                  "сыр",
+                  "брест"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сырая, 1.5 процента, вывоз в Витебск",
+          "requestBody": {
+            "message": "Сырая, 1.5 процента, вывоз в Витебск",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот подходящие варианты в Бресте из доступных кандидатов:\n\n1) **Брестское мороженое ОАО** — молочная продукция (в т.ч. сметана, творог, сыры), есть профиль по молочной продукции.  \nПуть: **/company/brestmoroj**\n\n2) **УК холдинга Концерн Брестмясомолпром ГО** — объединение предприятий молочной переработки в РБ, подходит для оптовых закупок.  \nПуть: **/company/brestmmp**\n\nУточните, пожалуйста:\n1) Вам нужно **сырье (молоко-сырец)** или **пастеризованное/упакованное**?  \n2) Нужна **доставка по Бресту** или возможен самовывоз?  \n3) Разовая закупка 1 тонна или **регулярные поставки**?"
+              }
+            ]
+          },
+          "latencyMs": 7162,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "cef660e8-607d-42e7-821b-dd88f96afe01",
+          "isStub": false,
+          "reply": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. Путь: — /company/brestmoroj (brest)\n2. Путь: — /company/brestmmp (brest)\nЧто уточнить у кандидатов сейчас:\n1. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n2. Уточните ответственное контактное лицо для быстрого согласования.\n\nЛокация из запроса: Витебск.",
+          "checks": [
+            {
+              "id": "D011.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D011.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D011.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок",
+                  "сыр",
+                  "брест",
+                  "витеб"
+                ],
+                "min": 1,
+                "hits": [
+                  "витеб"
+                ]
+              }
+            },
+            {
+              "id": "D011.T2.C4",
+              "type": "includes_any",
+              "description": "Если есть гео-сигнал, он должен учитываться",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "витеб"
+                ],
+                "hits": [
+                  "витеб"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Дай 2-3 релевантных варианта или честно скажи что не нашел, но без общих советов",
+          "requestBody": {
+            "message": "Дай 2-3 релевантных варианта или честно скажи что не нашел, но без общих советов",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот подходящие варианты в Бресте из доступных кандидатов:\n\n1) **Брестское мороженое ОАО** — молочная продукция (в т.ч. сметана, творог, сыры), есть профиль по молочной продукции.  \nПуть: **/company/brestmoroj**\n\n2) **УК холдинга Концерн Брестмясомолпром ГО** — объединение предприятий молочной переработки в РБ, подходит для оптовых закупок.  \nПуть: **/company/brestmmp**\n\nУточните, пожалуйста:\n1) Вам нужно **сырье (молоко-сырец)** или **пастеризованное/упакованное**?  \n2) Нужна **доставка по Бресту** или возможен самовывоз?  \n3) Разовая закупка 1 тонна или **регулярные поставки**?"
+              },
+              {
+                "role": "user",
+                "content": "Сырая, 1.5 процента, вывоз в Витебск"
+              },
+              {
+                "role": "assistant",
+                "content": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. Путь: — /company/brestmoroj (brest)\n2. Путь: — /company/brestmmp (brest)\nЧто уточнить у кандидатов сейчас:\n1. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n2. Уточните ответственное контактное лицо для быстрого согласования.\n\nЛокация из запроса: Витебск."
+              }
+            ]
+          },
+          "latencyMs": 3232,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "30b8f7a0-c9a4-4ff9-99e4-716acd26f197",
+          "isStub": false,
+          "reply": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. Путь: — /company/brestmoroj (Брест, brest)\n2. Путь: — /company/brestmmp (Брест, brest)\nЧто уточнить у кандидатов сейчас:\n1. Подтвердите форму поставки и документы (ветеринарные/лабораторные) под ваш маршрут.\n2. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n3. Уточните ответственное контактное лицо для быстрого согласования.",
+          "checks": [
+            {
+              "id": "D011.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D011.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D011.T3.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с продуктом и локацией после уточнения",
+              "passed": false,
+              "reason": "Not enough terms mentioned",
+              "details": {
+                "terms": [
+                  "молок",
+                  "сыр",
+                  "брест",
+                  "витеб"
+                ],
+                "min": 2,
+                "hits": [
+                  "брест"
+                ]
+              }
+            },
+            {
+              "id": "D011.T3.C4",
+              "type": "any_of",
+              "description": "Нужны либо конкретные кандидаты, либо честное прозрачное ограничение",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 15051
+    }
+  ]
+}

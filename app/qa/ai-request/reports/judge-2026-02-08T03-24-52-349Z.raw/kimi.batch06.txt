@@ -1,0 +1,137 @@
+Based on my review of previous QA judge results to ensure consistency, here is my evaluation for scenarios UXA011-UXA015:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UXA011",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.60,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Asked clarifying questions to narrow down search (product, region, volume)",
+        "Provided concrete search keywords for finding manufacturers ('производитель', 'завод', 'собственное производство')",
+        "Gave practical criteria for verifying manufacturers in company cards"
+      ],
+      "criticalIssues": [
+        "Did not provide any concrete manufacturer candidates immediately",
+        "No indication of how quickly actual results can be delivered after clarification"
+      ],
+      "strengths": [
+        "Clear explanation of how to identify manufacturers vs intermediaries",
+        "Specific verification checklist for production capabilities",
+        "Maintained focus on user's core need (finding manufacturers)"
+      ],
+      "nextUserProbe": "Найди производителей пластиковых контейнеров в Минске, объем 1000 шт/мес"
+    },
+    {
+      "scenarioId": "UXA012",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Generic response asking for context instead of showing how to filter existing results",
+        "Only mentioned checking 'Сайт' field and 'если доступно' filter — no concrete action",
+        "Critical penalty: user gave a clear filter constraint, but assistant fell back to generic advice"
+      ],
+      "criticalIssues": [
+        "Failed to demonstrate the filter in action or show example results with websites",
+        "Response structure prioritizes asking questions over delivering value",
+        "No indication of whether 'website' filter actually exists in the interface"
+      ],
+      "strengths": [
+        "Acknowledged the filter requirement correctly",
+        "Mentioned specific field to check ('Сайт')",
+        "Offered to filter existing list if user has one"
+      ],
+      "nextUserProbe": "Просто покажи мне компании в Минске у которых заполнен сайт"
+    },
+    {
+      "scenarioId": "UXA013",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Complete response failure — garbled template output with placeholders instead of actual answer",
+        "Response appears to be a broken email/WhatsApp template mix with {city}, {qty}, {spec} placeholders",
+        "No actual answer to the user's request about filtering by email"
+      ],
+      "criticalIssues": [
+        "Critical quality failure: template system leaked into response with unfilled variables",
+        "Zero useful information provided about email filtering",
+        "Response is completely unusable for the user's task",
+        "No indication whether email filter exists or how to apply it"
+      ],
+      "strengths": [
+        "None — response is broken"
+      ],
+      "nextUserProbe": "Как отфильтровать компании по наличию email в Biznesinfo?"
+    },
+    {
+      "scenarioId": "UXA014",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.70,
+      "userSatisfaction": 0.62,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Provided concrete search keywords for B2B companies ('юрлица', 'безнал', 'НДС', 'счёт-фактура')",
+        "Acknowledged the filter need and offered to narrow further with clarifying questions",
+        "Keywords are actionable and relevant to finding companies working with legal entities"
+      ],
+      "criticalIssues": [
+        "Did not demonstrate the filter in action or show example companies",
+        "No confirmation whether 'works with legal entities' is an actual filter in the interface",
+        "Response prioritizes asking questions over showing results"
+      ],
+      "strengths": [
+        "Specific B2B-oriented keywords provided",
+        "Acknowledged additional constraints that might matter (НДС, отсрочка, доставка)",
+        "Keywords cover both search and verification aspects"
+      ],
+      "nextUserProbe": "Покажи конкретно IT-компании в Минске, которые работают с юрлицами и выставляют НДС"
+    },
+    {
+      "scenarioId": "UXA015",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Asked for company name/ID to locate the specific reception number",
+        "Correctly indicated data source (Biznesinfo catalog cards)",
+        "Honest about limitation — will report as unknown if not in card"
+      ],
+      "criticalIssues": [
+        "Did not offer to show example of where reception number appears in a card",
+        "No proactive help like 'Here is how to find it yourself'",
+        "Response is purely reactive — waits for user input"
+      ],
+      "strengths": [
+        "Clear about data boundaries and source",
+        "Honest about limitations upfront",
+        "Specific request for identifying information (name, ID, link)"
+      ],
+      "nextUserProbe": "Покажи на примере карточки ООО 'Амкодор' где искать номер приемной"
+    }
+  ]
+}
+```

@@ -1,0 +1,225 @@
+{
+  "runId": "judge-2026-02-07T02-56-34-062Z",
+  "generatedAt": "2026-02-07T02:57:21.767Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/run-2026-02-07T02-55-14-917Z.json",
+  "sourceSummary": {
+    "runId": "run-2026-02-07T02-55-14-917Z",
+    "startedAt": "2026-02-07T02:55:14.917Z",
+    "endedAt": "2026-02-07T02:55:45.346Z",
+    "durationMs": 30429,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.milk-onion-city-switch.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 20,
+    "passedChecks": 20,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "totalScenarios": 1,
+  "judges": [
+    {
+      "judge": "gemini",
+      "summary": {
+        "total": 1,
+        "averageUsefulness": 5,
+        "usefulCount": 1,
+        "notUsefulCount": 0,
+        "usefulRate": 1,
+        "zeroUsefulnessCount": 0,
+        "topIssues": [],
+        "worstScenarios": [
+          {
+            "scenarioId": "R004",
+            "usefulness": 5,
+            "verdict": "useful",
+            "reasons": [
+              "Ассистент успешно сменил товар с молока на лук, не 'таща' за собой старых кандидатов (поставщиков молока).",
+              "Корректно меняет географический контекст по запросу пользователя."
+            ],
+            "criticalIssues": []
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "R004",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 1,
+          "reasons": [
+            "Ассистент успешно сменил товар с молока на лук, не 'таща' за собой старых кандидатов (поставщиков молока).",
+            "Корректно меняет географический контекст по запросу пользователя.",
+            "Предоставляет конкретных поставщиков, когда они найдены.",
+            "В случае отсутствия прямых поставщиков предлагает полезные рубрики и ключевые слова для дальнейшего поиска, демонстрируя честность о своих пределах.",
+            "Вопросы для уточнения всегда релевантны текущему товару и помогают сузить поиск.",
+            "Форматирование ответов четкое и легко читаемое."
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Context continuity and geo adherence across multiple turns.",
+            "Actionable advice with specific companies or search strategies.",
+            "Honesty about limitations when no strong candidates are found.",
+            "Properly switches product context and tailors follow-up questions."
+          ],
+          "judge": "gemini"
+        }
+      ]
+    },
+    {
+      "judge": "kimi",
+      "summary": {
+        "total": 1,
+        "averageUsefulness": 4,
+        "usefulCount": 1,
+        "notUsefulCount": 0,
+        "usefulRate": 1,
+        "zeroUsefulnessCount": 0,
+        "topIssues": [
+          {
+            "issue": "turn 3: при запросе 'лук репчатый' без указания города ассистент вернулся к гродно (контекст turn 1), хотя логичнее было бы спросить город или предложить несколько регионов",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "R004",
+            "usefulness": 4,
+            "verdict": "useful",
+            "reasons": [
+              "Turn 1-2: корректно найдены поставщики молока в Гродно и Бресте с уточнением специализации",
+              "Turn 3: при смене товара на лук ассистент НЕ протащил молочных поставщиков — дал релевантного кандидата по овощам"
+            ],
+            "criticalIssues": [
+              "Turn 3: при запросе 'лук репчатый' без указания города ассистент вернулся к Гродно (контекст turn 1), хотя логичнее было бы спросить город или предложить несколько регионов"
+            ]
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "R004",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "reasons": [
+            "Turn 1-2: корректно найдены поставщики молока в Гродно и Бресте с уточнением специализации",
+            "Turn 3: при смене товара на лук ассистент НЕ протащил молочных поставщиков — дал релевантного кандидата по овощам",
+            "Turn 4: честно признал отсутствие поставщиков лука в Могилеве и дал направления для поиска",
+            "Turn 5: нашел 2 релевантных поставщика овощей в Минске"
+          ],
+          "criticalIssues": [
+            "Turn 3: при запросе 'лук репчатый' без указания города ассистент вернулся к Гродно (контекст turn 1), хотя логичнее было бы спросить город или предложить несколько регионов"
+          ],
+          "strengths": [
+            "Чистая смена контекста при смене товара — нет 'засора' от предыдущих кандидатов",
+            "Нет служебных хвостов в ответах",
+            "Конкретные компании со ссылками на карточки",
+            "Уточняющие вопросы по спецификации товара (желтый/красный, фасованный/навалом)"
+          ],
+          "judge": "kimi"
+        }
+      ]
+    },
+    {
+      "judge": "minimax",
+      "summary": {
+        "total": 1,
+        "averageUsefulness": 2,
+        "usefulCount": 0,
+        "notUsefulCount": 1,
+        "usefulRate": 0,
+        "zeroUsefulnessCount": 0,
+        "topIssues": [
+          {
+            "issue": "грубое нарушение контекста в turn 3: город гродно «приклеился» от обсуждения молока к обсуждению лука без явного запроса пользователя",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "R004",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "reasons": [
+              "Turn 3 критическая ошибка: при смене товара на лук ассистент автоматически перенес город Гродно из предыдущего контекста (про молоко), хотя пользователь город не указывал — это нарушение контекстной преемственности",
+              "Ассистент должен был спросить «В каком городе?» при переходе на новый товар, а не тащить старый географический контекст"
+            ],
+            "criticalIssues": [
+              "Грубое нарушение контекста в Turn 3: город Гродно «приклеился» от обсуждения молока к обсуждению лука без явного запроса пользователя"
+            ]
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "R004",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.95,
+          "reasons": [
+            "Turn 3 критическая ошибка: при смене товара на лук ассистент автоматически перенес город Гродно из предыдущего контекста (про молоко), хотя пользователь город не указывал — это нарушение контекстной преемственности",
+            "Ассистент должен был спросить «В каком городе?» при переходе на новый товар, а не тащить старый географический контекст",
+            "В остальных переходах (Брест→лук, Могилев→Минск) ассистент отрабатывает корректно",
+            "Честно сообщает об отсутствии кандидатов в Могилеве, дает полезные поисковые подсказки"
+          ],
+          "criticalIssues": [
+            "Грубое нарушение контекста в Turn 3: город Гродно «приклеился» от обсуждения молока к обсуждению лука без явного запроса пользователя"
+          ],
+          "strengths": [
+            "Честность о границах базы (нет кандидатов в Могилеве)",
+            "Конкретные компании с ID и ссылками",
+            "Уточняющие вопросы по объему, типу продукции, доставке"
+          ],
+          "judge": "minimax"
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "geminiAvg": 5,
+    "kimiAvg": 4,
+    "minimaxAvg": 2,
+    "avgGap": 1,
+    "usefulRateGap": 0,
+    "pairwise": [
+      {
+        "left": "gemini",
+        "right": "kimi",
+        "avgGap": 1,
+        "usefulRateGap": 0
+      },
+      {
+        "left": "gemini",
+        "right": "minimax",
+        "avgGap": 3,
+        "usefulRateGap": 1
+      },
+      {
+        "left": "kimi",
+        "right": "minimax",
+        "avgGap": 2,
+        "usefulRateGap": 1
+      }
+    ]
+  },
+  "gate": {
+    "enabled": false,
+    "pass": true,
+    "failures": [],
+    "checks": []
+  }
+}

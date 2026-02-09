@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-08T18:20:00Z",
+    "source": "manual-regression",
+    "description": "Regression for explicit negative constraints in sourcing queries (не/без/кроме)"
+  },
+  "scenarios": [
+    {
+      "id": "NE001",
+      "title": "Молоко + явное исключение автозапчастей",
+      "personaGoal": "Пользователь сразу задает негативный фильтр и ждет релевантный first-pass",
+      "tags": ["regression", "negation", "cross_domain", "milk", "single_turn"],
+      "turns": [
+        {
+          "user": "Нужны поставщики молока в Бресте, не автозапчасти",
+          "checks": [
+            { "id": "NE001.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "NE001.T1.C2", "type": "includes_any", "patterns": ["молок", "брест"], "description": "Должен сохранить молочную тему и гео" },
+            {
+              "id": "NE001.T1.C3",
+              "type": "excludes_all",
+              "patterns": ["фокус:\\s*\\*\\*запчаст", "запчасти\\s+в\\s+минске", "/company/avto", "/company/up-18", "/company/avtostim"],
+              "description": "Не должен скатываться в автозапчасти как целевую выдачу"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NE002",
+      "title": "Автозапчасти + явное исключение клининга",
+      "personaGoal": "Пользователь ищет автозапчасти, явно запрещая клининг",
+      "tags": ["regression", "negation", "cross_domain", "auto", "single_turn"],
+      "turns": [
+        {
+          "user": "Ищу автозапчасти в Минске, не клининг и не уборка",
+          "checks": [
+            { "id": "NE002.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "NE002.T1.C2", "type": "includes_any", "patterns": ["запчаст", "авто", "минск"], "description": "Должен сохранить авто-тему и гео" },
+            {
+              "id": "NE002.T1.C3",
+              "type": "excludes_all",
+              "patterns": ["фокус:\\s*\\*\\*клининг", "уборка\\s+после\\s+ремонта", "/company/clean", "/company/ubork"],
+              "description": "Не должен делать клининг целевой выдачей"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NE003",
+      "title": "Клининг + явное исключение автозапчастей",
+      "personaGoal": "Пользователь ищет клининг и отсекает авто-домен заранее",
+      "tags": ["regression", "negation", "cross_domain", "cleaning", "single_turn"],
+      "turns": [
+        {
+          "user": "Нужна уборка после ремонта в Минске, без автозапчастей",
+          "checks": [
+            { "id": "NE003.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "NE003.T1.C2", "type": "includes_any", "patterns": ["уборк", "клининг", "минск"], "description": "Должен сохранить тему клининга и гео" },
+            {
+              "id": "NE003.T1.C3",
+              "type": "excludes_all",
+              "patterns": ["фокус:\\s*\\*\\*запчаст", "запчасти\\s+в\\s+минске", "/company/avto", "/company/avtostim"],
+              "description": "Не должен делать авто-домен целевой выдачей"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

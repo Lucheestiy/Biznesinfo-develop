@@ -1,0 +1,220 @@
+{
+  "runId": "judge-2026-02-07T02-59-17-703Z",
+  "generatedAt": "2026-02-07T02:59:50.661Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/run-2026-02-07T02-58-39-486Z.json",
+  "sourceSummary": {
+    "runId": "run-2026-02-07T02-58-39-486Z",
+    "startedAt": "2026-02-07T02:58:39.486Z",
+    "endedAt": "2026-02-07T02:59:13.539Z",
+    "durationMs": 34053,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.milk-onion-city-switch.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 20,
+    "passedChecks": 20,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "totalScenarios": 1,
+  "judges": [
+    {
+      "judge": "gemini",
+      "summary": {
+        "total": 1,
+        "averageUsefulness": 5,
+        "usefulCount": 1,
+        "notUsefulCount": 0,
+        "usefulRate": 1,
+        "zeroUsefulnessCount": 0,
+        "topIssues": [],
+        "worstScenarios": [
+          {
+            "scenarioId": "R004",
+            "usefulness": 5,
+            "verdict": "useful",
+            "reasons": [
+              "Relevant supplier identified for the initial query.",
+              "Correctly handled context switch to a new city while maintaining product relevance."
+            ],
+            "criticalIssues": []
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "R004",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 1,
+          "reasons": [
+            "Relevant supplier identified for the initial query.",
+            "Correctly handled context switch to a new city while maintaining product relevance.",
+            "Successfully switched product context from milk to onions without carrying over old candidates.",
+            "Honestly reported the absence of direct suppliers in a specific city and offered actionable alternatives.",
+            "Provided relevant suppliers for the final city and product query."
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Strong relevance to user intent across all turns.",
+            "Excellent geo adherence and context continuity, especially when switching cities and products.",
+            "Clear and actionable next steps provided through clarifying questions.",
+            "Honesty about limitations (no suppliers in Mogilev) and proactive suggestions for alternatives (nearby regions).",
+            "No hallucination; all responses are grounded in the 'list'."
+          ],
+          "judge": "gemini"
+        }
+      ]
+    },
+    {
+      "judge": "kimi",
+      "summary": {
+        "total": 1,
+        "averageUsefulness": 4,
+        "usefulCount": 1,
+        "notUsefulCount": 0,
+        "usefulRate": 1,
+        "zeroUsefulnessCount": 0,
+        "topIssues": [
+          {
+            "issue": "turn 1: опечатка 'гроднл' вместо 'гродно' не исправлена, но понята корректно",
+            "count": 1
+          },
+          {
+            "issue": "turn 3: при запросе лука без региона предложены поставщики только из гомельской и гродненской областей, хотя в turn 5 показаны минские — неполнота выборки",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "R004",
+            "usefulness": 4,
+            "verdict": "useful",
+            "reasons": [
+              "При смене товара (молоко -> лук) ассистент корректно переключился на новых поставщиков, не тащит старых кандидатов",
+              "При отсутствии поставщиков в Могилеве честно сообщает об этом и предлагает альтернативы"
+            ],
+            "criticalIssues": [
+              "Turn 1: опечатка 'Гроднл' вместо 'Гродно' не исправлена, но понята корректно",
+              "Turn 3: при запросе лука без региона предложены поставщики только из Гомельской и Гродненской областей, хотя в turn 5 показаны минские — неполнота выборки"
+            ]
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "R004",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "reasons": [
+            "При смене товара (молоко -> лук) ассистент корректно переключился на новых поставщиков, не тащит старых кандидатов",
+            "При отсутствии поставщиков в Могилеве честно сообщает об этом и предлагает альтернативы"
+          ],
+          "criticalIssues": [
+            "Turn 1: опечатка 'Гроднл' вместо 'Гродно' не исправлена, но понята корректно",
+            "Turn 3: при запросе лука без региона предложены поставщики только из Гомельской и Гродненской областей, хотя в turn 5 показаны минские — неполнота выборки"
+          ],
+          "strengths": [
+            "Контекстная непрерывность: при смене города (Гродно -> Брест) сохраняется тема молока",
+            "Честность о лимитах: явно заявлено об отсутствии поставщиков в Могилеве",
+            "Структурированный формат с путями /company/xxx и уточняющими вопросами"
+          ],
+          "judge": "kimi"
+        }
+      ]
+    },
+    {
+      "judge": "minimax",
+      "summary": {
+        "total": 1,
+        "averageUsefulness": 5,
+        "usefulCount": 1,
+        "notUsefulCount": 0,
+        "usefulRate": 1,
+        "zeroUsefulnessCount": 0,
+        "topIssues": [],
+        "worstScenarios": [
+          {
+            "scenarioId": "R004",
+            "usefulness": 5,
+            "verdict": "useful",
+            "reasons": [
+              "Все ответы строго по запросу, без мусора и служебных хвостов",
+              "При смене товара (молоко -> лук) старые кандидаты не тащатся"
+            ],
+            "criticalIssues": []
+          }
+        ]
+      },
+      "ratings": [
+        {
+          "scenarioId": "R004",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "reasons": [
+            "Все ответы строго по запросу, без мусора и служебных хвостов",
+            "При смене товара (молоко -> лук) старые кандидаты не тащатся",
+            "Честно сообщает об отсутствии поставщиков в Могилеве",
+            "Конкретные поставщики с путями, а не абстрактные советы",
+            "Уместные уточняющие вопросы для обеих товарных категорий"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Чистый вывод без артефактов шаблонов",
+            "Гранулярная релевантность по регионам",
+            "Последовательное соблюдение контекста товара"
+          ],
+          "judge": "minimax"
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "geminiAvg": 5,
+    "kimiAvg": 4,
+    "minimaxAvg": 5,
+    "avgGap": 1,
+    "usefulRateGap": 0,
+    "pairwise": [
+      {
+        "left": "gemini",
+        "right": "kimi",
+        "avgGap": 1,
+        "usefulRateGap": 0
+      },
+      {
+        "left": "gemini",
+        "right": "minimax",
+        "avgGap": 0,
+        "usefulRateGap": 0
+      },
+      {
+        "left": "kimi",
+        "right": "minimax",
+        "avgGap": -1,
+        "usefulRateGap": 0
+      }
+    ]
+  },
+  "gate": {
+    "enabled": false,
+    "pass": true,
+    "failures": [],
+    "checks": []
+  }
+}

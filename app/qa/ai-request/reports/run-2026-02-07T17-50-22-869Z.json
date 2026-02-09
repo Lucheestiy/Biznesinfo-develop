@@ -1,0 +1,2889 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-07T17:50:00Z",
+      "source": "user-provided",
+      "description": "Real short query bank (part B): supplier/contractor lookup intents, 24 items"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-07T17-50-22-869Z",
+    "startedAt": "2026-02-07T17:50:22.869Z",
+    "endedAt": "2026-02-07T17:52:27.528Z",
+    "durationMs": 124659,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-120-bank-b-suppliers-contractors.json",
+    "totalScenarios": 24,
+    "passedScenarios": 22,
+    "failedScenarios": 2,
+    "passRate": 0.9167,
+    "totalChecks": 120,
+    "passedChecks": 118,
+    "failedChecks": 2,
+    "checkPassRate": 0.9833,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:mentions_any_terms:Нужно сохранить связь с предметом запроса",
+      "count": 1
+    },
+    {
+      "key": "check:includes_any:Ответ должен быть по теме поиска поставщика/подрядчика",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "UXB025",
+      "title": "Банк B: Поставщики/подрядчики — запрос 25",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Поставщики металлопроката в Минске, доставка.",
+          "requestBody": {
+            "message": "Поставщики металлопроката в Минске, доставка.",
+            "history": []
+          },
+          "latencyMs": 5516,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "705d69a0-fc32-4f30-b280-0da45c2fa920",
+          "isStub": false,
+          "reply": "Ниже — релевантные поставщики металлопроката в Минске с возможностью доставки (по данным списка кандидатов):\n\n1. **АВАБИ ООО** — комплексный поставщик трубной продукции и металлопроката, производитель металлопрофиля; Минск.  \n   /company/avabi\n\n2. **АйронТрейдПлюс ООО** — оптовая и розничная продажа металлопроката; Минск.  \n   /company/irontrade\n\n3. **Армет ООО** — холодный/горячий металлопрокат оптом, размотка рулонов, рубка по чертежам; Минск.  \n   /company/armet\n\n4. **АтомСпецмет ООО** — дистрибьютор металлопроката (черный/нержавейка/цветной), спецсталь; Минск.  \n   /company/atomsm\n\n5. **БазисСталь групп Бел ООО** — металлопрокат, поставки из Европы, доставка по РБ; Минск.  \n   /company/basissteel\n\nЧтобы точнее сузить подбор:\n- Какие позиции/размеры нужны (лист, труба, уголок и т.д.)?\n- Объем и формат закупки (опт/розница)?\n- Сроки и требуемая доставка (дата/адрес)?",
+          "checks": [
+            {
+              "id": "UXB025.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB025.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB025.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "поставщ",
+                  "достав"
+                ]
+              }
+            },
+            {
+              "id": "UXB025.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "металлопроката",
+                  "минске",
+                  "доставка"
+                ],
+                "min": 1,
+                "hits": [
+                  "металлопроката",
+                  "минске",
+                  "доставка"
+                ]
+              }
+            },
+            {
+              "id": "UXB025.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 881
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5517
+    },
+    {
+      "id": "UXB026",
+      "title": "Банк B: Поставщики/подрядчики — запрос 26",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны подрядчики на ремонт офиса «под ключ».",
+          "requestBody": {
+            "message": "Нужны подрядчики на ремонт офиса «под ключ».",
+            "history": []
+          },
+          "latencyMs": 6110,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "e9f24cc1-c8ed-4c27-921b-6ec01561c562",
+          "isStub": false,
+          "reply": "Для поиска подрядчиков на ремонт офиса «под ключ» в Biznesinfo попробуйте такие подходы:\n\n**Рубрики/направления (по смыслу):**  \n- Строительство и ремонт помещений  \n- Отделочные работы / комплексный ремонт  \n- Проектирование интерьеров / дизайн‑проект  \n- Инженерные системы (электрика, вентиляция, кондиционирование)\n\n**Ключевые слова/синонимы для поиска:**  \n- «ремонт офиса под ключ», «комплексный ремонт», «отделочные работы»,  \n- «офисные помещения», «капитальный ремонт», «строительно‑отделочные работы»,  \n- «дизайн‑проект офиса», «монтаж электрики», «вентиляция».\n\n**Фильтры:**  \n- город/область,  \n- специализация «комплексный ремонт»,  \n- наличие портфолио/опыта в коммерческих объектах.\n\nЧтобы сузить поиск и предложить более точные фильтры, уточните, пожалуйста:  \n1) В каком городе/области нужен ремонт?  \n2) Примерная площадь и формат работ (косметика/капремонт/инженерия)?  \n3) Есть ли сроки или бюджетные рамки?",
+          "checks": [
+            {
+              "id": "UXB026.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB026.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB026.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "подряд",
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB026.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "подрядчики",
+                  "ремонт",
+                  "офиса",
+                  "ключ"
+                ],
+                "min": 1,
+                "hits": [
+                  "ремонт",
+                  "офиса",
+                  "ключ"
+                ]
+              }
+            },
+            {
+              "id": "UXB026.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 928
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 6111
+    },
+    {
+      "id": "UXB027",
+      "title": "Банк B: Поставщики/подрядчики — запрос 27",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXB027.T1.C4",
+          "type": "mentions_any_terms",
+          "description": "Нужно сохранить связь с предметом запроса",
+          "passed": false,
+          "reason": "Not enough terms mentioned",
+          "details": {
+            "terms": [
+              "найти",
+              "перевозчиков",
+              "рефрижераторов"
+            ],
+            "min": 1,
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где найти перевозчиков рефрижераторов?",
+          "requestBody": {
+            "message": "Где найти перевозчиков рефрижераторов?",
+            "history": []
+          },
+          "latencyMs": 4741,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "30c95b0b-be7d-4c71-a3b8-c60fbd9dbc01",
+          "isStub": false,
+          "reply": "Можно искать в рубриках и по ключевым словам.\n\n**Рубрики (пример):**\n1) Логистика → Автоперевозки  \n2) Грузоперевозки → Рефрижераторные перевозки / Температурные перевозки  \n3) Транспортные услуги → Холодная цепь\n\n**Ключевые слова/синонимы для поиска:**\n- рефрижераторные перевозки  \n- перевозка с температурным режимом  \n- температурные грузоперевозки  \n- авто рефрижератор / холодильник  \n- cold chain / холодная логистика\n\n**Фильтры региона:**\n- Город/область отправления или базирования перевозчика (Минск, Брест, Гродно и т.д.)\n- Междугородние / международные\n\nУточните, пожалуйста:  \n1) Маршрут (откуда–куда)?  \n2) Какой температурный режим/тип груза?  \n3) Нужны разовые рейсы или регулярный контракт?",
+          "checks": [
+            {
+              "id": "UXB027.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB027.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB027.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB027.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": false,
+              "reason": "Not enough terms mentioned",
+              "details": {
+                "terms": [
+                  "найти",
+                  "перевозчиков",
+                  "рефрижераторов"
+                ],
+                "min": 1,
+                "hits": []
+              }
+            },
+            {
+              "id": "UXB027.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 707
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4742
+    },
+    {
+      "id": "UXB028",
+      "title": "Банк B: Поставщики/подрядчики — запрос 28",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Поставщики спецодежды, печать логотипа.",
+          "requestBody": {
+            "message": "Поставщики спецодежды, печать логотипа.",
+            "history": []
+          },
+          "latencyMs": 4805,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4c21b4c9-3518-4412-9d94-bb1f5e1c54ee",
+          "isStub": false,
+          "reply": "Подберу поставщиков. Для поиска по рубрикатору используйте:\n\n**Рубрики:**\n1) Спецодежда / СИЗ  \n2) Пошив спецодежды  \n3) Нанесение логотипов / брендирование (шелкография, вышивка, термопечать)\n\n**Ключевые слова/синонимы:**\n- спецодежда оптом  \n- корпоративная одежда  \n- рабочая одежда  \n- пошив спецодежды  \n- вышивка логотипа  \n- шелкография по ткани  \n- термопечать на одежде  \n- брендирование одежды\n\n**Фильтры региона/города:** выберите ваш город и ближайшие области для расширения выдачи.\n\nЧтобы сузить поиск, уточните:\n1) Город/регион?  \n2) Объём и тип: уточняется, уточняется (куртки/футболки/комбинезоны и т.д.)  \n3) Предпочтительный метод нанесения и срок срок поставки?",
+          "checks": [
+            {
+              "id": "UXB028.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB028.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB028.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "поставщ",
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB028.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "спецодежды",
+                  "печать",
+                  "логотипа"
+                ],
+                "min": 1,
+                "hits": [
+                  "спецодежды",
+                  "печать",
+                  "логотипа"
+                ]
+              }
+            },
+            {
+              "id": "UXB028.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 680
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4805
+    },
+    {
+      "id": "UXB029",
+      "title": "Банк B: Поставщики/подрядчики — запрос 29",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Кто делает лазерную резку металла?",
+          "requestBody": {
+            "message": "Кто делает лазерную резку металла?",
+            "history": []
+          },
+          "latencyMs": 6261,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "36f89099-2a73-4027-a1da-81c78fd45abe",
+          "isStub": false,
+          "reply": "Для поиска исполнителей по лазерной резке металла в каталоге попробуйте такие варианты:\n\n**Рубрики/разделы (ориентиры):**\n- Производство/обработка металлов (если есть)\n- Металлообработка, резка металла, услуги лазерной резки\n- Изделия из металла (в т.ч. в разделе «Торговля и логистика → Метизы, скобяные изделия и изделия из металла» — как смежный вариант)\n\n**Ключевые слова/синонимы для поиска:**\n- “лазерная резка металла”\n- “лазерная резка листового металла”\n- “лазерный раскрой”\n- “резка нержавейки/стали/алюминия”\n- “metal laser cutting” (иногда помогает)\n\n**Фильтры:**\n- Город/область (критично для логистики)\n- Тип металла и толщина (если доступно в фильтрах/описаниях)\n\nУточните, пожалуйста:\n1) В каком городе/области нужен подрядчик?  \n2) Какой металл и толщины?  \n3) Нужны ли доп. услуги (гибка, сварка, покраска, доставка)?",
+          "checks": [
+            {
+              "id": "UXB029.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB029.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB029.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "подряд",
+                  "рубр",
+                  "поиск",
+                  "достав"
+                ]
+              }
+            },
+            {
+              "id": "UXB029.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "лазерную",
+                  "резку",
+                  "металла"
+                ],
+                "min": 1,
+                "hits": [
+                  "металла"
+                ]
+              }
+            },
+            {
+              "id": "UXB029.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 835
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 6262
+    },
+    {
+      "id": "UXB030",
+      "title": "Банк B: Поставщики/подрядчики — запрос 30",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сервис 1С: внедрение + сопровождение.",
+          "requestBody": {
+            "message": "Сервис 1С: внедрение + сопровождение.",
+            "history": []
+          },
+          "latencyMs": 4871,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "99e6e0e6-e076-47c5-99f3-a67ba4ace2df",
+          "isStub": false,
+          "reply": "Для поиска поставщиков 1С (внедрение + сопровождение) подойдут такие рубрики и ключевые слова:\n\n**Рубрики/направления**\n1. **IT‑услуги → Внедрение 1С**\n2. **IT‑услуги → Сопровождение 1С / 1С:ИТС**\n3. **Автоматизация бизнеса / ERP**\n4. **Бухгалтерские программы и сервисы**\n\n**Ключевые слова/синонимы**\n- «1С внедрение», «внедрение 1С:ERP», «1С:Управление торговлей», «1С:Бухгалтерия», «1С:ЗУП»\n- «сопровождение 1С», «доработка 1С», «настройка 1С»\n- «1С интеграция», «обновление 1С», «1С ИТС»\n\nЧтобы сузить поиск, уточните:\n1) Город/регион в Беларуси?  \n2) Какая конфигурация 1С нужна (ERP/УТ/Бухгалтерия/ЗУП и т.п.)?  \n3) Нужен полный цикл (обследование‑внедрение‑сопровождение) или только сопровождение?",
+          "checks": [
+            {
+              "id": "UXB030.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB030.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB030.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "поставщ",
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB030.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "внедрение",
+                  "сопровождение"
+                ],
+                "min": 1,
+                "hits": [
+                  "внедрение",
+                  "сопровождение"
+                ]
+              }
+            },
+            {
+              "id": "UXB030.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 704
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4871
+    },
+    {
+      "id": "UXB031",
+      "title": "Банк B: Поставщики/подрядчики — запрос 31",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Поставщики упаковки: пленка, коробки.",
+          "requestBody": {
+            "message": "Поставщики упаковки: пленка, коробки.",
+            "history": []
+          },
+          "latencyMs": 6835,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "69899529-660a-4327-9c79-2e5863a18031",
+          "isStub": false,
+          "reply": "Подскажите, что именно ищете:  \n- тип упаковки (стрейч/термоусадочная/пищ. пленка, гофрокороб/картонные коробки и т. п.)  \n- регион/город в Беларуси  \n- объемы и формат (опт, регулярные поставки, контракт)\n\nПока первый шаг в рубрикаторе и ключевые слова:\n\n**Рубрики/разделы (возможные):**  \n1. Упаковка и тара → Пленка упаковочная  \n2. Упаковка и тара → Картонная упаковка / Гофротара  \n3. Полимерные материалы → Пленка ПЭ/ПП  \n4. Полиграфия и упаковка → Коробки, упаковка\n\n**Ключевые слова/синонимы:**  \n- «стрейч пленка», «термоусадочная пленка», «ПЭ пленка», «ПП пленка», «пищ. пленка»  \n- «гофрокороба», «картонные коробки», «гофротара», «упаковка из картона», «коробки для уточняется»\n\n**Фильтры:**  \n- Регион/город  \n- Оптовые поставки  \n- Производитель/дистрибьютор  \n- Доставка по РБ\n\nУточните 2–3 пункта выше — подберу точные рубрики и запрос для поиска.",
+          "checks": [
+            {
+              "id": "UXB031.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB031.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB031.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "рубр",
+                  "поиск",
+                  "достав"
+                ]
+              }
+            },
+            {
+              "id": "UXB031.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "упаковки",
+                  "пленка",
+                  "коробки"
+                ],
+                "min": 1,
+                "hits": [
+                  "упаковки",
+                  "пленка",
+                  "коробки"
+                ]
+              }
+            },
+            {
+              "id": "UXB031.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 863
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 6835
+    },
+    {
+      "id": "UXB032",
+      "title": "Банк B: Поставщики/подрядчики — запрос 32",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужен аутсорс бухгалтерии для ООО.",
+          "requestBody": {
+            "message": "Нужен аутсорс бухгалтерии для ООО.",
+            "history": []
+          },
+          "latencyMs": 4826,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "b31cb1c2-8e2a-41ad-8ce0-868426bb906c",
+          "isStub": false,
+          "reply": "Понял. Для поиска аутсорсинга бухгалтерии для ООО в каталоге Biznesinfo рекомендую:\n\n**Где искать (рубрики/направления):**\n- Бизнес‑услуги (B2B) → Бухгалтерские услуги / Аутсорсинг бухгалтерии  \n- Бухгалтерское сопровождение ООО  \n- Налоговое консультирование (если нужно)\n\n**Ключевые слова/синонимы:**\n- «аутсорс бухгалтерии», «бухгалтерское обслуживание», «ведение бухучета»,  \n- «сдача отчетности», «налоговый учет», «бухгалтер для ООО»\n\n**Фильтры:**\n- Регион/город (важно для выезда/офлайн‑подписания)  \n- Формат обслуживания: удаленно/очно  \n- Отрасль (если нужна специфика)\n\nЧтобы сузить поиск и подобрать подходящих исполнителей, уточните, пожалуйста:\n1) Город/область?  \n2) Объем: сколько сотрудников/операций в месяц?  \n3) Нужны ли доп. услуги (кадровый учет, расчет зарплаты, ВЭД)?",
+          "checks": [
+            {
+              "id": "UXB032.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB032.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB032.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB032.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "аутсорс",
+                  "бухгалтерии"
+                ],
+                "min": 1,
+                "hits": [
+                  "аутсорс",
+                  "бухгалтерии"
+                ]
+              }
+            },
+            {
+              "id": "UXB032.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 791
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4826
+    },
+    {
+      "id": "UXB033",
+      "title": "Банк B: Поставщики/подрядчики — запрос 33",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Кто делает разработку сайта для B2B?",
+          "requestBody": {
+            "message": "Кто делает разработку сайта для B2B?",
+            "history": []
+          },
+          "latencyMs": 4755,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "d3ac7045-1360-4fad-94f0-a922d4181999",
+          "isStub": false,
+          "reply": "Для разработки B2B‑сайта ищите в разделе **Бизнес‑услуги (B2B)**. Подходящие рубрики и ключевые слова:\n\n**Рубрики/направления:**  \n- Веб‑разработка, создание сайтов  \n- IT‑услуги для бизнеса, digital‑агентства  \n- Корпоративные сайты, B2B‑порталы, личные кабинеты\n\n**Ключевые слова/синонимы:**  \n- «разработка сайта B2B», «корпоративный сайт», «B2B‑портал», «личный кабинет», «CRM‑интеграция», «интернет‑каталог», «лендинг для B2B», «UX/UI», «backend», «frontend», «SEO‑аудит», «техподдержка сайта»\n\n**Фильтры:**  \n- Регион/город (Минск, областные центры)  \n- Формат работы (агентство/студия/фриланс)\n\nУточните, пожалуйста:  \n1) Город/регион?  \n2) Нужен новый сайт или доработка существующего?  \n3) Ориентировочный срок запуска?",
+          "checks": [
+            {
+              "id": "UXB033.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB033.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB033.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "рубр"
+                ]
+              }
+            },
+            {
+              "id": "UXB033.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "разработку",
+                  "сайта"
+                ],
+                "min": 1,
+                "hits": [
+                  "сайта"
+                ]
+              }
+            },
+            {
+              "id": "UXB033.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 728
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4755
+    },
+    {
+      "id": "UXB034",
+      "title": "Банк B: Поставщики/подрядчики — запрос 34",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Ищу юридическую фирму по ВЭД/импорту.",
+          "requestBody": {
+            "message": "Ищу юридическую фирму по ВЭД/импорту.",
+            "history": []
+          },
+          "latencyMs": 5787,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "fbd3dac0-e2a3-4d30-bf56-d7ef47661051",
+          "isStub": false,
+          "reply": "Рекомендую начать поиск по таким рубрикам (если есть в каталоге) и с такими ключевыми словами:\n\n**Рубрики (ориентиры):**\n- Юридические услуги / консалтинг / внешнеэкономическая деятельность  \n- Таможенное оформление / ВЭД / импорт‑экспорт  \n- Налоговый и внешнеторговый консалтинг  \n\n**Ключевые слова/синонимы для поиска:**\n- «юрист ВЭД», «юридическое сопровождение ВЭД»\n- «импорт», «внешнеэкономическая деятельность»\n- «таможенное право», «таможенные споры»\n- «контракты ВЭД», «инкотермс»\n- «сертификация/декларирование» (если нужно)\n\n**Фильтры:**\n- Город/область (если важна локализация)\n- Тип клиентов (B2B), если доступно\n\nЧтобы сузить подбор:\n1) В каком городе/области нужна фирма?  \n2) Что именно требуется: сопровождение контрактов ВЭД, таможенные споры, консультации по импорту, проверка контрагентов, сертификация?  \n3) Нужен разовый проект или абонентское обслуживание?",
+          "checks": [
+            {
+              "id": "UXB034.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB034.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB034.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB034.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "юридическую",
+                  "фирму",
+                  "импорту"
+                ],
+                "min": 1,
+                "hits": [
+                  "импорту"
+                ]
+              }
+            },
+            {
+              "id": "UXB034.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 879
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5787
+    },
+    {
+      "id": "UXB035",
+      "title": "Банк B: Поставщики/подрядчики — запрос 35",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужна сертификация продукции (декларация/сертификат).",
+          "requestBody": {
+            "message": "Нужна сертификация продукции (декларация/сертификат).",
+            "history": []
+          },
+          "latencyMs": 3742,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "aeb3f076-6c09-402e-94a6-4835e2cd936c",
+          "isStub": false,
+          "reply": "Подойдёт рубрика **«Стандартизация, метрология, сертификация»** (госструктуры/услуги) и/или **«Сертификация и испытания»** (инж./промышл. услуги).  \nКлючевые слова для поиска: *сертификация продукции, декларация соответствия, сертификат соответствия, испытания, протокол испытаний, техрегламент ТР ТС/ЕАЭС, оценка соответствия*.\n\nУточните, чтобы сузить поиск:\n1) В каком городе/области РБ нужны услуги?  \n2) Какая продукция (категория/код ТН ВЭД, если есть)?  \n3) Нужен именно сертификат или декларация (и по какому ТР ЕАЭС, если известно)?\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным.",
+          "checks": [
+            {
+              "id": "UXB035.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB035.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB035.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "категор",
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB035.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "нужна",
+                  "сертификация",
+                  "продукции",
+                  "декларация"
+                ],
+                "min": 1,
+                "hits": [
+                  "сертификация",
+                  "продукции",
+                  "декларация"
+                ]
+              }
+            },
+            {
+              "id": "UXB035.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 663
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3742
+    },
+    {
+      "id": "UXB036",
+      "title": "Банк B: Поставщики/подрядчики — запрос 36",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Поставщики кофемашин для офиса + сервис.",
+          "requestBody": {
+            "message": "Поставщики кофемашин для офиса + сервис.",
+            "history": []
+          },
+          "latencyMs": 4795,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "5e8d48f4-fed6-46c6-ab77-cbed4cc6b530",
+          "isStub": false,
+          "reply": "Под это подойдут такие рубрики и поисковые запросы (первичный заход):\n\n**Рубрики для поиска:**\n1) Бизнес‑услуги (B2B) → (если есть подрубрика) «Кофемашины для офиса / кофейное оборудование / вендинг»  \n2) Услуги для населения → «Ремонт кофемашин / сервисное обслуживание» (если ищете сервис отдельно)\n\n**Ключевые слова/синонимы:**\n- «кофемашины для офиса», «кофейное оборудование», «аренда кофемашин», «кофе в офис», «вендинг», «кофемашины + обслуживание», «сервис кофемашин», «ремонт кофемашин».\n\n**Фильтры:**\n- Регион/город — важно для сервиса и выездного обслуживания.\n\nУточните, пожалуйста, **город/регион**, а также **формат** (покупка или аренда) и **ориентировочное число чашек/сотрудников** — подберу более точные варианты и запросы.",
+          "checks": [
+            {
+              "id": "UXB036.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB036.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB036.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB036.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "кофемашин",
+                  "офиса"
+                ],
+                "min": 1,
+                "hits": [
+                  "кофемашин",
+                  "офиса"
+                ]
+              }
+            },
+            {
+              "id": "UXB036.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 741
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4795
+    },
+    {
+      "id": "UXB037",
+      "title": "Банк B: Поставщики/подрядчики — запрос 37",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Найди охранное предприятие (пультовая охрана).",
+          "requestBody": {
+            "message": "Найди охранное предприятие (пультовая охрана).",
+            "history": []
+          },
+          "latencyMs": 4900,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ead4b625-165b-4a19-ad97-88f7c8e738cb",
+          "isStub": false,
+          "reply": "Готов помочь с подбором. Для поиска в Biznesinfo подойдут рубрики и ключевые запросы:\n\n**Рубрики:**\n- Государство и общество → **Охрана и безопасность**\n- Государство и общество → **Безопасность и охрана**\n\n**Ключевые слова/синонимы:**\n- пультовая охрана  \n- охранное предприятие  \n- услуги охраны  \n- сигнализация / охранная сигнализация  \n- мониторинг тревожных сигналов  \n- тревожная кнопка  \n- ГБР (группа быстрого реагирования)\n\n**Фильтры:**\n- Город/область (важно для выезда ГБР)\n- Тип услуг (пультовая охрана, тревожная кнопка, охрана объектов)\n\nУточните, пожалуйста:\n1) В каком городе/области нужна пультовая охрана?  \n2) Что охраняем: офис, склад, магазин, частный дом/квартира?  \n3) Нужна ли выездная ГБР/тревожная кнопка?",
+          "checks": [
+            {
+              "id": "UXB037.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB037.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB037.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB037.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "охранное",
+                  "предприятие",
+                  "пультовая",
+                  "охрана"
+                ],
+                "min": 1,
+                "hits": [
+                  "охранное",
+                  "предприятие",
+                  "пультовая",
+                  "охрана"
+                ]
+              }
+            },
+            {
+              "id": "UXB037.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 732
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4900
+    },
+    {
+      "id": "UXB038",
+      "title": "Банк B: Поставщики/подрядчики — запрос 38",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Промышленная вентиляция: проект+монтаж.",
+          "requestBody": {
+            "message": "Промышленная вентиляция: проект+монтаж.",
+            "history": []
+          },
+          "latencyMs": 5535,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "767245d9-6466-4655-bbdb-cb3aeb6dfef4",
+          "isStub": false,
+          "reply": "Подходит запрос «Промышленная вентиляция: проект+монтаж». Рекомендую искать в рубриках:\n- **Строительство и недвижимость → Вентиляция и кондиционирование воздуха**  \n  /catalog/stroitelstvo-nedvijimost/ventilyaciya-i-kondicionirovanie-vozduha\n- Также смежно: **Строительство и недвижимость → Проектные работы**  \n  /catalog/stroitelstvo-nedvijimost/proektnye-raboty  \n  и **Архитектура и проектирование**  \n  /catalog/stroitelstvo-nedvijimost/arhitektura-i-proektirovanie\n\nКлючевые слова/синонимы для поиска:\n- «промышленная вентиляция», «вентиляция производственных помещений»\n- «проект вентиляции», «проектирование вентиляции»\n- «монтаж вентиляции», «системы вентиляции»\n- «приточно‑вытяжная вентиляция», «аспирация», «дымоудаление»\n\nУточняющие вопросы (чтобы сузить список):\n1) В каком городе/области нужен проект и монтаж?  \n2) Тип объекта (цех, склад, пищевое производство и т. п.)?  \n3) Нужны ли пусконаладка и последующее обслуживание?",
+          "checks": [
+            {
+              "id": "UXB038.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB038.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB038.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB038.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "промышленная",
+                  "вентиляция",
+                  "проект",
+                  "монтаж"
+                ],
+                "min": 1,
+                "hits": [
+                  "промышленная",
+                  "вентиляция",
+                  "проект",
+                  "монтаж"
+                ]
+              }
+            },
+            {
+              "id": "UXB038.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 942
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5536
+    },
+    {
+      "id": "UXB039",
+      "title": "Банк B: Поставщики/подрядчики — запрос 39",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики топлива по безналу.",
+          "requestBody": {
+            "message": "Нужны поставщики топлива по безналу.",
+            "history": []
+          },
+          "latencyMs": 4904,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "a9acf963-8dd6-42c6-8457-4b17a9935e1a",
+          "isStub": false,
+          "reply": "1. Белоруснефть‑Минскавтозаправка РУП — /company/belorusneft  \nПричина: профиль «Автозаправочные станции (АЗС)» и «оптово‑розничная торговля нефтепродуктами», что соответствует поставкам топлива по безналу.\n\nСильных релевантных кандидатов в текущем списке — только один. Остальные из выдачи связаны с мониторингом/оборудованием, а не продажей топлива. Чтобы сузить и найти больше поставщиков, уточните:\n1) Какой вид топлива нужен (ДТ/АИ‑92/АИ‑95/газ)?  \n2) Регион/город поставки?  \n3) Формат: самовывоз по карте/талонам или доставка топливозаправщиком?\n\nКороткий прозрачный ranking (предварительно):\n1. АвтоЮрлайн ООО — /company/avtoyurlayn-152 (Пассажирские перевозки; Минск, minsk)\n2. АНТЕЛИС Электроникс ООО — /company/antelis (Навигационное оборудование, спутниковый мониторинг; Минск, minsk)\n3. АС Мониторинг ООО — /company/asmonitoring (Навигационное оборудование, спутниковый мониторинг; Минск, minsk)\nКритерии: релевантность профиля, локация, полнота контактов, риск несоответствия задаче.\nФокус запроса: Нужны поставщики топлива по безналу.",
+          "checks": [
+            {
+              "id": "UXB039.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB039.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB039.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "поставщ",
+                  "достав",
+                  "контакт"
+                ]
+              }
+            },
+            {
+              "id": "UXB039.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "топлива",
+                  "безналу"
+                ],
+                "min": 1,
+                "hits": [
+                  "топлива",
+                  "безналу"
+                ]
+              }
+            },
+            {
+              "id": "UXB039.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 1049
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4904
+    },
+    {
+      "id": "UXB040",
+      "title": "Банк B: Поставщики/подрядчики — запрос 40",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Хочу найти типографию для каталогов A4.",
+          "requestBody": {
+            "message": "Хочу найти типографию для каталогов A4.",
+            "history": []
+          },
+          "latencyMs": 4515,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1160ef32-9b08-4056-b352-2f40f14b913d",
+          "isStub": false,
+          "reply": "Подходящие варианты из доступных кандидатов:\n\n1. **АРГО-ГРАФИКС ТМ ООО** — полиграфические услуги; прямо указаны *каталоги, буклеты, листовки* — значит подходит для печати каталогов A4. Минск.  \n/​company/ag\n\nДругих релевантных типографий в текущем списке нет — рекомендую проверить карточку компании и уточнить возможности/тиражи.\n\nЧтобы сузить поиск и подобрать ещё варианты, уточните:\n1) В каком городе/регионе нужна типография?  \n2) Нужен ли полный цикл (дизайн/верстка/допечатная подготовка) или только печать?  \n3) Ориентировочный тираж и срок?\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. АРГО-ГРАФИКС ТМ ООО — /company/ag (Полиграфические услуги, типографии; Минск, minsk)\n2. Автобис ООО — /company/m-autobis (Оборудование для АЗС, автомоек, СТО; Минск, minsk)\n3. АгроСябар ООО — /company/agrosb (Автосервис грузовых автомобилей; Минский р-н, minsk-region)\n4. АРДИС ЗАО — /company/ardis (Мебель; Минский р-н, minsk-region)",
+          "checks": [
+            {
+              "id": "UXB040.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB040.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB040.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "компан",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB040.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "хочу",
+                  "найти",
+                  "типографию",
+                  "каталогов"
+                ],
+                "min": 1,
+                "hits": [
+                  "каталогов"
+                ]
+              }
+            },
+            {
+              "id": "UXB040.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 946
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4515
+    },
+    {
+      "id": "UXB041",
+      "title": "Банк B: Поставщики/подрядчики — запрос 41",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужен подрядчик на контекстную рекламу.",
+          "requestBody": {
+            "message": "Нужен подрядчик на контекстную рекламу.",
+            "history": []
+          },
+          "latencyMs": 5282,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4bca4f76-2be2-4b46-b8f9-3f9684a3ba42",
+          "isStub": false,
+          "reply": "Подрядчика по контекстной рекламе лучше искать в рубриках про маркетинг/рекламу/интернет‑услуги. В каталоге попробуйте такие варианты и фильтры:\n\n**Рубрики/направления для поиска**\n1) Маркетинг и реклама → Контекстная реклама  \n2) Интернет‑маркетинг / Digital‑агентства  \n3) Реклама в интернете / Продвижение сайтов (PPC)\n\n**Ключевые слова/синонимы**\n- контекстная реклама, PPC, перформанс‑маркетинг  \n- Яндекс.Директ, Google Ads  \n- контекст + настройка/ведение/аудит/оптимизация  \n- лидогенерация, performance, медиаплан\n\n**Регион/город**\n- укажите город (Минск или другой), если нужен локальный подрядчик; если можно удалённо — выбирайте «Беларусь» без ограничений по региону.\n\nЧтобы сузить подбор точнее, подскажите:\n1) В каком городе/регионе нужен подрядчик?  \n2) Какая тематика бизнеса и целевая география рекламы?  \n3) Нужна только настройка или ещё ведение/аналитика/сквозная аналитика?",
+          "checks": [
+            {
+              "id": "UXB041.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB041.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB041.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "подряд",
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB041.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "подрядчик",
+                  "контекстную",
+                  "рекламу"
+                ],
+                "min": 1,
+                "hits": [
+                  "подрядчик",
+                  "рекламу"
+                ]
+              }
+            },
+            {
+              "id": "UXB041.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 894
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5282
+    },
+    {
+      "id": "UXB042",
+      "title": "Банк B: Поставщики/подрядчики — запрос 42",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Утилизация/вывоз отходов для юрлиц.",
+          "requestBody": {
+            "message": "Утилизация/вывоз отходов для юрлиц.",
+            "history": []
+          },
+          "latencyMs": 5058,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "eed61ada-907b-418e-9c95-d1f46f2f7777",
+          "isStub": false,
+          "reply": "Подходящие рубрики для поиска утилизации/вывоза отходов для юрлиц:\n\n**Рубрика/категория (ориентиры):**\n- Услуги для предприятий → утилизация/вывоз отходов  \n- Коммунальные/экологические услуги → обращение с отходами  \n(в каталоге часто встречаются как «вывоз отходов», «утилизация», «обезвреживание», «переработка отходов»)\n\n**Ключевые слова/синонимы для поиска:**\n- вывоз отходов, утилизация отходов, обращение с отходами  \n- ТБО/ТКО, промышленные отходы  \n- обезвреживание, переработка, захоронение  \n- контракт на вывоз, абонентское обслуживание  \n- паспортизация отходов (если нужно)\n\n**Фильтры:**\n- Регион/город (по месту расположения вашей компании и зоне обслуживания подрядчика)  \n- Тип отходов (если есть фильтр): ТКО/промышленные/опасные\n\nУточните, пожалуйста, **город/область** и **тип отходов** (ТКО, промышленные, опасные), чтобы сузить поиск.",
+          "checks": [
+            {
+              "id": "UXB042.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB042.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB042.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB042.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "утилизация",
+                  "вывоз",
+                  "отходов",
+                  "юрлиц"
+                ],
+                "min": 1,
+                "hits": [
+                  "утилизация",
+                  "вывоз",
+                  "отходов",
+                  "юрлиц"
+                ]
+              }
+            },
+            {
+              "id": "UXB042.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 856
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5058
+    },
+    {
+      "id": "UXB043",
+      "title": "Банк B: Поставщики/подрядчики — запрос 43",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Лизинговые компании, условия для малого бизнеса.",
+          "requestBody": {
+            "message": "Лизинговые компании, условия для малого бизнеса.",
+            "history": []
+          },
+          "latencyMs": 7754,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2e719304-83ec-44f1-9677-e65df047f582",
+          "isStub": false,
+          "reply": "Вот как лучше искать лизинговые компании и условия для малого бизнеса в Biznesinfo:\n\n**Рубрики (куда зайти):**\n- Если в каталоге есть раздел «Финансы/Лизинг» — используйте его.  \n- Если нет явной рубрики, попробуйте общие «Бизнес‑услуги (B2B)» и подрубрики «Финансовые услуги», «Лизинг», «Кредитование».\n\n**Ключевые слова/синонимы для поиска:**\n- «лизинг», «лизинговая компания»\n- «лизинг для малого бизнеса»\n- «лизинг оборудования», «лизинг авто»\n- «финансирование», «рассрочка для бизнеса» (иногда дублируется)\n\n**Фильтры по региону/городу:**  \nуточните город/область — список будет точнее и ближе к вам.\n\n**Как сузить/расширить:**\n- Сузить: добавить предмет лизинга (авто/оборудование/спецтехника), размер аванса, срок, требования к возрасту бизнеса.\n- Расширить: убрать предмет лизинга и оставить только «лизинг для малого бизнеса».\n\nУточните, пожалуйста:\n1) В каком городе/области ищете?  \n2) Что планируете брать в лизинг (авто, оборудование, спецтехника и т.п.)?  \n3) Есть ли требования по авансу/сроку?",
+          "checks": [
+            {
+              "id": "UXB043.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB043.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB043.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "компан",
+                  "рубр",
+                  "поиск",
+                  "услов"
+                ]
+              }
+            },
+            {
+              "id": "UXB043.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "лизинговые",
+                  "условия",
+                  "малого",
+                  "бизнеса"
+                ],
+                "min": 1,
+                "hits": [
+                  "лизинговые",
+                  "условия",
+                  "малого",
+                  "бизнеса"
+                ]
+              }
+            },
+            {
+              "id": "UXB043.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 1010
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 7754
+    },
+    {
+      "id": "UXB044",
+      "title": "Банк B: Поставщики/подрядчики — запрос 44",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Таможенный брокер — Минск.",
+          "requestBody": {
+            "message": "Таможенный брокер — Минск.",
+            "history": []
+          },
+          "latencyMs": 4365,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f44866a0-79d0-4936-9d00-e9887954b381",
+          "isStub": false,
+          "reply": "Для запроса «таможенный брокер» по Минску можно искать так:\n\n**Рубрики/направления для поиска**\n- Логистика → Таможенные услуги / Таможенные брокеры\n- ВЭД → Таможенное оформление / Декларирование\n- Экспедирование и грузоперевозки → Таможенное оформление\n\n**Ключевые слова и синонимы**\n- таможенный брокер\n- таможенное оформление\n- таможенное декларирование\n- ВЭД\n- импорт/экспорт оформление\n- декларант\n\n**Фильтр региона**\n- Минск (и при необходимости Минская область)\n\nЧтобы сузить поиск и получить более релевантные компании, уточните, пожалуйста:\n1) Какие виды товаров/категории (код ТН ВЭД, если есть)?  \n2) Нужны услуги только брокера или «под ключ» (доставка + оформление)?  \n3) Регулярные поставки или разовый кейс?",
+          "checks": [
+            {
+              "id": "UXB044.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB044.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB044.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав"
+                ]
+              }
+            },
+            {
+              "id": "UXB044.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "таможенный",
+                  "брокер",
+                  "минск"
+                ],
+                "min": 1,
+                "hits": [
+                  "таможенный",
+                  "брокер",
+                  "минск"
+                ]
+              }
+            },
+            {
+              "id": "UXB044.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 722
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4365
+    },
+    {
+      "id": "UXB045",
+      "title": "Банк B: Поставщики/подрядчики — запрос 45",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Поставщики мебели для офиса, сроки до 2 недель.",
+          "requestBody": {
+            "message": "Поставщики мебели для офиса, сроки до 2 недель.",
+            "history": []
+          },
+          "latencyMs": 7177,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4ec5dd28-22bb-43e1-a9d4-3b933643fc56",
+          "isStub": false,
+          "reply": "Для поиска поставщиков офисной мебели на Biznesinfo начните с рубрик и ключевых слов ниже. Срок до 2 недель — стоит сразу фильтровать по городу/региону, чтобы ускорить логистику.\n\n**Где искать (рубрики):**\n1) *Деревообработка и мебель → Товары для дома* (slug: `derevoobrabotka-i-mebel/tovari-dlya-doma`) — часто там размещают поставщиков мебели, включая офисную.  \n2) *Торговля и логистика* (slug: `torgovlya-logistika`) — если нужны дилеры/оптовики и быстрая доставка.  \n3) *Бизнес‑услуги (B2B) → Канцтовары, товары для офиса* (slug: `biznes-uslugi-dlya-biznesa/kanctovary-tovary-dlya-ofisa`) — иногда есть офисная мебель у поставщиков офисных товаров.\n\n**Ключевые слова/синонимы для поиска:**\n- «офисная мебель», «мебель для офиса», «офисные столы», «офисные кресла», «рабочие места», «кабинет руководителя»\n- «мебель на заказ», «корпусная мебель», «поставка офисной мебели»\n- «быстрая доставка», «наличие на складе»\n\n**Фильтры по региону:**\n- Выберите ваш город/область (для срока до 2 недель лучше локальные поставщики или областные центры).\n\n**Что уточнить для точного подбора:**\n1) Город/область поставки?  \n2) Что именно нужно: столы/кресла/шкафы/комплекты, объём (шт.)?  \n3) Бюджет/ценовой сегмент (эконом/средний/премиум) и нужен ли монтаж?",
+          "checks": [
+            {
+              "id": "UXB045.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB045.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB045.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "поставщ",
+                  "рубр",
+                  "поиск",
+                  "достав"
+                ]
+              }
+            },
+            {
+              "id": "UXB045.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "мебели",
+                  "офиса",
+                  "сроки",
+                  "недель"
+                ],
+                "min": 1,
+                "hits": [
+                  "мебели",
+                  "офиса",
+                  "недель"
+                ]
+              }
+            },
+            {
+              "id": "UXB045.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 1250
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 7178
+    },
+    {
+      "id": "UXB046",
+      "title": "Банк B: Поставщики/подрядчики — запрос 46",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужно производство наружной рекламы.",
+          "requestBody": {
+            "message": "Нужно производство наружной рекламы.",
+            "history": []
+          },
+          "latencyMs": 4245,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "bf55981e-2e8c-4696-9b2d-258da74eee01",
+          "isStub": false,
+          "reply": "Подойдёт поиск по рубрикам, связанным с рекламой и полиграфией. Начните с разделов типа «Рекламно-производственные компании», «Наружная реклама», «Полиграфия/Широкоформатная печать» (если в каталоге есть).  \nКлючевые слова/синонимы для поиска: «наружная реклама», «рекламное производство», «вывески», «световые короба», «объемные буквы», «баннеры», «лайтбоксы», «брендирование фасадов», «монтаж рекламы».\n\nУточните, пожалуйста:\n1) Город/регион в Беларуси?  \n2) Что именно нужно изготовить (вывеска, баннер, объемные буквы и т.п.)?  \n3) Требуется ли монтаж/согласование?",
+          "checks": [
+            {
+              "id": "UXB046.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB046.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB046.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "компан",
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB046.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "производство",
+                  "наружной",
+                  "рекламы"
+                ],
+                "min": 1,
+                "hits": [
+                  "производство",
+                  "рекламы"
+                ]
+              }
+            },
+            {
+              "id": "UXB046.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 569
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4245
+    },
+    {
+      "id": "UXB047",
+      "title": "Банк B: Поставщики/подрядчики — запрос 47",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны промышленные моющие средства оптом.",
+          "requestBody": {
+            "message": "Нужны промышленные моющие средства оптом.",
+            "history": []
+          },
+          "latencyMs": 5979,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "e9949bd0-a849-4eb6-8adf-1d36b7f1befa",
+          "isStub": false,
+          "reply": "Подберём поставщиков по каталогу. Для поиска в Biznesinfo рекомендую начать с рубрик, связанных с химией/моющими средствами (если в каталоге есть), а также использовать ключевые слова.\n\n**Где искать (рубрики):**\n- Попробуйте рубрики в блоке «Химия / бытовая и промышленная химия / моющие средства» (если доступны в каталоге).\n- Также можно искать через «Оптовая торговля» + «моющие средства».\n\n**Ключевые слова/синонимы:**\n- «промышленные моющие средства»\n- «профессиональная химия»\n- «моющие средства для производства»\n- «технические моющие средства»\n- «санитарная химия», «CIP-моющие средства»\n- «концентраты моющие», «щелочные/кислотные моющие»\n\n**Фильтры:**\n- Регион/город поставки (Минск, областные центры).\n- Опт/дистрибуция.\n\nЧтобы сузить подбор, уточните, пожалуйста:\n1) Для каких отраслей/задач нужны средства (пищевка, общепром, клининг, автосервис и т.д.)?\n2) Какой регион/город поставки?\n3) Нужны конкретные типы (щелочные, кислотные, для CIP, для полов, для оборудования)?",
+          "checks": [
+            {
+              "id": "UXB047.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB047.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB047.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": [
+                  "поставщ",
+                  "рубр",
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXB047.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "промышленные",
+                  "моющие",
+                  "средства",
+                  "оптом"
+                ],
+                "min": 1,
+                "hits": [
+                  "промышленные",
+                  "моющие",
+                  "средства"
+                ]
+              }
+            },
+            {
+              "id": "UXB047.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 985
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5979
+    },
+    {
+      "id": "UXB048",
+      "title": "Банк B: Поставщики/подрядчики — запрос 48",
+      "tags": [
+        "query_bank",
+        "supplier_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет подобрать поставщика или подрядчика под конкретную B2B-задачу.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UXB048.T1.C3",
+          "type": "includes_any",
+          "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "поставщ",
+              "подряд",
+              "компан",
+              "категор",
+              "рубр",
+              "поиск",
+              "достав",
+              "услов",
+              "контакт"
+            ],
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Подбор поставщиков с НДС/без НДС.",
+          "requestBody": {
+            "message": "Подбор поставщиков с НДС/без НДС.",
+            "history": []
+          },
+          "latencyMs": 1632,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "8b4b5406-80e3-4457-9fb6-38244d6d0d06",
+          "isStub": false,
+          "reply": "Уточните, пожалуйста: какие именно товары/услуги нужны и в каком регионе/городе искать? Также важен вариант НДС: только с НДС, только без, или оба?",
+          "checks": [
+            {
+              "id": "UXB048.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXB048.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXB048.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщика/подрядчика",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "поставщ",
+                  "подряд",
+                  "компан",
+                  "категор",
+                  "рубр",
+                  "поиск",
+                  "достав",
+                  "услов",
+                  "контакт"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UXB048.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Нужно сохранить связь с предметом запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "ндс",
+                  "поставщ"
+                ],
+                "min": 1,
+                "hits": [
+                  "ндс"
+                ]
+              }
+            },
+            {
+              "id": "UXB048.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 147
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 1632
+    }
+  ]
+}

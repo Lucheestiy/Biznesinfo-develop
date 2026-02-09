@@ -1,0 +1,105 @@
+Based on my analysis of the QA results, judge reports, and codebase, I can now provide concrete engineering advice for the Biznesinfo AI assistant.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Current QA run shows 100% pass rate (2/2 scenarios, 23/23 checks) with avg usefulness 4.75/5. However, judge analysis reveals systematic issues: (1) geo-filters don't verify actual company locations against micro-districts (e.g., 'Малиновка'), (2) company lists repeat across turns without location-based filtering, (3) contradiction between turns (finding candidates then claiming none exist). Root cause: retrieval layer lacks address-level geo-validation and cross-turn result consistency.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix micro-district geo-filtering for company results",
+      "why": "Judge identified that assistant returns same company list across all 3 turns without filtering by 'Малиновка' district. Users expect location-filtered results when specifying micro-districts.",
+      "expectedImpact": "Reduces 'repeating same list' complaints; improves usefulness score from 4→5 on geo-constrained queries.",
+      "validationScenarios": ["D001"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add cross-turn consistency guard for vendor lookups",
+      "why": "Historical issue (UX107): Turn 1 finds 'Белпожохрансервис', Turn 2 claims 'нет релевантных компаний'. Same contradiction pattern risks appearing in current flow.",
+      "expectedImpact": "Eliminates contradiction failures; maintains user trust in multi-turn conversations.",
+      "validationScenarios": ["D001", "UX107"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enrich company data with address/location field for filtering",
+      "why": "Current `BiznesinfoCompanySummary` has `city` and `region` but no `address` or `district` field. Cannot verify if company is actually in 'Малиновка'.",
+      "expectedImpact": "Enables accurate micro-district filtering; supports 'near me' queries.",
+      "validationScenarios": ["D001", "S005", "S006"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "geo",
+      "title": "Implement address-level location matching for micro-districts",
+      "action": "In `app/src/app/api/ai/request/route.ts`, enhance `filterAndRankVendorCandidates()` to check `company.address` field against district patterns (e.g., /малиновка|каменная\\s+горка/i). If user specifies micro-district, filter candidates by address match before returning.",
+      "implementationHint": "Add `addressMatch` scoring in `filterAndRankVendorCandidates()` around line 280-295. Use regex pattern from `extractLocationPhrase()` to match against `c.address`.",
+      "expectedImpact": "Returns only companies actually located in requested micro-district; eliminates 'same list for all turns' issue.",
+      "risk": "Low - falls back to city-level if address field empty.",
+      "effort": "S",
+      "validationScenarios": ["D001", "S005"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Cache vendor candidates across turns in session",
+      "action": "Store `vendorCandidates` in conversation context (similar to `history`). On follow-up turns with same sourcing topic, reuse cached candidates instead of re-querying, then apply new filters (geo, ranking) on cached set.",
+      "implementationHint": "Extend `AssistantSessionRef` in `conversations.ts` to include `lastVendorCandidates: string[]`. In `buildVendorLookupContext()`, check cache before new search when `followUpByLocation || followUpByRanking`.",
+      "expectedImpact": "Prevents contradiction between turns; ensures consistent company set across multi-turn sourcing conversations.",
+      "risk": "Medium - need TTL/cache invalidation on new search terms.",
+      "effort": "M",
+      "validationScenarios": ["D001", "UX107"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add explicit location-verification instruction to system prompt",
+      "action": "When `cityRegionHints` contains `phrase` (micro-district), add instruction: 'Verify each recommended company is located in {phrase} district by checking address field. If location uncertain, note this explicitly.'",
+      "implementationHint": "In `buildCityRegionHintsBlock()`, when `hint.phrase` exists and differs from city, append verification instruction to returned block.",
+      "expectedImpact": "LLM self-corrects on location claims; reduces judge complaints about unverified locations.",
+      "risk": "Low - instruction-only change.",
+      "effort": "S",
+      "validationScenarios": ["D001", "S005"]
+    },
+    {
+      "id": "R4",
+      "area": "ranking",
+      "title": "Deduplicate and filter company lists by geo constraints",
+      "action": "In `postProcessAssistantReply()`, when `mode.rankingRequested` and `locationPhrase` exists, strip companies not matching location from response. Use `stripCompanyLinkLines()` pattern but with geo-aware filtering.",
+      "implementationHint": "Add geo-filter step before line 954-957 in route.ts. Check each `/company/` link's associated candidate against `locationPhrase` via address match.",
+      "expectedImpact": "Ensures ranking responses respect geo constraints even when LLM hallucinates extra companies.",
+      "risk": "Low - post-processing safeguard.",
+      "effort": "S",
+      "validationScenarios": ["D001"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add contradiction detection for vendor availability claims",
+      "action": "Track if previous turn mentioned specific companies. If current turn claims 'нет релевантных компаний' but history contains company mentions, trigger consistency fallback.",
+      "implementationHint": "In `postProcessAssistantReply()`, check `history` for company slugs via `extractAssistantCompanySlugsFromHistory()`. If `replyClaimsNoRelevantVendors()` true but history has slugs, append: 'В предыдущем ответе упоминались: {list}. Уточните, что изменилось?'",
+      "expectedImpact": "Prevents UX107-style contradictions; improves user trust.",
+      "risk": "Low - additive message only.",
+      "effort": "S",
+      "validationScenarios": ["UX107", "D001"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "D001",
+      "D002"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.geo.json",
+      "scenarios.regressions.ranking-followups.json",
+      "scenarios.dirty.realworld.json"
+    ],
+    "successMetrics": [
+      "usefulRate >= 0.95 (currently 1.0, maintain)",
+      "avgUsefulness >= 4.8 (currently 4.75, target +0.05)",
+      "zero contradiction issues in judge reports",
+      "geo-filtered queries show address-verified companies only"
+    ]
+  }
+}
+```

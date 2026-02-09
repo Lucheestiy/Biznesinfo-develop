@@ -1,0 +1,565 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-08T12:40:00Z",
+      "source": "manual-regression",
+      "description": "Cross-domain regressions: block irrelevant domain drift in sourcing responses"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T17-48-50-106Z-3629436-cdxrt",
+    "startedAt": "2026-02-08T17:48:50.106Z",
+    "endedAt": "2026-02-08T17:49:26.744Z",
+    "durationMs": 36638,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.cross-domain.json",
+    "totalScenarios": 4,
+    "passedScenarios": 4,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 20,
+    "passedChecks": 20,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 4,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "CD001",
+      "title": "Молоко в Бресте/Витебске: не подмешивать автозапчасти и промышленный нерелевант",
+      "tags": [
+        "regression",
+        "cross_domain",
+        "milk",
+        "geo",
+        "multi_turn"
+      ],
+      "personaGoal": "Закупщик ищет молочную продукцию, ожидает молочный фокус без авто/металло нерелеванта",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну молока в Бресте?",
+          "requestBody": {
+            "message": "Где купить тонну молока в Бресте?",
+            "history": []
+          },
+          "latencyMs": 6872,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1fd859fd-6712-49d4-9652-9e85a95f92ea",
+          "isStub": false,
+          "reply": "В Бресте из доступных вариантов по вашему запросу вижу **2 релевантных поставщика** молочной продукции:\n\n1. **Брестское мороженое ОАО**  \n   Почему подходит: в карточке указана **молочная продукция** (сметана, творог, сыры и др.), значит есть профиль по молочному сырью/переработке.  \n   Ссылка: **/company/brestmoroj**\n\n2. **Управляющая компания холдинга Концерн Брестмясомолпром ГО**  \n   Почему подходит: это **крупное объединение мясомолочной промышленности**, в составе — предприятия по переработке молока. Можно запросить, кто из входящих заводов сможет отгрузить 1 т.  \n   Ссылка: **/company/brestmmp**\n\n⚠️ Третий кандидат из списка (**Брестмаш**) — это производитель оборудования, не поставщик молока, поэтому не включаю.\n\nКак быстрее купить 1 т:\n- Пишите сразу запрос с параметрами: **объём 1000 кг, жирность, пастеризованное/сырое, тара (фляги/еврокуб), самовывоз или доставка по Бресту, дата поставки, форма оплаты**.\n- Начните с двух компаний выше и попросите КП + срок отгрузки в один день.\n\nЕсли хотите, сразу подготовлю короткий текст запроса (email + WhatsApp), чтобы вы просто отправили.",
+          "checks": [
+            {
+              "id": "CD001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "CD001.T1.C2",
+              "type": "includes_any",
+              "description": "Должен держать товар и город",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "брест"
+                ],
+                "hits": [
+                  "молок",
+                  "брест"
+                ]
+              }
+            },
+            {
+              "id": "CD001.T1.C3",
+              "type": "any_of",
+              "description": "Должен дать shortlist или полезный fallback без выдумывания",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "CD001.T1.C4",
+              "type": "excludes_all",
+              "description": "Не должен уводить в нерелевантные домены",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "автозапчаст",
+                  "шиномонтаж",
+                  "подшип",
+                  "металлопрокат",
+                  "вентиляц",
+                  "кабел"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сырая, 1.5 процента, вывоз в Витебск",
+          "requestBody": {
+            "message": "Сырая, 1.5 процента, вывоз в Витебск",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "В Бресте из доступных вариантов по вашему запросу вижу **2 релевантных поставщика** молочной продукции:\n\n1. **Брестское мороженое ОАО**  \n   Почему подходит: в карточке указана **молочная продукция** (сметана, творог, сыры и др.), значит есть профиль по молочному сырью/переработке.  \n   Ссылка: **/company/brestmoroj**\n\n2. **Управляющая компания холдинга Концерн Брестмясомолпром ГО**  \n   Почему подходит: это **крупное объединение мясомолочной промышленности**, в составе — предприятия по переработке молока. Можно запросить, кто из входящих заводов сможет отгрузить 1 т.  \n   Ссылка: **/company/brestmmp**\n\n⚠️ Третий кандидат из списка (**Брестмаш**) — это производитель оборудования, не поставщик молока, поэтому не включаю.\n\nКак быстрее купить 1 т:\n- Пишите сразу запрос с параметрами: **объём 1000 кг, жирность, пастеризованное/сырое, тара (фляги/еврокуб), самовывоз или доставка по Бресту, дата поставки, форма оплаты**.\n- Начните с двух компаний выше и попросите КП + срок отгрузки в один день.\n\nЕсли хотите, сразу подготовлю короткий текст запроса (email + WhatsApp), чтобы вы просто отправили."
+              }
+            ]
+          },
+          "latencyMs": 7639,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c1b02aef-fa7d-48bd-9698-a86a2a08ea97",
+          "isStub": false,
+          "reply": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. Ссылка: — /company/brestmoroj (brest)\n2. Ссылка: — /company/brestmmp (brest)\nФокус по запросу: молока, сырая.\nУчет ограничений: самовывоз/вывоз, пункт вывоза: Витебск, локация: Брест.\nЧто уточнить у кандидатов сейчас:\n1. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n2. Уточните ответственное контактное лицо для быстрого согласования.",
+          "checks": [
+            {
+              "id": "CD001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "CD001.T2.C2",
+              "type": "includes_any",
+              "description": "Должен сохранить молочный фокус",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "сыр"
+                ],
+                "hits": [
+                  "молок",
+                  "сыр"
+                ]
+              }
+            },
+            {
+              "id": "CD001.T2.C3",
+              "type": "includes_any",
+              "description": "Должен учесть переключение на Витебск",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "витеб",
+                  "vitebsk"
+                ],
+                "hits": [
+                  "витеб"
+                ]
+              }
+            },
+            {
+              "id": "CD001.T2.C4",
+              "type": "excludes_all",
+              "description": "Не должен подмешивать нерелевантные домены",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "автозапчаст",
+                  "шиномонтаж",
+                  "подшип",
+                  "металлопрокат",
+                  "вентиляц",
+                  "кабел"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 14513
+    },
+    {
+      "id": "CD002",
+      "title": "Лук репчатый: не подмешивать авто/индастриал",
+      "tags": [
+        "regression",
+        "cross_domain",
+        "vegetables",
+        "single_turn"
+      ],
+      "personaGoal": "Найти овощных поставщиков без дрейфа в автомобильные/металло-направления",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Кто оптом продает лук репчатый в Могилеве?",
+          "requestBody": {
+            "message": "Кто оптом продает лук репчатый в Могилеве?",
+            "history": []
+          },
+          "latencyMs": 7661,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "508345f3-6a2e-48c5-82e6-16a42f391c75",
+          "isStub": false,
+          "reply": "1. **ИК Тарома Инжиниринг ООО** — /company/taroma  \n   Почему не подходит напрямую: в карточке указаны ингредиенты для пищепрома (белки, оболочки, крахмалы и т.д.), а не оптовая продажа овощей/лука.\n\nЧтобы быстро найти нужных поставщиков в каталоге, рекомендую искать по рубрикам и ключам:\n1. **Рубрики:**  \n   - Овощи оптом  \n   - Плодоовощная продукция  \n   - Продукты питания оптом / Бакалея и овощи\n2. **Ключевые фразы:**  \n   - «лук репчатый оптом»  \n   - «овощи оптом Могилев»  \n   - «поставщик лука»  \n   - «фермерское хозяйство лук»\n3. **Фильтры:**  \n   - Город: **Могилев**  \n   - Регион: **Могилевская область**  \n   - Тип: опт / производитель / дистрибьютор\n\nЕсли хотите, подготовлю короткий шаблон запроса поставщику (цена за кг, калибр, фасовка, объем, доставка по Могилеву).",
+          "checks": [
+            {
+              "id": "CD002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "CD002.T1.C2",
+              "type": "includes_any",
+              "description": "Должен фиксировать овощную тематику",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "лук",
+                  "репчат",
+                  "овощ"
+                ],
+                "hits": [
+                  "лук",
+                  "репчат",
+                  "овощ"
+                ]
+              }
+            },
+            {
+              "id": "CD002.T1.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать Могилев",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "могил",
+                  "mogilev"
+                ],
+                "hits": [
+                  "могил"
+                ]
+              }
+            },
+            {
+              "id": "CD002.T1.C4",
+              "type": "excludes_all",
+              "description": "Не должен выводить кросс-доменный нерелевант",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "автозапчаст",
+                  "шиномонтаж",
+                  "подшип",
+                  "металлопрокат",
+                  "вентиляц",
+                  "кабел"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 7661
+    },
+    {
+      "id": "CD003",
+      "title": "Сертификация: не превращать запрос в поиск автозапчастей",
+      "tags": [
+        "regression",
+        "cross_domain",
+        "certification",
+        "single_turn"
+      ],
+      "personaGoal": "Пользователь ищет услуги сертификации, ожидает сервисный фокус",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сертификат соответствия где сделать в Минске?",
+          "requestBody": {
+            "message": "Сертификат соответствия где сделать в Минске?",
+            "history": []
+          },
+          "latencyMs": 5271,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "a100f5c3-70a2-4162-ada2-c4829db411f6",
+          "isStub": false,
+          "reply": "В Минске по вашему запросу из доступных кандидатов вижу **1 явно релевантный вариант**:\n\n1. **СтандартноБай ООО** — профиль прямо по задаче: *«Стандартизация, метрология, сертификация»*, указаны услуги *сертификация, декларирование, госрегистрация, сертификаты для маркетплейсов*.  \n   Контакты: +375 (29) 630-08-26, info@standartno.by  \n   Страница: **/company/standartno**\n\nПочему только один: в текущем списке остальные компании относятся к транспорту/банковскому процессингу и не выглядят как исполнители по сертификату соответствия.\n\nЧтобы быстро сузить и не переплатить, при обращении сразу уточняйте:\n- что за продукция: **товар/услуга**;\n- код ТН ВЭД/ОКП (если есть): **по вашему ТЗ**;\n- нужен формат: **сертификат / декларация ЕАЭС**;\n- для какого рынка: **РБ / ЕАЭС / маркетплейс**;\n- сроки: **срок поставки**.\n\nЕсли хотите, подготовлю короткий текст запроса в компанию (email + WhatsApp), чтобы отправить сегодня.\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным.",
+          "checks": [
+            {
+              "id": "CD003.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "CD003.T1.C2",
+              "type": "includes_any",
+              "description": "Должен оставаться в теме сертификации",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сертифик",
+                  "соответств",
+                  "декларац"
+                ],
+                "hits": [
+                  "сертифик",
+                  "соответств",
+                  "декларац"
+                ]
+              }
+            },
+            {
+              "id": "CD003.T1.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать Минск",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "minsk"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            },
+            {
+              "id": "CD003.T1.C4",
+              "type": "excludes_all",
+              "description": "Не должен уводить в авто/пром нерелевант",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "автозапчаст",
+                  "шиномонтаж",
+                  "подшип",
+                  "металлопрокат"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5272
+    },
+    {
+      "id": "CD004",
+      "title": "Клининг после ремонта: не подмешивать техдомены",
+      "tags": [
+        "regression",
+        "cross_domain",
+        "cleaning",
+        "single_turn"
+      ],
+      "personaGoal": "Офис-менеджер ищет клининг, ожидает сервисную релевантность",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Уборка после ремонта Минск фирма",
+          "requestBody": {
+            "message": "Уборка после ремонта Минск фирма",
+            "history": []
+          },
+          "latencyMs": 8930,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "753d60a9-ca41-422f-9271-64cb28a85016",
+          "isStub": false,
+          "reply": "Вот релевантные фирмы в Минске по **уборке после ремонта** (из доступного списка):\n\n1. **БК-ИНВЕСТ ООО** — /company/cleanoff  \n   Почему подходит: в описании прямо указана **послестроительная уборка помещений в Минске**.\n\n2. **БэстКлининг ООО** — /company/bestcleaning  \n   Почему подходит: прямо указано **«Уборка после ремонта»**, а также квартиры/офисы/промобъекты.\n\n3. **Аталиан ОДО** — /company/atalian  \n   Почему подходит: комплексный клининг и обслуживание объектов, подходит для крупных/регулярных задач.\n\n4. **Антония ИЧСУП** — /company/antonia  \n   Почему подходит: клининговая компания в Минске, профиль — уборка помещений.\n\n5. **Аклини ООО** — /company/aklini  \n   Почему подходит: профессиональная уборка + техобслуживание объектов (может быть удобно для комплексного сервиса).\n\n**Как быстро выбрать «лучшую» под ваш кейс:**\n- Сразу уточняйте: площадь, тип объекта (квартира/офис), сроки, нужен ли вывоз мусора, мойка окон, химчистка.\n- Сравните 3 КП по: цене за м², что входит в «после ремонта», срок выполнения, гарантия на результат.\n\nЕсли хотите, подготовлю короткий текст запроса (RFQ) для отправки сразу этим 5 компаниям.",
+          "checks": [
+            {
+              "id": "CD004.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "CD004.T1.C2",
+              "type": "includes_any",
+              "description": "Должен остаться в теме клининга",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "клининг",
+                  "уборк",
+                  "после\\s+ремонт"
+                ],
+                "hits": [
+                  "клининг",
+                  "уборк",
+                  "после\\s+ремонт"
+                ]
+              }
+            },
+            {
+              "id": "CD004.T1.C3",
+              "type": "includes_any",
+              "description": "Должен учитывать Минск",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "minsk"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            },
+            {
+              "id": "CD004.T1.C4",
+              "type": "excludes_all",
+              "description": "Не должен подмешивать нерелевантные домены",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "автозапчаст",
+                  "шиномонтаж",
+                  "подшип",
+                  "металлопрокат",
+                  "кабел"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 8930
+    }
+  ]
+}

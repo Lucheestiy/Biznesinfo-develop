@@ -1,0 +1,841 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-07T18:23:06.896Z",
+      "source": "user-provided",
+      "description": "Real short query bank (part G): errors/non-standard/stress intents, 6 items"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-07T18-24-48-169Z",
+    "startedAt": "2026-02-07T18:24:48.169Z",
+    "endedAt": "2026-02-07T18:25:09.293Z",
+    "durationMs": 21124,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-120-bank-g-errors-stress.json",
+    "totalScenarios": 6,
+    "passedScenarios": 6,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 30,
+    "passedChecks": 30,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UXG115",
+      "title": "Банк G: Ошибки и стресс-кейсы — запрос 115",
+      "tags": [
+        "query_bank",
+        "errors",
+        "stress_cases",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь столкнулся с проблемой поиска/интерфейса и ожидает быстрое, практичное решение.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Ничего не ищется, помоги.",
+          "requestBody": {
+            "message": "Ничего не ищется, помоги.",
+            "history": []
+          },
+          "latencyMs": 2194,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "bbd3d16e-2afa-4300-8f8a-21267e4c92ef",
+          "isStub": false,
+          "reply": "Понимаю. Давайте разберёмся и настроим поиск. Что именно вы ищете (товар/услуга) и в каком регионе/городе?  \nЕсли уже пробовали — какие слова вводили и в каком разделе/рубрике искали?",
+          "checks": [
+            {
+              "id": "UXG115.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXG115.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXG115.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме ошибки/поддержки/поиска",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "результат",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "унп",
+                  "коротк",
+                  "ошиб",
+                  "белая",
+                  "завис",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "номер",
+                  "телефон",
+                  "карточк",
+                  "поддерж",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ],
+                "hits": [
+                  "поиск"
+                ]
+              }
+            },
+            {
+              "id": "UXG115.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть практичным: шаги диагностики/исправления или точный next step",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXG115.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 183
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2197
+    },
+    {
+      "id": "UXG116",
+      "title": "Банк G: Ошибки и стресс-кейсы — запрос 116",
+      "tags": [
+        "query_bank",
+        "errors",
+        "stress_cases",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь столкнулся с проблемой поиска/интерфейса и ожидает быстрое, практичное решение.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сайт завис, страница белая.",
+          "requestBody": {
+            "message": "Сайт завис, страница белая.",
+            "history": []
+          },
+          "latencyMs": 3769,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4e5e305c-e34b-4dc9-8f42-85e5be6e6a98",
+          "isStub": false,
+          "reply": "Уточните, пожалуйста: это ваш сайт или Biznesinfo? И где именно «белая страница» — при открытии главной/поиска/карточки компании?  \n\nПока базовые шаги:\n1) Обновите страницу с очисткой кэша (Ctrl+F5).  \n2) Откройте в другом браузере/инкогнито.  \n3) Проверьте, не блокируют ли расширения (AdBlock и т.п.).  \n4) Если это ваш сайт — проверьте логи сервера и ошибки JS в консоли.  \n\nНапишите, что за сайт, устройство/браузер и адрес страницы.",
+          "checks": [
+            {
+              "id": "UXG116.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXG116.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXG116.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме ошибки/поддержки/поиска",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "результат",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "унп",
+                  "коротк",
+                  "ошиб",
+                  "белая",
+                  "завис",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "номер",
+                  "телефон",
+                  "карточк",
+                  "поддерж",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ],
+                "hits": [
+                  "поиск",
+                  "ошиб",
+                  "белая",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "UXG116.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть практичным: шаги диагностики/исправления или точный next step",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXG116.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 437
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3770
+    },
+    {
+      "id": "UXG117",
+      "title": "Банк G: Ошибки и стресс-кейсы — запрос 117",
+      "tags": [
+        "query_bank",
+        "errors",
+        "stress_cases",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь столкнулся с проблемой поиска/интерфейса и ожидает быстрое, практичное решение.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Почему я вижу устаревший номер телефона?",
+          "requestBody": {
+            "message": "Почему я вижу устаревший номер телефона?",
+            "history": []
+          },
+          "latencyMs": 3699,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1650b02b-1a99-45ac-a874-b849f8c29715",
+          "isStub": false,
+          "reply": "Возможные причины:  \n1) Компания не обновляла карточку на портале.  \n2) Номер изменён, но подтверждение ещё не прошло модерацию.  \n3) Источник данных обновился с задержкой.\n\nЧто можно сделать:  \n- Проверьте другие контакты в карточке (email/сайт/мессенджеры).  \n- Сообщите о проблеме через «Сообщить об ошибке» в карточке (если есть).  \n- Запросите у компании актуальные контакты.\n\nПодскажите, речь о конкретной компании? Если да, пришлите ссылку/ID карточки — проверим, как лучше уточнить.",
+          "checks": [
+            {
+              "id": "UXG117.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXG117.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXG117.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме ошибки/поддержки/поиска",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "результат",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "унп",
+                  "коротк",
+                  "ошиб",
+                  "белая",
+                  "завис",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "номер",
+                  "телефон",
+                  "карточк",
+                  "поддерж",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ],
+                "hits": [
+                  "ошиб",
+                  "обнов",
+                  "номер",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "UXG117.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть практичным: шаги диагностики/исправления или точный next step",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXG117.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 490
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3701
+    },
+    {
+      "id": "UXG118",
+      "title": "Банк G: Ошибки и стресс-кейсы — запрос 118",
+      "tags": [
+        "query_bank",
+        "errors",
+        "stress_cases",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь столкнулся с проблемой поиска/интерфейса и ожидает быстрое, практичное решение.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Я ввожу УНП, а он «слишком короткий» — что делать?",
+          "requestBody": {
+            "message": "Я ввожу УНП, а он «слишком короткий» — что делать?",
+            "history": []
+          },
+          "latencyMs": 3376,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c820b646-3fa2-4b06-97e6-a0eff0fa6d59",
+          "isStub": false,
+          "reply": "УНП в РБ должен быть из **9 цифр**. Если система пишет «слишком короткий», обычно причина одна из этих:\n\n1) Введено меньше 9 цифр (проверьте длину).  \n2) Есть пробелы/символы (вводите только цифры, без пробелов и дефисов).  \n3) Введён не УНП, а другой номер (например, ОКПО/регистрационный).  \n\nЕсли компания иностранная — УНП может отсутствовать, тогда ищите по названию/ключевым словам.\n\nПодскажите, сколько цифр вы вводите и это точно УНП белорусской компании?",
+          "checks": [
+            {
+              "id": "UXG118.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXG118.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXG118.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме ошибки/поддержки/поиска",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "результат",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "унп",
+                  "коротк",
+                  "ошиб",
+                  "белая",
+                  "завис",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "номер",
+                  "телефон",
+                  "карточк",
+                  "поддерж",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ],
+                "hits": [
+                  "унп",
+                  "коротк",
+                  "номер",
+                  "русск",
+                  "белорус"
+                ]
+              }
+            },
+            {
+              "id": "UXG118.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть практичным: шаги диагностики/исправления или точный next step",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXG118.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 463
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3377
+    },
+    {
+      "id": "UXG119",
+      "title": "Банк G: Ошибки и стресс-кейсы — запрос 119",
+      "tags": [
+        "query_bank",
+        "errors",
+        "stress_cases",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь столкнулся с проблемой поиска/интерфейса и ожидает быстрое, практичное решение.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сделай поиск по запросу «электромонтаж» и покажи только Гомель.",
+          "requestBody": {
+            "message": "Сделай поиск по запросу «электромонтаж» и покажи только Гомель.",
+            "history": []
+          },
+          "latencyMs": 4506,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ccc24f85-f27e-40aa-8454-bc17ec26a947",
+          "isStub": false,
+          "reply": "По запросу «электромонтаж» с фильтром Гомель в списке кандидатов нашёлся один явно релевантный вариант:\n\n1) **СпецЭлектроСила ООО** — /company/spetseles  \n   Причина: в карточке указано «Электромонтажные работы», электролаборатория, поиск повреждений кабеля, монтаж кабельных муфт (Гомель).\n\nПохоже, сильных совпадений больше нет. Уточните, пожалуйста:  \n1) Какие именно электромонтажные работы нужны (внутренние/наружные сети, силовые, слаботочка, лаборатория/испытания)?  \n2) Объект: промышленный/коммерческий/жилой?  \n3) Нужны ли допуски/испытания и сроки срок поставки?",
+          "checks": [
+            {
+              "id": "UXG119.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXG119.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXG119.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме ошибки/поддержки/поиска",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "результат",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "унп",
+                  "коротк",
+                  "ошиб",
+                  "белая",
+                  "завис",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "номер",
+                  "телефон",
+                  "карточк",
+                  "поддерж",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ],
+                "hits": [
+                  "поиск",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "UXG119.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть практичным: шаги диагностики/исправления или точный next step",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXG119.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 573
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4506
+    },
+    {
+      "id": "UXG120",
+      "title": "Банк G: Ошибки и стресс-кейсы — запрос 120",
+      "tags": [
+        "query_bank",
+        "errors",
+        "stress_cases",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь столкнулся с проблемой поиска/интерфейса и ожидает быстрое, практичное решение.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Я написал по-русски, а у меня компания на белорусском — найдешь?",
+          "requestBody": {
+            "message": "Я написал по-русски, а у меня компания на белорусском — найдешь?",
+            "history": []
+          },
+          "latencyMs": 3286,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "89e051a6-2232-4583-b6a0-29beab2cc9a2",
+          "isStub": false,
+          "reply": "Да, попробуем найти. Даже если компания на белорусском, можно искать по русским/латинским вариантам названия и по ключевым словам.  \n\nЧтобы продолжить, уточните, пожалуйста:  \n1) Как называется компания (как минимум часть названия/транслитерация)?  \n2) Чем занимается (сфера/услуги/товары)?  \n3) Город или область?  \n\nЕсли дадите эти данные — предложу точные рубрики и варианты поиска.",
+          "checks": [
+            {
+              "id": "UXG120.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXG120.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXG120.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме ошибки/поддержки/поиска",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "результат",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "унп",
+                  "коротк",
+                  "ошиб",
+                  "белая",
+                  "завис",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "номер",
+                  "телефон",
+                  "карточк",
+                  "поддерж",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ],
+                "hits": [
+                  "поиск",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ]
+              }
+            },
+            {
+              "id": "UXG120.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть практичным: шаги диагностики/исправления или точный next step",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXG120.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 385
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3286
+    }
+  ]
+}

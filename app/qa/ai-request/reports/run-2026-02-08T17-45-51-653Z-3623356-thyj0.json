@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-08T12:40:00Z",
+      "source": "manual-regression",
+      "description": "Cross-domain regressions: block irrelevant domain drift in sourcing responses"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1200,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T17-45-51-653Z-3623356-thyj0",
+    "startedAt": "2026-02-08T17:45:51.653Z",
+    "endedAt": "2026-02-08T17:46:04.531Z",
+    "durationMs": 12878,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.cross-domain.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 8,
+    "passedChecks": 8,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "CD001",
+      "title": "Молоко в Бресте/Витебске: не подмешивать автозапчасти и промышленный нерелевант",
+      "tags": [
+        "regression",
+        "cross_domain",
+        "milk",
+        "geo",
+        "multi_turn"
+      ],
+      "personaGoal": "Закупщик ищет молочную продукцию, ожидает молочный фокус без авто/металло нерелеванта",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну молока в Бресте?",
+          "requestBody": {
+            "message": "Где купить тонну молока в Бресте?",
+            "history": []
+          },
+          "latencyMs": 6094,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "b3550fc4-da0f-418a-8726-5638a1cf9f50",
+          "isStub": false,
+          "reply": "В Бресте из вашего списка есть **2 явно релевантных варианта** для закупки 1 тонны молока:\n\n1. **ОАО «Брестское мороженое»**  \n   Почему подходит: в профиле указана **молочная продукция** (в т.ч. сметана, творог, сыры), значит есть прямой профиль по молоку/переработке.  \n   Контакты: +375 (162) 22 15 41, info@ice-cream.by  \n   Ссылка: **/company/brestmoroj**\n\n2. **ГО «Концерн Брестмясомолпром» (управляющая компания холдинга)**  \n   Почему подходит: это **крупное объединение мясомолочной промышленности**, в составе есть предприятия по переработке молока — могут направить на нужный завод-поставщик.  \n   Контакты: +375 (162) 58 28 01, info@brestmmp.by  \n   Ссылка: **/company/brestmmp**\n\n**Что важно:**  \n- «Брестмаш» из списка не подходит (это оборудование, не поставка молока).  \n- Для объёма **1 тонна** лучше сразу запрашивать: тип молока (сырье/пастеризованное), жирность, фасовка (налив/бидоны), доставка, дата.\n\nМогу сразу подготовить вам короткий текст запроса (email/WhatsApp), чтобы отправить в эти 2 компании.",
+          "checks": [
+            {
+              "id": "CD001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "CD001.T1.C2",
+              "type": "includes_any",
+              "description": "Должен держать товар и город",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "брест"
+                ],
+                "hits": [
+                  "молок",
+                  "брест"
+                ]
+              }
+            },
+            {
+              "id": "CD001.T1.C3",
+              "type": "any_of",
+              "description": "Должен дать shortlist или полезный fallback без выдумывания",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "CD001.T1.C4",
+              "type": "excludes_all",
+              "description": "Не должен уводить в нерелевантные домены",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "автозапчаст",
+                  "шиномонтаж",
+                  "подшип",
+                  "металлопрокат",
+                  "вентиляц",
+                  "кабел"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сырая, 1.5 процента, вывоз в Витебск",
+          "requestBody": {
+            "message": "Сырая, 1.5 процента, вывоз в Витебск",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "В Бресте из вашего списка есть **2 явно релевантных варианта** для закупки 1 тонны молока:\n\n1. **ОАО «Брестское мороженое»**  \n   Почему подходит: в профиле указана **молочная продукция** (в т.ч. сметана, творог, сыры), значит есть прямой профиль по молоку/переработке.  \n   Контакты: +375 (162) 22 15 41, info@ice-cream.by  \n   Ссылка: **/company/brestmoroj**\n\n2. **ГО «Концерн Брестмясомолпром» (управляющая компания холдинга)**  \n   Почему подходит: это **крупное объединение мясомолочной промышленности**, в составе есть предприятия по переработке молока — могут направить на нужный завод-поставщик.  \n   Контакты: +375 (162) 58 28 01, info@brestmmp.by  \n   Ссылка: **/company/brestmmp**\n\n**Что важно:**  \n- «Брестмаш» из списка не подходит (это оборудование, не поставка молока).  \n- Для объёма **1 тонна** лучше сразу запрашивать: тип молока (сырье/пастеризованное), жирность, фасовка (налив/бидоны), доставка, дата.\n\nМогу сразу подготовить вам короткий текст запроса (email/WhatsApp), чтобы отправить в эти 2 компании."
+              }
+            ]
+          },
+          "latencyMs": 6532,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1e1873a3-8c52-4f27-b15b-f32d0155701f",
+          "isStub": false,
+          "reply": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста:\n1. Ссылка: — /company/brestmoroj (brest)\n2. Ссылка: — /company/brestmmp (brest)\nФокус по запросу: молока, сырая.\nУчет ограничений: самовывоз/вывоз, пункт вывоза: Витебск, локация: Брест.\nЧто уточнить у кандидатов сейчас:\n1. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n2. Уточните ответственное контактное лицо для быстрого согласования.",
+          "checks": [
+            {
+              "id": "CD001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "CD001.T2.C2",
+              "type": "includes_any",
+              "description": "Должен сохранить молочный фокус",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "сыр"
+                ],
+                "hits": [
+                  "молок",
+                  "сыр"
+                ]
+              }
+            },
+            {
+              "id": "CD001.T2.C3",
+              "type": "includes_any",
+              "description": "Должен учесть переключение на Витебск",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "витеб",
+                  "vitebsk"
+                ],
+                "hits": [
+                  "витеб"
+                ]
+              }
+            },
+            {
+              "id": "CD001.T2.C4",
+              "type": "excludes_all",
+              "description": "Не должен подмешивать нерелевантные домены",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "автозапчаст",
+                  "шиномонтаж",
+                  "подшип",
+                  "металлопрокат",
+                  "вентиляц",
+                  "кабел"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 12627
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-06T16:40:00Z",
+      "source": "manual-regression",
+      "description": "Regression for tire wholesale query in Brest region with greeting noise"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-07T03-00-39-159Z",
+    "startedAt": "2026-02-07T03:00:39.159Z",
+    "endedAt": "2026-02-07T03:00:47.739Z",
+    "durationMs": 8580,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.tires-brest.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 4,
+    "passedChecks": 4,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "R004",
+      "title": "Шины оптом в Брестской области: не подставлять нерелевантный food-профиль",
+      "tags": [
+        "regression",
+        "tires",
+        "geo",
+        "relevance",
+        "noise"
+      ],
+      "personaGoal": "Найти поставщиков легковых шин оптом без ложных кандидатов из другой тематики",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Привет. Как дела? Где можно купить шины для легковой машины оптом в Брестской области?",
+          "requestBody": {
+            "message": "Привет. Как дела? Где можно купить шины для легковой машины оптом в Брестской области?",
+            "history": []
+          },
+          "latencyMs": 8310,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3908a952-e96e-4478-87ff-3b48bbc56ddd",
+          "isStub": false,
+          "reply": "Под ваш запрос (опт, легковые шины, Брестская обл.) в базе есть 2 явно релевантных поставщика в Бресте:\n\n1) **Автосеть СООО** — /company/autoset-brest  \n   Причина: «Шины: летние, зимние, всесезонные…» (в т.ч. для легковых). Брест.\n\n2) **Багория СООО** — /company/bagoria  \n   Причина: «Поставка легковых… шин, а также литых дисков…» Брест.\n\nДругие компании из списка специализируются на грузовых/спецтехнике, поэтому не включаю.\n\n**Где искать в рубриках Biznesinfo**  \n- Автомобильная техника, услуги, транспорт → **Автомобильные шины, диски для транспортных средств**  \n- Альтернатива: **Шины, колесные диски**\n\n**Ключевые слова/синонимы для поиска**  \n«легковые шины оптом», «автошины оптом», «шинный оптовик», «шины легковые Брест», «летние/зимние шины оптом», «R13–R19».\n\nЧтобы уточнить подбор и ускорить контакт:  \n1) Какие размеры/сезонность и бренды интересуют?  \n2) Примерный объём закупки объем и желаемая цена/бюджет?  \n3) Нужна доставка по области или самовывоз (какой город)?",
+          "checks": [
+            {
+              "id": "R004.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R004.T1.C2",
+              "type": "includes_any",
+              "description": "Должен учитывать географию Брестской области",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "brest"
+                ],
+                "hits": [
+                  "брест",
+                  "brest"
+                ]
+              }
+            },
+            {
+              "id": "R004.T1.C3",
+              "type": "excludes_all",
+              "description": "Не должен подставлять нерелевантную компанию Айтадор",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "/company/biznesinfo-76536",
+                  "айтадор"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "R004.T1.C4",
+              "type": "includes_any",
+              "description": "Должен дать практичный путь поиска, если точных кандидатов нет",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "рубр",
+                  "каталог",
+                  "ключев",
+                  "поиск"
+                ],
+                "hits": [
+                  "рубр",
+                  "ключев",
+                  "поиск"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 8311
+    }
+  ]
+}

@@ -1,0 +1,312 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "source": "targeted-regression",
+      "description": "UXC065+UXG119"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T03-11-03-338Z",
+    "startedAt": "2026-02-08T03:11:03.338Z",
+    "endedAt": "2026-02-08T03:11:20.742Z",
+    "durationMs": 17404,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/scenarios.u065_g119.json",
+    "totalScenarios": 2,
+    "passedScenarios": 2,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 10,
+    "passedChecks": 10,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 2,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UXC065",
+      "title": "Банк C: Сравнение и выбор — запрос 65",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи компании, которые не «однодневки» (по признакам).",
+          "requestBody": {
+            "message": "Покажи компании, которые не «однодневки» (по признакам).",
+            "history": []
+          },
+          "latencyMs": 12543,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ec1d327f-e17b-48bf-9118-2df7bbd98aeb",
+          "isStub": false,
+          "reply": "Ниже — практичный список **признаков “не однодневки”**, по которым можно фильтровать компании в каталоге. Используйте их как чек‑лист:\n\n1. **Возраст компании** — регистрация 3+ лет.  \n2. **Полные контакты** — юр. адрес, телефоны, e‑mail, сайт.  \n3. **Несколько каналов связи** — телефон + e‑mail + мессенджер.  \n4. **Наличие офиса/склада/производства** — подтверждённый адрес.  \n5. **Портфолио/кейсы/фото работ** в карточке или на сайте.  \n6. **Отзывы/упоминания** — хотя бы несколько внешних отзывов.  \n7. **Публичные реквизиты** — УНП/ОКПО, договорная работа.  \n8. **Профильная рубрика** — чёткая специализация, не «всё подряд».  \n9. **Стабильность контактов** — один и тот же номер/домен несколько лет.  \n10. **География и логистика** — реальные адреса, не «виртуальный офис».\n\nЧтобы показать конкретные компании, уточните, пожалуйста:\n1) **Сфера/услуга** (что ищем)?  \n2) **Город/регион**?  \n3) **Минимальный возраст компании** (например, 3, 5 или 10 лет)?\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Покажи компании, которые не «однодневки» (по признакам).",
+          "checks": [
+            {
+              "id": "UXC065.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC065.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC065.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "критер",
+                  "услов",
+                  "срок"
+                ]
+              }
+            },
+            {
+              "id": "UXC065.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC065.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 1433
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 12545
+    },
+    {
+      "id": "UXG119",
+      "title": "Банк G: Ошибки и стресс-кейсы — запрос 119",
+      "tags": [
+        "query_bank",
+        "errors",
+        "stress_cases",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь столкнулся с проблемой поиска/интерфейса и ожидает быстрое, практичное решение.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сделай поиск по запросу «электромонтаж» и покажи только Гомель.",
+          "requestBody": {
+            "message": "Сделай поиск по запросу «электромонтаж» и покажи только Гомель.",
+            "history": []
+          },
+          "latencyMs": 4467,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1919bf05-c2dd-49a3-bac1-5f2d40de3abc",
+          "isStub": false,
+          "reply": "Вот варианты по запросу «электромонтаж» в Гомеле (из доступных кандидатов):\n\n1) **СпецЭлектроСила ООО** — электромонтажные работы, электролаборатория, поиск повреждений кабеля, монтаж муфт, ремонт силового кабеля 0,4–10 кВ.  \n/​company/spetseles\n\n2) **Ратон ОАО** — производит электротехническое оборудование (КРУ, трансформаторные подстанции и др.), может быть релевантно для проектов с поставкой/монтажом.  \n/​company/raton\n\nДругих явно релевантных кандидатов в списке нет. Если нужен конкретный тип работ (жилые/промышленные, кабельные линии, ВРУ/ЩО, пусконаладка), уточните — сузим подбор.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Гомельводоканал КПУП — /company/gomelvodokanal (Металлоизделия; Гомель, gomel)\n2. СпецЭлектроСила ООО — /company/spetseles (Электромонтажные работы; Гомель, gomel)\n3. Ратон ОАО — /company/raton (Производственные услуги; Гомель, gomel)",
+          "checks": [
+            {
+              "id": "UXG119.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXG119.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXG119.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме ошибки/поддержки/поиска",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "результат",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "унп",
+                  "коротк",
+                  "ошиб",
+                  "белая",
+                  "завис",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "номер",
+                  "телефон",
+                  "карточк",
+                  "поддерж",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ],
+                "hits": [
+                  "поиск",
+                  "гомел",
+                  "электромонтаж"
+                ]
+              }
+            },
+            {
+              "id": "UXG119.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть практичным: шаги диагностики/исправления или точный next step",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXG119.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 889
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4467
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Biznesinfo assistant suffers from a systematic \"generic fallback\" pattern: instead of executing searches and returning concrete company data from the catalog, it provides search instructions and checklists. This is the root cause of low usefulness scores (2.62-4.26 avg) despite 100% strict-check pass rate. The assistant behaves like a search tutorial rather than a data retrieval service. Priority fixes: (1) Force tool-use for catalog queries, (2) Add retrieval confidence thresholds with graceful degradation, (3) Fix intent recognition for filter/view/add operations.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Enforce catalog tool invocation on company queries",
+      "why": "80% of low-usefulness scenarios show assistant giving search instructions instead of executing searches. The assistant has catalog access but doesn't use it.",
+      "expectedImpact": "Converts ~15 'generic fallback' scenarios into concrete data responses. Raises usefulRate from 0.46-0.9 to target 0.8+.",
+      "validationScenarios": ["UXA001", "UXA005", "UXA008", "UXA011", "UXA012", "UXA013", "UXA017", "UXB029", "UXB031", "UXB033", "UXB034", "UX101", "UX102", "UX104", "UX111"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix intent classification for filter/view/add operations",
+      "why": "UXA013 (filter by email → got email templates), UXA022 (view card → got add instructions), UX106 (moderation time → got add instructions) show critical intent misclassification.",
+      "expectedImpact": "Eliminates complete misunderstanding failures. Prevents user frustration from completely irrelevant responses.",
+      "validationScenarios": ["UXA013", "UXA022", "UX106"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement fuzzy search with partial match display",
+      "why": "UX102 (Бел...Транс...Сервис), UXA002 (БелТех…), UXA009 (инвест) show assistant cannot handle partial/fuzzy names. Users expect partial match suggestions.",
+      "expectedImpact": "Enables successful resolution of fuzzy lookup scenarios. Reduces circular clarification loops.",
+      "validationScenarios": ["UX102", "UXA002", "UXA009"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add retrieval confidence threshold with partial results",
+      "why": "Current behavior is all-or-nothing: either full results or generic instructions. When few matches exist (UX101: only 2 companies), assistant should show them with caveats.",
+      "expectedImpact": "Improves UX101, UX107 scenarios where limited results exist but aren't presented. Increases transparency.",
+      "validationScenarios": ["UX101", "UX107", "UX108"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add UNP/counterparty lookup tool for due diligence",
+      "why": "UX103 shows assistant cannot verify UNP 19xxxxxxx. Due diligence is a key use case requiring structured company data retrieval by identifier.",
+      "expectedImpact": "Enables due diligence workflow. High-value B2B feature.",
+      "validationScenarios": ["UX103"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add mandatory tool-use trigger for company/supplier queries",
+      "action": "Modify system prompt to require catalog search tool invocation for any query containing: company names, 'найди', 'покажи', 'кто делает', 'поставщики', 'производители', 'заводы'. Prohibit generic search instructions unless tool returns empty.",
+      "implementationHint": "src/prompts/system.ts or similar - add conditional logic: if query matches company_lookup intent AND no tool call made → force retry with tool invocation",
+      "expectedImpact": "Eliminates 80% of generic fallback responses in Bank A/B scenarios",
+      "risk": "May increase latency; requires tool timeout handling",
+      "effort": "M",
+      "validationScenarios": ["UXA001", "UXA005", "UXA011", "UXA017", "UXB029", "UXB031", "UXB033", "UXB034"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Fix intent classification for filter operations",
+      "action": "Add explicit examples in prompt: 'Покажи только тех, у кого есть email' → filter operation, NOT email template generation. 'Покажи карточку компании' → view operation, NOT add instructions.",
+      "implementationHint": "Few-shot examples in system prompt or intent classifier training data. Add negative examples of misclassified scenarios.",
+      "expectedImpact": "Fixes UXA013, UXA022, UX106 critical failures",
+      "risk": "Low - prompt-only change",
+      "effort": "S",
+      "validationScenarios": ["UXA013", "UXA022", "UX106"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Implement fuzzy/prefix search with top-N display",
+      "action": "When user provides partial name (БелТех…, …инвест, Stroy…), execute search with wildcard/prefix matching and return top 5 candidates with disambiguation data (UNP, city, activity).",
+      "implementationHint": "app/lib/search.ts or search service - add fuzzy matching logic with Levenshtein or trigram similarity. Return partial matches with confidence scores.",
+      "expectedImpact": "Resolves UX102, UXA002, UXA009 without clarification loops",
+      "risk": "May return irrelevant matches if threshold too low",
+      "effort": "M",
+      "validationScenarios": ["UX102", "UXA002", "UXA009"]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Add 'limited results' response template",
+      "action": "When search returns <5 results, use template: 'Найдено X компаний: [list with links]. Это все результаты по вашему запросу. Рекомендую уточнить: [suggestions]' instead of generic fallback.",
+      "implementationHint": "src/templates/responses.ts - add conditional branch for low-result-count scenarios",
+      "expectedImpact": "Fixes UX101, UX107 where assistant had data but didn't present it",
+      "risk": "Low - template change only",
+      "effort": "S",
+      "validationScenarios": ["UX101", "UX107"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Add UNP-based company lookup endpoint",
+      "action": "Create dedicated tool/function for UNP lookup (full or partial). Returns structured company data for due diligence: status, address, director, activity codes.",
+      "implementationHint": "app/api/company/unp/route.ts or similar - integrate with EGR/company registry data source",
+      "expectedImpact": "Enables UX103 due diligence workflow",
+      "risk": "Requires external data source integration",
+      "effort": "M",
+      "validationScenarios": ["UX103"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Add response type validation layer",
+      "action": "Post-process assistant responses: if user asked for companies but response contains no company names/links and includes words like 'введите', 'откройте', 'поиск', 'фильтр' → reject and trigger tool call.",
+      "implementationHint": "app/lib/response-validator.ts - regex/classifier to detect tutorial-style responses when data was expected",
+      "expectedImpact": "Safety net for R1 - catches generic fallbacks before they reach user",
+      "risk": "False positives on legitimate clarification requests",
+      "effort": "M",
+      "validationScenarios": ["UXA001", "UXA005", "UXA011", "UXA012", "UXB029", "UXB031"]
+    },
+    {
+      "id": "R7",
+      "area": "geo",
+      "title": "Preserve geo constraints across multi-turn",
+      "action": "When user specifies geo (Минск, Гомель) in early turn, enforce it in subsequent searches. Current failure: UX101 turn 3 ignored geo constraint.",
+      "implementationHint": "Conversation state management - extract and persist geo entities, append to search queries",
+      "expectedImpact": "Fixes UX101 geo violation, improves multi-turn consistency",
+      "risk": "Low - state management fix",
+      "effort": "S",
+      "validationScenarios": ["UX101", "UX110"]
+    },
+    {
+      "id": "R8",
+      "area": "ranking",
+      "title": "Add B2B/relevance scoring for company cards",
+      "action": "Score company cards for B2B relevance markers (website, email, 'для юрлиц', 'опт', 'производство') and prioritize in results. Filter out obvious B2C-only entries.",
+      "implementationHint": "Search ranking function - add weighted scoring for B2B signals",
+      "expectedImpact": "Improves UXA014, UXB029 relevance without explicit filtering",
+      "risk": "May filter legitimate B2B companies missing markers",
+      "effort": "M",
+      "validationScenarios": ["UXA014", "UXB029", "UXB033"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UXA013", "UXA022", "UXA001", "UXA011", "UX101", "UX102", "UX103", "UX106", "UX111"],
+    "regressionSuites": ["query_bank_company_lookup", "sourcing_multi_turn", "fuzzy_search", "leadgen_segmentation"],
+    "successMetrics": [
+      "usefulRate >= 0.80 (gemini baseline)",
+      "avgUsefulness >= 4.0 for all judges",
+      "genericFallbackRate < 0.10 (responses with 'введите'/'откройте'/'поиск' without company data)",
+      "intentMisclassificationRate < 0.05 (filter/view/add errors)",
+      "zero critical penalties (complete misunderstanding of user intent)"
+    ]
+  }
+}
+```

@@ -1,0 +1,316 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "generatedAt": "2026-02-08T04:23:18.489Z",
+      "source": "app/qa/ai-request/scenarios.chatgpt-pro.master.json",
+      "count": 2
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 10,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T04-23-18-512Z",
+    "startedAt": "2026-02-08T04:23:18.511Z",
+    "endedAt": "2026-02-08T04:23:37.933Z",
+    "durationMs": 19422,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/uxc065_uxg119.only.json",
+    "totalScenarios": 2,
+    "passedScenarios": 2,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 10,
+    "passedChecks": 10,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 2,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UXC065",
+      "title": "Банк C: Сравнение и выбор — запрос 65",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи компании, которые не «однодневки» (по признакам).",
+          "requestBody": {
+            "message": "Покажи компании, которые не «однодневки» (по признакам).",
+            "history": []
+          },
+          "latencyMs": 13392,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c9a12e89-ca24-482d-8acc-a953a0f25cb2",
+          "isStub": false,
+          "reply": "Отличный запрос. Если смотреть **по признакам в карточке каталога** (без “гарантий”), вот практичный фильтр, чтобы отобрать компании, которые **менее похожи на «однодневки»**:\n\n1. **Полные контакты и прозрачность**  \n   - Есть городской телефон + корпоративный email + сайт + адрес офиса/склада.  \n   - Не только мессенджер и мобильный номер.  \n   **Почему важно:** чем выше “след” компании, тем сложнее быть временной структурой.\n\n2. **Подробно заполненная карточка**  \n   - Описание услуг/товаров, фото, бренды, условия работы, документы/сертификаты.  \n   - Указаны конкретные ниши, а не “делаем всё”.  \n   **Почему важно:** однодневки обычно не инвестируют в качественное наполнение.\n\n3. **Деловые атрибуты B2B**  \n   - Условия оплаты (с НДС/без НДС), договор, безнал, доставка, гарантия, сервис.  \n   - Есть контакт ответственного менеджера/отдела продаж.  \n   **Почему важно:** наличие процесса важнее красивых обещаний.\n\n4. **Региональная привязка и стабильность**  \n   - Совпадают город/регион в карточке, на сайте и в контактах.  \n   - Есть постоянный адрес, а не только “работаем по РБ”.  \n   **Почему важно:** стабильная операционная база снижает риск.\n\n5. **Признаки реальной операционной деятельности**  \n   - Ассортимент/портфолио, кейсы, регулярные обновления, несколько направлений в одной отрасли.  \n   **Почему важно:** у “временных” компаний обычно мало подтверждений деятельности.\n\n6. **Корпоративный стиль коммуникации**  \n   - Быстрый, предметный ответ на запрос, понятные КП, реквизиты до оплаты.  \n   **Почему важно:** на этапе первого контакта часто видны риски.\n\n---\n\n### Мини-чеклист скоринга (быстрый отбор)\nОцените каждую компанию по 10-балльной шкале:\n\n1. Контакты и сайт — **0–2**\n2. Полнота карточки/описания — **0–2**\n3. Договорные условия и реквизиты — **0–2**\n4. Адрес и региональная прозрачность — **0–2**\n5. Операционные признаки (портфолио/ассортимент/активность) — **0–2**\n\n**8–10 баллов:** приоритетно проверять и запрашивать КП  \n**5–7 баллов:** можно рассматривать, но с дополнительной проверкой  \n**0–4 балла:** высокий риск, лучше в резерв\n\n---\n\nЕсли хотите, я могу на следующем шаге сделать для вас **короткий рейтинг 5–10 компаний из нужной рубрики/города** по этим признакам (в формате таблицы: “сигналы надёжности / риски / итоговый балл”).  \nНапишите: **рубрику + город**.",
+          "checks": [
+            {
+              "id": "UXC065.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC065.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC065.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "рейтинг",
+                  "услов",
+                  "гарант",
+                  "цен",
+                  "таблиц"
+                ]
+              }
+            },
+            {
+              "id": "UXC065.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC065.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 2320
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 13393
+    },
+    {
+      "id": "UXG119",
+      "title": "Банк G: Ошибки и стресс-кейсы — запрос 119",
+      "tags": [
+        "query_bank",
+        "errors",
+        "stress_cases",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь столкнулся с проблемой поиска/интерфейса и ожидает быстрое, практичное решение.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сделай поиск по запросу «электромонтаж» и покажи только Гомель.",
+          "requestBody": {
+            "message": "Сделай поиск по запросу «электромонтаж» и покажи только Гомель.",
+            "history": []
+          },
+          "latencyMs": 5761,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c787c4ba-a98b-4909-ad44-973b7db3a517",
+          "isStub": false,
+          "reply": "Вот релевантные варианты по запросу **«электромонтаж»** с фильтром **Гомель**:\n\n1. **СпецЭлектроСила ООО**  \n   - Почему подходит: в карточке прямо указаны **«Электромонтажные работы»**, электролаборатория, монтаж кабельных муфт, ремонт силового кабеля 0,4–10 кВ.  \n   - Ссылка: **/company/spetseles**\n\n2. **Гомельводоканал КПУП**  \n   - Почему может подойти частично: в описании есть **проектирование, ремонт, монтаж** инженерных сетей (в основном водопровод/канализация), поэтому для чистого электромонтажа релевантность ниже.  \n   - Ссылка: **/company/gomelvodokanal**\n\n3. **Ратон ОАО**  \n   - Почему может подойти под смежные задачи: производит электротехническое оборудование (КРУ, подстанции и др.), но это скорее поставка/производство, чем выездной электромонтаж.  \n   - Ссылка: **/company/raton**\n\n**Итог:** сильный точный кандидат по электромонтажу в этом списке — **СпецЭлектроСила ООО**.  \nЕсли хотите, могу сразу подготовить короткий шаблон запроса (звонок/email/WhatsApp) на расчёт работ для 2–3 компаний.",
+          "checks": [
+            {
+              "id": "UXG119.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXG119.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXG119.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме ошибки/поддержки/поиска",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "результат",
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "унп",
+                  "коротк",
+                  "ошиб",
+                  "белая",
+                  "завис",
+                  "кэш",
+                  "брауз",
+                  "обнов",
+                  "номер",
+                  "телефон",
+                  "карточк",
+                  "поддерж",
+                  "русск",
+                  "белорус",
+                  "транслит"
+                ],
+                "hits": [
+                  "фильтр",
+                  "гомел",
+                  "электромонтаж",
+                  "коротк",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "UXG119.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть практичным: шаги диагностики/исправления или точный next step",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXG119.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 1018
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5761
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-08T12:40:00Z",
+    "source": "manual-regression",
+    "description": "Cross-domain regressions: block irrelevant domain drift in sourcing responses"
+  },
+  "scenarios": [
+    {
+      "id": "CD001",
+      "title": "Молоко в Бресте/Витебске: не подмешивать автозапчасти и промышленный нерелевант",
+      "personaGoal": "Закупщик ищет молочную продукцию, ожидает молочный фокус без авто/металло нерелеванта",
+      "tags": ["regression", "cross_domain", "milk", "geo", "multi_turn"],
+      "turns": [
+        {
+          "user": "Где купить тонну молока в Бресте?",
+          "checks": [
+            { "id": "CD001.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "CD001.T1.C2", "type": "includes_any", "patterns": ["молок", "брест"], "description": "Должен держать товар и город" },
+            {
+              "id": "CD001.T1.C3",
+              "type": "any_of",
+              "description": "Должен дать shortlist или полезный fallback без выдумывания",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть хотя бы одна карточка /company/..." },
+                { "type": "includes_any", "patterns": ["не нашлось", "не подставляю", "рубрик", "поисковые формулировки"], "description": "Есть прозрачный fallback" }
+              ]
+            },
+            {
+              "id": "CD001.T1.C4",
+              "type": "excludes_all",
+              "patterns": ["автозапчаст", "шиномонтаж", "подшип", "металлопрокат", "вентиляц", "кабел"],
+              "description": "Не должен уводить в нерелевантные домены"
+            }
+          ]
+        },
+        {
+          "user": "Сырая, 1.5 процента, вывоз в Витебск",
+          "checks": [
+            { "id": "CD001.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "CD001.T2.C2", "type": "includes_any", "patterns": ["молок", "сыр"], "description": "Должен сохранить молочный фокус" },
+            { "id": "CD001.T2.C3", "type": "includes_any", "patterns": ["витеб", "vitebsk"], "description": "Должен учесть переключение на Витебск" },
+            {
+              "id": "CD001.T2.C4",
+              "type": "excludes_all",
+              "patterns": ["автозапчаст", "шиномонтаж", "подшип", "металлопрокат", "вентиляц", "кабел"],
+              "description": "Не должен подмешивать нерелевантные домены"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CD002",
+      "title": "Лук репчатый: не подмешивать авто/индастриал",
+      "personaGoal": "Найти овощных поставщиков без дрейфа в автомобильные/металло-направления",
+      "tags": ["regression", "cross_domain", "vegetables", "single_turn"],
+      "turns": [
+        {
+          "user": "Кто оптом продает лук репчатый в Могилеве?",
+          "checks": [
+            { "id": "CD002.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "CD002.T1.C2", "type": "includes_any", "patterns": ["лук", "репчат", "овощ"], "description": "Должен фиксировать овощную тематику" },
+            { "id": "CD002.T1.C3", "type": "includes_any", "patterns": ["могил", "mogilev"], "description": "Должен учитывать Могилев" },
+            {
+              "id": "CD002.T1.C4",
+              "type": "excludes_all",
+              "patterns": ["автозапчаст", "шиномонтаж", "подшип", "металлопрокат", "вентиляц", "кабел"],
+              "description": "Не должен выводить кросс-доменный нерелевант"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CD003",
+      "title": "Сертификация: не превращать запрос в поиск автозапчастей",
+      "personaGoal": "Пользователь ищет услуги сертификации, ожидает сервисный фокус",
+      "tags": ["regression", "cross_domain", "certification", "single_turn"],
+      "turns": [
+        {
+          "user": "Сертификат соответствия где сделать в Минске?",
+          "checks": [
+            { "id": "CD003.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "CD003.T1.C2", "type": "includes_any", "patterns": ["сертифик", "соответств", "декларац"], "description": "Должен оставаться в теме сертификации" },
+            { "id": "CD003.T1.C3", "type": "includes_any", "patterns": ["минск", "minsk"], "description": "Должен учитывать Минск" },
+            {
+              "id": "CD003.T1.C4",
+              "type": "excludes_all",
+              "patterns": ["автозапчаст", "шиномонтаж", "подшип", "металлопрокат"],
+              "description": "Не должен уводить в авто/пром нерелевант"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CD004",
+      "title": "Клининг после ремонта: не подмешивать техдомены",
+      "personaGoal": "Офис-менеджер ищет клининг, ожидает сервисную релевантность",
+      "tags": ["regression", "cross_domain", "cleaning", "single_turn"],
+      "turns": [
+        {
+          "user": "Уборка после ремонта Минск фирма",
+          "checks": [
+            { "id": "CD004.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "CD004.T1.C2", "type": "includes_any", "patterns": ["клининг", "уборк", "после\\s+ремонт"], "description": "Должен остаться в теме клининга" },
+            { "id": "CD004.T1.C3", "type": "includes_any", "patterns": ["минск", "minsk"], "description": "Должен учитывать Минск" },
+            {
+              "id": "CD004.T1.C4",
+              "type": "excludes_all",
+              "patterns": ["автозапчаст", "шиномонтаж", "подшип", "металлопрокат", "кабел"],
+              "description": "Не должен подмешивать нерелевантные домены"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

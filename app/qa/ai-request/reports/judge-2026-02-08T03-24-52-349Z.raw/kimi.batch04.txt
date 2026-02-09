@@ -1,0 +1,111 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UXA001",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Пользователь дал конкретный запрос: ООО с названием и город Минск — ассистент ответил уточнением вместо поиска",
+        "Ответ — чисто инструкционный рубрикатор, никакой конкретики по компаниям"
+      ],
+      "criticalIssues": [
+        "Generic fallback: пользователь указал город и тип организации, но получил общие инструкции вместо результатов"
+      ],
+      "strengths": [
+        "Корректно зафиксировал локацию Минск"
+      ],
+      "nextUserProbe": "Просто найди хоть что-то по «ООО» в Минске, я дам точнее"
+    },
+    {
+      "scenarioId": "UXA002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Запрос содержал частичное название «БелТех…» — ассистент мог бы предложить варианты из каталога",
+        "Вместо попытки найти совпадения — сразу отсылка к egr.gov.by, перекладывание работы на пользователя"
+      ],
+      "criticalIssues": [
+        "Refusal-only behavior: не предложил ни одного кандидата, хотя префикс «БелТех» достаточно специфичен"
+      ],
+      "strengths": [
+        "Указал официальный реестр для проверки"
+      ],
+      "nextUserProbe": "Дай хотя бы 3 компании с «БелТех» в названии, я сам выберу"
+    },
+    {
+      "scenarioId": "UXA003",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Четкая пошаговая инструкция с примерами форматов номеров",
+        "Предложил конкретные next steps: ввести номер и город для уточнения"
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Actionable: пользователь может сразу применить инструкцию",
+        "Honest about limits: указал границы данных Biznesinfo"
+      ],
+      "nextUserProbe": "+375291234567 Минск — что найдется?"
+    },
+    {
+      "scenarioId": "UXA004",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Пользователь дал конкретное название «Альфа» и город Гродно — ассистент ответил «не вижу карточек»",
+        "Вместо списка компаний — инструкция по ручному поиску с вариациями написания"
+      ],
+      "criticalIssues": [
+        "Generic fallback after concrete constraints: пользователь уже сузил до города и названия, но получил рубрикатор"
+      ],
+      "strengths": [
+        "Правильно зафиксировал регион и предложил варианты написания"
+      ],
+      "nextUserProbe": "Просто покажи список компаний «Альфа» в Гродно, я сам разберусь"
+    },
+    {
+      "scenarioId": "UXA005",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Пользователь указал ИП, фамилию Иванов и сферу строительство — достаточно конкретики для поиска",
+        "Ответ «не вижу перечня» + запрос доп. уточнений выглядит как уклонение от поиска"
+      ],
+      "criticalIssues": [
+        "Generic fallback: после конкретных constraints (ИП, фамилия, отрасль) — только общие вопросы без попытки найти"
+      ],
+      "strengths": [
+        "Уточнение по виду работ логично для сужения, но должно было идти вместе с результатами"
+      ],
+      "nextUserProbe": "ИП Иванов строительство Минск — есть в базе или нет?"
+    }
+  ]
+}
+```

@@ -1,0 +1,593 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": 1,
+      "generatedAt": "2026-02-07T20:29:31.507Z",
+      "endpoint": "/api/ai/request",
+      "localeHint": "mostly-ru-with-mixed-en",
+      "totalScenarios": 10,
+      "suite": "dirty_realworld",
+      "source": "10 real-world dirty queries (telegraphic, short, typo-like) + follow-up turns for continuity and structured output checks"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1200,
+      "maxScenarios": 2,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 50,
+      "stubOutageThreshold": 12,
+      "targetPassCount": 1,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-07T20-29-48-547Z",
+    "startedAt": "2026-02-07T20:29:48.547Z",
+    "endedAt": "2026-02-07T20:30:18.574Z",
+    "durationMs": 30027,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.dirty.realworld.json",
+    "totalScenarios": 2,
+    "passedScenarios": 2,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 23,
+    "passedChecks": 23,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "D001",
+      "title": "Dirty query: типография визитки срочно",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Реальный быстрый запрос с минимальным контекстом и телеграфным стилем.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "нужна типография минск срочно визитки",
+          "requestBody": {
+            "message": "нужна типография минск срочно визитки",
+            "history": []
+          },
+          "latencyMs": 7601,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "b00af162-f583-4fbe-a648-06aecab7c9ed",
+          "isStub": false,
+          "reply": "Могу помочь по делу: Вот подходящие типографии в Минске для срочных визиток (из доступных кандидатов):\n\n1. **Аврора Принт ООО** — весь спектр полиграфических услуг, указаны визитки; Минск.  \n/компания: **/company/avrora**\n\n2. **Золотой Оттиск ЧП (ПОСТПРИНТ)** — полиграфия, в перечне визитки; Минск.  \n/компания: **/company/postprint**\n\n3. **Топпринт ООО** — типография полного цикла, фирменная продукция; Минск.  \n/компания: **/company/topprint**\n\n4. **Интегралполиграф УП** — современная типография, печатная продукция; Минск.  \n/компания: **/company/integralpoligraf**\n\nЕсли нужно «самое срочно», лучше сразу прозвонить 2–3 — у них чаще есть быстрый цифровой тираж.\n\nУточните, пожалуйста:  \n1) тираж объем?  \n2) есть ли макет или нужна верстка?  \n3) срок к какому времени/дню срок поставки?",
+          "checks": [
+            {
+              "id": "D001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D001.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D001.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 793
+              }
+            },
+            {
+              "id": "D001.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "типограф",
+                  "визит",
+                  "печат"
+                ],
+                "min": 1,
+                "hits": [
+                  "типограф",
+                  "визит",
+                  "печат"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "малиновка, сегодня до 18, безнал",
+          "requestBody": {
+            "message": "малиновка, сегодня до 18, безнал",
+            "history": [
+              {
+                "role": "user",
+                "content": "нужна типография минск срочно визитки"
+              },
+              {
+                "role": "assistant",
+                "content": "Могу помочь по делу: Вот подходящие типографии в Минске для срочных визиток (из доступных кандидатов):\n\n1. **Аврора Принт ООО** — весь спектр полиграфических услуг, указаны визитки; Минск.  \n/компания: **/company/avrora**\n\n2. **Золотой Оттиск ЧП (ПОСТПРИНТ)** — полиграфия, в перечне визитки; Минск.  \n/компания: **/company/postprint**\n\n3. **Топпринт ООО** — типография полного цикла, фирменная продукция; Минск.  \n/компания: **/company/topprint**\n\n4. **Интегралполиграф УП** — современная типография, печатная продукция; Минск.  \n/компания: **/company/integralpoligraf**\n\nЕсли нужно «самое срочно», лучше сразу прозвонить 2–3 — у них чаще есть быстрый цифровой тираж.\n\nУточните, пожалуйста:  \n1) тираж объем?  \n2) есть ли макет или нужна верстка?  \n3) срок к какому времени/дню срок поставки?"
+              }
+            ]
+          },
+          "latencyMs": 6060,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "fbed77f6-6fc3-4853-b363-7498084b0903",
+          "isStub": false,
+          "reply": "Понял: Малиновка, сегодня до 18:00, оплата безнал.  \nИз списка выше начните с ближайших в Минске — проверьте адреса/контакты на карточках компаний и сразу звоните по срочному тиражу:\n\n1) Аврора Принт ООО — /company/avrora  \n2) Золотой Оттиск ЧП (ПОСТПРИНТ) — /company/postprint  \n3) Топпринт ООО — /company/topprint  \n4) Интегралполиграф УП — /company/integralpoligraf  \n\nРекомендую:  \n- в звонке уточнить «цифровая печать визиток день-в-день», «срок до 18:00», «безнал».  \n- если нужен самовывоз — спросить адрес/время готовности.\n\nУточню 3 момента, чтобы точнее сузить:  \n1) Тираж (например 100/200/500)?  \n2) Есть готовый макет (PDF/AI) или нужна верстка?  \n3) Формат/бумага (стандарт 90×50, мелованная 300 г/м² или другое)?",
+          "checks": [
+            {
+              "id": "D001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D001.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D001.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "типограф",
+                  "визит",
+                  "печат"
+                ],
+                "min": 1,
+                "hits": [
+                  "визит",
+                  "печат"
+                ]
+              }
+            },
+            {
+              "id": "D001.T2.C4",
+              "type": "includes_any",
+              "description": "Если есть гео-сигнал, он должен учитываться",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "малинов"
+                ],
+                "hits": [
+                  "минск",
+                  "малинов"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "дай 3 варианта и что спросить по срокам/тиражу",
+          "requestBody": {
+            "message": "дай 3 варианта и что спросить по срокам/тиражу",
+            "history": [
+              {
+                "role": "user",
+                "content": "нужна типография минск срочно визитки"
+              },
+              {
+                "role": "assistant",
+                "content": "Могу помочь по делу: Вот подходящие типографии в Минске для срочных визиток (из доступных кандидатов):\n\n1. **Аврора Принт ООО** — весь спектр полиграфических услуг, указаны визитки; Минск.  \n/компания: **/company/avrora**\n\n2. **Золотой Оттиск ЧП (ПОСТПРИНТ)** — полиграфия, в перечне визитки; Минск.  \n/компания: **/company/postprint**\n\n3. **Топпринт ООО** — типография полного цикла, фирменная продукция; Минск.  \n/компания: **/company/topprint**\n\n4. **Интегралполиграф УП** — современная типография, печатная продукция; Минск.  \n/компания: **/company/integralpoligraf**\n\nЕсли нужно «самое срочно», лучше сразу прозвонить 2–3 — у них чаще есть быстрый цифровой тираж.\n\nУточните, пожалуйста:  \n1) тираж объем?  \n2) есть ли макет или нужна верстка?  \n3) срок к какому времени/дню срок поставки?"
+              },
+              {
+                "role": "user",
+                "content": "малиновка, сегодня до 18, безнал"
+              },
+              {
+                "role": "assistant",
+                "content": "Понял: Малиновка, сегодня до 18:00, оплата безнал.  \nИз списка выше начните с ближайших в Минске — проверьте адреса/контакты на карточках компаний и сразу звоните по срочному тиражу:\n\n1) Аврора Принт ООО — /company/avrora  \n2) Золотой Оттиск ЧП (ПОСТПРИНТ) — /company/postprint  \n3) Топпринт ООО — /company/topprint  \n4) Интегралполиграф УП — /company/integralpoligraf  \n\nРекомендую:  \n- в звонке уточнить «цифровая печать визиток день-в-день», «срок до 18:00», «безнал».  \n- если нужен самовывоз — спросить адрес/время готовности.\n\nУточню 3 момента, чтобы точнее сузить:  \n1) Тираж (например 100/200/500)?  \n2) Есть готовый макет (PDF/AI) или нужна верстка?  \n3) Формат/бумага (стандарт 90×50, мелованная 300 г/м² или другое)?"
+              }
+            ]
+          },
+          "latencyMs": 5135,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "d3b80494-97b7-4c87-951b-6f5c9ca44f99",
+          "isStub": false,
+          "reply": "Вот 3 варианта в Минске (проверьте адреса/контакты на карточках компании — важно для Малиновки и срочности):\n\n1) **Аврора Принт ООО** — /company/avrora  \n2) **Золотой Оттиск ЧП (ПОСТПРИНТ)** — /company/postprint  \n3) **Топпринт ООО** — /company/topprint  \n\nЧто спросить по срокам/тиражу (скрипт вопросов):\n1) «Можете сделать визитки **сегодня до 18:00**? Какое **время готовности**?»  \n2) «Какой **минимальный и максимальный тираж** вы берёте в срочном режиме?»  \n3) «Если **макет готов**, сколько времени на печать? Если **нужна верстка**, сколько это займет?»  \n4) «Какой **формат и бумага** доступны в срочном режиме (например 90×50, 300 г/м²)?»  \n5) «Возможна **оплата по безналу**? Какие документы/реквизиты нужны?»  \n6) «Есть ли **самовывоз** и где точка выдачи?»  \n\nЕсли скажете тираж и наличие макета, подскажу, кому вероятнее всего успеть.",
+          "checks": [
+            {
+              "id": "D001.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D001.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D001.T3.C3",
+              "type": "any_of",
+              "description": "Нужен практичный shortlist либо прозрачный план отбора",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 18798
+    },
+    {
+      "id": "D002",
+      "title": "Dirty query: проверка УНП",
+      "tags": [
+        "dirty_input",
+        "real_world",
+        "multi_turn",
+        "verification"
+      ],
+      "personaGoal": "Пользователь с обрывочным номером УНП и запросом на верификацию.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "проверь унп 19... действующая?",
+          "requestBody": {
+            "message": "проверь унп 19... действующая?",
+            "history": []
+          },
+          "latencyMs": 2131,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c3fb4a07-b086-4331-8f52-50349c9ab2b3",
+          "isStub": false,
+          "reply": "Похоже, вы хотите проверить статус УНП. Нужен полный УНП (9 цифр) и желательно название компании. Пришлите — подскажу, как проверить или сверю по карточке в каталоге.",
+          "checks": [
+            {
+              "id": "D002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D002.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D002.T1.C3",
+              "type": "reply_length_min",
+              "description": "Длина ответа минимум 90 символов",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 90,
+                "len": 166
+              }
+            },
+            {
+              "id": "D002.T1.C4",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с ключевыми сущностями запроса",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "унп",
+                  "провер",
+                  "действ"
+                ],
+                "min": 1,
+                "hits": [
+                  "унп",
+                  "провер"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "если нет exact то как проверить быстро самому",
+          "requestBody": {
+            "message": "если нет exact то как проверить быстро самому",
+            "history": [
+              {
+                "role": "user",
+                "content": "проверь унп 19... действующая?"
+              },
+              {
+                "role": "assistant",
+                "content": "Похоже, вы хотите проверить статус УНП. Нужен полный УНП (9 цифр) и желательно название компании. Пришлите — подскажу, как проверить или сверю по карточке в каталоге."
+              }
+            ]
+          },
+          "latencyMs": 5517,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6924313e-b339-49b3-b31e-b58860e1e802",
+          "isStub": false,
+          "reply": "Вот короткий чек‑лист, как быстро проверить компанию без «точного» УНП:\n\n1. Проверьте по названию и городу в каталоге Biznesinfo:  \n   – используйте 2–3 варианта написания (ООО/ОАО/ЗАО, с/без кавычек).  \n   – добавьте город/область для сужения результатов.\n\n2. Попробуйте поиском по ключевым словам профиля (вид деятельности):  \n   – например, «строительство», «опт», «логистика» + город.  \n   – так проще найти карточку, где указан УНП.\n\n3. Если знаете часть УНП («19…»), ищите по реквизитам на сайте компании/в подписи письма/в счете или договоре.  \n   – затем сверяйте карточку в каталоге.\n\n4. Если нужно официально проверить статус (действующая/ликвидация):  \n   – используйте госресурсы проверки юрлиц/ИП по названию или УНП (ЕГР).  \n   – там можно искать и по названию, но точность выше с городом.\n\nЕсли подскажете город, сферу и любой фрагмент названия — я попробую сузить поиск и подсказать, где вероятнее найти точный УНП.",
+          "checks": [
+            {
+              "id": "D002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D002.T2.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D002.T2.C3",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходной задачей",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "унп",
+                  "провер",
+                  "действ"
+                ],
+                "min": 1,
+                "hits": [
+                  "унп",
+                  "провер",
+                  "действ"
+                ]
+              }
+            },
+            {
+              "id": "D002.T2.C4",
+              "type": "reply_length_min",
+              "description": "Должен быть содержательный follow-up ответ",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 80,
+                "len": 931
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "дай чеклист 5 пунктов без воды",
+          "requestBody": {
+            "message": "дай чеклист 5 пунктов без воды",
+            "history": [
+              {
+                "role": "user",
+                "content": "проверь унп 19... действующая?"
+              },
+              {
+                "role": "assistant",
+                "content": "Похоже, вы хотите проверить статус УНП. Нужен полный УНП (9 цифр) и желательно название компании. Пришлите — подскажу, как проверить или сверю по карточке в каталоге."
+              },
+              {
+                "role": "user",
+                "content": "если нет exact то как проверить быстро самому"
+              },
+              {
+                "role": "assistant",
+                "content": "Вот короткий чек‑лист, как быстро проверить компанию без «точного» УНП:\n\n1. Проверьте по названию и городу в каталоге Biznesinfo:  \n   – используйте 2–3 варианта написания (ООО/ОАО/ЗАО, с/без кавычек).  \n   – добавьте город/область для сужения результатов.\n\n2. Попробуйте поиском по ключевым словам профиля (вид деятельности):  \n   – например, «строительство», «опт», «логистика» + город.  \n   – так проще найти карточку, где указан УНП.\n\n3. Если знаете часть УНП («19…»), ищите по реквизитам на сайте компании/в подписи письма/в счете или договоре.  \n   – затем сверяйте карточку в каталоге.\n\n4. Если нужно официально проверить статус (действующая/ликвидация):  \n   – используйте госресурсы проверки юрлиц/ИП по названию или УНП (ЕГР).  \n   – там можно искать и по названию, но точность выше с городом.\n\nЕсли подскажете город, сферу и любой фрагмент названия — я попробую сузить поиск и подсказать, где вероятнее найти точный УНП."
+              }
+            ]
+          },
+          "latencyMs": 3124,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f37781e1-43c3-48ce-b339-955ab0ff7ab9",
+          "isStub": false,
+          "reply": "1. Введите полное название + город в каталоге Biznesinfo.  \n2. Проверьте 2–3 варианта названия (ООО/ОАО/ЗАО, с/без кавычек).  \n3. Добавьте ключевую деятельность в поиск (например, «логистика», «стройматериалы»).  \n4. Найдите УНП в договоре/счёте/сайте компании.  \n5. Подтвердите статус в ЕГР по названию или УНП.",
+          "checks": [
+            {
+              "id": "D002.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "D002.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "D002.T3.C3",
+              "type": "includes_any",
+              "description": "Должны быть корректные шаги верификации",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "провер",
+                  "реестр",
+                  "источник",
+                  "официаль",
+                  "данных",
+                  "унп",
+                  "карточк"
+                ],
+                "hits": [
+                  "провер",
+                  "унп"
+                ]
+              }
+            },
+            {
+              "id": "D002.T3.C4",
+              "type": "any_of",
+              "description": "Нужен структурированный чеклист/план",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "question_count_min",
+                    "passed": false,
+                    "reason": "Not enough questions"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 10773
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Biznesinfo assistant has 100% functional pass rate but fails on value delivery—providing search methodology instead of actual company data. Top-3 fixes: (1) Enforce result-first behavior for catalog queries, (2) Add intent classification to distinguish 'show/find' from 'how to add', (3) Store/fetch last-search results across multi-turn conversations to maintain constraints.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Enforce result-first response for catalog queries",
+      "why": "96% of judge complaints cite 'generic fallback'—providing search instructions instead of actual companies. This is the single biggest usefulness killer.",
+      "expectedImpact": "Increase minimax usefulness from 2.62 to 3.5+ by eliminating instruction-only responses for lookup queries",
+      "validationScenarios": [
+        "UXA001",
+        "UXA004",
+        "UXA006",
+        "UXA009",
+        "UXA011",
+        "UXB026",
+        "UXB030",
+        "UXB031"
+      ]
+    },
+    {
+      "priority": "P0",
+      "title": "Add intent classifier for 'show/find' vs 'add/How-to' queries",
+      "why": "Critical misinterpretation pattern: UXA013, UXA022, UX106 show assistant confuses 'покажи карточку' with 'добавь карточку'. Causes zero usefulness scores.",
+      "expectedImpact": "Eliminate catastrophic intent failures (usefulness 0-1) for simple lookup queries",
+      "validationScenarios": [
+        "UXA013",
+        "UXA022",
+        "UX106"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement conversation-scoped search state",
+      "why": "UX101, UX102, UX107 show systematic failure: user provides constraints, assistant loses them. Turn 3 always falls back to generic. Turn 1 results don't inform Turn 2-3.",
+      "expectedImpact": "Multi-turn scenarios should maintain constraint continuity—expected usefulness 4+ for these flows",
+      "validationScenarios": [
+        "UX101",
+        "UX102",
+        "UX107",
+        "UX104",
+        "UX111"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Return comparison tables for multi-candidate queries",
+      "why": "UX101, UX102, UX110 explicitly request comparison (price/lead time/MOQ). Assistant never delivers—always generic advice or single candidate.",
+      "expectedImpact": "Direct fix for 'never delivered promised 3-5 suppliers' complaint across all judges",
+      "validationScenarios": [
+        "UX101",
+        "UX102",
+        "UX110"
+      ]
+    },
+    {
+      "priority": "P2",
+      "title": "Add geographic constraint validation",
+      "why": "UX101 judge notes 'violation of geo constraint in turn 3'—user said 'Минск', assistant provided non-Minsk results later.",
+      "expectedImpact": "Eliminate geo drift in multi-turn queries",
+      "validationScenarios": [
+        "UX101",
+        "UX110"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add system instruction: 'Lookup queries MUST return data, not instructions'",
+      "action": "In system prompt, add explicit rule: When user asks to 'найди/find/покажи' companies, products, or suppliers, FIRST attempt catalog search and return actual results. Only provide search methodology if results are genuinely empty.",
+      "implementationHint": "app/src/lib/ai/systemPrompt.ts or equivalent - add 'lookup_results_rule' instruction block",
+      "expectedImpact": "Eliminates generic fallback pattern—the #1 judge complaint",
+      "risk": "Low - makes existing behavior more consistent",
+      "effort": "S",
+      "validationScenarios": [
+        "UXA001",
+        "UXA004",
+        "UXA011",
+        "UXB031"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add intent classifier for company_card operations",
+      "action": "Add system instruction: 'Distinguish: \"покажи карточку\" = VIEW existing company (search catalog), \"добавь карточку\" = CREATE new entry (instructions). Never conflate the two.'",
+      "implementationHint": "Near existing intent classification in ai/requests.ts or conversation handler",
+      "expectedImpact": "Fixes catastrophic failures like UXA022 (view vs add confusion)",
+      "risk": "Low - clarifies existing logic",
+      "effort": "S",
+      "validationScenarios": [
+        "UXA022",
+        "UXA013",
+        "UX106"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Return minimum 3 candidates for supplier/lookup queries",
+      "action": "When search returns 0-2 results, fetch additional candidates using relaxed constraints (drop city, broaden category) until 3+ results or exhaust catalog. Always show 3 minimum for comparison requests.",
+      "implementationHint": "app/src/lib/ai/requests.ts - searchCompanies function, modify minResults threshold",
+      "expectedImpact": "Addresses 'only 1-2 weak candidates' complaint across UX101, UX102",
+      "risk": "Medium - may affect latency, requires pagination handling",
+      "effort": "M",
+      "validationScenarios": [
+        "UX101",
+        "UX102",
+        "UXB029"
+      ]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Add multi-turn constraint preservation rule",
+      "action": "System instruction: 'When user provides filters (city, category, B2B, price range), these apply to ALL subsequent turns unless user explicitly changes them. Re-apply last-turn filters to new searches.'",
+      "implementationHint": "conversation context handler - persist filters across assistant turns",
+      "expectedImpact": "Fixes 'violation of geo constraint in turn 3', 'dropped branding constraint' patterns",
+      "risk": "Medium - requires state management",
+      "effort": "M",
+      "validationScenarios": [
+        "UX101",
+        "UX107",
+        "UX110"
+      ]
+    },
+    {
+      "id": "R5",
+      "area": "template",
+      "title": "Create structured comparison table template",
+      "action": "For queries with 3+ candidates, auto-generate markdown table with columns: Company | City | Website | Phone | MOQ | Lead Time | Price (Y/N)",
+      "implementationHint": "app/src/components/SearchBar.tsx or results display component",
+      "expectedImpact": "Direct fix for 'never provided comparison data' judge feedback",
+      "risk": "Low - presentation layer change",
+      "effort": "S",
+      "validationScenarios": [
+        "UX101",
+        "UX102",
+        "UX110"
+      ]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Add 'humble refusal' guidelines for missing data",
+      "action": "System instruction: 'If company data is incomplete (no MOQ/price), explicitly state \"X unavailable in card\" rather than silent omission or generic advice. Honesty about limitations scores better than hallucination.'",
+      "implementationHint": "System prompt - data_completeness section",
+      "expectedImpact": "Honest 'data unavailable' responses (UX108) scored 5 from Gemini—replicate this pattern",
+      "risk": "Low - improves transparency",
+      "effort": "S",
+      "validationScenarios": [
+        "UX108",
+        "UX103"
+      ]
+    },
+    {
+      "id": "R7",
+      "area": "guardrails",
+      "title": "Block 'generic rubric advice' when candidates exist",
+      "action": "If search returns >0 companies AND user asked for companies (not 'how to search'), reject fallback to search instructions. Force return of results even if imperfect.",
+      "implementationHint": "app/src/lib/ai/requests.ts - add fallback_gate logic before returning rubric advice",
+      "expectedImpact": "Eliminates 'checklist instead of results' pattern—top Kimi complaint",
+      "risk": "Medium - may show lower-quality results but scores better",
+      "effort": "M",
+      "validationScenarios": [
+        "UXB029",
+        "UXB031",
+        "UXB033"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UXA022",
+      "UXA013",
+      "UXA001",
+      "UX101",
+      "UX102"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.chatgpt-pro.master.json",
+      "app/scripts/ai-request-qa-runner.mjs"
+    ],
+    "successMetrics": [
+      "Minimax usefulness: current 2.62 → target 3.5",
+      "Minimax useful rate: current 0.46 → target 0.70",
+      "Zero scenarios with usefulness 0-1 (current: UXA013, UXA022)",
+      "Multi-turn constraint preservation: 100% of Turn 3 respects Turn 1 filters"
+    ]
+  }
+}
+```
+

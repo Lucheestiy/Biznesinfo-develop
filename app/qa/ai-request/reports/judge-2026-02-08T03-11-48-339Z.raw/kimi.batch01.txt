@@ -1,0 +1,135 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UX101",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Only 1 candidate provided when user requested 3-5 suppliers",
+        "Turn 2: Failed to filter for branding/printing — gave generic search instructions instead of concrete results",
+        "Turn 3: Still only 1 candidate after user explicitly asked to compare 5 options"
+      ],
+      "criticalIssues": [
+        "Critical failure: after 3 turns still cannot provide more than 1 supplier",
+        "Turn 2 completely ignored user constraint (брендирование/печать) — no actual filtering performed",
+        "Turn 3: Generic fallback to rubric advice ('Шаблон сравнения поставщиков') instead of concrete supplier data",
+        "User is a procurement manager with urgent need — this level of service would lose the deal"
+      ],
+      "strengths": [
+        "Maintained geo context (Минск) throughout",
+        "Asked clarifying technical questions (print type, volumes, sizes)"
+      ],
+      "nextUserProbe": "Вы вообще можете найти поставщиков или только один у вас в базе?"
+    },
+    {
+      "scenarioId": "UX102",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: No fuzzy search performed — only generic advice and irrelevant result (Автосервис PRO-tone)",
+        "Turn 2: Gave search tips instead of actually searching — user already provided partial name",
+        "Turn 3: Asked user to provide the list instead of finding it — complete role reversal"
+      ],
+      "criticalIssues": [
+        "Critical failure: assistant never actually searched for 'Бел...Транс...Сервис' in Brest",
+        "Turn 1 returned completely irrelevant company (car service) for transport company query",
+        "Turn 3: User said 'Нашлось несколько' but assistant asks for the list — no continuity",
+        "No actual UNP or legal address provided despite explicit request in Turn 1"
+      ],
+      "strengths": [
+        "Suggested correct official registry (egr.gov.by) for verification"
+      ],
+      "nextUserProbe": "Найди хоть что-то по 'Белтранссервис' в Бресте — УНП, адрес, руководителя"
+    },
+    {
+      "scenarioId": "UX103",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Refused to check UNP without company card — no proactive search attempted",
+        "Turn 2: Generic checklist without checking the actual company",
+        "Turn 3: Universal risk template without any company-specific data"
+      ],
+      "criticalIssues": [
+        "Critical failure: 3 turns and zero actual company data retrieved",
+        "User provided UNP (19xxxxxxx) but assistant never used it to find the company",
+        "Turn 3 'risk summary' is completely generic — could apply to any company",
+        "No status, address, director, or activity types provided despite explicit Turn 1 request"
+      ],
+      "strengths": [
+        "Risk categories listed are relevant for due diligence"
+      ],
+      "nextUserProbe": "Введи УНП в поиск и дай мне данные компании — это же базовая функция"
+    },
+    {
+      "scenarioId": "UX104",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.50,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Generic category navigation instead of concrete companies",
+        "Turn 2: Listed 4 random companies without verifying they are logistics companies",
+        "Turn 3: Promised segmentation but no actual data provided"
+      ],
+      "criticalIssues": [
+        "Turn 2 companies appear random — Инт Хауз, Белщитсервис, Евро-офис are not logistics companies",
+        "No phone numbers or websites actually provided despite user request",
+        "Turn 3: Generic response about 'can prepare export' without delivering the 30 companies",
+        "Employee count filter (20-50) completely ignored across all turns"
+      ],
+      "strengths": [
+        "Correctly identified relevant categories for logistics search",
+        "Mentioned legal constraints on data export"
+      ],
+      "nextUserProbe": "Это не логистические компании! Где грузоперевозчики Гомеля?"
+    },
+    {
+      "scenarioId": "UX105",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.70,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Generic answer about 'usually' instead of specific Biznesinfo process",
+        "Turn 2: Vague 'usually possible' without confirming Biznesinfo capabilities",
+        "Turn 3: Generic premium description without pricing or specific rejection reasons"
+      ],
+      "criticalIssues": [
+        "Never provided specific URL/path for adding company on Biznesinfo",
+        "No concrete premium pricing or features for Biznesinfo platform",
+        "Turn 3 asks user for tariff page screenshot — complete role reversal",
+        "Critical failure: 3 turns and user still doesn't know how to add their company"
+      ],
+      "strengths": [
+        "Listed typical required fields accurately",
+        "Rejection reasons listed are generally applicable"
+      ],
+      "nextUserProbe": "Дай прямую ссылку на форму добавления компании на biznesinfo.by"
+    }
+  ]
+}
+```

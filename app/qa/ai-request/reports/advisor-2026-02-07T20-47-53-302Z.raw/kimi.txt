@@ -1,0 +1,152 @@
+Now I have a comprehensive understanding of the QA results. Let me analyze the key issues and provide concrete engineering advice.
+
+Based on my analysis of the QA results, here are the concrete engineering recommendations:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical pattern detected: assistant suffers from severe continuity failures in multi-turn conversations. After providing concrete company candidates in Turn 1/Turn 2, Turn 3 consistently drops context and falls back to generic rubrics instead of ranking/analyzing the previously identified companies. This affects 5/11 scenarios (D001, D005, D006, D008, D011) with usefulness scores 1-2. Root cause appears to be prompt instructions that prioritize 'avoiding hallucination' over 'continuity with retrieved candidates'.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix continuity context retention for ranking follow-ups",
+      "why": "5 scenarios fail with 'generic fallback' pattern where assistant forgets previously identified companies when asked to rank/analyze them. This is the #1 user-facing defect.",
+      "expectedImpact": "Increases usefulness score from 1-2 to 4-5 for D006, D008, D005; reduces genericFallbackRate from 54% to <20%",
+      "validationScenarios": ["D006", "D008", "D005", "D001", "D011"]
+    },
+    {
+      "priority": "P0",
+      "title": "Enforce company path output in ranking/rubric responses",
+      "why": "Strict check D001.T3.C3 fails because assistant provides generic questions instead of company-specific shortlist. Users expect /company/ links or explicit references to previously found candidates.",
+      "expectedImpact": "Fixes 1 strict failure, improves user trust in actionable output",
+      "validationScenarios": ["D001", "D003", "D004", "D005", "D006", "D008"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add geo-filters for micro-districts (Малиновка, Казимировка)",
+      "why": "D001 Turn 2 fails to filter 4 identified print shops by Малиновка proximity. Assistant gives generic search instructions instead of analyzing locations.",
+      "expectedImpact": "Improves usefulness for location-constrained queries; reduces 'generic fallback' rate",
+      "validationScenarios": ["D001", "S005", "S006"]
+    },
+    {
+      "priority": "P1",
+      "title": "Improve constraint incorporation in follow-up turns",
+      "why": "D011 fails because assistant ignores '1.5% fat, delivery to Vitebsk' constraints and repeats same processors instead of finding raw milk suppliers.",
+      "expectedImpact": "Better handling of refined queries; improves continuity score from 1 to 4+",
+      "validationScenarios": ["D011"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add specific certification bodies to knowledge base",
+      "why": "D007 provides generic certification guide without naming specific Minsk certification organizations from catalog.",
+      "expectedImpact": "Increases usefulness from 3 to 4-5 for verification/service queries",
+      "validationScenarios": ["D007"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Inject candidate memory into Turn 3+ ranking prompts",
+      "action": "Modify prompt template to include explicit instruction: 'If user asks for ranking/shortlist/risks and you have previously identified specific companies in this conversation, you MUST reference those exact companies by name and /company/ path. Do NOT provide generic rubrics.'",
+      "implementationHint": "File: src/lib/ai/prompts/ranking.ts or similar; add 'previouslyIdentifiedCompanies' context variable that accumulates across turns",
+      "expectedImpact": "Eliminates generic fallback in D006, D008, D005; improves continuityScore from avg 2.36 to 4+",
+      "risk": "Low - only affects multi-turn with existing candidates",
+      "effort": "S",
+      "validationScenarios": ["D006", "D008", "D005", "D001"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add explicit company path requirement to structured output schema",
+      "action": "Update system prompt: 'When providing shortlists, rankings, or comparisons, always include at least one /company/ path OR explicitly state if previously mentioned companies don't match new constraints.'",
+      "implementationHint": "Add to response format instructions in base prompt; validate with regex check for /company/ in ranking responses",
+      "expectedImpact": "Fixes D001.T3.C3 strict failure; ensures actionable output",
+      "risk": "Low",
+      "effort": "S",
+      "validationScenarios": ["D001", "D003", "D004", "D005"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Enable partial UNP search for verification queries",
+      "action": "Implement search by partial UNP pattern '19...' when full UNP not provided. Return candidates with matching prefix for user selection.",
+      "implementationHint": "src/lib/meilisearch/search.ts - add prefix search filter on unp field; limit to 5 results",
+      "expectedImpact": "Improves D002 Turn 2 usefulness; enables proactive assistance instead of just asking for full UNP",
+      "risk": "Low - only affects verification queries with partial data",
+      "effort": "S",
+      "validationScenarios": ["D002"]
+    },
+    {
+      "id": "R4",
+      "area": "geo",
+      "title": "Add micro-district location filtering in responses",
+      "action": "When user specifies district (Малиновка, Казимировка), assistant should check company addresses for proximity keywords before responding. If no match, explicitly state 'none of the previously found companies are in X district'.",
+      "implementationHint": "Add location extractor in src/lib/utils/location.ts; check against company.address field in context",
+      "expectedImpact": "Fixes D001 Turn 2; improves geo-signal handling across all scenarios",
+      "risk": "Low",
+      "effort": "M",
+      "validationScenarios": ["D001", "S005", "S006"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Remove over-aggressive 'avoid hallucination' fallback triggers",
+      "action": "Current prompt likely has strong anti-hallucination instruction causing generic rubrics. Replace with: 'If you have identified companies earlier in this conversation, prioritize referencing them even if your confidence is moderate. Only fall back to generic advice if NO companies were found in previous turns.'",
+      "implementationHint": "Review base system prompt for anti-hallucination clauses; soften for continuity preservation",
+      "expectedImpact": "Reduces genericFallbackRate from 54% to <20%; fixes D006, D008, D011",
+      "risk": "Medium - monitor for hallucination increase",
+      "effort": "S",
+      "validationScenarios": ["D006", "D008", "D011", "D005"]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Add contract clause templates for service queries",
+      "action": "When user asks 'what to include in contract' (D008), provide specific clauses for cleaning services instead of generic priority rubric.",
+      "implementationHint": "Add service-specific contract templates to knowledge base or prompt; trigger when query matches 'договор' + service type",
+      "expectedImpact": "Improves D008 usefulness from 1 to 4+",
+      "risk": "Low",
+      "effort": "M",
+      "validationScenarios": ["D008"]
+    },
+    {
+      "id": "R7",
+      "area": "ranking",
+      "title": "Implement explicit candidate tracking across turns",
+      "action": "Add conversation state tracking for 'identifiedCandidates' array. When user asks for ranking/shortlist, system prompt should inject: 'Previously identified: [Company A /company/a], [Company B /company/b]'.",
+      "implementationHint": "Modify conversation history processing to extract and inject company mentions into context window",
+      "expectedImpact": "Prevents continuity failures; ensures consistent candidate references",
+      "risk": "Low",
+      "effort": "M",
+      "validationScenarios": ["D006", "D008", "D005", "D001", "D011"]
+    },
+    {
+      "id": "R8",
+      "area": "qa",
+      "title": "Add automated continuity check to QA suite",
+      "action": "New check: verify that company names from Turn 1/2 appear in Turn 3 response when user asks for ranking/comparison/shortlist.",
+      "implementationHint": "Extend scripts/ai-request-qa-runner.mjs with 'continuity_candidates' check type",
+      "expectedImpact": "Catches regressions in multi-turn candidate retention",
+      "risk": "None",
+      "effort": "S",
+      "validationScenarios": ["D006", "D008", "D005", "D011"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["D006", "D008", "D005", "D001", "D011"],
+    "regressionSuites": [
+      "scenarios.dirty.realworld.json",
+      "scenarios.regressions.ranking-followups.json",
+      "scenarios.regressions.milk-brest-mogilev.json"
+    ],
+    "successMetrics": [
+      "averageUsefulness >= 4.0 (currently 2.727 Kimi, 3.727 Gemini)",
+      "usefulRate >= 0.80 (currently 0.5455 Kimi, 0.6364 Gemini)",
+      "genericFallbackRate <= 0.20 (currently 0.5455 Kimi, 0.3636 Gemini)",
+      "averageContinuityScore >= 4.0 (currently 2.364 Kimi, 3.545 Gemini)",
+      "strictPassRate >= 0.95 (currently 0.8182)"
+    ]
+  }
+}
+```

@@ -1,0 +1,140 @@
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UX101",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.48,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Only 1 candidate provided (АМ-АРТ ООО) despite request for 3-5 suppliers",
+        "Turn 2: Generic fallback — instead of filtering concrete candidates, gave search rubric advice ('Как отфильтровать в Biznesinfo')",
+        "Turn 3: Still only 1 company available, failed to deliver comparison of 5 options as requested"
+      ],
+      "criticalIssues": [
+        "Critical penalty: after user gave concrete constraint (брендирование/печать), assistant dropped to generic search instructions instead of concrete progress",
+        "Never delivered promised 3-5 suppliers or comparison table",
+        "Repeatedly asked clarifying questions without providing actual candidates",
+        "User explicitly asked for comparison by price/lead time/MOQ — assistant never provided this data"
+      ],
+      "strengths": [
+        "Maintained geo context (Минск) throughout",
+        "Provided template for supplier comparison (though never filled it)",
+        "Honest about having only 1 candidate in catalog"
+      ],
+      "nextUserProbe": "Дай уже конкретных 5 поставщиков с ценами и сроками, а не советы где искать!"
+    },
+    {
+      "scenarioId": "UX102",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.78,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Failed to find company by fuzzy name pattern, gave irrelevant result (Автосервис PRO-tone)",
+        "Turn 2: Generic fallback — provided name variations to try instead of actual search results",
+        "Turn 3: Asked user to provide list of found companies instead of showing comparison itself"
+      ],
+      "criticalIssues": [
+        "Never performed actual fuzzy search or returned matching candidates",
+        "Turn 1 result (Автосервис PRO-tone) completely irrelevant to 'Бел...Транс...Сервис' logistics company",
+        "Turn 3 failed to show comparison when user said 'Нашлось несколько' — assistant should have asked which ones or offered to compare",
+        "No UNP or legal address provided despite explicit request"
+      ],
+      "strengths": [
+        "Suggested checking official registry (egr.gov.by)",
+        "Provided structured comparison framework for when companies are found"
+      ],
+      "nextUserProbe": "Ну так найди сам по словам 'Белтранссервис' в Бресте и дай мне УНП!"
+    },
+    {
+      "scenarioId": "UX103",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Refused to check counterparty by UNP, gave generic instructions how to search instead",
+        "Turn 2: Again refused to check, gave generic list of risk signs to look for",
+        "Turn 3: Provided generic risk checklist without any specific company data"
+      ],
+      "criticalIssues": [
+        "Complete refusal behavior: never checked the requested UNP 19xxxxxxx",
+        "User gave partial UNP — assistant should have tried search or asked for full UNP instead of generic refusal",
+        "No structured due diligence output for specific counterparty as requested",
+        "Turn 3 'risk summary' is completely generic, not based on any actual company data"
+      ],
+      "strengths": [
+        "Referenced official registry (egr.gov.by) for verification",
+        "Generic risk checklist is comprehensive for due diligence purposes"
+      ],
+      "nextUserProbe": "Проверь конкретно УНП 191234567 и дай мне статус и адрес!"
+    },
+    {
+      "scenarioId": "UX104",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.70,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Provided concrete search categories and keywords for logistics companies in Gomel region",
+        "Turn 2: Started showing actual companies from catalog with links (Инт Хауз, Белщитсервис, Евро-офис)",
+        "Turn 3: Offered segmentation and legal-safe data export format"
+      ],
+      "criticalIssues": [
+        "Turn 1 gave generic rubric advice instead of concrete companies (acceptable as starting point)",
+        "Turn 2 companies shown (Инт Хауз, Белщитсервис, Евро-офис) don't appear to be logistics companies — relevance questionable",
+        "Never confirmed employee count filter (20-50) is applicable or provided data",
+        "Turn 3 response cut off mid-sentence"
+      ],
+      "strengths": [
+        "Maintained geo context (Гомель) and employee filter context",
+        "Offered practical segmentation (транспорт/склад/экспедиция)",
+        "Correctly addressed legal constraints on data export",
+        "Proposed structured CSV/XLSX output format"
+      ],
+      "nextUserProbe": "А где собственно логистические компании? Это же не перевозчики совсем."
+    },
+    {
+      "scenarioId": "UX105",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.68,
+      "userSatisfaction": 0.62,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Listed typical required fields for company registration",
+        "Turn 2: Confirmed ability to upload price lists, photos, certificates",
+        "Turn 3: Explained premium benefits and common rejection reasons"
+      ],
+      "criticalIssues": [
+        "Turn 1: Generic answer without specific reference to Biznesinfo's actual form",
+        "Turn 3: No specific premium pricing provided (admitted limitation)",
+        "All turns use 'обычно' — uncertainty indicates lack of specific Biznesinfo knowledge",
+        "Never provided direct link to add company form or moderation timeframe"
+      ],
+      "strengths": [
+        "Maintained onboarding context throughout",
+        "Turn 3 premium benefits list is comprehensive",
+        "Turn 3 rejection reasons are practical and actionable",
+        "Asked clarifying questions to provide more specific answers"
+      ],
+      "nextUserProbe": "А дай прямую ссылку на форму добавления и точный прайс на премиум?"
+    }
+  ]
+}

@@ -25,6 +25,15 @@ The main dataset file is expected at:
 
 - `./safe_rebuild_biznesinfo_develop.sh`
 
+## AI chat storage
+
+- By default assistant chat history is stored in `DATABASE_URL`.
+- To store chat history in a separate DB (for example Show DB), set:
+  - `AI_CHATS_DATABASE_URL=postgresql://...`
+- In this dev setup, `docker-compose.yml` can use a shared network/database with Show:
+  - external network: `showlucheestiycom_default`
+  - DSN defaults: `postgresql://show_ai:show_ai_change_me@ai-chats-postgres:5432/show_ai_chats`
+
 ## Automation (AI devloop)
 
 This repo is intended to be advanced automatically via a systemd timer that:
@@ -36,4 +45,3 @@ This repo is intended to be advanced automatically via a systemd timer that:
 - sends a Telegram summary.
 
 Edit `devloop/TODO.md` to steer what the AI works on next.
-

@@ -1,0 +1,117 @@
+The file already contains my ratings for all 5 scenarios (S016-S020). Let me verify the content matches the expected JSON schema and the ratings are appropriate based on the provided transcripts.
+
+Looking at the existing ratings:
+
+1. **S016 (Паллеты и тара)** - Rated 3 (useful) - Appropriate. Found 1 real supplier, provided good checklist, but failed to deliver top-3 ranking.
+
+2. **S017 (LED-экраны)** - Rated 2 (not_useful) - Appropriate. No concrete companies provided, only generic instructions.
+
+3. **S018 (Охранные системы)** - Rated 2 (not_useful) - Appropriate. Complete refusal to provide shortlist after 3 turns.
+
+4. **S019 (Юридические услуги ВЭД)** - Rated 3 (useful) - Appropriate. Provided 2 companies with links and transparent ranking logic.
+
+5. **S020 (3PL-логистика)** - Rated 2 (not_useful) - Appropriate. Only 2 real candidates found, failed to provide proper top-3 shortlist.
+
+The JSON is valid and follows the required schema. The ratings appear to be consistent with the rubric and the actual transcript content provided in the prompt.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S016",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "reasons": [
+        "Turn 1: Нашел конкретного поставщика с релевантным описанием (Боголин ООО)",
+        "Turn 3: Предоставил практичный чек-лист по проверке качества и влажности древесины"
+      ],
+      "criticalIssues": [
+        "Turn 2: Полностью проигнорировал найденного поставщика и переключился на общие инструкции по поиску",
+        "Turn 3: Ranking содержит только 1 реального поставщика, остальные 2 позиции - заглушки"
+      ],
+      "strengths": [
+        "Честно признает ограничения данных",
+        "Предоставляет конкретные технические критерии проверки (влажность 18-22%, камерная сушка)"
+      ]
+    },
+    {
+      "scenarioId": "S017",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "reasons": [
+        "Turn 1-2: Дает только общие инструкции по поиску, без конкретных компаний",
+        "Turn 3: Честно признает отсутствие релевантных кандидатов"
+      ],
+      "criticalIssues": [
+        "Turn 3: Вместо top-3 компаний дает абстрактные 'критерии рейтинга' - пользователь просил конкретный список",
+        "Не использует данные из каталога для формирования ответа",
+        "Пользователь дважды уточнял локацию, но помощник не предоставил ни одной конкретной компании"
+      ],
+      "strengths": [
+        "Критерии оценки подрядчиков релевантны и практичны",
+        "Честность об ограничениях данных"
+      ]
+    },
+    {
+      "scenarioId": "S018",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "reasons": [
+        "Turn 1: Дает инструкции по поиску, но без конкретных компаний",
+        "Turn 2: Признает отсутствие кандидатов в текущем списке"
+      ],
+      "criticalIssues": [
+        "Turn 3: Пользователь явно просит shortlist top-3, получает 'назвать не могу' + общие критерии",
+        "Полный отказ от выполнения запроса на 3-м turn'е после двух уточнений",
+        "Нет попытки предложить хотя бы потенциальных кандидатов из каталога"
+      ],
+      "strengths": [
+        "Критерии выбора подрядчика детальны и применимы",
+        "Честность об ограничениях"
+      ]
+    },
+    {
+      "scenarioId": "S019",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.7,
+      "reasons": [
+        "Turn 2: Предоставил 2 конкретные компании с ссылками из каталога",
+        "Turn 3: Дал прозрачную логику ранжирования"
+      ],
+      "criticalIssues": [
+        "Компании не подтверждены по специализации ВЭД - это общие юридические фирмы",
+        "Turn 3: Не удалось сформировать полный top-3, только 2 кандидата",
+        "Не уточнил у пользователя детали для точного подбора (тип товаров, язык договора)"
+      ],
+      "strengths": [
+        "Дает конкретные ссылки на компании",
+        "Предлагает помощь в составлении запроса для рассылки"
+      ]
+    },
+    {
+      "scenarioId": "S020",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "reasons": [
+        "Turn 1: Нашел 2 реальных 3PL-провайдера с описаниями",
+        "Turn 3: Предоставил детальный SLA чек-лист"
+      ],
+      "criticalIssues": [
+        "Turn 3: Пользователь просит shortlist top-3, получает только 2 компании без 3-го кандидата",
+        "Не удалось найти провайдеров в Колодищах, хотя локация была уточнена",
+        "После 3-х turn'ов нет полного списка из 3 компаний"
+      ],
+      "strengths": [
+        "SLA чек-лист детален и практичен для e-commerce",
+        "Правильно понимает специфику 3PL и фулфилмента"
+      ]
+    }
+  ]
+}
+```

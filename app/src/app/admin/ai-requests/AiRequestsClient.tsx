@@ -19,6 +19,13 @@ type AiRequestListRow = {
   plan: string;
   companyId: string | null;
   companyIds: string[];
+  vendorLookupFilters: { city: string | null; region: string | null };
+  cityRegionHints: Array<{
+    source: "currentMessage" | "lookupSeed" | "historySeed";
+    city: string | null;
+    region: string | null;
+    phrase: string | null;
+  }>;
   messagePreview: string;
   provider: string;
   model: string | null;
@@ -70,6 +77,18 @@ function formatTokens(n: number): string {
   return String(v);
 }
 
+function formatGeoHintsPreview(hints: AiRequestListRow["cityRegionHints"]): string {
+  if (!Array.isArray(hints) || hints.length === 0) return "";
+  return hints
+    .slice(0, 3)
+    .map((hint) => {
+      const parts = [hint.city, hint.region, hint.phrase, hint.source].filter(Boolean);
+      return parts.join(" | ");
+    })
+    .filter(Boolean)
+    .join(" ; ");
+}
+
 export default function AiRequestsClient() {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -84,6 +103,7 @@ export default function AiRequestsClient() {
   const [onlyNonStub, setOnlyNonStub] = useState(false);
   const [onlyRated, setOnlyRated] = useState(false);
   const [onlyDown, setOnlyDown] = useState(false);
+  const [onlyGeoHints, setOnlyGeoHints] = useState(false);
 
   const [openId, setOpenId] = useState<string | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -122,7 +142,8 @@ export default function AiRequestsClient() {
     const rated = requests.filter((r) => Boolean(r.feedback)).length;
     const down = requests.filter((r) => r.feedback?.rating === "down").length;
     const templateOk = requests.filter((r) => r.template?.isCompliant).length;
-    return { total, stub, nonStub, errors, injected, rated, down, templateOk };
+    const geoHints = requests.filter((r) => Array.isArray(r.cityRegionHints) && r.cityRegionHints.length > 0).length;
+    return { total, stub, nonStub, errors, injected, rated, down, templateOk, geoHints };
   }, [requests]);
 
   const filtered = useMemo(() => {
@@ -139,6 +160,7 @@ export default function AiRequestsClient() {
       if (onlyNonStub && r.isStub) return false;
       if (onlyRated && !r.feedback) return false;
       if (onlyDown && r.feedback?.rating !== "down") return false;
+      if (onlyGeoHints && (!Array.isArray(r.cityRegionHints) || r.cityRegionHints.length === 0)) return false;
       if (!q) return true;
 
       const hay = [
@@ -146,6 +168,11 @@ export default function AiRequestsClient() {
         r.user.email,
         r.user.name || "",
         r.companyId || "",
+        r.vendorLookupFilters?.city || "",
+        r.vendorLookupFilters?.region || "",
+        ...(Array.isArray(r.cityRegionHints)
+          ? r.cityRegionHints.flatMap((hint) => [hint.city || "", hint.region || "", hint.phrase || "", hint.source || ""])
+          : []),
         r.messagePreview || "",
         r.replyPreview || "",
       ]
@@ -153,7 +180,7 @@ export default function AiRequestsClient() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [requests, query, providerFilter, onlyErrors, onlyInjected, onlyNonStub, onlyRated, onlyDown]);
+  }, [requests, query, providerFilter, onlyErrors, onlyInjected, onlyNonStub, onlyRated, onlyDown, onlyGeoHints]);
 
   const openDetails = async (id: string) => {
     setOpenId(id);
@@ -213,7 +240,8 @@ export default function AiRequestsClient() {
                 <span className="font-semibold">{stats.injected}</span> • Rated:{" "}
                 <span className="font-semibold">{stats.rated}</span> • 👎:{" "}
                 <span className="font-semibold">{stats.down}</span> • Template OK:{" "}
-                <span className="font-semibold">{stats.templateOk}</span>
+                <span className="font-semibold">{stats.templateOk}</span> • Geo hints:{" "}
+                <span className="font-semibold">{stats.geoHints}</span>
               </div>
               {status && (
                 <div className="text-xs text-gray-500 mt-2">
@@ -277,7 +305,7 @@ export default function AiRequestsClient() {
                     <label className="block text-xs text-gray-600 mb-1">Provider</label>
                     <select
                       value={providerFilter}
-                      onChange={(e) => setProviderFilter(e.target.value as any)}
+                      onChange={(e) => setProviderFilter(e.target.value as "all" | "stub" | "openai" | "codex")}
                       className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
                     >
                       <option value="all">Все</option>
@@ -306,6 +334,10 @@ export default function AiRequestsClient() {
                     <label className="inline-flex items-center gap-2 text-sm text-gray-700">
                       <input type="checkbox" checked={onlyDown} onChange={(e) => setOnlyDown(e.target.checked)} />
                       👎 only
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={onlyGeoHints} onChange={(e) => setOnlyGeoHints(e.target.checked)} />
+                      Geo hints
                     </label>
                   </div>
                 </div>
@@ -347,6 +379,11 @@ export default function AiRequestsClient() {
                           {r.companyIds?.length > 0 && (
                             <div className="text-xs text-gray-500 mt-1">+{r.companyIds.length} shortlist</div>
                           )}
+                          {(r.vendorLookupFilters?.city || r.vendorLookupFilters?.region) && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              geo: {[r.vendorLookupFilters.city, r.vendorLookupFilters.region].filter(Boolean).join(", ")}
+                            </div>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-gray-700">
                           <div className="font-medium">{r.provider}</div>
@@ -387,6 +424,14 @@ export default function AiRequestsClient() {
                             {r.guardrailsVersion != null && (
                               <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-700 px-2 py-0.5 text-xs">
                                 g{r.guardrailsVersion}
+                              </span>
+                            )}
+                            {r.cityRegionHints?.length > 0 && (
+                              <span
+                                title={formatGeoHintsPreview(r.cityRegionHints)}
+                                className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-xs"
+                              >
+                                geo
                               </span>
                             )}
                           </div>

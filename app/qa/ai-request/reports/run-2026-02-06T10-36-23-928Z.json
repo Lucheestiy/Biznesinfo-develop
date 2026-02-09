@@ -1,0 +1,372 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-06T10:10:00Z",
+      "source": "manual-regression",
+      "description": "Regression scenarios for geo mismatch in multi-turn sourcing"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 2,
+      "maxStubRetries": 1,
+      "minTurnDelayMs": 80,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-06T10-36-23-928Z",
+    "startedAt": "2026-02-06T10:36:23.928Z",
+    "endedAt": "2026-02-06T10:36:27.363Z",
+    "durationMs": 3435,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.geo.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 12,
+    "passedChecks": 12,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "R001",
+      "title": "Молоко в Бресте: запрет на дрейф в Минск",
+      "tags": [
+        "regression",
+        "geo",
+        "sourcing",
+        "multi_turn"
+      ],
+      "personaGoal": "Закупщик ищет поставщиков молока в Бресте, проверяет устойчивость к geo-correction",
+      "totalTurns": 4,
+      "completedTurns": 4,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где можно купить тонну молока в Бресте?",
+          "requestBody": {
+            "message": "Где можно купить тонну молока в Бресте?",
+            "history": []
+          },
+          "latencyMs": 695,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "e8f5aae2-cf64-4a31-9633-815f93beb022",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Автосервис PRO-tone — /company/avtoservis-pro-tone (Автосервис и ремонт; Брест, brest)\n2. БРВ-Брест ИООО — /company/brw (Мебель; Брест, brest)\n3. Брествнештранс СООО — /company/brestvneshtrans (Автомойки, химчистки; Брест, brest)\n4. Брестльносемена КУП — /company/brls (Лён. Льноматериалы; Брест, brest)\n\nФокус задачи: можно, молока, можно молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "checks": [
+            {
+              "id": "R001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R001.T1.C2",
+              "type": "includes_any",
+              "description": "Должна учитываться локация Брест",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "brest"
+                ],
+                "hits": [
+                  "брест",
+                  "brest"
+                ]
+              }
+            },
+            {
+              "id": "R001.T1.C3",
+              "type": "excludes_all",
+              "description": "Не должно уходить в медицинские нерелевантные компании",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "поликлиник",
+                  "больниц",
+                  "медицинск"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Я указал Брест - в ответе Минск? Почему? В Бресте есть компании которые продают молоко",
+          "requestBody": {
+            "message": "Я указал Брест - в ответе Минск? Почему? В Бресте есть компании которые продают молоко",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где можно купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Автосервис PRO-tone — /company/avtoservis-pro-tone (Автосервис и ремонт; Брест, brest)\n2. БРВ-Брест ИООО — /company/brw (Мебель; Брест, brest)\n3. Брествнештранс СООО — /company/brestvneshtrans (Автомойки, химчистки; Брест, brest)\n4. Брестльносемена КУП — /company/brls (Лён. Льноматериалы; Брест, brest)\n\nФокус задачи: можно, молока, можно молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ]
+          },
+          "latencyMs": 656,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1780a60c-298e-42ee-ab36-342fce28d4e8",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Автосервис PRO-tone — /company/avtoservis-pro-tone (Автосервис и ремонт; Брест, brest)\n2. БРВ-Брест ИООО — /company/brw (Мебель; Брест, brest)\n3. Брествнештранс СООО — /company/brestvneshtrans (Автомойки, химчистки; Брест, brest)\n4. Брестльносемена КУП — /company/brls (Лён. Льноматериалы; Брест, brest)\n\nФокус задачи: можно, молока, есть, молоко.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nЛокация из запроса: ответе Минск.",
+          "checks": [
+            {
+              "id": "R001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R001.T2.C2",
+              "type": "includes_any",
+              "description": "Ассистент должен зафиксировать Брест",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "brest"
+                ],
+                "hits": [
+                  "брест",
+                  "brest"
+                ]
+              }
+            },
+            {
+              "id": "R001.T2.C3",
+              "type": "excludes_all",
+              "description": "Нельзя переопределять локацию на Минск",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "локация из запроса:\\s*минск",
+                  "фокус по локации:\\s*минск"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Где список поставщиков?",
+          "requestBody": {
+            "message": "Где список поставщиков?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где можно купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Автосервис PRO-tone — /company/avtoservis-pro-tone (Автосервис и ремонт; Брест, brest)\n2. БРВ-Брест ИООО — /company/brw (Мебель; Брест, brest)\n3. Брествнештранс СООО — /company/brestvneshtrans (Автомойки, химчистки; Брест, brest)\n4. Брестльносемена КУП — /company/brls (Лён. Льноматериалы; Брест, brest)\n\nФокус задачи: можно, молока, можно молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Я указал Брест - в ответе Минск? Почему? В Бресте есть компании которые продают молоко"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Автосервис PRO-tone — /company/avtoservis-pro-tone (Автосервис и ремонт; Брест, brest)\n2. БРВ-Брест ИООО — /company/brw (Мебель; Брест, brest)\n3. Брествнештранс СООО — /company/brestvneshtrans (Автомойки, химчистки; Брест, brest)\n4. Брестльносемена КУП — /company/brls (Лён. Льноматериалы; Брест, brest)\n\nФокус задачи: можно, молока, есть, молоко.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nЛокация из запроса: ответе Минск."
+              }
+            ]
+          },
+          "latencyMs": 768,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f2fa66d3-1c10-43cb-b808-d7aac7db84cf",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nРубрики для старта: профильная рубрика услуги/товара + 1-2 смежные.\n\nПоисковые формулировки: добавьте 2-3 синонима к основному запросу и уточните объем/срок.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена).",
+          "checks": [
+            {
+              "id": "R001.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R001.T3.C2",
+              "type": "includes_any",
+              "description": "Должен быть список кандидатов или полезный fallback без галлюцинаций",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "/company/",
+                  "рубрик",
+                  "не подставляю"
+                ],
+                "hits": [
+                  "рубрик"
+                ]
+              }
+            },
+            {
+              "id": "R001.T3.C3",
+              "type": "excludes_all",
+              "description": "Без нерелевантной медицины",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "поликлиник",
+                  "больниц",
+                  "медицинск"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "user": "Указана компания которая продает запчасти в Минске опять!!!",
+          "requestBody": {
+            "message": "Указана компания которая продает запчасти в Минске опять!!!",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где можно купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Автосервис PRO-tone — /company/avtoservis-pro-tone (Автосервис и ремонт; Брест, brest)\n2. БРВ-Брест ИООО — /company/brw (Мебель; Брест, brest)\n3. Брествнештранс СООО — /company/brestvneshtrans (Автомойки, химчистки; Брест, brest)\n4. Брестльносемена КУП — /company/brls (Лён. Льноматериалы; Брест, brest)\n\nФокус задачи: можно, молока, можно молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "Я указал Брест - в ответе Минск? Почему? В Бресте есть компании которые продают молоко"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Автосервис PRO-tone — /company/avtoservis-pro-tone (Автосервис и ремонт; Брест, brest)\n2. БРВ-Брест ИООО — /company/brw (Мебель; Брест, brest)\n3. Брествнештранс СООО — /company/brestvneshtrans (Автомойки, химчистки; Брест, brest)\n4. Брестльносемена КУП — /company/brls (Лён. Льноматериалы; Брест, brest)\n\nФокус задачи: можно, молока, есть, молоко.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.\n\nЛокация из запроса: ответе Минск."
+              },
+              {
+                "role": "user",
+                "content": "Где список поставщиков?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по каталогу Biznesinfo:\n\nРубрики для старта: профильная рубрика услуги/товара + 1-2 смежные.\n\nПоисковые формулировки: добавьте 2-3 синонима к основному запросу и уточните объем/срок.\n\nЧтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена)."
+              }
+            ]
+          },
+          "latencyMs": 1010,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "d628c140-3108-4a6a-b2e6-ad2d9c9ee4a2",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. 18 УП — /company/up-18 (Инструменты, абразивы; Минск, minsk)\n2. Ави-Прайм ООО — /company/aviprime (Услуги для сельского хозяйства; Минск, minsk)\n3. АВТО СТИМ ООО — /company/avtostim (Запчасти для грузовых автомобилей; Минск, minsk)\n4. Автодиллер-Агро ООО — /company/avtodiller-agro (Автозапчасти и принадлежности; Минск, minsk)\n\nФокус задачи: указана, запчасти, указана запчасти.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "checks": [
+            {
+              "id": "R001.T4.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R001.T4.C2",
+              "type": "includes_any",
+              "description": "Должна быть гео-коррекция и удержание контекста",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "локаци"
+                ],
+                "hits": [
+                  "локаци"
+                ]
+              }
+            },
+            {
+              "id": "R001.T4.C3",
+              "type": "not_refusal_only",
+              "description": "Не отказ, а практичные next steps",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3132
+    }
+  ]
+}

@@ -1,0 +1,340 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "generatedAt": "2026-02-08T04:34:39.130Z",
+      "source": "app/qa/ai-request/scenarios.chatgpt-pro.master.json",
+      "count": 2
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T04-35-54-483Z",
+    "startedAt": "2026-02-08T04:35:54.483Z",
+    "endedAt": "2026-02-08T04:36:08.100Z",
+    "durationMs": 13617,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/uxd070_uxd081.only.json",
+    "totalScenarios": 2,
+    "passedScenarios": 2,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 11,
+    "passedChecks": 11,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 2,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UXD070",
+      "title": "Банк D: Проверка контрагента и реквизиты — запрос 70",
+      "tags": [
+        "query_bank",
+        "counterparty_check",
+        "requisites",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро проверить контрагента, реквизиты и надежность данных для рабочих задач.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Статус: действует или в ликвидации?",
+          "requestBody": {
+            "message": "Статус: действует или в ликвидации?",
+            "history": []
+          },
+          "latencyMs": 2618,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "616b34df-1fa7-46de-ad9c-a2f1adba6a2f",
+          "isStub": false,
+          "reply": "Уточню: чтобы проверить **«действует / в ликвидации»**, нужен идентификатор компании — хотя бы:\n\n1. Название компании (точное)  \n2. Город/регион  \n3. По возможности УНП\n\nПришлите эти данные, и я подскажу, как быстро проверить статус по карточке компании в каталоге.\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "checks": [
+            {
+              "id": "UXD070.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXD070.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXD070.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме контрагента/реквизитов/проверки данных",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "контрагент",
+                  "компан",
+                  "организац",
+                  "унп",
+                  "реквиз",
+                  "адрес",
+                  "руковод",
+                  "статус",
+                  "ликвидац",
+                  "окэд",
+                  "регистрац",
+                  "лиценз",
+                  "телефон",
+                  "источник",
+                  "обновля",
+                  "проверк",
+                  "данн",
+                  "уточнит",
+                  "идентификатор",
+                  "карточк"
+                ],
+                "hits": [
+                  "компан",
+                  "унп",
+                  "статус",
+                  "ликвидац",
+                  "проверк",
+                  "данн",
+                  "идентификатор",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "UXD070.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован или содержать практичные следующие шаги",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXD070.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 319
+              }
+            },
+            {
+              "id": "UXD070.T1.C6",
+              "type": "excludes_all",
+              "description": "Не должно быть ложной гео-интерпретации слова «ликвидации»",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "локация\\s+из\\s+запроса\\s*:\\s*ликвидац"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2621
+    },
+    {
+      "id": "UXD081",
+      "title": "Банк D: Проверка контрагента и реквизиты — запрос 81",
+      "tags": [
+        "query_bank",
+        "counterparty_check",
+        "requisites",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро проверить контрагента, реквизиты и надежность данных для рабочих задач.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Выдай данные в виде списка/JSON.",
+          "requestBody": {
+            "message": "Выдай данные в виде списка/JSON.",
+            "history": []
+          },
+          "latencyMs": 10681,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3cc7261b-ab02-4e12-b396-beb028b36818",
+          "isStub": false,
+          "reply": "Могу выдать данные в формате JSON, но нужен идентификатор контрагента/компании.\n\nУкажите, пожалуйста:\n1. УНП, или\n2. название организации и город, или\n3. ссылку на карточку (/company/...).\n\nПосле этого верну структурированный список реквизитов и статуса (действует/ликвидация) в JSON.",
+          "checks": [
+            {
+              "id": "UXD081.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXD081.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXD081.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме контрагента/реквизитов/проверки данных",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "контрагент",
+                  "компан",
+                  "организац",
+                  "унп",
+                  "реквиз",
+                  "адрес",
+                  "руковод",
+                  "статус",
+                  "ликвидац",
+                  "окэд",
+                  "регистрац",
+                  "лиценз",
+                  "телефон",
+                  "источник",
+                  "обновля",
+                  "проверк",
+                  "данн",
+                  "уточнит",
+                  "идентификатор",
+                  "карточк"
+                ],
+                "hits": [
+                  "контрагент",
+                  "компан",
+                  "организац",
+                  "унп",
+                  "реквиз",
+                  "статус",
+                  "ликвидац",
+                  "данн",
+                  "идентификатор",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "UXD081.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован или содержать практичные следующие шаги",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXD081.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 284
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 10682
+    }
+  ]
+}

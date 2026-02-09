@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-08T18:55:00Z",
+      "source": "manual-regression",
+      "description": "Regression for announcement-style template requests (\"ищем подрядчика\")"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T19-03-44-672Z-3798972-y380s",
+    "startedAt": "2026-02-08T19:03:44.672Z",
+    "endedAt": "2026-02-08T19:03:51.357Z",
+    "durationMs": 6685,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.template-announcement.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 5,
+    "passedChecks": 5,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "TA001",
+      "title": "Объявление: ищем подрядчика",
+      "tags": [
+        "regression",
+        "template",
+        "announcement",
+        "single_turn"
+      ],
+      "personaGoal": "Пользователь просит готовый текст объявления для публикации и ожидает структурированный first-pass",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Напиши объявление «ищем подрядчика» для публикации.",
+          "requestBody": {
+            "message": "Напиши объявление «ищем подрядчика» для публикации.",
+            "history": []
+          },
+          "latencyMs": 6388,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6c825799-028f-4835-8919-cc489d7edbfb",
+          "isStub": false,
+          "reply": "Subject: Ищем подрядчика на выполнение работ/услуг напиши объявление в {city}\n\nBody:\nДобрый день!\n\nКомпания {company} ищет подрядчика для выполнения напиши объявление в {city}.\n\nЧто требуется:\n- Объём: {qty}\n- Технические требования: {spec}\n- Сроки выполнения: {deadline}\n- Место выполнения/доставки: {delivery}\n- Требуемые документы: {list_of_docs}\n- Гарантия/сервис: {warranty_terms}\n\nПросим направить коммерческое предложение, в котором указать:\n- Стоимость (с НДС/без НДС)\n- Сроки начала и завершения работ\n- Условия оплаты\n- Наличие аналогичного опыта (кейсы/портфолио)\n- Контактное лицо для оперативной связи\n\nПредложения принимаются до {deadline}.\nКонтакты для связи: {contact}.\n\nСпасибо!\n\nWhatsApp:\nЗдравствуйте! Ищем подрядчика на напиши объявление в {city}. Объём: {qty}, требования: {spec}, срок: {deadline}. Пришлите, пожалуйста, КП с ценой, сроками и условиями оплаты на {contact}.",
+          "checks": [
+            {
+              "id": "TA001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "TA001.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "TA001.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме объявления/шаблона",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "объявлен",
+                  "подрядчик",
+                  "шаблон",
+                  "пример",
+                  "публикац",
+                  "subject",
+                  "body",
+                  "whatsapp"
+                ],
+                "hits": [
+                  "объявлен",
+                  "подрядчик",
+                  "subject",
+                  "body",
+                  "whatsapp"
+                ]
+              }
+            },
+            {
+              "id": "TA001.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен дать структуру текста или шаблонные блоки",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "template_blocks",
+                    "passed": true,
+                    "reason": "Template blocks present"
+                  },
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "TA001.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 894
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 6390
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-08T21:10:00Z",
+    "source": "manual-regression",
+    "description": "Regression checks for broken /company links in assistant replies."
+  },
+  "scenarios": [
+    {
+      "id": "LINK001",
+      "title": "Shortlist links should open: milk procurement in Brest",
+      "personaGoal": "User wants real supplier links and phone follow-up without dead cards.",
+      "tags": ["multi_turn", "link_integrity", "suppliers", "milk"],
+      "turns": [
+        {
+          "user": "Где купить тонну молока в Бресте? Дай 3 компании ссылками на карточки.",
+          "checks": [
+            { "id": "LINK001.T1.C1", "type": "not_stub", "description": "Reply must not be stub." },
+            { "id": "LINK001.T1.C2", "type": "company_path_min_count", "min": 2, "description": "Need at least 2 /company links." },
+            { "id": "LINK001.T1.C3", "type": "company_paths_resolve_min", "min": 2, "description": "At least 2 /company links must resolve." }
+          ]
+        },
+        {
+          "user": "Дай телефон первой компании и продублируй ссылку на карточку.",
+          "checks": [
+            { "id": "LINK001.T2.C1", "type": "not_stub", "description": "Reply must not be stub." },
+            {
+              "id": "LINK001.T2.C2",
+              "type": "all_of",
+              "description": "Need real phone number and card link.",
+              "checks": [
+                {
+                  "type": "includes_any",
+                  "patterns": ["\\+?\\d[\\d\\s().-]{7,}\\d"],
+                  "description": "Reply contains phone number"
+                },
+                {
+                  "type": "includes_any",
+                  "patterns": ["/company/"],
+                  "description": "Reply contains /company link"
+                },
+                {
+                  "type": "excludes_all",
+                  "patterns": ["телефон\\s+не\\s+найден", "нет\\s+проверенн\\w*\\s+телефон"],
+                  "description": "No false claim that phone is not found"
+                }
+              ]
+            },
+            { "id": "LINK001.T2.C3", "type": "company_paths_resolve_min", "min": 1, "description": "At least one provided card link must resolve." }
+          ]
+        },
+        {
+          "user": "Ок, а теперь email и сайт первой компании.",
+          "checks": [
+            { "id": "LINK001.T3.C1", "type": "not_stub", "description": "Reply must not be stub." },
+            {
+              "id": "LINK001.T3.C2",
+              "type": "all_of",
+              "description": "Need email and website.",
+              "checks": [
+                {
+                  "type": "includes_any",
+                  "patterns": ["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"],
+                  "description": "Reply contains email"
+                },
+                {
+                  "type": "includes_any",
+                  "patterns": ["https?://", "www\\."],
+                  "description": "Reply contains website URL"
+                }
+              ]
+            },
+            { "id": "LINK001.T3.C3", "type": "company_paths_resolve_min", "min": 1, "description": "At least one provided card link must resolve." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LINK002",
+      "title": "Shortlist links should open: cleaning after renovation in Minsk",
+      "personaGoal": "User wants contractor cards that are actually reachable.",
+      "tags": ["multi_turn", "link_integrity", "services", "cleaning"],
+      "turns": [
+        {
+          "user": "Нужна уборка после ремонта в Минске. Покажи 3 фирмы и ссылки на карточки.",
+          "checks": [
+            { "id": "LINK002.T1.C1", "type": "not_stub", "description": "Reply must not be stub." },
+            { "id": "LINK002.T1.C2", "type": "company_path_min_count", "min": 1, "description": "Need at least 1 /company link." },
+            { "id": "LINK002.T1.C3", "type": "company_paths_resolve_min", "min": 1, "description": "At least 1 /company link must resolve." }
+          ]
+        },
+        {
+          "user": "Повтори лучшую компанию и ссылку на карточку, чтобы я сразу открыл.",
+          "checks": [
+            { "id": "LINK002.T2.C1", "type": "not_stub", "description": "Reply must not be stub." },
+            { "id": "LINK002.T2.C2", "type": "company_path_min_count", "min": 1, "description": "Need at least 1 /company link." },
+            { "id": "LINK002.T2.C3", "type": "company_paths_resolve_min", "min": 1, "description": "At least 1 /company link must resolve." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LINK003",
+      "title": "Fuzzy lookup links should open",
+      "personaGoal": "User asks fuzzy company lookup and expects working card links.",
+      "tags": ["multi_turn", "link_integrity", "company_lookup", "fuzzy"],
+      "turns": [
+        {
+          "user": "Компания вроде Бел...Транс...Сервис, Брест. Дай варианты со ссылками карточек.",
+          "checks": [
+            { "id": "LINK003.T1.C1", "type": "not_stub", "description": "Reply must not be stub." },
+            { "id": "LINK003.T1.C2", "type": "company_path_min_count", "min": 1, "description": "Need at least 1 /company link." },
+            { "id": "LINK003.T1.C3", "type": "company_paths_resolve_min", "min": 1, "description": "At least 1 /company link must resolve." }
+          ]
+        },
+        {
+          "user": "Покажи чем отличаются и оставь ссылки, куда перейти.",
+          "checks": [
+            { "id": "LINK003.T2.C1", "type": "not_stub", "description": "Reply must not be stub." },
+            { "id": "LINK003.T2.C2", "type": "company_path_min_count", "min": 1, "description": "Need at least 1 /company link." },
+            { "id": "LINK003.T2.C3", "type": "company_paths_resolve_min", "min": 1, "description": "At least 1 /company link must resolve." }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-06T10:45:00Z",
+      "source": "manual-regression",
+      "description": "Regression for milk sourcing with city switch and vendor validation"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 2,
+      "maxStubRetries": 1,
+      "minTurnDelayMs": 100,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-06T12-33-02-842Z",
+    "startedAt": "2026-02-06T12:33:02.842Z",
+    "endedAt": "2026-02-06T12:33:14.269Z",
+    "durationMs": 11427,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.milk-brest-mogilev.json",
+    "totalScenarios": 1,
+    "passedScenarios": 0,
+    "failedScenarios": 1,
+    "passRate": 0,
+    "totalChecks": 10,
+    "passedChecks": 9,
+    "failedChecks": 1,
+    "checkPassRate": 0.9,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:excludes_all:Не должен продвигать железнодорожные компании как молочных поставщиков",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "R002",
+      "title": "Молоко: Брест -> Могилев + проверка нерелевантной компании",
+      "tags": [
+        "regression",
+        "milk",
+        "geo",
+        "validation",
+        "multi_turn"
+      ],
+      "personaGoal": "Закупщик оптом (тонна молока), нужен стабильный multi-turn без ухода в железные дороги",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "R002.T3.C3",
+          "type": "excludes_all",
+          "description": "Не должен продвигать железнодорожные компании как молочных поставщиков",
+          "passed": false,
+          "reason": "Forbidden patterns found",
+          "details": {
+            "patterns": [
+              "железн[а-я\\s-]*дорог",
+              "белорусск[а-я\\s-]*железн"
+            ],
+            "hits": [
+              "железн[а-я\\s-]*дорог",
+              "белорусск[а-я\\s-]*железн"
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну молока в Бресте?",
+          "requestBody": {
+            "message": "Где купить тонну молока в Бресте?",
+            "history": []
+          },
+          "latencyMs": 8121,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "27bb232e-7dde-4eba-a5e9-07bea6b65ce6",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестмаш ОАО — /company/bmz (Автомобильное производство; Брест, brest)\n2. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest)\n3. Лора ЧУПТП — /company/lora (Сельхозмашины, сельхозоборудование; Брест, brest)\n4. Управляющая компания холдинга Концерн Брестмясомолпром ГО — /company/brestmmp (Пищевая промышленность; Брест, brest)\n\nФокус задачи: молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "checks": [
+            {
+              "id": "R002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R002.T1.C2",
+              "type": "includes_any",
+              "description": "Должен учитывать Брест",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "brest"
+                ],
+                "hits": [
+                  "брест",
+                  "brest"
+                ]
+              }
+            },
+            {
+              "id": "R002.T1.C3",
+              "type": "includes_any",
+              "description": "Нужен полезный first-pass",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "/company/",
+                  "рубрик",
+                  "поисковые формулировки"
+                ],
+                "hits": [
+                  "/company/"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "А в Могилеве?",
+          "requestBody": {
+            "message": "А в Могилеве?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестмаш ОАО — /company/bmz (Автомобильное производство; Брест, brest)\n2. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest)\n3. Лора ЧУПТП — /company/lora (Сельхозмашины, сельхозоборудование; Брест, brest)\n4. Управляющая компания холдинга Концерн Брестмясомолпром ГО — /company/brestmmp (Пищевая промышленность; Брест, brest)\n\nФокус задачи: молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ]
+          },
+          "latencyMs": 1202,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "55238725-54d1-433e-a7e8-1c6d92fa7b23",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Авангард СДП РУП Могилёвское отделение Белорусской железной дороги — /company/avangard-sdp (Сельское хозяйство; Могилевский р-н, mogilev)\n\nФокус задачи: молока.\n\nФокус по локации: Могилев.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "checks": [
+            {
+              "id": "R002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R002.T2.C2",
+              "type": "includes_any",
+              "description": "Должен переключиться на Могилев",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "могил",
+                  "mogilev"
+                ],
+                "hits": [
+                  "могил",
+                  "mogilev"
+                ]
+              }
+            },
+            {
+              "id": "R002.T2.C3",
+              "type": "excludes_all",
+              "description": "Не должен оставаться в Бресте",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "локация из запроса:\\s*брест",
+                  "фокус по локации:\\s*брест"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "1. Авангард СДП РУП Могилёвское отделение Белорусской железной дороги - Там что то про железные дороги. Компания точно молоко продает?",
+          "requestBody": {
+            "message": "1. Авангард СДП РУП Могилёвское отделение Белорусской железной дороги - Там что то про железные дороги. Компания точно молоко продает?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Брестмаш ОАО — /company/bmz (Автомобильное производство; Брест, brest)\n2. Брестское мороженое ОАО — /company/brestmoroj (Молочная промышленность; Брест, brest)\n3. Лора ЧУПТП — /company/lora (Сельхозмашины, сельхозоборудование; Брест, brest)\n4. Управляющая компания холдинга Концерн Брестмясомолпром ГО — /company/brestmmp (Пищевая промышленность; Брест, brest)\n\nФокус задачи: молока.\n\nФокус по локации: Брест.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              },
+              {
+                "role": "user",
+                "content": "А в Могилеве?"
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Авангард СДП РУП Могилёвское отделение Белорусской железной дороги — /company/avangard-sdp (Сельское хозяйство; Могилевский р-н, mogilev)\n\nФокус задачи: молока.\n\nФокус по локации: Могилев.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ]
+          },
+          "latencyMs": 1702,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "5cf287ee-46fe-4caa-8509-51fe5a26748a",
+          "isStub": false,
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. Авангард СДП РУП Могилёвское отделение Белорусской железной дороги — /company/avangard-sdp (Сельское хозяйство; Могилевский р-н, mogilev)\n\nФокус задачи: молока, mogilev, молока mogilev.\n\nФокус по локации: Могилев.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "checks": [
+            {
+              "id": "R002.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "R002.T3.C2",
+              "type": "includes_any",
+              "description": "Должен вернуться к товарной теме (молоко) и валидации",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "релевант",
+                  "провер"
+                ],
+                "hits": [
+                  "молок",
+                  "релевант"
+                ]
+              }
+            },
+            {
+              "id": "R002.T3.C3",
+              "type": "excludes_all",
+              "description": "Не должен продвигать железнодорожные компании как молочных поставщиков",
+              "passed": false,
+              "reason": "Forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "железн[а-я\\s-]*дорог",
+                  "белорусск[а-я\\s-]*железн"
+                ],
+                "hits": [
+                  "железн[а-я\\s-]*дорог",
+                  "белорусск[а-я\\s-]*железн"
+                ]
+              }
+            },
+            {
+              "id": "R002.T3.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен практичный ответ, а не пустой отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 11027
+    }
+  ]
+}

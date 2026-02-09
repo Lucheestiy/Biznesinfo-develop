@@ -1,0 +1,227 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "source": "manual",
+      "description": "Potato sourcing sanity"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-06T15-04-41-450Z",
+    "startedAt": "2026-02-06T15:04:41.450Z",
+    "endedAt": "2026-02-06T15:05:03.108Z",
+    "durationMs": 21658,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/ai-potato-scenario.json",
+    "totalScenarios": 1,
+    "passedScenarios": 0,
+    "failedScenarios": 1,
+    "passRate": 0,
+    "totalChecks": 5,
+    "passedChecks": 4,
+    "failedChecks": 1,
+    "checkPassRate": 0.8,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:excludes_all:P5",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "POTATO_VITEBSK_001",
+      "title": "Картошка в Витебске без нерелевантных карточек",
+      "tags": [
+        "regression",
+        "sourcing",
+        "geo",
+        "potato"
+      ],
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "P5",
+          "type": "excludes_all",
+          "description": null,
+          "passed": false,
+          "reason": "Forbidden patterns found",
+          "details": {
+            "patterns": [
+              "не по теме",
+              "автолайт",
+              "жалюзи",
+              "электрооборуд"
+            ],
+            "hits": [
+              "автолайт",
+              "жалюзи",
+              "электрооборуд"
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну картошки в витебске?",
+          "requestBody": {
+            "message": "Где купить тонну картошки в витебске?",
+            "history": []
+          },
+          "latencyMs": 12430,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2371edb9-7afe-4f7a-b8cf-a0f1bfde9eb6",
+          "isStub": false,
+          "reply": "Для поиска тонны картошки в Витебске в rubricator лучше всего подойдут такие рубрики и ключевые слова:\n\n**Рубрики:**\n1. Сельхозпродукция → Овощи\n2. Оптовая торговля → Овощи, фрукты\n3. Фермерские хозяйства → Овощеводство\n\n**Ключевые слова/синонимы:**\n- картофель оптом\n- картошка оптом\n- продовольственный картофель\n- семенной картофель (если нужно для посадки)\n- овощные базы\n- фермерские хозяйства\n\n**Фильтры:**\n- Регион: Витебская область  \n- Город: Витебск\n\nЧтобы сузить поиск: добавьте сорт (например, {сорт}), фасовку (мешки 25/50 кг), класс (пищевой/семенной), условия доставки (самовывоз/доставка).\n\nУточните, пожалуйста:\n1) Нужен пищевой или семенной картофель?  \n2) Фасовка (мешки 25/50 кг) и сорт важны?  \n3) Самовывоз или нужна доставка по Витебску?",
+          "checks": [
+            {
+              "id": "P1",
+              "type": "not_stub",
+              "description": null,
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "P2",
+              "type": "includes_any",
+              "description": null,
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "витеб",
+                  "Витеб"
+                ],
+                "hits": [
+                  "витеб",
+                  "Витеб"
+                ]
+              }
+            },
+            {
+              "id": "P3",
+              "type": "any_of",
+              "description": null,
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Любую картошку. Где купить?",
+          "requestBody": {
+            "message": "Любую картошку. Где купить?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну картошки в витебске?"
+              },
+              {
+                "role": "assistant",
+                "content": "Для поиска тонны картошки в Витебске в rubricator лучше всего подойдут такие рубрики и ключевые слова:\n\n**Рубрики:**\n1. Сельхозпродукция → Овощи\n2. Оптовая торговля → Овощи, фрукты\n3. Фермерские хозяйства → Овощеводство\n\n**Ключевые слова/синонимы:**\n- картофель оптом\n- картошка оптом\n- продовольственный картофель\n- семенной картофель (если нужно для посадки)\n- овощные базы\n- фермерские хозяйства\n\n**Фильтры:**\n- Регион: Витебская область  \n- Город: Витебск\n\nЧтобы сузить поиск: добавьте сорт (например, {сорт}), фасовку (мешки 25/50 кг), класс (пищевой/семенной), условия доставки (самовывоз/доставка).\n\nУточните, пожалуйста:\n1) Нужен пищевой или семенной картофель?  \n2) Фасовка (мешки 25/50 кг) и сорт важны?  \n3) Самовывоз или нужна доставка по Витебску?"
+              }
+            ]
+          },
+          "latencyMs": 8949,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "0e6a4076-5c40-42c7-8a02-3445d440faf5",
+          "isStub": false,
+          "reply": "Вот что есть в текущем снимке каталога (в Витебске из списка только одна компания, но она **не про картофель** — каталог, похоже, не показывает овощных поставщиков по запросу). Проверьте на странице компании детали, вдруг у них есть нужное направление:\n\n1. **Артбат ООО** — Витебск, электрооборудование (не профиль, но это единственная компания из списка в Витебске). /company/artbat  \n2. **Автолайтэкспресс ООО** — Минск, курьерская служба. /company/autolight  \n3. **АКМА ГРУПП ООО** — Минск, жалюзи/роллеты. /company/acma  \n4. **Агентство авиатуров ОЛЛ ТУР ООО** — Минск, авиаперевозки. /company/alltour  \n\nПохоже, в этом списке нет поставщиков картофеля. Давайте быстро найдём нужных через рубрикатор:\n\n**Рубрики:**  \n- Сельхозпродукция → Овощи  \n- Оптовая торговля → Овощи, фрукты  \n- Фермерские хозяйства → Овощеводство  \n\n**Ключевые слова:**  \n- картофель оптом  \n- картошка оптом  \n- продовольственный картофель  \n- овощная база  \n- фермерские хозяйства  \n\n**Фильтр:** Витебская область → Витебск\n\nЕсли хотите, подберу поставщиков шире по Витебской области или соседним регионам. Напишите, ок ли расширить географию.",
+          "checks": [
+            {
+              "id": "P4",
+              "type": "not_stub",
+              "description": null,
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "P5",
+              "type": "excludes_all",
+              "description": null,
+              "passed": false,
+              "reason": "Forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "не по теме",
+                  "автолайт",
+                  "жалюзи",
+                  "электрооборуд"
+                ],
+                "hits": [
+                  "автолайт",
+                  "жалюзи",
+                  "электрооборуд"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 21381
+    }
+  ]
+}

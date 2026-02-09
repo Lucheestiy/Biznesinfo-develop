@@ -4,6 +4,13 @@ import { getDbPool } from "@/lib/auth/db";
 
 export const runtime = "nodejs";
 
+type RequestCityRegionHint = {
+  source: "currentMessage" | "lookupSeed" | "historySeed";
+  city: string | null;
+  region: string | null;
+  phrase: string | null;
+};
+
 function clampInt(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
   return Math.max(min, Math.min(max, Math.floor(value)));
@@ -146,6 +153,32 @@ export async function GET(request: Request) {
     const companyIds = Array.isArray(requestMeta?.companyIds)
       ? requestMeta.companyIds.filter((x: unknown) => typeof x === "string").slice(0, 16)
       : [];
+    const vendorLookupFiltersRaw =
+      requestMeta?.vendorLookupFilters && typeof requestMeta.vendorLookupFilters === "object" && !Array.isArray(requestMeta.vendorLookupFilters)
+        ? requestMeta.vendorLookupFilters
+        : null;
+    const vendorLookupFilters = {
+      city: typeof vendorLookupFiltersRaw?.city === "string" ? truncate(vendorLookupFiltersRaw.city, 72) : null,
+      region: typeof vendorLookupFiltersRaw?.region === "string" ? truncate(vendorLookupFiltersRaw.region, 72) : null,
+    };
+    const cityRegionHints: RequestCityRegionHint[] = Array.isArray(requestMeta?.cityRegionHints)
+      ? requestMeta.cityRegionHints
+          .filter((x: unknown) => x && typeof x === "object" && !Array.isArray(x))
+          .map((x: unknown): RequestCityRegionHint => {
+            const raw = x as Record<string, unknown>;
+            return {
+              source:
+                raw.source === "lookupSeed" || raw.source === "historySeed" || raw.source === "currentMessage"
+                  ? raw.source
+                  : "currentMessage",
+              city: typeof raw.city === "string" ? truncate(raw.city, 72) : null,
+              region: typeof raw.region === "string" ? truncate(raw.region, 72) : null,
+              phrase: typeof raw.phrase === "string" ? truncate(raw.phrase, 72) : null,
+            };
+          })
+          .filter((x: RequestCityRegionHint) => Boolean(x.city || x.region || x.phrase))
+          .slice(0, 6)
+      : [];
 
     const plan = typeof requestMeta?.plan === "string" ? requestMeta.plan : row.plan;
     const guardrailsVersion = typeof guardrails?.version === "number" ? guardrails.version : null;
@@ -158,6 +191,8 @@ export async function GET(request: Request) {
       plan,
       companyId: row.company_id,
       companyIds,
+      vendorLookupFilters,
+      cityRegionHints,
       messagePreview: truncate(row.message, 240),
       provider: provider || "stub",
       model,

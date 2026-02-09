@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-07T03:00:00Z",
+    "source": "manual-regression",
+    "description": "Regression for product switch (milk -> onion) and city follow-ups without stale candidates/placeholders"
+  },
+  "scenarios": [
+    {
+      "id": "R004",
+      "title": "Молоко (Гродно/Брест) -> лук репчатый (Могилев/Минск)",
+      "personaGoal": "Проверить, что ассистент при смене товара не тащит старых кандидатов и не вставляет служебные хвосты.",
+      "tags": ["regression", "product_switch", "geo", "multi_turn", "onion", "milk"],
+      "turns": [
+        {
+          "user": "Где купить тонну молока в Гроднл",
+          "checks": [
+            { "id": "R004.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R004.T1.C2", "type": "includes_any", "patterns": ["молок", "гродн", "гродно"], "description": "Должен учитывать товар и город (даже с опечаткой)" },
+            { "id": "R004.T1.C3", "type": "not_refusal_only", "description": "Нужен практичный first-pass" }
+          ]
+        },
+        {
+          "user": "А в Бресте?",
+          "checks": [
+            { "id": "R004.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R004.T2.C2", "type": "includes_any", "patterns": ["брест", "brest"], "description": "Должен переключиться на Брест" },
+            { "id": "R004.T2.C3", "type": "mentions_any_terms", "terms": ["молок"], "min": 1, "description": "Должен сохранить тему молока" }
+          ]
+        },
+        {
+          "user": "А кто оптом лук репчатый продает?",
+          "checks": [
+            { "id": "R004.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R004.T3.C2", "type": "mentions_any_terms", "terms": ["лук", "репчат", "овощ"], "min": 1, "description": "Должен переключиться на тему лука" },
+            { "id": "R004.T3.C3", "type": "excludes_all", "patterns": ["/company/molochny-mir", "/company/brestmoroj", "/company/brestmmp"], "description": "Не должен тянуть молочные компании после смены товара" },
+            { "id": "R004.T3.C4", "type": "not_refusal_only", "description": "Нужен полезный first-pass или прозрачный next step" }
+          ]
+        },
+        {
+          "user": "В могилеве лук репчатый",
+          "checks": [
+            { "id": "R004.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R004.T4.C2", "type": "includes_any", "patterns": ["могил", "mogilev"], "description": "Должен учитывать Могилев" },
+            { "id": "R004.T4.C3", "type": "mentions_any_terms", "terms": ["лук", "репчат", "овощ"], "min": 1, "description": "Должен сохранить тему лука" },
+            { "id": "R004.T4.C4", "type": "excludes_all", "patterns": ["Фокус исходного запроса"], "description": "Не должен добавлять шумный служебный хвост" },
+            { "id": "R004.T4.C5", "type": "excludes_all", "patterns": ["/company/molochny-mir", "/company/brestmoroj", "/company/brestmmp"], "description": "Не должен подмешивать молочные компании" }
+          ]
+        },
+        {
+          "user": "А в Минске тогда",
+          "checks": [
+            { "id": "R004.T5.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R004.T5.C2", "type": "includes_any", "patterns": ["минск", "minsk"], "description": "Должен переключиться на Минск" },
+            { "id": "R004.T5.C3", "type": "mentions_any_terms", "terms": ["лук", "репчат", "овощ"], "min": 1, "description": "Должен держать тему лука" },
+            { "id": "R004.T5.C4", "type": "excludes_all", "patterns": ["\\{qty\\}", "\\{city\\}", "\\{delivery\\}", "\\{deadline\\}"], "description": "Не должен оставлять плейсхолдеры в обычном ответе" },
+            { "id": "R004.T5.C5", "type": "excludes_all", "patterns": ["Фокус исходного запроса"], "description": "Не должен добавлять шумный служебный хвост" }
+          ]
+        }
+      ]
+    }
+  ]
+}

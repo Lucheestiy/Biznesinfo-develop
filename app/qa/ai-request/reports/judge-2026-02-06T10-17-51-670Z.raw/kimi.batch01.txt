@@ -1,0 +1,102 @@
+Looking at this request, I need to act as an external QA judge and evaluate the usefulness of AI assistant replies in the provided multi-turn business sourcing conversations. Let me analyze each scenario based on the rubric and return ONLY valid JSON.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "reasons": [
+        "Assistant ignores geo refinement (Сухарево) and keeps repeating same generic list",
+        "Ranking includes irrelevant companies (АмикПласт for packaging, БВСпроджект for lingerie)",
+        "No actual reasons provided for 'why' in top-3 request"
+      ],
+      "criticalIssues": [
+        "Complete failure to filter by district Сухарево",
+        "Companies don't match product category (ПНД трубы)"
+      ],
+      "strengths": [
+        "Provides company links and acknowledges data limitations"
+      ]
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "reasons": [
+        "Initial list contains somewhat relevant companies (БелСтройКомплект, Завод Энергооборудование)",
+        "Ranking at turn 3 prioritizes more relevant companies",
+        "Still ignores Советский район refinement"
+      ],
+      "criticalIssues": [
+        "No response to 'Советский район' geo constraint",
+        "Does not address certificate question in turn 3"
+      ],
+      "strengths": [
+        "Better company relevance than S001",
+        "Ranking order improved in final turn"
+      ]
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "reasons": [
+        "Turn 2 completely breaks - returns generic instructions instead of district filtering",
+        "Turn 3 ranking is completely wrong (advertising agency, furniture store, car service for concrete request)",
+        "No continuity with original concrete suppliers from turn 1"
+      ],
+      "criticalIssues": [
+        "Catastrophic context loss at turn 2",
+        "Ranking returns completely unrelated companies",
+        "Fails basic task of supplier shortlisting"
+      ],
+      "strengths": []
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "reasons": [
+        "Turn 1 gives generic priority framework instead of actual company list",
+        "Turn 2 breaks context and returns search instructions instead of filtering by Уручье",
+        "Turn 3 repeats same generic framework without actual companies"
+      ],
+      "criticalIssues": [
+        "Never provides actual cleaning service companies",
+        "Complete failure to handle geo refinement",
+        "Generic filler response without actionable data"
+      ],
+      "strengths": [
+        "Framework structure is logical (just not populated with data)"
+      ]
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "reasons": [
+        "Initial list includes some auto-related companies but misses tire service specialization",
+        "Ignores Каменная Горка location refinement",
+        "Does not answer 'who to call first' question with actionable priority"
+      ],
+      "criticalIssues": [
+        "No tire-specific companies in results",
+        "Geo refinement ignored",
+        "No practical prioritization guidance"
+      ],
+      "strengths": [
+        "Companies are at least in automotive sector",
+        "Maintains context better than S003/S004"
+      ]
+    }
+  ]
+}
+```

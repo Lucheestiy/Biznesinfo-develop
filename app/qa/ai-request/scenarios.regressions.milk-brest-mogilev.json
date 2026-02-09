@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-06T10:45:00Z",
+    "source": "manual-regression",
+    "description": "Regression for milk sourcing with city switch and vendor validation"
+  },
+  "scenarios": [
+    {
+      "id": "R002",
+      "title": "Молоко: Брест -> Могилев + проверка нерелевантной компании",
+      "personaGoal": "Закупщик оптом (тонна молока), нужен стабильный multi-turn без ухода в железные дороги",
+      "tags": ["regression", "milk", "geo", "validation", "multi_turn"],
+      "turns": [
+        {
+          "user": "Где купить тонну молока в Бресте?",
+          "checks": [
+            { "id": "R002.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R002.T1.C2", "type": "includes_any", "patterns": ["брест", "brest"], "description": "Должен учитывать Брест" },
+            { "id": "R002.T1.C3", "type": "includes_any", "patterns": ["/company/", "рубрик", "поисковые формулировки"], "description": "Нужен полезный first-pass" }
+          ]
+        },
+        {
+          "user": "А в Могилеве?",
+          "checks": [
+            { "id": "R002.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R002.T2.C2", "type": "includes_any", "patterns": ["могил", "mogilev"], "description": "Должен переключиться на Могилев" },
+            { "id": "R002.T2.C3", "type": "excludes_all", "patterns": ["локация из запроса:\\s*брест", "фокус по локации:\\s*брест"], "description": "Не должен оставаться в Бресте" }
+          ]
+        },
+        {
+          "user": "1. Авангард СДП РУП Могилёвское отделение Белорусской железной дороги - Там что то про железные дороги. Компания точно молоко продает?",
+          "checks": [
+            { "id": "R002.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R002.T3.C2", "type": "includes_any", "patterns": ["молок", "релевант", "провер"], "description": "Должен вернуться к товарной теме (молоко) и валидации" },
+            { "id": "R002.T3.C3", "type": "excludes_all", "patterns": ["точно\\s+прода[её]т\\s+молок", "гарантирую\\s+что\\s+.*молок"], "description": "Не должен утверждать неподтвержденную продажу молока без валидации" },
+            { "id": "R002.T3.C4", "type": "not_refusal_only", "description": "Нужен практичный ответ, а не пустой отказ" }
+          ]
+        },
+        {
+          "user": "Подготовь заявку",
+          "checks": [
+            { "id": "R002.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R002.T4.C2", "type": "template_blocks", "description": "Должны быть блоки Subject / Body / WhatsApp" }
+          ]
+        },
+        {
+          "user": "Заполни заявку на 1000 литров пастеризованного в Могилеве",
+          "checks": [
+            { "id": "R002.T5.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R002.T5.C2", "type": "template_blocks", "description": "Должны быть блоки Subject / Body / WhatsApp" },
+            { "id": "R002.T5.C3", "type": "includes_any", "patterns": ["1000\\s*(литр|л)", "пастериз", "могил"], "description": "Должен подставить ключевые параметры в текст шаблона" },
+            { "id": "R002.T5.C4", "type": "excludes_all", "patterns": ["\\{qty\\}", "\\{city\\}", "\\{product\\/service\\}", "\\{тип\\s+молока\\}"], "description": "Не должен оставлять базовые плейсхолдеры после запроса на заполнение" }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -33,6 +33,116 @@ function tokenizeServiceQuery(raw: string): string[] {
   return cleaned.split(" ").filter(Boolean);
 }
 
+const SERVICE_QUERY_STOP_WORDS = new Set([
+  "где",
+  "кто",
+  "как",
+  "найти",
+  "подобрать",
+  "поставщик",
+  "поставщики",
+  "поставщика",
+  "поставщиков",
+  "поставка",
+  "поставки",
+  "купить",
+  "куплю",
+  "нужен",
+  "нужна",
+  "нужно",
+  "нужны",
+  "срочно",
+  "цена",
+  "стоимость",
+  "опт",
+  "оптом",
+  "в",
+  "во",
+  "по",
+  "на",
+  "для",
+  "из",
+  "и",
+  "или",
+  "а",
+  "но",
+  "г",
+  "город",
+  "область",
+  "обл",
+  "район",
+  "регион",
+  "тонна",
+  "тонны",
+  "тонну",
+  "кг",
+  "килограмм",
+  "килограмма",
+  "литр",
+  "литра",
+  "литров",
+  "шт",
+  "штук",
+  "the",
+  "a",
+  "an",
+  "where",
+  "who",
+  "find",
+  "buy",
+  "need",
+  "price",
+  "urgent",
+]);
+
+function isGeoLikeServiceToken(token: string): boolean {
+  const t = (token || "").trim().toLowerCase().replace(/ё/gu, "е");
+  if (!t) return false;
+  return /^(минск\p{L}*|брест\p{L}*|гомел\p{L}*|гродн\p{L}*|витебск\p{L}*|могил[её]в\p{L}*|могилев\p{L}*|беларус\p{L}*|рб)$/u.test(
+    t,
+  );
+}
+
+function canonicalizeServiceToken(token: string): string {
+  const t = (token || "").trim().toLowerCase().replace(/ё/gu, "е");
+  if (!t) return "";
+
+  if (t.startsWith("молок") || t.startsWith("молоч") || t === "milk" || t === "dairy") return "молоко";
+  if (t.startsWith("лук") || t.startsWith("репчат") || t === "onion") return "лук";
+  if (t.startsWith("овощ") || t.startsWith("плодоовощ") || t.startsWith("vegetable")) return "овощи";
+  if (t.startsWith("клининг") || t.startsWith("cleaning")) return "клининг";
+  if (t.startsWith("уборк")) return "уборка";
+  if (t.startsWith("сертифик") || t.startsWith("сертификац") || t.startsWith("certif")) return "сертификация";
+  if (t.startsWith("декларац")) return "декларация";
+  if (t.startsWith("короб")) return "короб";
+  if (t.startsWith("гофро")) return "гофро";
+  if (t.startsWith("типограф")) return "типография";
+  if (t.startsWith("полиграф")) return "полиграфия";
+
+  return t;
+}
+
+function normalizeServiceSearchQuery(raw: string): string {
+  const out: string[] = [];
+  const seen = new Set<string>();
+
+  for (const token of tokenizeServiceQuery(raw)) {
+    const t = canonicalizeServiceToken(token.trim());
+    if (!t) continue;
+    if (/^\d+$/u.test(t)) continue;
+    if (/^\d+(?:[.,]\d+)?%$/u.test(t)) continue;
+    if (SERVICE_QUERY_STOP_WORDS.has(t)) continue;
+    if (isGeoLikeServiceToken(t)) continue;
+    if (t.length < 3) continue;
+    if (seen.has(t)) continue;
+    seen.add(t);
+    out.push(t);
+    if (out.length >= 8) break;
+  }
+
+  return out.join(" ");
+}
+
 function shouldApplyMilkFilter(raw: string): boolean {
   const tokens = tokenizeServiceQuery(raw);
   return tokens.some((t) => t.startsWith("молок") || t.startsWith("молоч"));
@@ -114,6 +224,79 @@ function hasForestKeyword(keywords: string[]): boolean {
   return false;
 }
 
+type KeywordIntentGuard = {
+  key: string;
+  trigger: RegExp;
+  required: RegExp;
+  forbidden?: RegExp;
+  allowIf?: RegExp;
+};
+
+const KEYWORD_INTENT_GUARDS: KeywordIntentGuard[] = [
+  {
+    key: "milk",
+    trigger: /(молок\p{L}*|молоч\p{L}*|milk|dairy)/u,
+    required: /(молок\p{L}*|молоч\p{L}*|milk|dairy)/u,
+    forbidden:
+      /(автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|вулканизац\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|вентиляц\p{L}*|кабел\p{L}*|типограф\p{L}*|полиграф\p{L}*)/u,
+  },
+  {
+    key: "vegetables",
+    trigger: /(лук\p{L}*|репчат\p{L}*|овощ\p{L}*|плодоовощ\p{L}*|onion|vegetable)/u,
+    required: /(лук\p{L}*|репчат\p{L}*|овощ\p{L}*|плодоовощ\p{L}*|onion|vegetable)/u,
+    forbidden:
+      /(автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|вентиляц\p{L}*|кабел\p{L}*|клининг\p{L}*|сертификац\p{L}*|декларац\p{L}*)/u,
+  },
+  {
+    key: "cleaning",
+    trigger: /(клининг\p{L}*|уборк\p{L}*|cleaning)/u,
+    required: /(клининг\p{L}*|уборк\p{L}*|cleaning)/u,
+    forbidden: /(автозапчаст\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|кабел\p{L}*)/u,
+  },
+  {
+    key: "certification",
+    trigger: /(сертифик\p{L}*|сертификац\p{L}*|декларац\p{L}*|certif\p{L}*)/u,
+    required: /(сертифик\p{L}*|сертификац\p{L}*|декларац\p{L}*|соответств\p{L}*|испытательн\p{L}*|аккредитац\p{L}*)/u,
+    forbidden: /(автозапчаст\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|шиномонтаж\p{L}*)/u,
+  },
+];
+
+function normalizeComparableKeywords(keywords: string[]): string {
+  return (keywords || [])
+    .map((k) =>
+      (k || "")
+        .trim()
+        .toLowerCase()
+        .replace(/ё/gu, "е"),
+    )
+    .filter(Boolean)
+    .join(" ");
+}
+
+function detectKeywordIntentGuards(raw: string): KeywordIntentGuard[] {
+  const source = (raw || "")
+    .trim()
+    .toLowerCase()
+    .replace(/ё/gu, "е");
+  if (!source) return [];
+  return KEYWORD_INTENT_GUARDS.filter((g) => g.trigger.test(source));
+}
+
+function matchesKeywordIntentGuards(keywords: string[], guards: KeywordIntentGuard[]): boolean {
+  if (guards.length === 0) return true;
+  const haystack = normalizeComparableKeywords(keywords);
+  if (!haystack) return false;
+
+  for (const guard of guards) {
+    if (!guard.required.test(haystack)) return false;
+    if (guard.forbidden && guard.forbidden.test(haystack)) {
+      if (!(guard.allowIf && guard.allowIf.test(haystack))) return false;
+    }
+  }
+
+  return true;
+}
+
 const KEYWORD_FILTER_TOTAL_SCAN_LIMIT = 5000;
 const KEYWORD_FILTER_TOTAL_SCAN_BATCH = 200;
 
@@ -123,7 +306,7 @@ async function countKeywordFilteredTotal(params: {
   filter: string[];
   attributesToSearchOn?: string[];
   matchingStrategy?: "all" | "last" | "frequency";
-  predicate: (keywords: string[]) => boolean;
+  predicate: (_keywords: string[]) => boolean;
 }): Promise<number> {
   let offset = 0;
   let counted = 0;
@@ -539,22 +722,31 @@ export async function meiliSearch(params: MeiliSearchParams): Promise<Biznesinfo
 
   // Determine search query and attributes to search on
   const company = (params.query || "").trim();
-  const service = (params.service || "").trim();
-  const keywords = (params.keywords || "").trim();
+  const rawService = (params.service || "").trim();
+  const rawKeywords = (params.keywords || "").trim();
+  const service = normalizeServiceSearchQuery(rawService);
+  const keywords = normalizeServiceSearchQuery(rawKeywords);
   const city = (params.city || "").trim();
   const cityNorm = normalizeCityForFilter(city);
   const useCityExactFilter = Boolean(cityNorm) && !isAddressLikeLocationQuery(city);
-  const keywordQuery = `${service} ${keywords}`.trim();
+  const keywordQuery = `${rawService} ${rawKeywords}`.trim();
   const applyCheeseFilter = Boolean(service || keywords) && shouldApplyCheeseFilter(keywordQuery);
   const applyMilkFilter = Boolean(service || keywords) && shouldApplyMilkFilter(keywordQuery);
   const applyGasFilter = Boolean(service || keywords) && shouldApplyGasFilter(keywordQuery);
   const applyForestFilter = Boolean(service || keywords) && shouldApplyForestFilter(keywordQuery);
+  const keywordIntentGuards = Boolean(service || keywords) ? detectKeywordIntentGuards(keywordQuery) : [];
+  const applyKeywordIntentGuard = keywordIntentGuards.length > 0;
   const applyKeywordFilter = applyCheeseFilter || applyMilkFilter || applyGasFilter || applyForestFilter;
   const matchesKeywordFilter = (hitKeywords: string[]) => {
     if (applyCheeseFilter && !hasCheeseKeyword(hitKeywords)) return false;
     if (applyMilkFilter && !hasMilkKeyword(hitKeywords)) return false;
     if (applyGasFilter && !hasGasKeyword(hitKeywords)) return false;
     if (applyForestFilter && !hasForestKeyword(hitKeywords)) return false;
+    return true;
+  };
+  const matchesStrictKeywordPredicates = (hitKeywords: string[]) => {
+    if (!matchesKeywordFilter(hitKeywords)) return false;
+    if (applyKeywordIntentGuard && !matchesKeywordIntentGuards(hitKeywords, keywordIntentGuards)) return false;
     return true;
   };
 
@@ -571,7 +763,11 @@ export async function meiliSearch(params: MeiliSearchParams): Promise<Biznesinfo
   }
 
   const searchQuery = terms.join(" ").trim();
-  const matchingStrategy: "all" | "last" | "frequency" | undefined = searchQuery ? "all" : undefined;
+  const matchingStrategy: "all" | "last" | "frequency" | undefined = searchQuery
+    ? (service || keywords) && !company
+      ? "frequency"
+      : "all"
+    : undefined;
 
   const attrs = new Set<string>();
   if (company) attrs.add("name");
@@ -617,6 +813,8 @@ export async function meiliSearch(params: MeiliSearchParams): Promise<Biznesinfo
   // (Avoids extra network calls by not trying to classify logo tone.)
   const withLogo: MeiliCompanyDocument[] = [];
   const withoutLogo: MeiliCompanyDocument[] = [];
+  const withLogoFallback: MeiliCompanyDocument[] = [];
+  const withoutLogoFallback: MeiliCompanyDocument[] = [];
 
   const batchSize = Math.min(200, Math.max(50, limit * 10));
   let fetched = 0;
@@ -636,8 +834,14 @@ export async function meiliSearch(params: MeiliSearchParams): Promise<Biznesinfo
     if (!result.hits.length) break;
 
     for (const hit of result.hits) {
-      if (applyKeywordFilter && !matchesKeywordFilter(hit.keywords || [])) continue;
+      const hitKeywords = hit.keywords || [];
+      if (!matchesKeywordFilter(hitKeywords)) continue;
       const logo = (hit.logo_url || "").trim();
+      if (applyKeywordIntentGuard) {
+        if (logo) withLogoFallback.push(hit);
+        else withoutLogoFallback.push(hit);
+      }
+      if (applyKeywordIntentGuard && !matchesKeywordIntentGuards(hitKeywords, keywordIntentGuards)) continue;
       if (logo) withLogo.push(hit);
       else withoutLogo.push(hit);
       if (withLogo.length >= targetEnd) break;
@@ -651,12 +855,16 @@ export async function meiliSearch(params: MeiliSearchParams): Promise<Biznesinfo
     if (estimatedTotal && fetched >= estimatedTotal) break;
   }
 
-  const ordered =
-    withLogo.length >= targetEnd ? withLogo : [...withLogo, ...withoutLogo];
+  const orderedStrict = withLogo.length >= targetEnd ? withLogo : [...withLogo, ...withoutLogo];
+  const orderedFallback = withLogoFallback.length >= targetEnd ? withLogoFallback : [...withLogoFallback, ...withoutLogoFallback];
+  const useFallbackKeywordOrdering = applyKeywordIntentGuard && orderedStrict.length === 0 && orderedFallback.length > 0;
+  const ordered = useFallbackKeywordOrdering ? orderedFallback : orderedStrict;
   const page = ordered.slice(offset, targetEnd);
 
   let total = estimatedTotal;
-  if (applyKeywordFilter) {
+  const shouldRecountTotal = applyKeywordFilter || (applyKeywordIntentGuard && !useFallbackKeywordOrdering);
+  if (shouldRecountTotal) {
+    const totalPredicate = useFallbackKeywordOrdering ? matchesKeywordFilter : matchesStrictKeywordPredicates;
     if (estimatedTotal && fetched >= estimatedTotal) {
       total = ordered.length;
     } else if (estimatedTotal && estimatedTotal <= KEYWORD_FILTER_TOTAL_SCAN_LIMIT) {
@@ -666,7 +874,7 @@ export async function meiliSearch(params: MeiliSearchParams): Promise<Biznesinfo
         filter,
         attributesToSearchOn,
         matchingStrategy,
-        predicate: matchesKeywordFilter,
+        predicate: totalPredicate,
       });
     }
   }

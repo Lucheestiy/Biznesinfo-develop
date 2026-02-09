@@ -1,0 +1,584 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "source": "targeted-regression",
+      "description": "4 remaining fails"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T02-35-18-198Z",
+    "startedAt": "2026-02-08T02:35:18.198Z",
+    "endedAt": "2026-02-08T02:35:36.358Z",
+    "durationMs": 18160,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/scenarios.failed4.new.json",
+    "totalScenarios": 4,
+    "passedScenarios": 4,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 20,
+    "passedChecks": 20,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 4,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UXC058",
+      "title": "Банк C: Сравнение и выбор — запрос 58",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи тех, кто может выставить счет сегодня.",
+          "requestBody": {
+            "message": "Покажи тех, кто может выставить счет сегодня.",
+            "history": []
+          },
+          "latencyMs": 10448,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4d4965c2-7fbc-44b5-85e8-6a2ddea46510",
+          "isStub": false,
+          "reply": "Чтобы показать тех, кто сможет выставить счёт сегодня, мне нужно понять, по какому товару/услуге искать. Пока могу предложить общий подход:\n\n1. Уточнить рубрику и ключевые слова (например, автосервис, запчасти, строительство и т.д.).\n2. Отфильтровать по городу/области.\n3. В карточках компаний проверять наличие контактов/документооборота (телефон, e‑mail, безнал).\n\nУточните, пожалуйста:\n1) Что именно нужно (товар/услуга)?  \n2) Город/область?  \n3) Достаточно «готовы выставить счёт сегодня», или нужен ещё ЭДО/безнал с НДС?\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: Покажи тех, кто может выставить счет сегодня.",
+          "checks": [
+            {
+              "id": "UXC058.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC058.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC058.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "критер",
+                  "услов",
+                  "срок"
+                ]
+              }
+            },
+            {
+              "id": "UXC058.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC058.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 987
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 10449
+    },
+    {
+      "id": "UXC059",
+      "title": "Банк C: Сравнение и выбор — запрос 59",
+      "tags": [
+        "query_bank",
+        "comparison",
+        "ranking",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет сравнить варианты и принять решение по прозрачным критериям.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "У кого есть офис в Бресте, но склад в Минске?",
+          "requestBody": {
+            "message": "У кого есть офис в Бресте, но склад в Минске?",
+            "history": []
+          },
+          "latencyMs": 3674,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "11205b2a-4776-4078-8406-5af55cae9c2b",
+          "isStub": false,
+          "reply": "В текущем списке кандидатов нет компаний, у которых явно указан офис в Бресте и склад в Минске. Нужны уточнения, чтобы сузить поиск.\n\n1. Какой товар/услуга нужны (например: складские услуги, металлоконструкции, канцтовары и т. д.)?\n2. Нужен именно склад в Минске или подойдет логистический центр/складские услуги по Минской области?\n3. Есть ли предпочтения по отрасли или формату (производитель/дистрибьютор/логистический оператор)?\n\nС этими данными предложу конкретные варианты и рубрики для поиска.\n\nКритерии прозрачного ранжирования: релевантность профиля, надежность, риск срыва сроков, полнота контактов.\n\nКороткий прозрачный ranking (без выдумывания компаний):\n1. Приоритет A: точное совпадение услуги/товара + полный профиль контактов + подходящая локация.\n2. Приоритет B: смежная специализация + подтверждаемые сроки/условия + понятный договор.\n3. Приоритет C: неполные карточки (нужна дополнительная проверка до заказа).\nКритерии: релевантность, локация, полнота контактов, риски по срокам и качеству.\nФокус запроса: У кого есть офис в Бресте, но склад в Минске?",
+          "checks": [
+            {
+              "id": "UXC059.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXC059.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXC059.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме сравнения/выбора",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сравн",
+                  "топ",
+                  "рейтинг",
+                  "шорт",
+                  "short",
+                  "критер",
+                  "выбор",
+                  "услов",
+                  "гарант",
+                  "срок",
+                  "цен",
+                  "таблиц"
+                ],
+                "hits": [
+                  "критер",
+                  "услов",
+                  "срок",
+                  "цен"
+                ]
+              }
+            },
+            {
+              "id": "UXC059.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован (нумерация/табличный подход/компании)",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXC059.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 70,
+                "len": 1071
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3674
+    },
+    {
+      "id": "UXD069",
+      "title": "Банк D: Проверка контрагента и реквизиты — запрос 69",
+      "tags": [
+        "query_bank",
+        "counterparty_check",
+        "requisites",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро проверить контрагента, реквизиты и надежность данных для рабочих задач.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Какой юридический адрес?",
+          "requestBody": {
+            "message": "Какой юридический адрес?",
+            "history": []
+          },
+          "latencyMs": 2159,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "bf8199fc-bb11-48df-ac14-44c219dd03c3",
+          "isStub": false,
+          "reply": "Уточните, по какой компании нужен юридический адрес? Пришлите название или ID карточки из каталога.",
+          "checks": [
+            {
+              "id": "UXD069.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXD069.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXD069.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме контрагента/реквизитов/проверки данных",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "контрагент",
+                  "компан",
+                  "организац",
+                  "унп",
+                  "реквиз",
+                  "адрес",
+                  "руковод",
+                  "статус",
+                  "ликвидац",
+                  "окэд",
+                  "регистрац",
+                  "лиценз",
+                  "телефон",
+                  "источник",
+                  "обновля",
+                  "проверк",
+                  "данн",
+                  "уточнит",
+                  "идентификатор",
+                  "карточк"
+                ],
+                "hits": [
+                  "компан",
+                  "адрес",
+                  "уточнит",
+                  "карточк"
+                ]
+              }
+            },
+            {
+              "id": "UXD069.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован или содержать практичные следующие шаги",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": false,
+                    "reason": "Not enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXD069.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 99
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2160
+    },
+    {
+      "id": "UXE100",
+      "title": "Банк E: Размещение и редактирование компании — запрос 100",
+      "tags": [
+        "query_bank",
+        "company_placement",
+        "company_editing",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет разместить компанию или быстро внести изменения в карточку и понять правила/опции.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Можно ли оплатить по счету?",
+          "requestBody": {
+            "message": "Можно ли оплатить по счету?",
+            "history": []
+          },
+          "latencyMs": 1518,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "824c7001-225a-4cc8-95ee-064fc0ed63fd",
+          "isStub": false,
+          "reply": "По Biznesinfo это делается через страницу: /add-company.\nПошагово:\n1. Откройте /add-company и заполните обязательные поля компании и контактов.\n2. Выберите категорию/подкатегорию и регион, добавьте короткое описание деятельности.\n3. Отправьте форму и дождитесь модерации карточки.\nЧто подготовить заранее:\n1. Название компании, УНП/регистрационные данные.\n2. Адрес, телефон, e-mail, сайт/мессенджер.\n3. Рубрики (чем занимаетесь) и короткое описание 2-5 предложений.\nПо оплате: да, размещение/тариф можно оплатить по счету (для юрлиц).\nДля счета обычно нужны реквизиты компании и выбранный тариф.\nЕсли нужно, дам короткий шаблон заполнения полей под вашу компанию.",
+          "checks": [
+            {
+              "id": "UXE100.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXE100.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXE100.T1.C3",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме размещения/редактирования карточки компании",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "компан",
+                  "каталог",
+                  "карточк",
+                  "модерац",
+                  "подтвержд",
+                  "документ",
+                  "телефон",
+                  "адрес",
+                  "филиал",
+                  "прайс",
+                  "фото",
+                  "логотип",
+                  "категор",
+                  "скры",
+                  "удал",
+                  "дубл",
+                  "отклон",
+                  "акци",
+                  "скид",
+                  "выдач",
+                  "тариф",
+                  "счет",
+                  "договор",
+                  "реклам",
+                  "аккаунт",
+                  "доступ",
+                  "парол",
+                  "кабинет"
+                ],
+                "hits": [
+                  "компан",
+                  "карточк",
+                  "модерац",
+                  "телефон",
+                  "адрес",
+                  "категор",
+                  "тариф",
+                  "счет"
+                ]
+              }
+            },
+            {
+              "id": "UXE100.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен быть структурирован или давать понятные next steps",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "numbered_list_min",
+                    "passed": true,
+                    "reason": "Enough numbered items"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UXE100.T1.C5",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 55,
+                "len": 663
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 1519
+    }
+  ]
+}

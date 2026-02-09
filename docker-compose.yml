@@ -1,6 +1,22 @@
 name: biznesinfodeveloplucheestiycom
 
 services:
+  codex-auth-sync:
+    image: node:20-alpine
+    container_name: biznesinfo-develop-codex-auth-sync
+    restart: unless-stopped
+    command: ["node", "/sync/codex-auth-sync-loop.mjs"]
+    environment:
+      CODEX_AUTH_SYNC_INTERVAL_SEC: ${CODEX_AUTH_SYNC_INTERVAL_SEC:-60}
+      CODEX_AUTH_SYNC_SOURCE_DIR: /host-codex
+      CODEX_AUTH_SYNC_OUT_FILE: /repo-secrets/codex-auth.json
+    volumes:
+      - /root/.codex:/host-codex:ro
+      - ./app/scripts:/sync:ro
+      - ./secrets:/repo-secrets
+    networks:
+      - biznesinfo-network
+
   app:
     build:
       context: ./app
@@ -24,6 +40,8 @@ services:
       SMTP_URL: ${SMTP_URL:-}
       EMAIL_FROM: ${EMAIL_FROM:-no-reply@biznesinfo-develop.lucheestiy.com}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://biznesinfo-develop.lucheestiy.com}
+      AI_CHATS_DATABASE_URL: ${AI_CHATS_DATABASE_URL:-postgresql://${AI_CHATS_DB_USER:-show_ai}:${AI_CHATS_DB_PASSWORD:-show_ai_change_me}@ai-chats-postgres:5432/${AI_CHATS_DB_NAME:-show_ai_chats}}
+      SHOW_DATABASE_URL: ${SHOW_DATABASE_URL:-}
       AI_ASSISTANT_PROVIDER: ${AI_ASSISTANT_PROVIDER:-stub}
       CODEX_AUTH_JSON_PATH: ${CODEX_AUTH_JSON_PATH:-/run/secrets/codex_auth_json}
       CODEX_BASE_URL: ${CODEX_BASE_URL:-https://chatgpt.com/backend-api/codex}
@@ -35,6 +53,7 @@ services:
       OPENAI_MAX_TOKENS: ${OPENAI_MAX_TOKENS:-800}
     networks:
       - biznesinfo-network
+      - show-default-network
     volumes:
       - ./app/public/data/biznesinfo:/app/public/data/biznesinfo:ro
       - ./app/public/companies:/app/public/companies:ro
@@ -43,6 +62,7 @@ services:
     expose:
       - "3000"
     depends_on:
+      - codex-auth-sync
       - meilisearch
       - postgres
 
@@ -93,6 +113,9 @@ services:
 networks:
   biznesinfo-network:
     driver: bridge
+  show-default-network:
+    external: true
+    name: showlucheestiycom_default
 
 volumes:
   biznesinfo-develop-meilisearch-data:

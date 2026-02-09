@@ -1,0 +1,229 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "source": "manual",
+      "description": "Potato sourcing sanity"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-06T15-02-36-204Z",
+    "startedAt": "2026-02-06T15:02:36.204Z",
+    "endedAt": "2026-02-06T15:02:49.624Z",
+    "durationMs": 13420,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/ai-potato-scenario.json",
+    "totalScenarios": 1,
+    "passedScenarios": 0,
+    "failedScenarios": 1,
+    "passRate": 0,
+    "totalChecks": 5,
+    "passedChecks": 4,
+    "failedChecks": 1,
+    "checkPassRate": 0.8,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:excludes_all:P5",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "POTATO_VITEBSK_001",
+      "title": "Картошка в Витебске без нерелевантных карточек",
+      "tags": [
+        "regression",
+        "sourcing",
+        "geo",
+        "potato"
+      ],
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "P5",
+          "type": "excludes_all",
+          "description": null,
+          "passed": false,
+          "reason": "Forbidden patterns found",
+          "details": {
+            "patterns": [
+              "не по теме",
+              "автолайт",
+              "жалюзи",
+              "электрооборуд"
+            ],
+            "hits": [
+              "не по теме",
+              "автолайт",
+              "жалюзи",
+              "электрооборуд"
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну картошки в витебске?",
+          "requestBody": {
+            "message": "Где купить тонну картошки в витебске?",
+            "history": []
+          },
+          "latencyMs": 5522,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "66fd2280-a64b-44c8-8232-f54ae9939320",
+          "isStub": false,
+          "reply": "Для поиска тонны картофеля в Витебске в каталоге попробуйте:\n\n**Рубрики:**\n1. Овощи / Овощи оптом  \n2. Сельхозпродукция / Продукты питания оптом  \n3. Фермерские хозяйства / Сельхозпроизводители\n\n**Ключевые слова/синонимы:**\n- картофель оптом  \n- картошка оптом  \n- овощи оптом  \n- сельхозпродукция\n\n**Фильтры:**\n- Регион: Витебская область  \n- Город: Витебск\n\nЧтобы подобрать точнее, уточните, пожалуйста (до 3 вопросов):\n1) Нужен столовый или семенной картофель?  \n2) Требуется доставка по Витебску или самовывоз?  \n3) В какие сроки и по какой фасовке (мешки 25–30 кг, биг-бэги)?",
+          "checks": [
+            {
+              "id": "P1",
+              "type": "not_stub",
+              "description": null,
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "P2",
+              "type": "includes_any",
+              "description": null,
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "витеб",
+                  "Витеб"
+                ],
+                "hits": [
+                  "витеб",
+                  "Витеб"
+                ]
+              }
+            },
+            {
+              "id": "P3",
+              "type": "any_of",
+              "description": null,
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Любую картошку. Где купить?",
+          "requestBody": {
+            "message": "Любую картошку. Где купить?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну картошки в витебске?"
+              },
+              {
+                "role": "assistant",
+                "content": "Для поиска тонны картофеля в Витебске в каталоге попробуйте:\n\n**Рубрики:**\n1. Овощи / Овощи оптом  \n2. Сельхозпродукция / Продукты питания оптом  \n3. Фермерские хозяйства / Сельхозпроизводители\n\n**Ключевые слова/синонимы:**\n- картофель оптом  \n- картошка оптом  \n- овощи оптом  \n- сельхозпродукция\n\n**Фильтры:**\n- Регион: Витебская область  \n- Город: Витебск\n\nЧтобы подобрать точнее, уточните, пожалуйста (до 3 вопросов):\n1) Нужен столовый или семенной картофель?  \n2) Требуется доставка по Витебску или самовывоз?  \n3) В какие сроки и по какой фасовке (мешки 25–30 кг, биг-бэги)?"
+              }
+            ]
+          },
+          "latencyMs": 7596,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2a14aa35-f139-4132-93b5-2e8866430604",
+          "isStub": false,
+          "reply": "В доступном списке кандидатов **нет профильных поставщиков картофеля**. Ниже — компании из списка (не по теме), на случай если нужно связаться с каталогом/уточнить поиск:\n1. Артбат ООО — электрооборудование, Витебск — /company/artbat  \n2. Автолайтэкспресс ООО — курьерские услуги, Минск — /company/autolight  \n3. АКМА ГРУПП ООО — жалюзи, Минск — /company/acma  \n\nЧтобы найти продавцов картофеля в Витебске, используйте в каталоге:\n\n**Рубрики:**\n- Овощи / Овощи оптом  \n- Сельхозпродукция / Продукты питания оптом  \n- Фермерские хозяйства / Сельхозпроизводители  \n\n**Ключевые слова:**\n- картофель оптом  \n- картошка оптом  \n- овощи оптом  \n- сельхозпродукция  \n\n**Фильтры:**  \nГород: Витебск; Регион: Витебская область.\n\nЕсли хотите, помогу сформировать точный запрос или текст обращения к поставщикам.",
+          "checks": [
+            {
+              "id": "P4",
+              "type": "not_stub",
+              "description": null,
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "P5",
+              "type": "excludes_all",
+              "description": null,
+              "passed": false,
+              "reason": "Forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "не по теме",
+                  "автолайт",
+                  "жалюзи",
+                  "электрооборуд"
+                ],
+                "hits": [
+                  "не по теме",
+                  "автолайт",
+                  "жалюзи",
+                  "электрооборуд"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 13120
+    }
+  ]
+}

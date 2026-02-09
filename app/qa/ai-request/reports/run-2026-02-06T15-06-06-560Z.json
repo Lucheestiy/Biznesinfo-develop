@@ -1,0 +1,197 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "source": "manual",
+      "description": "Potato sourcing sanity"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-06T15-06-06-560Z",
+    "startedAt": "2026-02-06T15:06:06.560Z",
+    "endedAt": "2026-02-06T15:06:25.298Z",
+    "durationMs": 18738,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/ai-potato-scenario.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 5,
+    "passedChecks": 5,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 45,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "POTATO_VITEBSK_001",
+      "title": "Картошка в Витебске без нерелевантных карточек",
+      "tags": [
+        "regression",
+        "sourcing",
+        "geo",
+        "potato"
+      ],
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну картошки в витебске?",
+          "requestBody": {
+            "message": "Где купить тонну картошки в витебске?",
+            "history": []
+          },
+          "latencyMs": 12600,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "812b1560-900d-4daf-8892-cf0928fe9123",
+          "isStub": false,
+          "reply": "Варианты поставщиков в Витебске (из доступного списка):\n1. Беккер Бис ООО — семена/посадочный материал (возможен картофель для посадки, не товарный). /company/abekker\n\nЕсли вам нужен именно **продовольственный картофель оптом**, уточните, пожалуйста:\n1) Для каких целей: еда/переработка/посадочный?\n2) Нужна доставка по Витебску/области?\n3) Сорт/калибр/упаковка (мешки 25–30 кг или навалом)?\n\nПока можете искать по рубрикам/ключам:\n- Рубрики: «Овощи оптом», «Сельхозпродукция», «Овощебазы/плодоовощные базы».\n- Ключевые слова: картофель оптом, картошка оптом, овощи оптом, продовольственный картофель.",
+          "checks": [
+            {
+              "id": "P1",
+              "type": "not_stub",
+              "description": null,
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "P2",
+              "type": "includes_any",
+              "description": null,
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "витеб",
+                  "Витеб"
+                ],
+                "hits": [
+                  "витеб",
+                  "Витеб"
+                ]
+              }
+            },
+            {
+              "id": "P3",
+              "type": "any_of",
+              "description": null,
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Любую картошку. Где купить?",
+          "requestBody": {
+            "message": "Любую картошку. Где купить?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну картошки в витебске?"
+              },
+              {
+                "role": "assistant",
+                "content": "Варианты поставщиков в Витебске (из доступного списка):\n1. Беккер Бис ООО — семена/посадочный материал (возможен картофель для посадки, не товарный). /company/abekker\n\nЕсли вам нужен именно **продовольственный картофель оптом**, уточните, пожалуйста:\n1) Для каких целей: еда/переработка/посадочный?\n2) Нужна доставка по Витебску/области?\n3) Сорт/калибр/упаковка (мешки 25–30 кг или навалом)?\n\nПока можете искать по рубрикам/ключам:\n- Рубрики: «Овощи оптом», «Сельхозпродукция», «Овощебазы/плодоовощные базы».\n- Ключевые слова: картофель оптом, картошка оптом, овощи оптом, продовольственный картофель."
+              }
+            ]
+          },
+          "latencyMs": 5816,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "a32cc56f-c962-4ffe-ad6e-0d9c20a93766",
+          "isStub": false,
+          "reply": "Варианты поставщиков в Витебске (из доступного списка):\n1. **Беккер Бис ООО** — семена/посадочный материал (может быть картофель для посадки). /company/abekker\n\nЕсли подойдет **любой** (включая посадочный), можно писать им напрямую.  \nЧтобы быстрее найти **продовольственный** картофель на 1 тонну, посмотрите и свяжитесь через рубрикатор:\n- Рубрики: «Овощи оптом», «Сельхозпродукция», «Овощебазы/плодоовощные базы».\n- Ключевые слова: *картофель оптом*, *картошка оптом*, *овощи оптом*.\n- Фильтры: регион **Витебская область**, город **Витебск**.\n\nНужно ли вам **доставку** по Витебску/области и есть ли требования к **упаковке** (мешки/навалом)?",
+          "checks": [
+            {
+              "id": "P4",
+              "type": "not_stub",
+              "description": null,
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "P5",
+              "type": "excludes_all",
+              "description": null,
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "не по теме",
+                  "автолайт",
+                  "жалюзи",
+                  "электрооборуд"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 18417
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-08T18:55:00Z",
+    "source": "manual-regression",
+    "description": "Regression for announcement-style template requests (\"ищем подрядчика\")"
+  },
+  "scenarios": [
+    {
+      "id": "TA001",
+      "title": "Объявление: ищем подрядчика",
+      "personaGoal": "Пользователь просит готовый текст объявления для публикации и ожидает структурированный first-pass",
+      "tags": ["regression", "template", "announcement", "single_turn"],
+      "turns": [
+        {
+          "user": "Напиши объявление «ищем подрядчика» для публикации.",
+          "checks": [
+            { "id": "TA001.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "TA001.T1.C2", "type": "not_refusal_only", "description": "Ответ не должен быть пустым отказом" },
+            {
+              "id": "TA001.T1.C3",
+              "type": "includes_any",
+              "patterns": ["объявлен", "подрядчик", "шаблон", "пример", "публикац", "subject", "body", "whatsapp"],
+              "description": "Ответ должен быть по теме объявления/шаблона"
+            },
+            {
+              "id": "TA001.T1.C4",
+              "type": "any_of",
+              "description": "Ответ должен дать структуру текста или шаблонные блоки",
+              "checks": [
+                { "type": "template_blocks", "description": "Есть блоки Subject/Body/WhatsApp" },
+                { "type": "numbered_list_min", "min": 2, "description": "Есть структурированный список" },
+                {
+                  "type": "includes_any",
+                  "patterns": ["тема", "subject", "body", "шаблон", "вариант", "пример", "пункт", "уточни"],
+                  "description": "Есть явная структура/формат"
+                }
+              ]
+            },
+            { "id": "TA001.T1.C5", "type": "reply_length_min", "min": 70, "description": "Ответ должен быть содержательным" }
+          ]
+        }
+      ]
+    }
+  ]
+}

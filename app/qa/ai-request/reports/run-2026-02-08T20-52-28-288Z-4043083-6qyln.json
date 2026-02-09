@@ -1,0 +1,806 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-08T21:10:00Z",
+      "source": "manual-regression",
+      "description": "Regression checks for broken /company links in assistant replies."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T20-52-28-288Z-4043083-6qyln",
+    "startedAt": "2026-02-08T20:52:28.288Z",
+    "endedAt": "2026-02-08T20:52:58.681Z",
+    "durationMs": 30393,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.link-integrity.json",
+    "totalScenarios": 3,
+    "passedScenarios": 2,
+    "failedScenarios": 1,
+    "passRate": 0.6667,
+    "totalChecks": 18,
+    "passedChecks": 17,
+    "failedChecks": 1,
+    "checkPassRate": 0.9444,
+    "targetPassCount": 3,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:all_of:Need real phone number and card link.",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "LINK001",
+      "title": "Shortlist links should open: milk procurement in Brest",
+      "tags": [
+        "multi_turn",
+        "link_integrity",
+        "suppliers",
+        "milk"
+      ],
+      "personaGoal": "User wants real supplier links and phone follow-up without dead cards.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "LINK001.T2.C2",
+          "type": "all_of",
+          "description": "Need real phone number and card link.",
+          "passed": false,
+          "reason": "Some sub-checks failed",
+          "details": {
+            "sub": [
+              {
+                "type": "includes_any",
+                "passed": false,
+                "reason": "No required patterns matched"
+              },
+              {
+                "type": "includes_any",
+                "passed": true,
+                "reason": "Matched at least one pattern"
+              },
+              {
+                "type": "excludes_all",
+                "passed": true,
+                "reason": "No forbidden patterns found"
+              }
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну молока в Бресте? Дай 3 компании ссылками на карточки.",
+          "requestBody": {
+            "message": "Где купить тонну молока в Бресте? Дай 3 компании ссылками на карточки.",
+            "history": []
+          },
+          "latencyMs": 6339,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "681cdd4f-10d3-4d0f-bbb4-369d41b4a1fc",
+          "isStub": false,
+          "reply": "Вот 3 компании в Бресте из релевантных карточек каталога:\n\n1. **Савушкин продукт ОАО**  \n   Почему подходит: в карточке указано **«Производство молочной продукции»** (прямо по вашему запросу на молоко).  \n   Карточка: **/company/savushkin**\n\n2. **Брестское мороженое ОАО**  \n   Почему подходит: в профиле есть **молочная продукция** (сметана, творог, сыры и др.), можно уточнить возможность оптовой поставки молока/сырья.  \n   Карточка: **/company/brestmoroj**\n\n3. **ДАЛМИО ООО**  \n   Почему в списке: компания связана с **молочной отраслью**, но по карточке это **оборудование и реконструкция молокопредприятий**, не прямой продавец молока.  \n   Карточка: **/company/dalmio**\n\n⚠️ Важно: из доступных данных уверенно как поставщики молочной продукции подходят первые 2 компании; для 3-й — только как отраслевой контакт.  \nЕсли хотите, сразу дам короткий текст запроса (звонок/email) на закупку **1 т молока** с параметрами: жирность, упаковка, цена, доставка и срок.\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/savushkin",
+              "/company/brestmoroj",
+              "/company/dalmio"
+            ],
+            "probes": {
+              "/company/savushkin": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/brestmoroj": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/dalmio": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "checks": [
+            {
+              "id": "LINK001.T1.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "LINK001.T1.C2",
+              "type": "company_path_min_count",
+              "description": "Need at least 2 /company links.",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 2,
+                "count": 3
+              }
+            },
+            {
+              "id": "LINK001.T1.C3",
+              "type": "company_paths_resolve_min",
+              "description": "At least 2 /company links must resolve.",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 2,
+                "pathCount": 3,
+                "resolvedCount": 3,
+                "resolvedPaths": [
+                  "/company/savushkin",
+                  "/company/brestmoroj",
+                  "/company/dalmio"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/savushkin": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/brestmoroj": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/dalmio": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Дай телефон первой компании и продублируй ссылку на карточку.",
+          "requestBody": {
+            "message": "Дай телефон первой компании и продублируй ссылку на карточку.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте? Дай 3 компании ссылками на карточки."
+              },
+              {
+                "role": "assistant",
+                "content": "Вот 3 компании в Бресте из релевантных карточек каталога:\n\n1. **Савушкин продукт ОАО**  \n   Почему подходит: в карточке указано **«Производство молочной продукции»** (прямо по вашему запросу на молоко).  \n   Карточка: **/company/savushkin**\n\n2. **Брестское мороженое ОАО**  \n   Почему подходит: в профиле есть **молочная продукция** (сметана, творог, сыры и др.), можно уточнить возможность оптовой поставки молока/сырья.  \n   Карточка: **/company/brestmoroj**\n\n3. **ДАЛМИО ООО**  \n   Почему в списке: компания связана с **молочной отраслью**, но по карточке это **оборудование и реконструкция молокопредприятий**, не прямой продавец молока.  \n   Карточка: **/company/dalmio**\n\n⚠️ Важно: из доступных данных уверенно как поставщики молочной продукции подходят первые 2 компании; для 3-й — только как отраслевой контакт.  \nЕсли хотите, сразу дам короткий текст запроса (звонок/email) на закупку **1 т молока** с параметрами: жирность, упаковка, цена, доставка и срок.\n\nОфициальный реестр для проверки статуса: egr.gov.by."
+              }
+            ]
+          },
+          "latencyMs": 2615,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3f29ba4a-b0a8-4264-9865-b71ba9140b21",
+          "isStub": false,
+          "reply": "По первой компании (**Савушкин продукт ОАО**) у меня в текущем контексте нет надежно подтверждённого телефона — чтобы не ошибиться, лучше открыть карточку и взять номер оттуда.\n\nСсылка на карточку (дублирую): **/company/savushkin**\n\nЕсли хотите, подскажу, как быстро проверить и выбрать нужный контакт (отдел продаж/закупок) на карточке.\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/savushkin"
+            ],
+            "probes": {
+              "/company/savushkin": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "checks": [
+            {
+              "id": "LINK001.T2.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "LINK001.T2.C2",
+              "type": "all_of",
+              "description": "Need real phone number and card link.",
+              "passed": false,
+              "reason": "Some sub-checks failed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  },
+                  {
+                    "type": "excludes_all",
+                    "passed": true,
+                    "reason": "No forbidden patterns found"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "LINK001.T2.C3",
+              "type": "company_paths_resolve_min",
+              "description": "At least one provided card link must resolve.",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 1,
+                "pathCount": 1,
+                "resolvedCount": 1,
+                "resolvedPaths": [
+                  "/company/savushkin"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/savushkin": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 9020
+    },
+    {
+      "id": "LINK002",
+      "title": "Shortlist links should open: cleaning after renovation in Minsk",
+      "tags": [
+        "multi_turn",
+        "link_integrity",
+        "services",
+        "cleaning"
+      ],
+      "personaGoal": "User wants contractor cards that are actually reachable.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужна уборка после ремонта в Минске. Покажи 3 фирмы и ссылки на карточки.",
+          "requestBody": {
+            "message": "Нужна уборка после ремонта в Минске. Покажи 3 фирмы и ссылки на карточки.",
+            "history": []
+          },
+          "latencyMs": 5112,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ac25916b-2d8d-4065-9589-729e48ac2afb",
+          "isStub": false,
+          "reply": "Вот релевантные варианты по **уборке после ремонта в Минске** из доступных кандидатов:\n\n1. **БК-ИНВЕСТ ООО**  \n   Почему подходит: в описании прямо указана **послестроительная уборка помещений в Минске**.  \n   Карточка: **/company/cleanoff**\n\n2. **БэстКлининг ООО**  \n   Почему подходит: в перечне услуг есть **уборка после ремонта**, а также офисов/квартир и промобъектов.  \n   Карточка: **/company/bestcleaning**\n\nСильных кандидатов в текущем списке только **2 из 3**.  \nЧтобы добрать 3-ю фирму без потери релевантности, рекомендую в каталоге проверить рубрику:  \n**/catalog/biznes-uslugi-dlya-biznesa/professionalnaya-uborka** (фильтр: Минск).\n\nЕсли хотите, сразу дам короткий чек-лист, как выбрать между этими 2 (цена, сроки, вывоз мусора, химия, гарантия).\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/cleanoff",
+              "/company/bestcleaning"
+            ],
+            "probes": {
+              "/company/cleanoff": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/bestcleaning": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "checks": [
+            {
+              "id": "LINK002.T1.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "LINK002.T1.C2",
+              "type": "company_path_min_count",
+              "description": "Need at least 1 /company link.",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 1,
+                "count": 2
+              }
+            },
+            {
+              "id": "LINK002.T1.C3",
+              "type": "company_paths_resolve_min",
+              "description": "At least 1 /company link must resolve.",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 1,
+                "pathCount": 2,
+                "resolvedCount": 2,
+                "resolvedPaths": [
+                  "/company/cleanoff",
+                  "/company/bestcleaning"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/cleanoff": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/bestcleaning": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Повтори лучшую компанию и ссылку на карточку, чтобы я сразу открыл.",
+          "requestBody": {
+            "message": "Повтори лучшую компанию и ссылку на карточку, чтобы я сразу открыл.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужна уборка после ремонта в Минске. Покажи 3 фирмы и ссылки на карточки."
+              },
+              {
+                "role": "assistant",
+                "content": "Вот релевантные варианты по **уборке после ремонта в Минске** из доступных кандидатов:\n\n1. **БК-ИНВЕСТ ООО**  \n   Почему подходит: в описании прямо указана **послестроительная уборка помещений в Минске**.  \n   Карточка: **/company/cleanoff**\n\n2. **БэстКлининг ООО**  \n   Почему подходит: в перечне услуг есть **уборка после ремонта**, а также офисов/квартир и промобъектов.  \n   Карточка: **/company/bestcleaning**\n\nСильных кандидатов в текущем списке только **2 из 3**.  \nЧтобы добрать 3-ю фирму без потери релевантности, рекомендую в каталоге проверить рубрику:  \n**/catalog/biznes-uslugi-dlya-biznesa/professionalnaya-uborka** (фильтр: Минск).\n\nЕсли хотите, сразу дам короткий чек-лист, как выбрать между этими 2 (цена, сроки, вывоз мусора, химия, гарантия).\n\nОфициальный реестр для проверки статуса: egr.gov.by."
+              }
+            ]
+          },
+          "latencyMs": 1993,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "9cf5d834-8cf5-4bb4-bef2-f524f3fd124b",
+          "isStub": false,
+          "reply": "Лучшая по релевантности под ваш запрос:\n\n**БК-ИНВЕСТ ООО** — карточка: **/company/cleanoff**\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/cleanoff"
+            ],
+            "probes": {
+              "/company/cleanoff": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "checks": [
+            {
+              "id": "LINK002.T2.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "LINK002.T2.C2",
+              "type": "company_path_min_count",
+              "description": "Need at least 1 /company link.",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 1,
+                "count": 1
+              }
+            },
+            {
+              "id": "LINK002.T2.C3",
+              "type": "company_paths_resolve_min",
+              "description": "At least 1 /company link must resolve.",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 1,
+                "pathCount": 1,
+                "resolvedCount": 1,
+                "resolvedPaths": [
+                  "/company/cleanoff"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/cleanoff": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 7134
+    },
+    {
+      "id": "LINK003",
+      "title": "Fuzzy lookup links should open",
+      "tags": [
+        "multi_turn",
+        "link_integrity",
+        "company_lookup",
+        "fuzzy"
+      ],
+      "personaGoal": "User asks fuzzy company lookup and expects working card links.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Компания вроде Бел...Транс...Сервис, Брест. Дай варианты со ссылками карточек.",
+          "requestBody": {
+            "message": "Компания вроде Бел...Транс...Сервис, Брест. Дай варианты со ссылками карточек.",
+            "history": []
+          },
+          "latencyMs": 6403,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "66de65e2-3979-481a-ac70-41e51539bd4b",
+          "isStub": false,
+          "reply": "Понял, ищем в Бресте что-то в духе **«Бел…Транс…Сервис»**.  \nПо текущему срезу у меня есть такие **наиболее близкие варианты в Бресте** (с ссылками на карточки):\n\n1. **БелАВТОномия ООО** — автосервис/обслуживание транспорта, профиль по автоуслугам близок к запросу “...транс/сервис”.  \n   Карточка: **/company/belavtonomiya**\n\n2. **Бреставтодор РУП** — дорожно‑транспортная эксплуатация и профильные транспортные работы.  \n   Карточка: **/company/brestavtodor**\n\n3. **Агропромтехсервис ООО** — ремонт и обслуживание техники (в т.ч. спецтехники), сервисный формат.  \n   Карточка: **/company/apts**\n\n⚠️ Прямого точного совпадения по названию **«Бел…Транс…Сервис»** в этом наборе не видно, поэтому это shortlist по релевантности (название/профиль/город).  \nЧтобы точнее добить нужную компанию, дайте 1–2 уточнения:  \n- помните кусок названия (например, “Белтранссервис”, “Белтранском”, и т.п.)?  \n- это грузоперевозки, экспедирование, СТО или аренда транспорта?",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/belavtonomiya",
+              "/company/brestavtodor",
+              "/company/apts"
+            ],
+            "probes": {
+              "/company/belavtonomiya": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/brestavtodor": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/apts": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "checks": [
+            {
+              "id": "LINK003.T1.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "LINK003.T1.C2",
+              "type": "company_path_min_count",
+              "description": "Need at least 1 /company link.",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 1,
+                "count": 3
+              }
+            },
+            {
+              "id": "LINK003.T1.C3",
+              "type": "company_paths_resolve_min",
+              "description": "At least 1 /company link must resolve.",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 1,
+                "pathCount": 3,
+                "resolvedCount": 3,
+                "resolvedPaths": [
+                  "/company/belavtonomiya",
+                  "/company/brestavtodor",
+                  "/company/apts"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/belavtonomiya": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/brestavtodor": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/apts": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Покажи чем отличаются и оставь ссылки, куда перейти.",
+          "requestBody": {
+            "message": "Покажи чем отличаются и оставь ссылки, куда перейти.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Компания вроде Бел...Транс...Сервис, Брест. Дай варианты со ссылками карточек."
+              },
+              {
+                "role": "assistant",
+                "content": "Понял, ищем в Бресте что-то в духе **«Бел…Транс…Сервис»**.  \nПо текущему срезу у меня есть такие **наиболее близкие варианты в Бресте** (с ссылками на карточки):\n\n1. **БелАВТОномия ООО** — автосервис/обслуживание транспорта, профиль по автоуслугам близок к запросу “...транс/сервис”.  \n   Карточка: **/company/belavtonomiya**\n\n2. **Бреставтодор РУП** — дорожно‑транспортная эксплуатация и профильные транспортные работы.  \n   Карточка: **/company/brestavtodor**\n\n3. **Агропромтехсервис ООО** — ремонт и обслуживание техники (в т.ч. спецтехники), сервисный формат.  \n   Карточка: **/company/apts**\n\n⚠️ Прямого точного совпадения по названию **«Бел…Транс…Сервис»** в этом наборе не видно, поэтому это shortlist по релевантности (название/профиль/город).  \nЧтобы точнее добить нужную компанию, дайте 1–2 уточнения:  \n- помните кусок названия (например, “Белтранссервис”, “Белтранском”, и т.п.)?  \n- это грузоперевозки, экспедирование, СТО или аренда транспорта?"
+              }
+            ]
+          },
+          "latencyMs": 7479,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "171bbdac-098a-4057-a77c-993838d88045",
+          "isStub": false,
+          "reply": "Ниже кратко по различиям, чтобы быстро выбрать, куда переходить:\n\n1. **БелАВТОномия ООО**  \n   - **Чем отличается:** больше про **автосервис/обслуживание авто**, а не классические грузоперевозки.  \n   - **Когда выбирать:** если нужен ремонт, ТО, сервис по транспорту.  \n   - Ссылка: **/company/belavtonomiya**\n\n2. **Бреставтодор РУП**  \n   - **Чем отличается:** профиль ближе к **дорожно‑эксплуатационным и инфраструктурным работам** (гос/крупный оператор).  \n   - **Когда выбирать:** если интересуют дорожные/спецработы, а не обычная коммерческая логистика.  \n   - Ссылка: **/company/brestavtodor**\n\n3. **Агропромтехсервис ООО**  \n   - **Чем отличается:** акцент на **ремонт/обслуживание техники и оборудования** (в т.ч. спецтехника).  \n   - **Когда выбирать:** если нужен именно технический сервис, а не транспортная компания-перевозчик.  \n   - Ссылка: **/company/apts**\n\nЕсли цель — именно компания формата **«Бел…Транс…Сервис»** как перевозчик/экспедитор, эти 3 могут быть только “рядом по смыслу”. Могу дать следующий точный набор под Брест по ключам: **белтранс, транссервис, грузоперевозки, экспедирование**.",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/belavtonomiya",
+              "/company/brestavtodor",
+              "/company/apts"
+            ],
+            "probes": {
+              "/company/belavtonomiya": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/brestavtodor": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/apts": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "checks": [
+            {
+              "id": "LINK003.T2.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "LINK003.T2.C2",
+              "type": "company_path_min_count",
+              "description": "Need at least 1 /company link.",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 1,
+                "count": 3
+              }
+            },
+            {
+              "id": "LINK003.T2.C3",
+              "type": "company_paths_resolve_min",
+              "description": "At least 1 /company link must resolve.",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 1,
+                "pathCount": 3,
+                "resolvedCount": 3,
+                "resolvedPaths": [
+                  "/company/belavtonomiya",
+                  "/company/brestavtodor",
+                  "/company/apts"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/belavtonomiya": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/brestavtodor": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/apts": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 13924
+    }
+  ]
+}

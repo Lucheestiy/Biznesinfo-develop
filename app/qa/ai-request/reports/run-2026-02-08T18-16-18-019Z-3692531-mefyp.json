@@ -1,0 +1,342 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-08T18:20:00Z",
+      "source": "manual-regression",
+      "description": "Regression for explicit negative constraints in sourcing queries (не/без/кроме)"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1500,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T18-16-18-019Z-3692531-mefyp",
+    "startedAt": "2026-02-08T18:16:18.019Z",
+    "endedAt": "2026-02-08T18:16:48.156Z",
+    "durationMs": 30137,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.negation-exclude.json",
+    "totalScenarios": 3,
+    "passedScenarios": 2,
+    "failedScenarios": 1,
+    "passRate": 0.6667,
+    "totalChecks": 9,
+    "passedChecks": 8,
+    "failedChecks": 1,
+    "checkPassRate": 0.8889,
+    "targetPassCount": 3,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:excludes_all:Не должен делать клининг целевой выдачей",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "NE001",
+      "title": "Молоко + явное исключение автозапчастей",
+      "tags": [
+        "regression",
+        "negation",
+        "cross_domain",
+        "milk",
+        "single_turn"
+      ],
+      "personaGoal": "Пользователь сразу задает негативный фильтр и ждет релевантный first-pass",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики молока в Бресте, не автозапчасти",
+          "requestBody": {
+            "message": "Нужны поставщики молока в Бресте, не автозапчасти",
+            "history": []
+          },
+          "latencyMs": 14227,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "7d2171b4-bf14-4a44-b3a3-611e20fd11e2",
+          "isStub": false,
+          "reply": "Под Брест и именно по **молочной тематике** из доступных кандидатов подходят:\n\n1. **Брестское мороженое ОАО**  \n   - Почему подходит: в карточке прямо указаны молочные продукты — *сметана, творог, сыры, сырки, мороженое* (молочная промышленность).  \n   - Путь: **/company/brestmoroj**\n\n2. **Управляющая компания холдинга Концерн Брестмясомолпром ГО**  \n   - Почему подходит: в описании указано объединение предприятий, включая **переработку молока**.  \n   - Путь: **/company/brestmmp**\n\nСильных точных кандидатов по вашему запросу в текущем срезе только 2 (автозапчасти исключены, как вы и просили).\n\nЧтобы быстро добрать больше поставщиков в каталоге, ищите по рубрикам/ключам:\n- Рубрики: **Пищевая промышленность**, **Молочная промышленность**  \n- Ключи: **«молоко оптом»**, **«молочная продукция»**, **«переработка молока»**, **«молочный завод»**  \n- Фильтр: **город Брест / регион Brest**\n\nЕсли хотите, сразу подготовлю короткий шаблон запроса поставщику (email + WhatsApp) для рассылки в 1 клик.",
+          "checks": [
+            {
+              "id": "NE001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "NE001.T1.C2",
+              "type": "includes_any",
+              "description": "Должен сохранить молочную тему и гео",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "молок",
+                  "брест"
+                ],
+                "hits": [
+                  "молок",
+                  "брест"
+                ]
+              }
+            },
+            {
+              "id": "NE001.T1.C3",
+              "type": "excludes_all",
+              "description": "Не должен скатываться в автозапчасти как целевую выдачу",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "фокус:\\s*\\*\\*запчаст",
+                  "запчасти\\s+в\\s+минске",
+                  "/company/avto",
+                  "/company/up-18",
+                  "/company/avtostim"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 14228
+    },
+    {
+      "id": "NE002",
+      "title": "Автозапчасти + явное исключение клининга",
+      "tags": [
+        "regression",
+        "negation",
+        "cross_domain",
+        "auto",
+        "single_turn"
+      ],
+      "personaGoal": "Пользователь ищет автозапчасти, явно запрещая клининг",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "NE002.T1.C3",
+          "type": "excludes_all",
+          "description": "Не должен делать клининг целевой выдачей",
+          "passed": false,
+          "reason": "Forbidden patterns found",
+          "details": {
+            "patterns": [
+              "фокус:\\s*\\*\\*клининг",
+              "уборка\\s+после\\s+ремонта",
+              "/company/clean",
+              "/company/ubork"
+            ],
+            "hits": [
+              "/company/clean"
+            ]
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Ищу автозапчасти в Минске, не клининг и не уборка",
+          "requestBody": {
+            "message": "Ищу автозапчасти в Минске, не клининг и не уборка",
+            "history": []
+          },
+          "latencyMs": 8538,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "fec7b7bc-471c-4685-a99d-b0fd0777ca49",
+          "isStub": false,
+          "reply": "Понял. По текущему списку кандидатов у меня **только клининговые компании**, они не подходят под ваш запрос автозапчастей.\n\nЧто сделать сразу, чтобы найти релевантных поставщиков в Biznesinfo (Минск):\n\n1. Рубрика  \n   **Автомобильная техника, услуги, транспорт → Автозапчасти и принадлежности**  \n   `/catalog/avtomobilnaya-tehnika-uslugi-transport/avtozapchasti-i-prinadlejnosti`\n\n2. Фильтр по локации  \n   **Город: Минск** (или регион minsk).\n\n3. Поисковые запросы (по очереди)  \n   - автозапчасти Минск  \n   - запчасти для иномарок Минск  \n   - запчасти для грузовых авто Минск  \n   - контрактные запчасти Минск  \n   - авторазборка Минск  \n   - оригинальные запчасти / аналоги Минск\n\n4. Минус-слова для отсечения нерелевантного  \n   - клининг  \n   - уборка  \n   - чистка\n\nЕсли хотите, я сразу подготовлю для вас:\n- короткий чек-лист отбора поставщиков (по наличию, срокам, гарантии, НДС/документам),  \n- и шаблон запроса поставщику (RFQ) для рассылки в 1 клик.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n1. Аклини ООО — /company/aklini (Профессиональная уборка; Минск, minsk)\n2. Антония ИЧСУП — /company/antonia (Профессиональная уборка; Минск, minsk)\n3. Аталиан ОДО — /company/atalian (Профессиональная уборка; Минск, minsk)\n4. БК-ИНВЕСТ ООО — /company/cleanoff (Профессиональная уборка; Минск, minsk)",
+          "checks": [
+            {
+              "id": "NE002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "NE002.T1.C2",
+              "type": "includes_any",
+              "description": "Должен сохранить авто-тему и гео",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "запчаст",
+                  "авто",
+                  "минск"
+                ],
+                "hits": [
+                  "запчаст",
+                  "авто",
+                  "минск"
+                ]
+              }
+            },
+            {
+              "id": "NE002.T1.C3",
+              "type": "excludes_all",
+              "description": "Не должен делать клининг целевой выдачей",
+              "passed": false,
+              "reason": "Forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "фокус:\\s*\\*\\*клининг",
+                  "уборка\\s+после\\s+ремонта",
+                  "/company/clean",
+                  "/company/ubork"
+                ],
+                "hits": [
+                  "/company/clean"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 8538
+    },
+    {
+      "id": "NE003",
+      "title": "Клининг + явное исключение автозапчастей",
+      "tags": [
+        "regression",
+        "negation",
+        "cross_domain",
+        "cleaning",
+        "single_turn"
+      ],
+      "personaGoal": "Пользователь ищет клининг и отсекает авто-домен заранее",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужна уборка после ремонта в Минске, без автозапчастей",
+          "requestBody": {
+            "message": "Нужна уборка после ремонта в Минске, без автозапчастей",
+            "history": []
+          },
+          "latencyMs": 6997,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "cc5e8c4c-80a3-482e-8467-b229d6783a71",
+          "isStub": false,
+          "reply": "Вот релевантные варианты **по уборке после ремонта в Минске** (без автозапчастей):\n\n1. **БК-ИНВЕСТ ООО** — /company/cleanoff  \n   Почему подходит: в описании прямо указана **послестроительная уборка в Минске**.\n\n2. **БэстКлининг ООО** — /company/bestcleaning  \n   Почему подходит: прямо указана **уборка после ремонта**, плюс квартиры/офисы/промобъекты.\n\n3. **Аталиан ОДО** — /company/atalian  \n   Почему подходит: комплексные клининговые услуги и обслуживание объектов/территорий.\n\n4. **Антония ИЧСУП** — /company/antonia  \n   Почему подходит: клининговая компания в Минске (нужно уточнить именно формат post-renovation).\n\n5. **Аклини ООО** — /company/aklini  \n   Почему подходит: профессиональная уборка помещений и территорий (уточнить специализацию на уборке после ремонта).\n\n**Не включал** нерелевантные категории (например, автозапчасти и благоустройство).\n\nДля быстрого поиска в каталоге используйте рубрику:  \n**Профессиональная уборка** → `/catalog/biznes-uslugi-dlya-biznesa/professionalnaya-uborka`  \nФильтр: **город Минск**.\n\nЕсли хотите, подготовлю короткий текст запроса (RFQ) для отправки сразу 3–5 компаниям, чтобы сравнить цену, сроки и что входит в уборку.",
+          "checks": [
+            {
+              "id": "NE003.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "NE003.T1.C2",
+              "type": "includes_any",
+              "description": "Должен сохранить тему клининга и гео",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "уборк",
+                  "клининг",
+                  "минск"
+                ],
+                "hits": [
+                  "уборк",
+                  "клининг",
+                  "минск"
+                ]
+              }
+            },
+            {
+              "id": "NE003.T1.C3",
+              "type": "excludes_all",
+              "description": "Не должен делать авто-домен целевой выдачей",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "фокус:\\s*\\*\\*запчаст",
+                  "запчасти\\s+в\\s+минске",
+                  "/company/avto",
+                  "/company/avtostim"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 6998
+    }
+  ]
+}

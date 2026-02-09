@@ -16,6 +16,9 @@ type AssistantMessage = {
   role: "user" | "assistant";
   content: string;
   requestId?: string;
+  localFallbackUsed?: boolean;
+  fallbackNotice?: string | null;
+  provider?: string | null;
   feedback?: AssistantFeedback | null;
 };
 
@@ -36,6 +39,65 @@ type AssistantSuggestionChip = {
   label: string;
   prompt: string;
 };
+
+const ASSISTANT_CHAT_STATE_KEY_PREFIX = "biznesinfo:assistant:chat:v1";
+const ASSISTANT_STORED_MESSAGES_LIMIT = 60;
+
+type PersistedAssistantChatState = {
+  conversationId: string | null;
+  draft: string;
+  messages: AssistantMessage[];
+  savedAt: string;
+};
+
+function sanitizeStoredAssistantMessages(input: unknown): AssistantMessage[] {
+  if (!Array.isArray(input)) return [];
+
+  const out: AssistantMessage[] = [];
+  for (let i = 0; i < input.length; i += 1) {
+    const item = input[i];
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+
+    const roleRaw = (item as any).role;
+    const role = roleRaw === "assistant" ? "assistant" : (roleRaw === "user" ? "user" : null);
+    if (!role) continue;
+
+    const content = typeof (item as any).content === "string" ? (item as any).content : "";
+    if (!content.trim()) continue;
+
+    const idRaw = typeof (item as any).id === "string" ? (item as any).id.trim() : "";
+    const requestId = typeof (item as any).requestId === "string" ? (item as any).requestId : undefined;
+    const fallbackNotice = typeof (item as any).fallbackNotice === "string" ? (item as any).fallbackNotice : null;
+    const provider = typeof (item as any).provider === "string" ? (item as any).provider : null;
+    const localFallbackUsed = Boolean((item as any).localFallbackUsed);
+
+    let feedback: AssistantFeedback | null = null;
+    if ((item as any).feedback && typeof (item as any).feedback === "object" && !Array.isArray((item as any).feedback)) {
+      const ratingRaw = (item as any).feedback.rating;
+      const createdAtRaw = (item as any).feedback.createdAt;
+      if ((ratingRaw === "up" || ratingRaw === "down") && typeof createdAtRaw === "string" && createdAtRaw) {
+        feedback = {
+          rating: ratingRaw,
+          reason: typeof (item as any).feedback.reason === "string" ? (item as any).feedback.reason : null,
+          createdAt: createdAtRaw,
+        };
+      }
+    }
+
+    out.push({
+      id: idRaw || `restored-${role}-${i}`,
+      role,
+      content,
+      requestId,
+      localFallbackUsed,
+      fallbackNotice,
+      provider,
+      feedback,
+    });
+  }
+
+  return out.slice(-ASSISTANT_STORED_MESSAGES_LIMIT);
+}
 
 function formatPlanLabel(plan: UserPlan): string {
   if (plan === "free") return "Free";
@@ -89,6 +151,8 @@ export default function AssistantClient({
   const [streamingReplyId, setStreamingReplyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<{ used: number; limit: number; day: string } | null>(initialUsage ?? null);
+  const [quotaResetting, setQuotaResetting] = useState(false);
+  const [quotaResetMessage, setQuotaResetMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState<{ id: string; kind: AssistantCopyKind } | null>(null);
   const [openActionsId, setOpenActionsId] = useState<string | null>(null);
   const [feedbackOpenId, setFeedbackOpenId] = useState<string | null>(null);
@@ -101,8 +165,10 @@ export default function AssistantClient({
     deadline: "",
     notes: "",
   });
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [shortlistCompanies, setShortlistCompanies] = useState<BiznesinfoCompanySummary[]>([]);
   const [shortlistCompaniesLoading, setShortlistCompaniesLoading] = useState(false);
+  const [chatStateReady, setChatStateReady] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
@@ -112,6 +178,10 @@ export default function AssistantClient({
   const canChat = user.plan === "paid" || user.plan === "partner";
   const planLabel = useMemo(() => formatPlanLabel(user.plan), [user.plan]);
   const chatCopyMarkerId = "__chat_conversation__";
+  const chatStorageKey = useMemo(
+    () => `${ASSISTANT_CHAT_STATE_KEY_PREFIX}:${String(user.email || "").trim().toLowerCase()}`,
+    [user.email],
+  );
 
   const companyContext = useMemo(() => {
     const companyId = companyIdFromUrl || null;
@@ -155,6 +225,63 @@ export default function AssistantClient({
   });
 
   const [messages, setMessages] = useState<AssistantMessage[]>(() => [buildIntroMessage()]);
+
+  useEffect(() => {
+    setChatStateReady(false);
+    try {
+      const raw = window.sessionStorage.getItem(chatStorageKey);
+      if (raw) {
+        const parsed: PersistedAssistantChatState = JSON.parse(raw);
+        const restoredMessages = sanitizeStoredAssistantMessages(parsed?.messages);
+        const restoredConversationId =
+          typeof parsed?.conversationId === "string" && parsed.conversationId.trim() ? parsed.conversationId.trim() : null;
+        const restoredDraft = typeof parsed?.draft === "string" ? parsed.draft : "";
+
+        if (restoredMessages.length > 0 || restoredConversationId || restoredDraft.trim()) {
+          setMessages([buildIntroMessage(), ...restoredMessages]);
+          setConversationId(restoredConversationId);
+          setDraft(restoredDraft);
+          prefillAppliedRef.current = Boolean(restoredDraft.trim());
+          setChatStateReady(true);
+          return;
+        }
+      }
+    } catch {
+      // ignore storage parse/read errors and fall back to fresh chat state
+    }
+
+    setMessages([buildIntroMessage()]);
+    setConversationId(null);
+    if (companyPrefillPrompt) {
+      setDraft(companyPrefillPrompt);
+      prefillAppliedRef.current = true;
+    } else {
+      setDraft("");
+      prefillAppliedRef.current = false;
+    }
+    setChatStateReady(true);
+  }, [chatStorageKey]);
+
+  useEffect(() => {
+    if (!chatStateReady) return;
+    try {
+      const persistedMessages = messages.filter((m) => m.id !== "intro").slice(-ASSISTANT_STORED_MESSAGES_LIMIT);
+      const payload: PersistedAssistantChatState = {
+        conversationId: conversationId || null,
+        draft: draft || "",
+        messages: persistedMessages,
+        savedAt: new Date().toISOString(),
+      };
+      if (persistedMessages.length === 0 && !payload.conversationId && !payload.draft.trim()) {
+        window.sessionStorage.removeItem(chatStorageKey);
+        return;
+      }
+      window.sessionStorage.setItem(chatStorageKey, JSON.stringify(payload));
+    } catch {
+      // ignore storage write errors
+    }
+  }, [chatStateReady, chatStorageKey, messages, conversationId, draft]);
+
   const suggestionChips = useMemo<AssistantSuggestionChip[]>(() => {
     const promptOr = (key: string, fallback: string): string => {
       const v = t(key);
@@ -237,6 +364,7 @@ export default function AssistantClient({
   const showSuggestionChips = canChat && messages.length <= 1 && (!draft.trim() || draft.trim() === (companyPrefillPrompt || "").trim());
 
   useEffect(() => {
+    if (!chatStateReady) return;
     if (prefillAppliedRef.current) return;
     if (!companyPrefillPrompt) return;
 
@@ -246,7 +374,7 @@ export default function AssistantClient({
     });
 
     prefillAppliedRef.current = true;
-  }, [companyPrefillPrompt]);
+  }, [chatStateReady, companyPrefillPrompt]);
 
   useEffect(() => {
     if (shortlistCompanyIds.length === 0) {
@@ -312,7 +440,14 @@ export default function AssistantClient({
     setOpenActionsId(null);
     setFeedbackOpenId(null);
     setFeedbackSendingId(null);
+    setQuotaResetMessage(null);
     setRfqOpen(false);
+    setConversationId(null);
+    try {
+      window.sessionStorage.removeItem(chatStorageKey);
+    } catch {
+      // ignore storage write errors
+    }
     if (copiedTimeoutRef.current) window.clearTimeout(copiedTimeoutRef.current);
     setMessages([buildIntroMessage()]);
 
@@ -325,6 +460,36 @@ export default function AssistantClient({
     }
 
     setTimeout(() => draftRef.current?.focus(), 0);
+  };
+
+  const resetPromptCounter = async () => {
+    if (quotaResetting) return;
+
+    setQuotaResetting(true);
+    setQuotaResetMessage(null);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/reset-usage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setError(data?.message || data?.error || (t("common.error") || "Ошибка"));
+        return;
+      }
+
+      const day = typeof data?.day === "string" && data.day ? data.day : (quota?.day || new Date().toISOString().slice(0, 10));
+      const used = typeof data?.used === "number" ? Math.max(0, Math.floor(data.used)) : 0;
+      const limit = typeof data?.limit === "number" ? Math.max(0, Math.floor(data.limit)) : user.aiRequestsPerDay;
+      setQuota({ day, used, limit });
+      setQuotaResetMessage(t("ai.resetCounterDone") || "Счётчик запросов сброшен.");
+    } catch {
+      setError(t("common.networkError") || "Ошибка сети");
+    } finally {
+      setQuotaResetting(false);
+    }
   };
 
   const extractEmailParts = (text: string): {
@@ -701,6 +866,7 @@ export default function AssistantClient({
 
     setDraft("");
     setError(null);
+    setQuotaResetMessage(null);
     setSending(true);
     setStreamingReplyId(null);
     const userMessage: AssistantMessage = { id: crypto.randomUUID(), role: "user", content: text };
@@ -720,6 +886,7 @@ export default function AssistantClient({
         history,
         payload,
       };
+      if (conversationId) requestBody.conversationId = conversationId;
       if (companyContext?.companyId) requestBody.companyId = companyContext.companyId;
       if (shortlistCompanyIds.length > 0) requestBody.companyIds = shortlistCompanyIds;
 
@@ -776,6 +943,9 @@ export default function AssistantClient({
       const assistantMessageId = crypto.randomUUID();
       let assistantText = "";
       let requestId: string | undefined;
+      let localFallbackUsed = false;
+      let fallbackNotice: string | null = null;
+      let provider: string | null = null;
       let done = false;
 
       const addAssistantIfNeeded = () => {
@@ -787,6 +957,9 @@ export default function AssistantClient({
           role: "assistant",
           content: assistantText || (t("common.loading") || "Загрузка..."),
           requestId,
+          localFallbackUsed,
+          fallbackNotice,
+          provider,
           feedback: null,
         };
         setMessages((prev) => [...prev, assistantMessage]);
@@ -800,7 +973,14 @@ export default function AssistantClient({
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMessageId
-              ? { ...m, content: assistantText || (t("common.loading") || "Загрузка..."), requestId: requestId ?? m.requestId }
+              ? {
+                  ...m,
+                  content: assistantText || (t("common.loading") || "Загрузка..."),
+                  requestId: requestId ?? m.requestId,
+                  localFallbackUsed: localFallbackUsed || m.localFallbackUsed || false,
+                  fallbackNotice: fallbackNotice ?? m.fallbackNotice ?? null,
+                  provider: provider ?? m.provider ?? null,
+                }
               : m,
           ),
         );
@@ -841,6 +1021,7 @@ export default function AssistantClient({
 
           if (eventName === "meta") {
             if (typeof data?.requestId === "string") requestId = data.requestId;
+            if (typeof data?.conversationId === "string" && data.conversationId) setConversationId(data.conversationId);
             continue;
           }
 
@@ -866,8 +1047,12 @@ export default function AssistantClient({
               setQuota({ used: data.used, limit: data.limit, day: data.day });
             }
             if (typeof data?.requestId === "string") requestId = data.requestId;
+            if (typeof data?.conversationId === "string" && data.conversationId) setConversationId(data.conversationId);
             const finalText = typeof data?.reply?.text === "string" ? data.reply.text : "";
             if (finalText) assistantText = finalText;
+            localFallbackUsed = Boolean(data?.reply?.localFallbackUsed);
+            fallbackNotice = typeof data?.reply?.fallbackNotice === "string" ? data.reply.fallbackNotice : null;
+            provider = typeof data?.reply?.provider === "string" ? data.reply.provider : null;
             updateAssistant();
             break;
           }
@@ -925,13 +1110,13 @@ export default function AssistantClient({
           </div>
         </div>
 
-        <div className="container mx-auto py-10 px-4">
+        <div className="container mx-auto px-1.5 py-4 sm:px-4 sm:py-10">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-              <h1 className="text-3xl font-bold text-gray-900">{t("ai.title")}</h1>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-2.5 sm:p-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t("ai.title")}</h1>
               <p className="mt-2 text-gray-600">{t("ai.personalAssistant")}</p>
 
-              <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-5">
+              <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 sm:p-5">
                 <div className="text-sm text-gray-600">
                   <div>
                     <span className="text-gray-500">Email:</span> {user.email}
@@ -953,11 +1138,26 @@ export default function AssistantClient({
                       )}
                     </div>
                   )}
+                  {canChat && (
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => void resetPromptCounter()}
+                        disabled={quotaResetting}
+                        className="inline-flex items-center justify-center rounded-lg border border-[#820251]/30 bg-[#820251]/5 px-3 py-1.5 text-xs font-medium text-[#820251] hover:bg-[#820251]/10 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {quotaResetting ? "Сброс..." : "Сбросить счётчик (тест)"}
+                      </button>
+                      {quotaResetMessage && (
+                        <span className="text-xs text-emerald-700">{quotaResetMessage}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {!canChat ? (
-                <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+                <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
                   <div className="font-semibold text-amber-900">Доступно в платном плане</div>
                   <p className="mt-2 text-sm text-amber-800">
                     У вас план Free — чат-ассистент доступен для <span className="font-semibold">Paid</span> и{" "}
@@ -976,11 +1176,11 @@ export default function AssistantClient({
                   </p>
                 </div>
               ) : (
-                <div className="mt-6 rounded-2xl border border-gray-200 bg-white overflow-hidden">
-	                  <div className="px-4 sm:px-5 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between gap-3">
+	                <div className="mt-4 sm:mt-6 -mx-1 sm:mx-0 rounded-2xl border border-gray-200 bg-white overflow-hidden">
+	                  <div className="px-2 sm:px-5 py-3 border-b border-gray-200 bg-gray-50 flex flex-col items-start sm:flex-row sm:items-center sm:justify-between gap-3">
 	                    <div className="min-w-0">
 	                      {companyContext && (
-	                        <div className="text-xs text-gray-600 truncate">
+	                        <div className="text-xs text-gray-600 break-words sm:truncate">
 	                          <span className="text-gray-500">Контекст:</span>{" "}
 	                          <span className="font-semibold text-[#820251]">
 	                            {companyContext.companyName || (companyContext.companyId ? `#${companyContext.companyId}` : "—")}
@@ -989,7 +1189,7 @@ export default function AssistantClient({
 	                      )}
 
 	                      {shortlistCompanyIds.length > 0 && (
-	                        <div className={`text-xs text-gray-600 truncate ${companyContext ? "mt-1" : ""}`}>
+	                        <div className={`text-xs text-gray-600 break-words sm:truncate ${companyContext ? "mt-1" : ""}`}>
 	                          <span className="text-gray-500">{t("ai.shortlistLabel") || "Шортлист"}:</span>{" "}
 	                          <span className="font-semibold text-[#820251]">{shortlistCompanyIds.length}</span>
 	                          {shortlistCompaniesLoading && (
@@ -1052,11 +1252,11 @@ export default function AssistantClient({
 		                        </div>
 		                      )}
 	                    </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
+                    <div className="w-full sm:w-auto flex flex-wrap items-center gap-x-3 gap-y-2 sm:flex-shrink-0">
                       {(companyContext || shortlistCompanyIds.length > 0) && (
                         <Link
                           href="/assistant"
-                          className="text-xs text-[#820251] hover:underline underline-offset-2"
+                          className="text-xs text-[#820251] hover:underline underline-offset-2 whitespace-nowrap"
                         >
                           Сбросить
                         </Link>
@@ -1065,7 +1265,7 @@ export default function AssistantClient({
                         type="button"
                         onClick={() => void copyChatConversation()}
                         disabled={messages.length === 0}
-                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline"
+                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline whitespace-nowrap"
                       >
                         {copied?.id === chatCopyMarkerId
                           ? (t("ai.copied") || "Скопировано!")
@@ -1075,20 +1275,28 @@ export default function AssistantClient({
                         type="button"
                         onClick={resetChat}
                         disabled={sending}
-                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline"
+                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline whitespace-nowrap"
                       >
                         {t("ai.newChat") || "Новый чат"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void resetPromptCounter()}
+                        disabled={sending || quotaResetting}
+                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline whitespace-nowrap"
+                      >
+                        {quotaResetting ? "Сброс..." : "Сбросить счётчик (тест)"}
                       </button>
                     </div>
                   </div>
                   <div
                     ref={scrollRef}
-                    className="h-[clamp(320px,55dvh,520px)] sm:h-[420px] overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-white to-gray-50"
+                    className="h-[clamp(320px,55dvh,520px)] sm:h-[420px] overflow-y-auto p-2 sm:p-5 space-y-4 bg-gradient-to-b from-white to-gray-50"
                   >
                     {messages.map((m) => (
                       <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                         <div
-                          className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                          className={`max-w-[98%] sm:max-w-[90%] rounded-2xl px-3 sm:px-4 py-3 text-[15px] sm:text-sm leading-relaxed shadow-sm ${
                             m.role === "user"
                               ? "bg-[#820251] text-white rounded-br-md"
                               : "relative group bg-white border border-gray-200 text-gray-900 rounded-bl-md pr-11 whitespace-pre-wrap break-words"
@@ -1154,6 +1362,11 @@ export default function AssistantClient({
                             </div>
                           )}
                           {renderAssistantMessageContent(m)}
+                          {m.role === "assistant" && m.id !== "intro" && m.localFallbackUsed && m.fallbackNotice && (
+                            <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
+                              {m.fallbackNotice}
+                            </div>
+                          )}
 
                           {m.role === "assistant" && m.id !== "intro" && m.requestId && (
                             <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
@@ -1250,14 +1463,14 @@ export default function AssistantClient({
                     ))}
                     {sending && !streamingReplyId && (
                       <div className="flex justify-start">
-                        <div className="max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm bg-white border border-gray-200 text-gray-500 rounded-bl-md animate-pulse">
+                        <div className="max-w-[98%] sm:max-w-[90%] rounded-2xl px-3 sm:px-4 py-3 text-[15px] sm:text-sm leading-relaxed shadow-sm bg-white border border-gray-200 text-gray-500 rounded-bl-md animate-pulse">
                           {t("common.loading") || "Загрузка..."}
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <div className="border-t border-gray-200 p-4 bg-white">
+                  <div className="border-t border-gray-200 p-2 sm:p-4 bg-white">
                     {error && <div className="mb-3 text-sm text-red-700">{error}</div>}
                     {showSuggestionChips && (
                       <div className="mb-3 flex flex-wrap gap-2">
@@ -1383,14 +1596,14 @@ export default function AssistantClient({
                         }}
                         placeholder={t("ai.placeholder") || "Опишите, что вам нужно найти или заказать..."}
                         rows={2}
-                        className="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a0006d]/30"
+                        className="flex-1 resize-none rounded-xl border border-gray-300 px-3 sm:px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a0006d]/30"
                         disabled={sending}
                       />
                       <button
                         type="button"
                         onClick={send}
                         disabled={sending || !draft.trim()}
-                        className="inline-flex items-center justify-center rounded-xl bg-[#820251] text-white px-6 py-3 font-semibold hover:bg-[#6a0143] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-[#820251] text-white px-6 py-3 font-semibold hover:bg-[#6a0143] disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {sending ? (t("common.loading") || "Загрузка...") : (t("ai.sendRequest") || "Отправить")}
                       </button>
@@ -1398,7 +1611,7 @@ export default function AssistantClient({
                         <button
                           type="button"
                           onClick={stopGenerating}
-                          className="inline-flex items-center justify-center rounded-xl bg-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-300"
+                          className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-300"
                         >
                           {t("ai.stopGenerating") || "Стоп"}
                         </button>

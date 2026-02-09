@@ -1,0 +1,162 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Biznesinfo assistant achieves strong 98.6% strict pass rate but shows significant quality gaps in retrieval relevance (2.6-2.7 usefulness from Kimi/Minimax judges). Critical issues: hallucinated company suggestions in 3+ scenarios, generic fallback pattern in 12+ scenarios, intent misinterpretation for filter vs. action requests. Recommended: strengthen retrieval-to-intent matching, add shortlist validation guardrails, and clarify 'show' vs 'add' company intent routing.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix hallucinated company suggestions",
+      "why": "3+ scenarios show completely irrelevant companies (laser cutting → seals/furniture, coffee shop → restaurant/newspaper). Major trust destroyer.",
+      "expectedImpact": "Eliminate wrong-company hallucinations; improve Kimi usefulness from 2.7 to 3.5+",
+      "validationScenarios": ["UXB029", "UX110", "UX102"]
+    },
+    {
+      "priority": "P1",
+      "title": "Eliminate generic fallback pattern",
+      "why": "12+ scenarios show 'ask for clarification' instead of providing candidates. Users expect actual vendors, not rubric lists.",
+      "expectedImpact": "Reduce clarification-requests; improve Minimax usefulness from 2.6 to 3.2+",
+      "validationScenarios": ["UXB031", "UXB033", "UXB034", "UXA008", "UXA010", "UXA011", "UXA014", "UXA016", "UXA017", "UXA020"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix intent misinterpretation (show vs add)",
+      "why": "UXA013 showed email templates instead of filtering companies with emails; UXA022 gave add-company instructions instead of showing existing card.",
+      "expectedImpact": "Zero template leakage for non-template requests",
+      "validationScenarios": ["UXA013", "UXA022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce shortlist delivery promises",
+      "why": "UX101 promised 5 suppliers but only delivered 1; UX103 refused partial UNP lookup despite having enough info.",
+      "expectedImpact": "100% promise fulfillment for explicitly requested counts",
+      "validationScenarios": ["UX101", "UX103"]
+    },
+    {
+      "priority": "P2",
+      "title": "Strengthen context continuity",
+      "why": "UX110 lost coffee shop context after 3 turns, returned irrelevant restaurant/newspaper. Multi-turn coherence critical for complex sourcing.",
+      "expectedImpact": "Maintain sourcing context across 3+ turns",
+      "validationScenarios": ["UX110"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Add intent-category cross-check before company presentation",
+      "action": "Implement validation: before showing /company/X, verify (primary_rubric_name || primary_category_name) contains at least 2 tokens from extractVendorSearchTerms(user_message). If match score < threshold, add explicit disclaimer or suppress presentation.",
+      "implementationHint": "function candidateRelevanceThresholdCheck() in route.ts ~line 4280 - add haystack validation before formatVendorShortlistRows()",
+      "expectedImpact": "Block irrelevant companies (seals/stamps for laser cutting query)",
+      "risk": "May suppress some borderline valid candidates; need fallback messaging",
+      "effort": "M",
+      "validationScenarios": ["UXB029", "UX110", "UX102"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add 'show me companies WITH email' intent classifier",
+      "action": "Enhance looksLikeVendorLookupIntent() or create new looksLikeFilterRequest() to detect 'filter by field' patterns: /(только|только.*у кого|у кого есть|у кого нет|filter|only.*with)/i + /(email|почт|телефон|сайт|адрес)/i. Route to retrieval with field filter, not template generation.",
+      "implementationHint": "Add new intent detector in route.ts near looksLikeVendorLookupIntent(), modify postProcessAssistantReply() routing logic",
+      "expectedImpact": "Zero template leakage for filter requests",
+      "risk": "Low - adds new routing path, doesn't modify existing",
+      "effort": "S",
+      "validationScenarios": ["UXA013"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add 'show existing card' vs 'add new card' disambiguation",
+      "action": "Create looksLikeShowCompanyCardIntent() detecting /(покажи|show|открой|open|display).*карточк|карточк.*существующ|карточк.*уже|карточк.*в каталоге/. If true, query biznesinfoGetCompany() with user-provided name; if looksLikeCompanyPlacementIntent() true, route to add-company flow.",
+      "implementationHint": "Add new intent function in route.ts; update vendorLookupIntent flow decision tree",
+      "expectedImpact": "Correct routing for 'show card' vs 'add card' requests",
+      "risk": "Low - adds intent clarity, doesn't break existing flows",
+      "effort": "S",
+      "validationScenarios": ["UXA022", "UXA012"]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Remove generic rubric/keyword fallback when candidates requested",
+      "action": "In postProcessAssistantReply() vendor lookup flow, detect 'demands concrete' signal: /(без общих совет|без рубрик|не советы|конкретн|варианты|карточк)/i. If signal present AND continuityCandidates.length > 0, skip rubric/keyword suggestions entirely and show only formatVendorShortlistRows().",
+      "implementationHint": "route.ts ~line 1760 in genericCatalogOverdrive check - add explicit 'concrete demanded' signal detection",
+      "expectedImpact": "Eliminate rubric-only responses when concrete vendors requested",
+      "risk": "Medium - may reduce helpful guidance for genuinely ambiguous queries",
+      "effort": "S",
+      "validationScenarios": ["UXB031", "UXB033", "UXB034", "UXA008", "UXA010"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add shortlist count enforcement guardrail",
+      "action": "Implement detectRequestedShortlistSize() enforcement: if user requests N candidates AND detectRequestedShortlistSize() returns N >= 2 AND continuityCandidates.length >= N, ensure final reply contains exactly N formatVendorShortlistRows(). If candidates < N, explicitly state 'found X of Y requested' and provide alternatives, not generic fallback.",
+      "implementationHint": "route.ts ~line 1460 buildForcedShortlistAppendix() - add strict count enforcement",
+      "expectedImpact": "100% promise fulfillment for 'N suppliers' requests",
+      "risk": "Low - improves reliability",
+      "effort": "S",
+      "validationScenarios": ["UX101"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Add partial identifier lookup acceptance",
+      "action": "In counterparty verification flow, if user provides partial UNP (ends with *** or shows only last 7 digits), attempt biznesinfoSearch() with available digits as fuzzy match pattern. If match found, present results with uncertainty disclaimer. Only refuse if no possible matches.",
+      "implementationHint": "route.ts looksLikeCounterpartyVerificationIntent() flow - add fuzzy UNP matching before refusal",
+      "expectedImpact": "Attempt partial lookups instead of blanket refusal",
+      "risk": "Medium - may return false positives; need uncertainty disclaimer",
+      "effort": "M",
+      "validationScenarios": ["UX103"]
+    },
+    {
+      "id": "R7",
+      "area": "retrieval",
+      "title": "Add sourcing context persistence check",
+      "action": "Implement contextContinuityCheck(): on multi-turn follow-up, verify extractVendorSearchTerms(history_last_sourcing_message) has 60%+ overlap with extractVendorSearchTerms(current_message). If overlap < 60%, prepend explicit continuity statement: 'Продолжаю поиск по [original_query]:' before new results.",
+      "implementationHint": "route.ts postProcessAssistantReply() vendorLookupIntent flow - add continuity verification before showing candidates",
+      "expectedImpact": "Maintain sourcing context across 3+ turns",
+      "risk": "Low - adds clarity, doesn't suppress responses",
+      "effort": "S",
+      "validationScenarios": ["UX110"]
+    },
+    {
+      "id": "R8",
+      "area": "prompt",
+      "title": "Add domain knowledge for common misinterpretations",
+      "action": "Enhance system prompt: 'When user asks ПОКАЗАТЬ companies WITH [field=email], do NOT generate email templates. Instead, filter existing companies by that field from the catalog.' Add explicit examples: 'Покажи только тех, у кого есть email → filter result, NOT template generation.'",
+      "implementationHint": "Update AI provider system prompt/instructions - route.ts generateOpenAiReply() or generateCodexReply() instructions parameter",
+      "expectedImpact": "Zero template leakage for filter queries",
+      "risk": "Low - clarifies existing intent without new logic",
+      "effort": "S",
+      "validationScenarios": ["UXA013", "UXA012"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UXB029",
+      "UX110",
+      "UX102",
+      "UXB031",
+      "UXB033",
+      "UXB034",
+      "UXA008",
+      "UXA010",
+      "UXA013",
+      "UXA022",
+      "UX101",
+      "UX103"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.chatgpt-pro.master.json",
+      "app/qa/ai-request/runner.mjs (qa-runner)"
+    ],
+    "successMetrics": [
+      "Strict pass rate: maintain >= 98% (currently 98.6%)",
+      "Judge usefulness Kimi: improve from 2.7 to 3.5+",
+      "Judge usefulness Minimax: improve from 2.6 to 3.2+",
+      "Zero hallucinated company suggestions in all 146 scenarios",
+      "Zero template leakage for non-template requests",
+      "100% promise fulfillment for 'N candidates' requests"
+    ]
+  }
+}
+```
+

@@ -1,0 +1,46 @@
+```json
+{
+  "advisor": "gemini",
+  "executiveSummary": "The current AI assistant demonstrates strong performance on general information queries like 'проверка УНП'. However, a critical issue has been identified by the 'kimi' judge in geo-specific queries, specifically in scenario D001 ('типография визитки срочно'). Despite acknowledging the 'Malinovka' district, the assistant fails to filter company results by this geographical constraint, providing a generic list instead. This leads to a lower usefulness score and indicates a gap in the system's ability to process and apply nuanced geographical filters during company retrieval.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Implement robust geographical filtering for company search results",
+      "why": "The assistant currently acknowledges geographical constraints (e.g., 'район Малиновка') but fails to apply them as a filter to the search results. This leads to irrelevant recommendations and a reduced usefulness score, as highlighted by the 'kimi' judge in scenario D001. Fixing this is fundamental for local business recommendations.",
+      "expectedImpact": "Significantly improve the relevance and usefulness of company recommendations for geo-specific queries, directly addressing the core issue raised by the judge in D001. This will likely increase user satisfaction for location-based searches.",
+      "validationScenarios": [
+        "D001"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Enhance Geo-Awareness in Company Search/Retrieval",
+      "action": "Modify the company search/retrieval logic to incorporate geographical filtering based on identified districts or neighborhoods. This requires ensuring that company data includes sufficient geographical granularity (e.g., district, coordinates) and that the search query construction effectively uses this information to filter results before presentation.",
+      "implementationHint": "1. **Data Enrichment**: Verify that company data indexed by Meilisearch (or any other search backend) contains specific district/neighborhood information. If not, update the data ingestion process (e.g., `app/scripts/index_meilisearch.ts` or related data processing scripts) to include this. 2. **Query Parsing**: Enhance the prompt processing logic to accurately extract and normalize district names (e.g., 'Малиновка'). 3. **Search Query Modification**: Adjust the search query sent to the backend to include geographical filter parameters. This might involve filtering results based on a list of companies known to be in a certain district, or using spatial querying if the search backend supports it.",
+      "expectedImpact": "Directly resolves the 'Malinovka' filtering issue in D001, providing accurate, localized company recommendations. Improves the overall quality and trustworthiness of the assistant's advice for location-sensitive queries. Will positively impact 'kimi' judge usefulness scores.",
+      "risk": "Medium. Requires changes to data indexing and search query logic. Careful testing is needed to ensure no regressions in non-geo-specific searches.",
+      "effort": "M",
+      "validationScenarios": [
+        "D001"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "D001",
+      "D002"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.dirty.realworld.json"
+    ],
+    "successMetrics": [
+      "Kimi judge average usefulness score for D001 >= 4.5",
+      "No new 'judgeIssueHints' related to geo-filtering in D001",
+      "Overall pass rate for all scenarios remains 1.0"
+    ]
+  }
+}
+```

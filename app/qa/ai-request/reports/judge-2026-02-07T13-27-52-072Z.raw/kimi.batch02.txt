@@ -1,0 +1,41 @@
+I see the file already contains ratings for S005 and S006. The user is asking me to evaluate scenario S005 again with the same transcript. Based on my analysis of the transcript:
+
+**Turn 1**: Good initial response with relevant tire service candidates for Minsk.
+
+**Turn 2**: Critical failure - when user specifies "Каменная Горка" (a specific micro-district), assistant admits having no candidates for that area and provides generic search instructions instead of actual results. This breaks geo adherence.
+
+**Turn 3**: User asks for practical top-3 with call priority. Assistant returns the same generic companies from Turn 1 without verifying they are near Каменная Горка. The response is incomplete (cut off) and doesn't actually provide the practical ranking requested.
+
+The existing rating in the file appears accurate. The rating of 2 (not_useful) is appropriate because:
+- Assistant failed to filter by the specific micro-district despite user mentioning it twice
+- No verification that listed companies serve commercial vehicles
+- Turn 2 provided generic search instructions instead of results
+- Turn 3 didn't deliver the practical ranking with call priority as requested
+
+The file already contains a correct evaluation for S005. Here's the existing valid JSON:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S005",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "reasons": [
+        "Turn 2: Assistant ignores the geo context (Каменная Горка) and provides generic search instructions instead of actual results",
+        "Turn 3: Returns companies without verifying proximity to Каменная Горка; no practical ranking by location relevance"
+      ],
+      "criticalIssues": [
+        "Failed to filter by specific micro-district Каменная Горка despite user explicitly mentioning it twice",
+        "No verification that listed companies serve commercial vehicles specifically"
+      ],
+      "strengths": [
+        "Turn 1 provided relevant initial candidates with explicit tire service mention",
+        "Asked clarifying questions about commercial vehicle types"
+      ]
+    }
+  ]
+}
+```

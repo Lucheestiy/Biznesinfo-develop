@@ -1,0 +1,1818 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-07T15:15:00Z",
+      "source": "user-provided",
+      "description": "Real short query bank (part A): company search intents, 24 items"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": false,
+      "paidLimit": 1000,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": false,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-08T19-50-33-961Z-3902048-kkyrf",
+    "startedAt": "2026-02-08T19:50:33.961Z",
+    "endedAt": "2026-02-08T19:52:24.641Z",
+    "durationMs": 110680,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-120-bank-a-company-search.json",
+    "totalScenarios": 24,
+    "passedScenarios": 24,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 72,
+    "passedChecks": 72,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 20,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UXA001",
+      "title": "Банк A: Поиск компании — запрос 1",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Найди ООО «…» по названию, Минск.",
+          "requestBody": {
+            "message": "Найди ООО «…» по названию, Минск.",
+            "history": []
+          },
+          "latencyMs": 4727,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ada48472-6850-4901-b32c-4728fc4c0537",
+          "isStub": false,
+          "reply": "Понял. Чтобы найти компанию в каталоге Biznesinfo по названию в Минске, сделайте так:\n\n1. Откройте поиск по компаниям и введите точное название:  \n   **ООО «…»** (можно также без кавычек и без «ООО» для расширения).\n\n2. Поставьте фильтр по региону/городу:  \n   **Беларусь → Минск**.\n\n3. Если не находится с первого раза, попробуйте варианты запроса:  \n   - `…`  \n   - `ООО …`  \n   - `… Минск`  \n   - часть названия без организационно-правовой формы.\n\n4. Проверьте карточку компании: УНП, адрес, телефон, сайт — чтобы подтвердить, что это именно нужное ООО.\n\nЕсли хотите, я могу сразу дать готовые варианты поисковых запросов под ваше точное название (в 5–7 вариантах), чтобы быстрее найти нужную карточку.",
+          "checks": [
+            {
+              "id": "UXA001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA001.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA001.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 705
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4728
+    },
+    {
+      "id": "UXA002",
+      "title": "Банк A: Поиск компании — запрос 2",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Компания «БелТех…» — нужен УНП.",
+          "requestBody": {
+            "message": "Компания «БелТех…» — нужен УНП.",
+            "history": []
+          },
+          "latencyMs": 3191,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4fb86d06-da94-40b6-aaf6-4655450fa1d7",
+          "isStub": false,
+          "reply": "Понял. По названию **«БелТех…»** (неполное) нельзя однозначно определить УНП — таких компаний может быть несколько.\n\nЧто сделать быстро:\n1. Уточните полное название (как в регистрации): например, **ООО/ОДО/ЧУП + точное имя**.  \n2. Добавьте город/регион (если знаете).  \n3. Пришлите ссылку на карточку компании в каталоге — я помогу проверить, где именно смотреть УНП.\n\nЕсли хотите, могу сразу дать шаблон поискового запроса для каталога, чтобы сузить результаты.\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "checks": [
+            {
+              "id": "UXA002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA002.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA002.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 516
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3192
+    },
+    {
+      "id": "UXA003",
+      "title": "Банк A: Поиск компании — запрос 3",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Как найти организацию по номеру телефона?",
+          "requestBody": {
+            "message": "Как найти организацию по номеру телефона?",
+            "history": []
+          },
+          "latencyMs": 4932,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c0ba9bb9-b6b8-4903-88e1-3444bd190cbf",
+          "isStub": false,
+          "reply": "Коротко: самый быстрый путь — искать по номеру прямо в каталоге Biznesinfo.\n\nКак сделать:\n1. Введите номер в поиск в нескольких форматах:\n   - `+375291234567`\n   - `80291234567`\n   - `29 123-45-67`\n2. Если не нашлось — ищите по части номера (например, последние 7 цифр).\n3. Откройте найденные карточки и проверьте:\n   - название компании,\n   - город/регион,\n   - вид деятельности (рубрика),\n   - дополнительные контакты/сайт.\n\nЧтобы повысить шанс:\n1. Уберите лишние символы (`() - пробелы`).\n2. Попробуйте код оператора отдельно (`29`, `33`, `44`, `25`).\n3. Сузьте по городу, если он известен.\n\nЕсли хотите, помогу составить точный поисковый запрос под ваш номер (можете прислать его в маске, например: `+37529***-**-**`).",
+          "checks": [
+            {
+              "id": "UXA003.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA003.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA003.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 722
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4933
+    },
+    {
+      "id": "UXA004",
+      "title": "Банк A: Поиск компании — запрос 4",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи компании с названием «Альфа» в Гродно.",
+          "requestBody": {
+            "message": "Покажи компании с названием «Альфа» в Гродно.",
+            "history": []
+          },
+          "latencyMs": 5611,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "62164dff-acb1-4bf4-a1b4-fa3fa05f43b1",
+          "isStub": false,
+          "reply": "Отлично, для запроса **«Альфа» в Гродно** вот как быстро найти компании в каталоге:\n\n1. Введите в поиске: **Альфа** (без кавычек).\n2. Примените фильтр региона/города: **Гродно**.\n3. Если результатов слишком много, сузьте:\n   - по рубрике (например, строительство, логистика, торговля),\n   - по типу (ООО/ИП),\n   - по полю в названии: **начинается с “Альфа”** или **содержит “Альфа”**.\n4. Проверьте карточки компаний с совпадениями по:\n   - точному названию,\n   - адресу в Гродно,\n   - актуальным контактам.\n\nЕсли хотите, могу сразу дать готовые варианты поисковых запросов для более точной выборки (например, «Альфа строй Гродно», «ООО Альфа Гродно»).",
+          "checks": [
+            {
+              "id": "UXA004.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA004.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA004.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 651
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5612
+    },
+    {
+      "id": "UXA005",
+      "title": "Банк A: Поиск компании — запрос 5",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Есть ли у вас ИП «Иванов» (строительство)?",
+          "requestBody": {
+            "message": "Есть ли у вас ИП «Иванов» (строительство)?",
+            "history": []
+          },
+          "latencyMs": 3857,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f5e14d6d-7949-4d82-a43a-301019bbb604",
+          "isStub": false,
+          "reply": "Да, могу помочь проверить, но по одному названию **«ИП Иванов»** точно идентифицировать компанию сложно (таких записей может быть несколько).\n\nЧто сделать быстро в каталоге:\n1. Откройте рубрику: **Строительство и недвижимость → Строительство, строительные работы**  \n   `/catalog/stroitelstvo-nedvijimost/stroitelstvo-stroitelnye-raboty`\n2. В поиске введите варианты: **ИП Иванов**, **Иванов**, **ИП ИВАНОВ**.\n3. Поставьте фильтр по городу/области (если знаете), чтобы убрать дубли.\n\nЕсли хотите, я подскажу точный поисковый запрос под ваш регион — напишите город (например, Минск/Гомель).",
+          "checks": [
+            {
+              "id": "UXA005.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA005.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA005.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 589
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3857
+    },
+    {
+      "id": "UXA006",
+      "title": "Банк A: Поиск компании — запрос 6",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Найди «Stroy…» (на латинице), возможно Витебск.",
+          "requestBody": {
+            "message": "Найди «Stroy…» (на латинице), возможно Витебск.",
+            "history": []
+          },
+          "latencyMs": 6575,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2431c8c9-33bb-4866-97d3-65a77dc71a9e",
+          "isStub": false,
+          "reply": "Отлично, начнём с быстрого поиска по префиксу.\n\nЧто вбить в Biznesinfo:\n1. Поиск: `Stroy`  \n2. Дополнительно варианты: `Stroi`, `Stroy-`, `Stroy ` (с пробелом), `Stroy*` (если есть поддержка маски)  \n3. Фильтр региона: **Витебская область**  \n4. Фильтр города: **Витебск**  \n\nКак сузить и не пропустить:\n1. Сортировка: сначала по релевантности, потом по дате обновления карточки.  \n2. Проверяйте и латиницу, и кириллицу: `Строй`, `Stroy`.  \n3. Если результатов мало — уберите город и оставьте только область.  \n4. Если результатов много — добавьте 2-е слово (например: `stroy servis`, `stroyinvest`, `stroygroup`).\n\nБыстрый чек-лист по карточкам:\n1. Есть телефон + сайт/почта.  \n2. Совпадает город (Витебск).  \n3. Профиль деятельности соответствует вашей задаче.  \n4. Карточка недавно обновлялась.\n\nЕсли хотите, я дам готовый точный набор запросов (10–15 штук) под сценарий “найти все компании с началом Stroy в Витебске” и шаблон таблицы для отбора.",
+          "checks": [
+            {
+              "id": "UXA006.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA006.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA006.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 950
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 6575
+    },
+    {
+      "id": "UXA007",
+      "title": "Банк A: Поиск компании — запрос 7",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Поиск не работает: ввожу «транспорт», пусто.",
+          "requestBody": {
+            "message": "Поиск не работает: ввожу «транспорт», пусто.",
+            "history": []
+          },
+          "latencyMs": 7730,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "8664a954-4bc4-447c-8ed8-c125500ebc75",
+          "isStub": false,
+          "reply": "Понял. Такое часто бывает, если поиск по сайту ищет **точное совпадение** или вы находитесь не в том разделе.  \nСделайте так (быстрый рабочий путь):\n\n1. Откройте рубрику напрямую:  \n   **/catalog/transport-logistika-perevozki**\n\n2. Если нужна уже конкретика, заходите в подрубрики:\n   - **Транспортные услуги и экспедирование грузов**  \n     /catalog/transport-logistika-perevozki/transportnye-uslugi-i-ekspedirovanie-gruzov\n   - **Железнодорожный транспорт**  \n     /catalog/transport-logistika-perevozki/jeleznodorojnyy-transport-bi\n   - **Речной и морской транспорт, перевозки**  \n     /catalog/transport-logistika-perevozki/rechnoy-i-morskoy-transport-perevozki\n   - **Водный транспорт**  \n     /catalog/transport-logistika-perevozki/vodnyy-transport\n\n3. В строке поиска пробуйте не только «транспорт», а варианты:\n   - «логистика»\n   - «грузоперевозки»\n   - «экспедирование»\n   - «перевозка грузов»\n   - «международные перевозки»\n\n4. Сразу поставьте фильтр по городу/области — так выдача появляется чаще и чище.\n\nЕсли хотите, подскажу точный маршрут по каталогу под вашу задачу (например: авто/жд/международные, город, тип груза).",
+          "checks": [
+            {
+              "id": "UXA007.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA007.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA007.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 1135
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 7730
+    },
+    {
+      "id": "UXA008",
+      "title": "Банк A: Поиск компании — запрос 8",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи ближайшие компании рядом с адресом …",
+          "requestBody": {
+            "message": "Покажи ближайшие компании рядом с адресом …",
+            "history": []
+          },
+          "latencyMs": 3096,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6f2157d2-9acd-4078-9764-e4d01fa770be",
+          "isStub": false,
+          "reply": "Могу помочь, но нужен сам адрес (или хотя бы город + район), чтобы подобрать ближайшие компании.\n\nПока можете сразу сузить поиск так:\n1. Укажите локацию: `город, по вашему ТЗ`  \n2. Выберите рубрику: что именно нужно — `по вашему ТЗ`  \n3. Радиус поиска: например, `1–3 км`, `5 км`, `10 км`  \n\nОтправьте в одном сообщении:\n`Адрес: ... | Что ищем: ... | Радиус: ...`  \nИ я дам короткий список ближайших компаний.",
+          "checks": [
+            {
+              "id": "UXA008.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA008.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA008.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 409
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3096
+    },
+    {
+      "id": "UXA009",
+      "title": "Банк A: Поиск компании — запрос 9",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Найди компанию по части названия: «инвест».",
+          "requestBody": {
+            "message": "Найди компанию по части названия: «инвест».",
+            "history": []
+          },
+          "latencyMs": 5592,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "0fc5b9a7-25c8-4c36-bbb4-ddc7fa65cc8c",
+          "isStub": false,
+          "reply": "Отлично. Для поиска по части названия **«инвест»** в каталоге используйте такой быстрый подход:\n\n1. Введите в строке поиска: **инвест**  \n2. Примените фильтр **«Компании»** (а не рубрики/товары, если есть такой переключатель).  \n3. Добавьте регион/город, чтобы убрать лишние результаты (например: Минск, Гомель и т.д.).  \n4. Проверьте варианты написания для расширения выборки:  \n   - **инвест**  \n   - **invest**  \n   - **инвест-** (если в названиях через дефис)  \n   - **инвэст** (редкий вариант)\n\nЧтобы получить релевантнее, можно искать в таком формате:  \n- **инвест минск**  \n- **инвест строй**  \n- **инвест групп**\n\nЕсли хотите, помогу сразу сузить: напишите **город** и **сферу** (например, строительство, финансы, логистика), и я дам готовый набор запросов и фильтров.",
+          "checks": [
+            {
+              "id": "UXA009.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA009.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA009.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 776
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5592
+    },
+    {
+      "id": "UXA010",
+      "title": "Банк A: Поиск компании — запрос 10",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Есть ли филиалы компании X в регионах?",
+          "requestBody": {
+            "message": "Есть ли филиалы компании X в регионах?",
+            "history": []
+          },
+          "latencyMs": 3792,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "e6adc2b4-957f-46a1-bdf5-6003484c8c9d",
+          "isStub": false,
+          "reply": "Могу помочь проверить, но по одному названию **“компания X”** я не могу достоверно подтвердить филиалы, чтобы не выдумывать данные.\n\nЧто сделать быстро в Biznesinfo:\n1. Откройте карточку компании X.  \n2. Проверьте блоки: **«Контакты»**, **«Адреса/Филиалы»**, **«Представительства»**.  \n3. В поиске по каталогу введите:  \n   - `компания X филиал`  \n   - `компания X город` (например, Гомель, Брест, Витебск и т.д.)  \n4. Отфильтруйте по регионам/городам — так увидите отдельные карточки филиалов, если они есть.\n\nЕсли пришлёте ссылку на карточку компании или точное юр. название, помогу сразу составить список регионов, где у неё есть присутствие.",
+          "checks": [
+            {
+              "id": "UXA010.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA010.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "Refusal is accompanied by useful guidance",
+              "details": {
+                "refusal": true,
+                "useful": true
+              }
+            },
+            {
+              "id": "UXA010.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 645
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3792
+    },
+    {
+      "id": "UXA011",
+      "title": "Банк A: Поиск компании — запрос 11",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Найди производителя, а не посредника.",
+          "requestBody": {
+            "message": "Найди производителя, а не посредника.",
+            "history": []
+          },
+          "latencyMs": 6664,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "36ce0521-dc2a-4972-8250-f80107486a75",
+          "isStub": false,
+          "reply": "Отлично, вот как быстро отфильтровать **именно производителей** в каталоге Biznesinfo (а не посредников):\n\n1. **Ищите в “производственных” рубриках**, а не в общих торговых.  \n2. В запрос добавляйте маркеры:  \n   - **“производитель”**, **“завод”**, **“изготовитель”**, **“собственное производство”**  \n   - исключайте: **“опт”**, **“дистрибьютор”**, **“поставщик”**, **“торговый дом”**, **“импортёр”**.  \n3. **Проверяйте карточку компании**:  \n   - есть ли формулировки “производим”, “цех/линия”, “ТУ/ГОСТ”, “OEM/ODM”;  \n   - есть ли фото производства, техописания, сертификаты;  \n   - совпадает ли профиль деятельности с вашим товаром.  \n4. **Фильтр по региону**: выбирайте город/область, где логично размещено производство.  \n5. **Быстрая валидация перед контактом**: задайте 3 вопроса  \n   - Вы производитель или дилер?  \n   - Где находится производство?  \n   - Можно получить техлист/сертификат на товар/услуга?\n\nЧтобы подобрать конкретные компании, напишите, пожалуйста:  \n- какой именно товар/услуга нужен,  \n- регион (например, Минск/РБ),  \n- объём (объем).",
+          "checks": [
+            {
+              "id": "UXA011.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA011.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA011.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 1064
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 6665
+    },
+    {
+      "id": "UXA012",
+      "title": "Банк A: Поиск компании — запрос 12",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи только тех, у кого есть сайт.",
+          "requestBody": {
+            "message": "Покажи только тех, у кого есть сайт.",
+            "history": []
+          },
+          "latencyMs": 2752,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "77b9cad5-7ddf-44e4-a5a2-1e601feb9bf9",
+          "isStub": false,
+          "reply": "Понял. Отфильтруем список **только по компаниям с сайтом**.\n\nЕсли вы в каталоге Biznesinfo:\n1. Откройте текущую рубрику/поиск.  \n2. В фильтрах включите: **«Есть сайт»** (или **«Веб‑сайт указан»**).  \n3. Примените фильтр и отсортируйте по релевантности/городу.\n\nЕсли хотите, пришлите текущий список (или ссылку на выдачу) — я сразу оставлю только компании с сайтом.",
+          "checks": [
+            {
+              "id": "UXA012.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA012.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA012.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 364
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2752
+    },
+    {
+      "id": "UXA013",
+      "title": "Банк A: Поиск компании — запрос 13",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи только тех, у кого есть email.",
+          "requestBody": {
+            "message": "Покажи только тех, у кого есть email.",
+            "history": []
+          },
+          "latencyMs": 3401,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "73417551-8503-4992-9a5d-242e02db1411",
+          "isStub": false,
+          "reply": "Subject: Запрос по только тех — Покажи только тех, у кого есть email.\n\nBody:\nЗдравствуйте, {contact}!\n\nНам нужно только тех в {city}. Просим подтвердить условия по {qty}, {spec}, {delivery} и срок {deadline}.\nТакже уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования.\n\nС уважением,\n{company}\n{contact}\n\nWhatsApp:\nЗдравствуйте! Нужен только тех в {city}. Подскажите, сможете дать условия по {qty}/{spec} и срок {deadline}?",
+          "checks": [
+            {
+              "id": "UXA013.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA013.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA013.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 457
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3401
+    },
+    {
+      "id": "UXA014",
+      "title": "Банк A: Поиск компании — запрос 14",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Сузь до тех, кто работает с юрлицами.",
+          "requestBody": {
+            "message": "Сузь до тех, кто работает с юрлицами.",
+            "history": []
+          },
+          "latencyMs": 5717,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "7062dfe2-1b7c-499a-822e-92bf2873a0be",
+          "isStub": false,
+          "reply": "Отлично, сужаем выборку до B2B (работа с юрлицами).\n\nЧто поставить в фильтрах/проверке карточек:\n1. **Тип клиента:** “для юрлиц”, “корпоративные клиенты”, “B2B”.\n2. **Документы:** “безналичный расчет”, “с НДС”, “договор”, “акт/счет-фактура”.\n3. **Условия:** “опт”, “долгосрочное обслуживание”, “выезд/обслуживание по договору”, “тендеры”.\n4. **Признаки в описании:** “предприятия”, “организации”, “парк техники”, “корпоративный сервис”.\n\nКлючевые слова для поиска по каталогу:\n- **для юридических лиц**\n- **корпоративным клиентам**\n- **B2B**\n- **по договору**\n- **безналичный расчет / с НДС**\n- **оптовые поставки**  \n\nЕсли хотите, следующим шагом сделаю короткий **чек-лист отбора 10 компаний** (кого оставлять в шорт-листе, а кого сразу исключать).",
+          "checks": [
+            {
+              "id": "UXA014.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA014.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA014.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 750
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5717
+    },
+    {
+      "id": "UXA015",
+      "title": "Банк A: Поиск компании — запрос 15",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Мне нужен номер приемной/офиса.",
+          "requestBody": {
+            "message": "Мне нужен номер приемной/офиса.",
+            "history": []
+          },
+          "latencyMs": 2366,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "d30956f4-f107-4e2c-8b41-19bbb61823de",
+          "isStub": false,
+          "reply": "Понял. Уточните, пожалуйста, **какой именно компании** нужен номер приёмной/офиса (название или ссылка на карточку в каталоге).\n\nЕсли хотите, могу также дать короткий шаблон запроса в компанию:\n«Здравствуйте! Подскажите, пожалуйста, актуальный номер приёмной/офиса для связи по вопросу по вашему ТЗ. Спасибо».",
+          "checks": [
+            {
+              "id": "UXA015.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA015.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA015.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 309
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 2366
+    },
+    {
+      "id": "UXA016",
+      "title": "Банк A: Поиск компании — запрос 16",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи компании в категории «пищевое оборудование».",
+          "requestBody": {
+            "message": "Покажи компании в категории «пищевое оборудование».",
+            "history": []
+          },
+          "latencyMs": 5488,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2cb6a542-a0a4-4d49-9838-d63a1ded1c6a",
+          "isStub": false,
+          "reply": "Могу помочь, но в доступном срезе рубрик у меня сейчас нет явной категории **«пищевое оборудование»** как отдельной ветки.  \nЧтобы быстро найти компании в Biznesinfo, сделайте так:\n\n1. Откройте рубрику: **Оборудование промышленное**  \n`/catalog/mashinostroenie-i-oborudovanie/oborudovanie-promyshlennoe`\n2. Дополнительно проверьте: **Холодильное оборудование**  \n`/catalog/mashinostroenie-i-oborudovanie/holodilnoe-oborudovanie`\n3. В поиске по каталогу используйте ключи:  \n**пищевое оборудование, оборудование для пищевой промышленности, линии розлива, фасовочное оборудование, упаковочное оборудование, хлебопекарное оборудование, мясоперерабатывающее оборудование, молочное оборудование, кондитерское оборудование**.\n4. Поставьте фильтр по городу/области (например, Минск, Гомель и т.д.), чтобы сузить список.\n\nЕсли хотите, я сразу подготовлю для вас **короткий шорт‑лист (3–5 компаний)** — напишите город/регион и тип оборудования (например, фасовка, охлаждение, переработка).",
+          "checks": [
+            {
+              "id": "UXA016.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA016.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA016.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 980
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 5489
+    },
+    {
+      "id": "UXA017",
+      "title": "Банк A: Поиск компании — запрос 17",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Найди заводы/производства, а не магазины.",
+          "requestBody": {
+            "message": "Найди заводы/производства, а не магазины.",
+            "history": []
+          },
+          "latencyMs": 6077,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3c994ab8-dc13-4975-8caf-5f40273ef3c2",
+          "isStub": false,
+          "reply": "Понял — фокус на **заводы/производителей**, исключаем розницу.\n\nЧто делать в Biznesinfo прямо сейчас:\n\n1. Ищите по ключам в названии/описании:\n   - **завод**\n   - **производство**\n   - **производитель**\n   - **изготовление**\n   - **предприятие**\n   - **цех**\n   - **фабрика**\n   - **оптовые поставки / B2B**\n\n2. Добавляйте минус-слова (или вручную отсекайте карточки), чтобы убрать магазины:\n   - **магазин**\n   - **супермаркет**\n   - **розница**\n   - **торговый центр**\n   - **универмаг**\n\n3. По рубрикам:\n   - лучше заходить в более “производственные” подрубрики вашей отрасли, а не в “Магазины …”.\n   - из доступных в срезе рубрик сейчас в основном торговые, поэтому эффективнее искать через ключи выше + фильтр по региону.\n\n4. Фильтр географии:\n   - сначала **область/город**, затем расширять на соседние регионы, если мало результатов.\n\nЕсли напишете, **что именно нужно производить/закупать** и **какой регион**, дам готовый набор точных запросов (5–10 штук) под вашу задачу.",
+          "checks": [
+            {
+              "id": "UXA017.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA017.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA017.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 981
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 6077
+    },
+    {
+      "id": "UXA018",
+      "title": "Банк A: Поиск компании — запрос 18",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Как искать по УНП?",
+          "requestBody": {
+            "message": "Как искать по УНП?",
+            "history": []
+          },
+          "latencyMs": 4713,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "93b3e749-b4ed-44ef-8850-3aff0f25396a",
+          "isStub": false,
+          "reply": "Коротко: на Biznesinfo обычно ищут по УНП через строку поиска по сайту.\n\nКак сделать:\n1. Введите УНП целиком в поиск (без пробелов, например `123456789`).\n2. Если не находит — попробуйте с префиксом: `УНП 123456789`.\n3. Откройте карточку компании и проверьте совпадение УНП в реквизитах.\n4. Если результатов много — добавьте город/регион в запрос (например: `123456789 Минск`).\n\nПрактичный совет:\n- Копируйте УНП без лишних символов (кавычек, точек, тире).\n- Проверяйте, что это именно 9 цифр.\n\nЕсли хотите, дам готовые варианты поисковых запросов под ваш конкретный УНП и город.\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "checks": [
+            {
+              "id": "UXA018.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA018.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA018.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 633
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4713
+    },
+    {
+      "id": "UXA019",
+      "title": "Банк A: Поиск компании — запрос 19",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "У вас есть поиск по ОКЭД/ОКВЭД?",
+          "requestBody": {
+            "message": "У вас есть поиск по ОКЭД/ОКВЭД?",
+            "history": []
+          },
+          "latencyMs": 4385,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3da66ceb-23c7-42db-b886-da4637e9a40f",
+          "isStub": false,
+          "reply": "Коротко: обычно в Biznesinfo основной поиск идёт по рубрикам каталога, названию компании и ключевым словам, а не как отдельный фильтр «по ОКЭД/ОКВЭД».\n\nЧто можно сделать на практике:\n1. Искать по коду как по ключевому слову (например, `46.90` или `ОКЭД 46.90`) в строке поиска.  \n2. Параллельно идти через рубрикатор и уточнять регион/город.  \n3. Использовать синонимы вида деятельности (часто это даёт больше результатов, чем код).\n\nЕсли хотите, подскажу точные рубрики и набор запросов под ваш конкретный код ОКЭД/ОКВЭД и город.",
+          "checks": [
+            {
+              "id": "UXA019.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA019.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA019.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 530
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 4385
+    },
+    {
+      "id": "UXA020",
+      "title": "Банк A: Поиск компании — запрос 20",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Найди компанию по адресу: улица…, дом…",
+          "requestBody": {
+            "message": "Найди компанию по адресу: улица…, дом…",
+            "history": []
+          },
+          "latencyMs": 3049,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "bb5ef5ff-7b0b-4cad-b505-4a17d647075a",
+          "isStub": false,
+          "reply": "Могу помочь, но по такому формату пока нельзя однозначно найти компанию.\n\nСделаем быстро так:\n1. Пришлите **точный адрес**: `город, улица, дом` (можно с корпусом/офисом).\n2. Если знаете — добавьте **сферу** (например: типография, клининг, логистика), чтобы сузить результат.\n3. Я дам вам короткий список, как проверить в каталоге Biznesinfo по этому адресу.\n\nЕсли хотите, отправьте адрес одной строкой — я сразу подскажу следующий шаг поиска.",
+          "checks": [
+            {
+              "id": "UXA020.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA020.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA020.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 442
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3049
+    },
+    {
+      "id": "UXA021",
+      "title": "Банк A: Поиск компании — запрос 21",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Почему в выдаче много дублей?",
+          "requestBody": {
+            "message": "Почему в выдаче много дублей?",
+            "history": []
+          },
+          "latencyMs": 7016,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "9478b499-f669-46ca-8b63-8ee8e9a84120",
+          "isStub": false,
+          "reply": "Чаще всего дубли в выдаче появляются из‑за сочетания нескольких факторов:\n\n1. **Одна компания размещена в нескольких рубриках**  \n   Если вы ищете по широкому запросу, карточка может попадать в результат из разных категорий.\n\n2. **Похожие/вариативные названия**  \n   Например: «ООО Ромашка», «Ромашка ООО», «Romashka». Визуально это дубли, но в базе могут быть отдельные записи.\n\n3. **Филиалы и офисы**  \n   У одной организации могут быть разные карточки по городам/адресам.\n\n4. **Исторические записи**  \n   Старые и обновлённые карточки иногда сосуществуют до чистки индекса.\n\n5. **Слишком широкие фильтры**  \n   Без точной географии и узкой рубрики алгоритм показывает больше похожих совпадений, включая «почти дубли».\n\nЧто сделать сразу, чтобы сократить дубли:\n- Уточнить **город/область**.\n- Сузить до 1–2 **точных рубрик** вместо общего запроса.\n- Добавить в поиск специфичный ключ: модель, услугу, стандарт, тип продукции.\n- Отсортировать и вручную сверить по **УНП/телефону/сайту** (лучшие поля для дедупликации).\n- Исключать записи без контактов, если нужна рабочая база для outreach.\n\nЕсли хотите, помогу настроить «чистый» поисковый шаблон под вашу задачу (ниша + регион + обязательные поля), чтобы в результате было меньше дублей.",
+          "checks": [
+            {
+              "id": "UXA021.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA021.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA021.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 1241
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 7016
+    },
+    {
+      "id": "UXA022",
+      "title": "Банк A: Поиск компании — запрос 22",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Покажи карточку компании полностью.",
+          "requestBody": {
+            "message": "Покажи карточку компании полностью.",
+            "history": []
+          },
+          "latencyMs": 3227,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "728cc753-072a-4902-966c-7b72e8332004",
+          "isStub": false,
+          "reply": "По Biznesinfo это делается через страницу: /add-company.\nПошагово:\n1. Откройте /add-company и заполните обязательные поля компании и контактов.\n2. Выберите категорию/подкатегорию и регион, добавьте короткое описание деятельности.\n3. Отправьте форму и дождитесь модерации карточки.\nЧто подготовить заранее:\n1. Название компании, УНП/регистрационные данные.\n2. Адрес, телефон, e-mail, сайт/мессенджер.\n3. Рубрики (чем занимаетесь) и короткое описание 2-5 предложений.\nЕсли нужно, дам короткий шаблон заполнения полей под вашу компанию.\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "checks": [
+            {
+              "id": "UXA022.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA022.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA022.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 587
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3227
+    },
+    {
+      "id": "UXA023",
+      "title": "Банк A: Поиск компании — запрос 23",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Как скопировать реквизиты?",
+          "requestBody": {
+            "message": "Как скопировать реквизиты?",
+            "history": []
+          },
+          "latencyMs": 3494,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "a7571c28-8e35-4173-8b31-a47aeb50804d",
+          "isStub": false,
+          "reply": "Быстро так:\n\n1. Откройте карточку компании.  \n2. Найдите блок **«Реквизиты»** (УНП, юр. адрес, банк и т.д.).  \n3. Выделите нужный текст мышкой → **Ctrl+C** (или ПКМ → **Копировать**).  \n4. Вставьте куда нужно: **Ctrl+V**.\n\nЕсли копируете с телефона:  \n- удерживайте палец на тексте,  \n- выделите фрагмент маркерами,  \n- нажмите **«Копировать»**.\n\nЕсли текст не выделяется, пришлите ссылку на страницу — подскажу альтернативный способ (через «Печать»/режим чтения/исходный код).\n\nОфициальный реестр для проверки статуса: egr.gov.by.",
+          "checks": [
+            {
+              "id": "UXA023.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA023.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA023.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 531
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3494
+    },
+    {
+      "id": "UXA024",
+      "title": "Банк A: Поиск компании — запрос 24",
+      "tags": [
+        "query_bank",
+        "company_lookup",
+        "single_turn",
+        "user_real_short"
+      ],
+      "personaGoal": "Пользователь хочет быстро найти/проверить компанию или навигацию по карточке/поиску.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Можно ли скачать карточку PDF?",
+          "requestBody": {
+            "message": "Можно ли скачать карточку PDF?",
+            "history": []
+          },
+          "latencyMs": 3128,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "b47d9d71-3bf6-4c24-bd71-c395607de41f",
+          "isStub": false,
+          "reply": "Да, обычно можно — если на странице компании есть кнопка **«Печать»** или **«Скачать/Экспорт»**.\n\nБыстрый способ, если отдельной кнопки нет:\n1. Откройте карточку компании.  \n2. Нажмите **Ctrl+P** (или «Печать» в браузере).  \n3. В принтере выберите **«Сохранить как PDF»**.  \n4. Сохраните файл.\n\nЕсли хотите, подскажу оптимальный вариант именно для вашей страницы (пришлите ссылку на карточку).\n\nОфициальный реестр для проверки статуса: egr.gov.by.\n\nПо выгрузке базы: помогу только в легальном формате.\n1. Допустима работа с публичными карточками каталога (название, город, телефон, сайт, /company ссылка).\n2. Соблюдайте правила сайта и условия доступа к данным.\n3. Ограничение: не включайте персональные/непубличные данные без законного основания.\n4. Могу собрать таблицу по сегментам: транспорт, склад, экспедиция + контакты из карточек.",
+          "checks": [
+            {
+              "id": "UXA024.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UXA024.T1.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UXA024.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 60,
+                "len": 838
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 3128
+    }
+  ]
+}

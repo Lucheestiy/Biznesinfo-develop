@@ -1,0 +1,131 @@
+```json
+{
+  "advisor": "gemini",
+  "executiveSummary": "The Biznesinfo AI assistant currently achieves its target pass rate for strict checks, indicating functional correctness in basic responses. However, judge evaluations reveal significantly lower usefulness scores (Gemini: 3.7/5, Kimi: 2.7/5), primarily due to: 1) Context Loss: Frequent inability to retain and apply user-provided constraints across turns, leading to generic fallbacks. 2) Lack of Specificity: Tendency to provide abstract rubrics or search instructions instead of concrete company names, rankings, or tailored advice derived from the Biznesinfo catalog, even when such data should be available. 3) Inadequate Filtering: Struggles to incorporate detailed user-specified filters (e.g., location, product attributes, time-sensitive terms) into search results. Addressing these core issues will significantly improve user satisfaction and the assistant's perceived utility.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Enhance Multi-Turn Context Retention and Application",
+      "why": "This directly addresses the primary cause of low usefulness and context loss, which undermines the assistant's intelligence. Generic fallbacks erode user trust and efficiency.",
+      "expectedImpact": "Significant reduction in generic responses, higher relevance of results, improved user satisfaction and task completion rates.",
+      "validationScenarios": [
+        "D001",
+        "D005",
+        "D006",
+        "D008",
+        "D011",
+        "D003"
+      ]
+    },
+    {
+      "priority": "P0",
+      "title": "Prioritize Concrete Shortlists and Specific Actionable Advice",
+      "why": "Directly addresses the 'lack of specificity' issue, making the assistant's output immediately actionable for the user. Users expect direct answers, especially in a 'rushed buyer' context.",
+      "expectedImpact": "Increased utility of responses, better alignment with the 'rushed buyer' persona, leading to quicker decision-making for users.",
+      "validationScenarios": [
+        "D001",
+        "D005",
+        "D006",
+        "D008",
+        "D011",
+        "D003"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Refine Retrieval and Filtering Mechanisms",
+      "why": "Enables the assistant to deliver more precise and relevant results based on detailed user requirements, reducing instances where specific constraints are ignored or mishandled.",
+      "expectedImpact": "Fewer instances of missed constraints, more accurate company suggestions, and higher precision in filtered results.",
+      "validationScenarios": [
+        "D001",
+        "D011"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval|prompt",
+      "title": "Dynamic Re-query with Accumulated Constraints",
+      "action": "Modify the prompt engineering and/or retrieval logic to explicitly construct or refine search queries by combining the initial user intent with *all subsequent, explicit constraints* (e.g., location, product specifications, delivery terms) from previous turns. When a new constraint is introduced, the system should re-execute or refine the search against the Biznesinfo catalog with the *cumulative* parameters. If no new companies are found after filtering, a polite and specific 'no results found for these combined criteria' is preferable to a generic fallback.",
+      "implementationHint": "Within the agent's logic, maintain a state object for active search parameters. On each new user turn, update this state and trigger a new search/filter operation on the Biznesinfo data based on the cumulative parameters. Ensure the underlying Biznesinfo search API can handle complex, multi-faceted queries.",
+      "expectedImpact": "Drastically reduce 'generic fallback' issues and ensure responses are highly relevant to the latest user input. Improve continuity across multi-turn conversations.",
+      "risk": "Medium (requires careful state management and robust integration with the Biznesinfo search API).",
+      "effort": "M",
+      "validationScenarios": [
+        "D001",
+        "D005",
+        "D006",
+        "D008",
+        "D011",
+        "D003"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "prompt|template",
+      "title": "Enforce Specific Company Presentation over General Rubrics",
+      "action": "Update the main prompt and any post-processing templates to *always* attempt to present specific company names, links, and relevant attributes when search results are available, especially when ranking or shortlisting is requested. Avoid using generic 'how-to-search' instructions or abstract criteria unless *explicitly no companies match the criteria*. For example, if a user asks for 'кого прозвонить первым' after companies were previously identified, the assistant should pick from those companies, not give a general rubric.",
+      "implementationHint": "Modify the prompt to explicitly instruct the model: 'If Biznesinfo data provides specific companies, prioritize listing 2-5 top relevant companies with brief justifications for their ranking/relevance, and include their Biznesinfo links. Only provide general advice or rubrics if no specific companies can be confidently identified after a thorough search matching all current constraints.'",
+      "expectedImpact": "Increase actionability and direct usefulness for the user, fulfilling the 'rushed buyer' persona by providing immediately usable information.",
+      "risk": "Low (primarily prompt/template adjustment).",
+      "effort": "S",
+      "validationScenarios": [
+        "D001",
+        "D005",
+        "D006",
+        "D008",
+        "D011",
+        "D003"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails|prompt",
+      "title": "Transparent Handling of 'No Results' and Data Limitations",
+      "action": "When a highly specific query (especially after multiple turns) yields no results from the Biznesinfo catalog, the assistant should clearly and transparently state that no companies were found matching *all* the detailed criteria. It should then offer to broaden the search by removing the *least critical* constraint or suggest alternative search terms, rather than reverting to a generic, unhelpful response or claiming an inability to access company lists (e.g., D005).",
+      "implementationHint": "Implement a check after the Biznesinfo data retrieval step. If the result set is empty or below a certain threshold (e.g., <2 companies), trigger a specific 'no results' prompt that guides the model to explain this limitation, suggest broadening the search, and offer to remove specific constraints.",
+      "expectedImpact": "Build user trust and provide more helpful guidance even in cases of no direct matches. Avoid frustrating users with generic advice when they've provided specific constraints.",
+      "risk": "Low.",
+      "effort": "S",
+      "validationScenarios": [
+        "D005",
+        "D011"
+      ]
+    },
+    {
+      "id": "R4",
+      "area": "template|prompt",
+      "title": "Contextualize General Advice for Identified Companies",
+      "action": "For scenarios like D008 ('уборка после ремонта') where contract clauses or checklists are requested, and specific companies have been identified in earlier turns, modify the prompt to instruct the model to *attempt* to contextualize the general advice with references to the previously identified companies (e.g., 'For [Company X], consider clause Y due to Z'). If direct contextualization is not feasible, ensure the general advice is still highly practical and *acknowledges* the previous company mentions, rather than ignoring them completely.",
+      "implementationHint": "Prepend a summary of previously identified companies (with their key attributes) to the prompt when general advice (like contract terms or checklists) is requested. Explicitly ask the model to integrate this context into its response if possible.",
+      "expectedImpact": "Maintain continuity and increase the perceived relevance and usefulness of general advice by tying it back to specific entities previously discussed.",
+      "risk": "Low.",
+      "effort": "S",
+      "validationScenarios": [
+        "D008"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "D005",
+      "D001",
+      "D008",
+      "D011",
+      "D006",
+      "D003"
+    ],
+    "regressionSuites": [
+      "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.dirty.realworld.json"
+    ],
+    "successMetrics": [
+      "Increase judgeSummary.gemini.averageUsefulness to > 4.0",
+      "Increase judgeSummary.kimi.averageUsefulness to > 3.5",
+      "Elimination of all 'generic fallback' and 'loss of context' issues from judgeIssueHints for validated scenarios",
+      "All strictPass=false scenarios (D005, D001) must pass their strict checks",
+      "UsefulRate for both judges to be > 0.8"
+    ]
+  }
+}
+```

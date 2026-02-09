@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-06T16:40:00Z",
+    "source": "manual-regression",
+    "description": "Regression for tire wholesale query in Brest region with greeting noise"
+  },
+  "scenarios": [
+    {
+      "id": "R004",
+      "title": "Шины оптом в Брестской области: не подставлять нерелевантный food-профиль",
+      "personaGoal": "Найти поставщиков легковых шин оптом без ложных кандидатов из другой тематики",
+      "tags": ["regression", "tires", "geo", "relevance", "noise"],
+      "turns": [
+        {
+          "user": "Привет. Как дела? Где можно купить шины для легковой машины оптом в Брестской области?",
+          "checks": [
+            { "id": "R004.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "R004.T1.C2", "type": "includes_any", "patterns": ["брест", "brest"], "description": "Должен учитывать географию Брестской области" },
+            { "id": "R004.T1.C3", "type": "excludes_all", "patterns": ["/company/biznesinfo-76536", "айтадор"], "description": "Не должен подставлять нерелевантную компанию Айтадор" },
+            { "id": "R004.T1.C4", "type": "includes_any", "patterns": ["рубр", "каталог", "ключев", "поиск"], "description": "Должен дать практичный путь поиска, если точных кандидатов нет" }
+          ]
+        }
+      ]
+    }
+  ]
+}
