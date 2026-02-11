@@ -2,6 +2,15 @@
 
 Local-only automation artifacts live under `devloop/` (runs, logs, Codex session ids).
 
+## Core docs to keep in sync
+
+- `devloop/AI_ASSISTANT_PLAN.md` (B2B product roadmap)
+- `devloop/AI_ASSISTANT_MASTER_PLAN.md` (full implementation strategy)
+- `devloop/TODO.md` (next concrete tasks)
+- `app/qa/ai-request/JUDGES_ADVISORS_PLAYBOOK.md` (QA workflow)
+- `app/qa/ai-request/reports/README.md` (report artifacts)
+- `/scenarios` (on-site scenario navigator page)
+
 ## Files
 
 - `TODO.md` — edit this to steer the AI work.
@@ -49,3 +58,7 @@ DEVLOOP_USE_MINIMAX=0
 # DEVLOOP_TRIAD_USEFULNESS_FILE=app/qa/ai-request/reports/latest.usefulness.json
 # DEVLOOP_TRIAD_ADVICE_FILE=app/qa/ai-request/reports/latest.advice.json
 ```
+
+## Doc update rule
+
+When assistant behavior changes (routing, guardrails, retrieval, website scan, QA gates), update all six items above in the same branch before merge/push.

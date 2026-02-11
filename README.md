@@ -45,3 +45,25 @@ This repo is intended to be advanced automatically via a systemd timer that:
 - sends a Telegram summary.
 
 Edit `devloop/TODO.md` to steer what the AI works on next.
+
+## Documentation map
+
+- Product/engineering roadmap (B2B): `devloop/AI_ASSISTANT_PLAN.md`
+- Full assistant strategy and cycles: `devloop/AI_ASSISTANT_MASTER_PLAN.md`
+- Current execution backlog: `devloop/TODO.md`
+- QA judges/advisors process: `app/qa/ai-request/JUDGES_ADVISORS_PLAYBOOK.md`
+- QA report artifacts guide: `app/qa/ai-request/reports/README.md`
+- Scenario navigation UI (website): `/scenarios`
+
+## AI assistant behavior baseline (current)
+
+The assistant is expected to:
+
+1. Prefer autonomous lookup from Biznesinfo context (company card/history) before asking the user for links again.
+2. Distinguish analytics/tagging requests from supplier-sourcing requests (no drift into wrong mode).
+3. Keep replies consistent across turns (avoid “found before / not found now” contradictions without explicit reason).
+4. Use guarded website research only when user intent requires factual website/news extraction.
+
+For validation, see the user-ideas regression bank:
+
+- `app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json`

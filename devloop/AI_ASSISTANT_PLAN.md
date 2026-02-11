@@ -14,7 +14,8 @@ It is written to be actionable for the automated devloop (small, safe PR-sized c
 ## Non-goals (for now)
 
 - Auto-sending messages to companies without explicit user action.
-- Web-browsing or claiming to verify companies outside Biznesinfo data.
+- Broad/open-ended web-browsing outside business need. Exception: tightly scoped best-effort website scan of company URLs from Biznesinfo cards when user explicitly asks to check site facts.
+- Asking users to resend links that are already recoverable from current card context, shortlist context, or recent dialog history.
 - Complex “agent” behaviors (tool-calling orchestration) without strong safety + observability.
 
 ## Primary B2B use cases
@@ -54,6 +55,28 @@ User intent: “No response yet” / “Price too high” / “Need faster deliv
 Assistant should:
 - Provide follow-up sequence templates (1st ping, 2nd ping, final).
 - Provide negotiation language and “trade-offs” suggestions.
+
+### E) Card-first factual lookup and website/news checks
+
+User intent: “Найди на карточке компании”, “Проверь новости на сайте компании”, “Дай контакты этой компании”.
+
+Assistant should:
+- Reuse company context from the current turn and recent turns (name, card links, shortlist references).
+- Resolve website from Biznesinfo card first, then perform a bounded website/news extraction flow.
+- Return structured output: `date`, `title`, `short summary`, `link` for news-style requests.
+- Ask for extra clarification only after autonomous lookup paths are exhausted.
+
+## Autonomy and self-check policy
+
+To prevent contradictory or low-trust behavior:
+
+1. If request is analytics/tagging intent, do not switch to supplier lookup fallback.
+2. If user asks to continue from card/site context, do not default to “send link” when link/candidate is already available in context.
+3. Before finalizing reply, run consistency checks:
+   - no “found then not found” contradiction without explicit narrowing/filter change,
+   - no irrelevant rubric/provider pivot,
+   - no duplicate fallback blocks that cancel previous progress.
+4. If confidence is low, state uncertainty explicitly and continue with concrete next safe action.
 
 ## UX surfaces (where the assistant appears)
 
@@ -145,6 +168,9 @@ Each step should be doable in one safe PR-sized change.
 7. Optional streaming responses (provider-dependent).
 8. Better error UX: quota/rate limit messages + retry guidance.
 9. Provider abstraction for multiple LLMs (OpenAI, others) with unified timeouts and safe fallback.
+10. Add history-aware follow-up detection for card/site/news requests (“на карточке”, “на сайте”, “последние новости”).
+11. Add anti-link-gate post-processing so assistant continues with known context instead of asking for the same link again.
+12. Add explicit analytics-vs-sourcing recovery guard (if answer drifted into wrong mode, repair before sending).
 
 ## Definition of done (for each step)
 

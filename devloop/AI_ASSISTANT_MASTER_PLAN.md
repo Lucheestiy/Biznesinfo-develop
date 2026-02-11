@@ -28,6 +28,7 @@ Anything that affects the assistant’s ability to help users achieve outcomes, 
 
 - **B2B outcomes first:** “need → shortlist → outreach” should be fast.
 - **Honesty:** never fabricate company facts; clearly label what is “from directory snapshot” vs user-provided.
+- **Autonomy with verification:** assistant should proactively use available card/context data and self-check consistency before asking user to repeat input.
 - **Safety:** treat all text as untrusted; prompt injection resistance is mandatory.
 - **Mobile-first:** the assistant must be usable on mobile.
 - **Small, reviewable changes:** prefer PR-sized steps.
@@ -333,6 +334,22 @@ Checklist:
 
 Definition of done:
 - Changes are measurable (at least locally) and regressions are caught early.
+
+### Cycle 7 — Autonomy + consistency hardening
+
+**Goal:** eliminate trust-breaking regressions where assistant asks for already-known links or contradicts its own prior step.
+
+Checklist:
+- [x] Add history-aware follow-up detection for card/site/news intents (e.g., “на карточке компании”).
+- [x] Bootstrap website research from company-name hints in current + recent turns when explicit card link is absent.
+- [x] Add anti-link-gate post-processing: if candidate/card context exists, continue autonomously instead of requesting the same link.
+- [x] Add analytics-tagging recovery guard: block drift into supplier-mode for pure analytics/tagging prompts.
+- [x] Add dedicated regression case for “found first, then not found / asked link” consistency failure.
+
+Definition of done:
+- Assistant does not ask for redundant links when context already contains enough identifiers.
+- Analytics-tagging turns remain in analytics domain through the full answer.
+- Multi-turn consistency regressions are covered by explicit scenario tests.
 
 ---
 
