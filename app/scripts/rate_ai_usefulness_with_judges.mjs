@@ -32,6 +32,9 @@ function parseArgs(argv) {
     minGeminiUsefulRate: null,
     minKimiUsefulRate: null,
     minMinimaxUsefulRate: null,
+    maxSynthesizedRate: null,
+    maxSchemaRetryRate: null,
+    maxNonJsonRetryRate: null,
     failExitCode: 3,
   };
 
@@ -117,6 +120,12 @@ function parseArgs(argv) {
       out.minKimiUsefulRate = parseRateOrNull(argv[++i]);
     } else if (a === "--min-minimax-useful-rate") {
       out.minMinimaxUsefulRate = parseRateOrNull(argv[++i]);
+    } else if (a === "--max-synthesized-rate") {
+      out.maxSynthesizedRate = parseRateOrNull(argv[++i]);
+    } else if (a === "--max-schema-retry-rate") {
+      out.maxSchemaRetryRate = parseRateOrNull(argv[++i]);
+    } else if (a === "--max-non-json-retry-rate") {
+      out.maxNonJsonRetryRate = parseRateOrNull(argv[++i]);
     } else if (a === "--fail-exit-code") {
       const code = Number(argv[++i] || 3);
       out.failExitCode = Number.isFinite(code) ? Math.max(1, Math.floor(code)) : 3;
@@ -145,6 +154,9 @@ function parseArgs(argv) {
         "  --min-gemini-useful-rate R  Minimum Gemini useful-rate (0..1 or %)",
         "  --min-kimi-useful-rate R    Minimum Kimi useful-rate (0..1 or %)",
         "  --min-minimax-useful-rate R  Minimum MiniMax useful-rate (0..1 or %)",
+        "  --max-synthesized-rate R    Max rate of synthesized ratings from summary-only judge output (0..1 or %)",
+        "  --max-schema-retry-rate R   Max batch-rate of schema-retry usage (0..1 or %)",
+        "  --max-non-json-retry-rate R Max batch-rate of non-JSON parse retry usage (0..1 or %)",
         "  --fail-exit-code N       Exit code when quality gate fails (default 3)",
       ].join("\n"));
       process.exit(0);
@@ -167,7 +179,10 @@ function isGateConfigured(opts) {
     opts.minMinimaxAvg != null ||
     opts.minGeminiUsefulRate != null ||
     opts.minKimiUsefulRate != null ||
-    opts.minMinimaxUsefulRate != null
+    opts.minMinimaxUsefulRate != null ||
+    opts.maxSynthesizedRate != null ||
+    opts.maxSchemaRetryRate != null ||
+    opts.maxNonJsonRetryRate != null
   );
 }
 
@@ -226,6 +241,7 @@ function mkScenarioPayload(s) {
 }
 
 function buildJudgePrompt(judgeName, scenarios) {
+  const expectedScenarioIds = (scenarios || []).map((s) => String(s?.id || "").trim()).filter(Boolean);
   const payload = {
     judge: judgeName,
     task: "Rate usefulness as a real frustrated business user in realistic multi-turn sourcing conversations.",
@@ -256,12 +272,17 @@ function buildJudgePrompt(judgeName, scenarios) {
       "If user gives extra constraints (quality/spec/logistics), continuity is mandatory.",
       "Do not use any external tools; evaluate only transcript content.",
       "Return JSON only.",
+      "You MUST return top-level key `ratings` as an array.",
+      "ratings length MUST equal expectedScenarioIds length.",
+      "Every scenarioId in ratings MUST be from expectedScenarioIds and appear exactly once.",
+      "Do not return summary-only JSON. If uncertain, still output a conservative per-scenario rating with low confidence.",
     ],
+    expectedScenarioIds,
     requiredJsonSchema: {
       judge: judgeName,
       ratings: [
         {
-          scenarioId: "S001",
+          scenarioId: expectedScenarioIds[0] || "UV001",
           usefulness: "integer 0..5",
           verdict: "useful|not_useful",
           confidence: "number 0..1",
@@ -396,6 +417,20 @@ function normalizeJudgeRatings(parsed, expectedIds = []) {
     const value = parsed[key];
     if (Array.isArray(value) && value.length > 0) nestedArrays.push(...value);
   }
+  const nestedSummary = parsed.summary && typeof parsed.summary === "object" && !Array.isArray(parsed.summary) ? parsed.summary : null;
+  if (nestedSummary) {
+    for (const key of ["ratings", "evaluations", "results", "items", "scores"]) {
+      const value = nestedSummary[key];
+      if (Array.isArray(value) && value.length > 0) nestedArrays.push(...value);
+    }
+  }
+  const nestedData = parsed.data && typeof parsed.data === "object" && !Array.isArray(parsed.data) ? parsed.data : null;
+  if (nestedData) {
+    for (const key of ["ratings", "evaluations", "results", "items", "scores"]) {
+      const value = nestedData[key];
+      if (Array.isArray(value) && value.length > 0) nestedArrays.push(...value);
+    }
+  }
   if (nestedArrays.length > 0) return nestedArrays;
 
   const expectedSet = new Set((expectedIds || []).map((id) => String(id || "").trim()).filter(Boolean));
@@ -451,15 +486,141 @@ function normalizeJudgeRatings(parsed, expectedIds = []) {
   return topLevelMapRows;
 }
 
+function buildSummaryFallbackRatings(parsed, expectedIds, judge) {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return [];
+  const ids = (expectedIds || []).map((id) => String(id || "").trim()).filter(Boolean);
+  if (ids.length === 0) return [];
+
+  const summary =
+    parsed.summary && typeof parsed.summary === "object" && !Array.isArray(parsed.summary) ? parsed.summary : null;
+  if (!summary) return [];
+
+  const normalizeRate = (raw) => {
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return null;
+    if (n > 1) return Math.max(0, Math.min(1, n / 100));
+    return Math.max(0, Math.min(1, n));
+  };
+  const clampScore = (raw) => {
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return null;
+    return Math.max(0, Math.min(5, n));
+  };
+
+  const avgUsefulnessRaw = clampScore(
+    summary.averageUsefulness ?? summary.avgUsefulness ?? summary.averageScore ?? summary.score ?? summary.avg,
+  );
+  const avgUsefulness = avgUsefulnessRaw == null ? null : Math.round(avgUsefulnessRaw);
+  const usefulCountRaw = Number(summary.usefulCount ?? summary.positiveCount ?? summary.goodCount);
+  const usefulCount = Number.isFinite(usefulCountRaw)
+    ? Math.max(0, Math.min(ids.length, Math.round(usefulCountRaw)))
+    : null;
+  const avgUserSatisfaction = normalizeRate(
+    summary.averageUserSatisfaction ?? summary.userSatisfaction ?? summary.avgSatisfaction,
+  );
+  const continueRate = normalizeRate(summary.wouldContinueRate ?? summary.continueRate ?? summary.userContinueRate);
+  const genericFallbackRate = normalizeRate(
+    summary.genericFallbackRate ?? summary.feltGenericFallbackRate ?? summary.fallbackRate,
+  );
+
+  const findingsSource = [
+    ...(Array.isArray(parsed.keyFindings) ? parsed.keyFindings : []),
+    ...(Array.isArray(parsed.findings) ? parsed.findings : []),
+    ...(Array.isArray(parsed.recommendations) ? parsed.recommendations : []),
+    ...(Array.isArray(parsed.issues) ? parsed.issues : []),
+  ];
+  const findingsSeen = new Set();
+  const findings = [];
+  for (const item of findingsSource) {
+    const value = truncate(String(item || "").trim(), 220);
+    if (!value) continue;
+    const key = value.toLowerCase();
+    if (findingsSeen.has(key)) continue;
+    findingsSeen.add(key);
+    findings.push(value);
+    if (findings.length >= 8) break;
+  }
+
+  if (avgUsefulness == null && usefulCount == null && findings.length === 0) return [];
+
+  const baselineUsefulness =
+    avgUsefulness != null ? avgUsefulness : usefulCount != null ? (usefulCount > 0 ? 3 : 2) : 2;
+  const baselineSatisfaction =
+    avgUserSatisfaction != null ? avgUserSatisfaction : Number((Math.max(0, Math.min(5, baselineUsefulness)) / 5).toFixed(3));
+  const baselineContinue = continueRate != null ? continueRate >= 0.5 : baselineUsefulness >= 3;
+  const baselineGenericFallback = genericFallbackRate != null ? genericFallbackRate >= 0.5 : false;
+
+  const positiveSignals = /(полез|хорош|лучш|сильн|работа|useful|good|great)/iu;
+  const negativeSignals = /(критич|сбой|ошиб|нерелев|hallucin|мусор|провал|бесполез|not[_\s-]?useful|irrelevant)/iu;
+  const scenarioPos = new Map(ids.map((id, idx) => [id, idx]));
+  const forcedLow = new Set();
+  const forcedHigh = new Set();
+  for (const finding of findings) {
+    const lower = String(finding || "").toLowerCase();
+    const mentioned = ids.filter((id) => lower.includes(id.toLowerCase()));
+    if (mentioned.length === 0) continue;
+    for (const id of mentioned) {
+      if (negativeSignals.test(finding)) forcedLow.add(id);
+      if (positiveSignals.test(finding)) forcedHigh.add(id);
+    }
+  }
+
+  const rows = [];
+  for (let idx = 0; idx < ids.length; idx++) {
+    const scenarioId = ids[idx];
+    let usefulness = baselineUsefulness;
+    if (usefulCount != null) {
+      usefulness = idx < usefulCount ? Math.max(usefulness, 3) : Math.min(usefulness, 2);
+    }
+    if (forcedLow.has(scenarioId)) usefulness = Math.min(usefulness, 1);
+    if (forcedHigh.has(scenarioId)) usefulness = Math.max(usefulness, 4);
+    usefulness = Math.max(0, Math.min(5, Math.round(usefulness)));
+
+    const localReasons = [
+      "Per-scenario ratings were synthesized from summary-only judge output.",
+      ...(findings.length > 0 ? [findings[0]] : []),
+    ];
+
+    rows.push({
+      scenarioId,
+      usefulness,
+      verdict: usefulness >= 3 ? "useful" : "not_useful",
+      confidence: 0.3,
+      userSatisfaction: baselineSatisfaction,
+      wouldContinue: baselineContinue,
+      feltGenericFallback: baselineGenericFallback,
+      continuityScore: usefulness,
+      reasons: localReasons,
+      criticalIssues: forcedLow.has(scenarioId) ? [findings.find((f) => String(f).toLowerCase().includes(scenarioId.toLowerCase())) || "summary-only fallback"] : [],
+      strengths: forcedHigh.has(scenarioId) ? ["mentioned as relatively stronger in summary findings"] : [],
+      nextUserProbe: null,
+      judge,
+      synthesized: true,
+      _fallback: "summary_only",
+      _scenarioOrder: scenarioPos.get(scenarioId) ?? idx,
+    });
+  }
+
+  return rows;
+}
+
 function validateJudgeBatch(parsed, judge, expectedIds) {
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new Error("judge output is not an object");
   }
 
-  const ratings = normalizeJudgeRatings(parsed, expectedIds);
+  let ratings = normalizeJudgeRatings(parsed, expectedIds);
   if (ratings.length === 0) {
-    const keys = Object.keys(parsed || {}).slice(0, 10);
-    throw new Error(`ratings array is empty (keys: ${keys.join(", ") || "none"})`);
+    const fallbackRatings = buildSummaryFallbackRatings(parsed, expectedIds, judge);
+    if (fallbackRatings.length > 0) {
+      ratings = fallbackRatings;
+      process.stdout.write(
+        `[${judge}] warning: synthesized ${fallbackRatings.length} per-scenario ratings from summary-only judge output\n`,
+      );
+    } else {
+      const keys = Object.keys(parsed || {}).slice(0, 10);
+      throw new Error(`ratings array is empty (keys: ${keys.join(", ") || "none"})`);
+    }
   }
 
   const byId = new Map();
@@ -516,10 +677,38 @@ function validateJudgeBatch(parsed, judge, expectedIds) {
       strengths,
       nextUserProbe: nextUserProbe || null,
       judge,
+      synthesized: Boolean(row?.synthesized || row?._fallback === "summary_only"),
     });
   }
 
-  const missing = expectedIds.filter((id) => !byId.has(id));
+  let missing = expectedIds.filter((id) => !byId.has(id));
+  if (missing.length > 0) {
+    const fallbackMissing = buildSummaryFallbackRatings(parsed, missing, judge);
+    for (const row of fallbackMissing) {
+      if (!row || !row.scenarioId || byId.has(row.scenarioId)) continue;
+      byId.set(row.scenarioId, {
+        scenarioId: row.scenarioId,
+        usefulness: Math.max(0, Math.min(5, Math.round(Number(row.usefulness) || 0))),
+        verdict: String(row.verdict || "").toLowerCase() === "useful" || Number(row.usefulness) >= 3 ? "useful" : "not_useful",
+        confidence: Number.isFinite(Number(row.confidence)) ? Math.max(0, Math.min(1, Number(row.confidence))) : 0.3,
+        userSatisfaction: Number.isFinite(Number(row.userSatisfaction))
+          ? Math.max(0, Math.min(1, Number(row.userSatisfaction)))
+          : Number(((Number(row.usefulness) || 0) / 5).toFixed(3)),
+        wouldContinue: typeof row.wouldContinue === "boolean" ? row.wouldContinue : Number(row.usefulness) >= 3,
+        feltGenericFallback: Boolean(row.feltGenericFallback),
+        continuityScore: Number.isFinite(Number(row.continuityScore))
+          ? Math.max(0, Math.min(5, Math.round(Number(row.continuityScore))))
+          : Math.max(0, Math.min(5, Math.round(Number(row.usefulness) || 0))),
+        reasons: Array.isArray(row.reasons) ? row.reasons : [],
+        criticalIssues: Array.isArray(row.criticalIssues) ? row.criticalIssues : [],
+        strengths: Array.isArray(row.strengths) ? row.strengths : [],
+        nextUserProbe: row.nextUserProbe || null,
+        judge,
+        synthesized: Boolean(row?.synthesized || row?._fallback === "summary_only"),
+      });
+    }
+    missing = expectedIds.filter((id) => !byId.has(id));
+  }
   if (missing.length > 0) {
     throw new Error(`missing scenario ratings: ${missing.join(", ")}`);
   }
@@ -539,6 +728,7 @@ function aggregate(ratings) {
     satisfactionScores.length > 0 ? satisfactionScores.reduce((a, b) => a + b, 0) / satisfactionScores.length : 0;
   const continueCount = ratings.filter((r) => Boolean(r.wouldContinue)).length;
   const genericFallbackCount = ratings.filter((r) => Boolean(r.feltGenericFallback)).length;
+  const synthesizedRatingCount = ratings.filter((r) => Boolean(r.synthesized)).length;
   const continuityScores = ratings.map((r) => Number(r.continuityScore)).filter((x) => Number.isFinite(x));
   const averageContinuityScore =
     continuityScores.length > 0 ? continuityScores.reduce((a, b) => a + b, 0) / continuityScores.length : 0;
@@ -584,6 +774,8 @@ function aggregate(ratings) {
     continueRate: Number((continueCount / Math.max(1, n)).toFixed(4)),
     genericFallbackCount,
     genericFallbackRate: Number((genericFallbackCount / Math.max(1, n)).toFixed(4)),
+    synthesizedRatingCount,
+    synthesizedRatingRate: Number((synthesizedRatingCount / Math.max(1, n)).toFixed(4)),
     averageContinuityScore: Number(averageContinuityScore.toFixed(3)),
     topIssues,
     worstScenarios: worst,
@@ -619,12 +811,16 @@ function evaluateQualityGate(params) {
     }
 
     const summary = row.summary || {};
+    const diagnostics = row.diagnostics || {};
     const avg = Number(summary.averageUsefulness);
     const usefulRate = Number(summary.usefulRate);
     const zeroCount = Number(summary.zeroUsefulnessCount);
     const userSatisfaction = Number(summary.averageUserSatisfaction);
     const continueRate = Number(summary.continueRate);
     const genericFallbackRate = Number(summary.genericFallbackRate);
+    const synthesizedRatingRate = Number(summary.synthesizedRatingRate);
+    const schemaRetryRate = Number(diagnostics.schemaRetryRate);
+    const nonJsonRetryRate = Number(diagnostics.nonJsonRetryRate);
 
     const minAvg = (threshold[judgeName] || {}).minAvg;
     if (minAvg != null) {
@@ -689,6 +885,42 @@ function evaluateQualityGate(params) {
         failures.push(`${judgeName} genericFallbackRate ${genericFallbackRate} > ${params.opts.maxGenericFallbackRate}`);
       }
     }
+
+    if (params.opts.maxSynthesizedRate != null) {
+      const pass = Number.isFinite(synthesizedRatingRate) && synthesizedRatingRate <= params.opts.maxSynthesizedRate;
+      checks.push({
+        judge: judgeName,
+        metric: "synthesizedRatingRate",
+        actual: synthesizedRatingRate,
+        expected: `<= ${params.opts.maxSynthesizedRate}`,
+        pass,
+      });
+      if (!pass) failures.push(`${judgeName} synthesizedRatingRate ${synthesizedRatingRate} > ${params.opts.maxSynthesizedRate}`);
+    }
+
+    if (params.opts.maxSchemaRetryRate != null) {
+      const pass = Number.isFinite(schemaRetryRate) && schemaRetryRate <= params.opts.maxSchemaRetryRate;
+      checks.push({
+        judge: judgeName,
+        metric: "schemaRetryRate",
+        actual: schemaRetryRate,
+        expected: `<= ${params.opts.maxSchemaRetryRate}`,
+        pass,
+      });
+      if (!pass) failures.push(`${judgeName} schemaRetryRate ${schemaRetryRate} > ${params.opts.maxSchemaRetryRate}`);
+    }
+
+    if (params.opts.maxNonJsonRetryRate != null) {
+      const pass = Number.isFinite(nonJsonRetryRate) && nonJsonRetryRate <= params.opts.maxNonJsonRetryRate;
+      checks.push({
+        judge: judgeName,
+        metric: "nonJsonRetryRate",
+        actual: nonJsonRetryRate,
+        expected: `<= ${params.opts.maxNonJsonRetryRate}`,
+        pass,
+      });
+      if (!pass) failures.push(`${judgeName} nonJsonRetryRate ${nonJsonRetryRate} > ${params.opts.maxNonJsonRetryRate}`);
+    }
   }
 
   return {
@@ -717,6 +949,12 @@ function buildMarkdown(out) {
     md.push(`- Real-user satisfaction: ${(judge.summary.averageUserSatisfaction * 100).toFixed(1)}%`);
     md.push(`- Would continue rate: ${(judge.summary.continueRate * 100).toFixed(1)}%`);
     md.push(`- Generic fallback rate: ${(judge.summary.genericFallbackRate * 100).toFixed(1)}%`);
+    md.push(`- Synthesized rating rate: ${(Number(judge.summary.synthesizedRatingRate || 0) * 100).toFixed(1)}%`);
+    if (judge.diagnostics) {
+      md.push(
+        `- Retry diagnostics: nonJSON ${(Number(judge.diagnostics.nonJsonRetryRate || 0) * 100).toFixed(1)}%, schema ${(Number(judge.diagnostics.schemaRetryRate || 0) * 100).toFixed(1)}%`,
+      );
+    }
     md.push(`- Continuity score avg: ${judge.summary.averageContinuityScore}/5`);
     md.push("");
     md.push(`### Top Issues (${judge.judge})`);
@@ -828,6 +1066,13 @@ function main() {
   const judges = [];
   for (const judgeName of opts.judges) {
     const allRatings = [];
+    const diagnostics = {
+      totalBatches: batches.length,
+      nonJsonRetryBatches: 0,
+      schemaRetryBatches: 0,
+      synthesizedBatches: 0,
+      synthesizedRatingCount: 0,
+    };
 
     for (let bi = 0; bi < batches.length; bi++) {
       const batch = batches[bi];
@@ -844,9 +1089,11 @@ function main() {
 
       const candidate = stripJsonHostileControlChars(extractJsonCandidate(res.stdout));
       let parsed;
+      let usedNonJsonRetry = false;
       try {
         parsed = JSON.parse(candidate);
       } catch (e) {
+        usedNonJsonRetry = true;
         const retryPrompt = [
           prompt,
           "",
@@ -874,14 +1121,73 @@ function main() {
           );
         }
       }
+      if (usedNonJsonRetry) diagnostics.nonJsonRetryBatches += 1;
 
-      const rows = validateJudgeBatch(parsed, judgeName, expectedIds);
+      let rows;
+      try {
+        rows = validateJudgeBatch(parsed, judgeName, expectedIds);
+      } catch (validationErr) {
+        const message = validationErr instanceof Error ? validationErr.message : String(validationErr);
+        const schemaFailure = /(ratings array is empty|missing scenario ratings)/iu.test(message);
+        if (!schemaFailure) throw validationErr;
+        diagnostics.schemaRetryBatches += 1;
+
+        const schemaRepairPrompt = [
+          prompt,
+          "",
+          "IMPORTANT SCHEMA FIX:",
+          "Your previous JSON did not include valid per-scenario ratings.",
+          `Return STRICT JSON with top-level keys: judge, ratings.`,
+          `ratings must contain exactly ${expectedIds.length} objects for scenarioId values: ${expectedIds.join(", ")}.`,
+          "Each rating object must include: scenarioId, usefulness, verdict, confidence, userSatisfaction, wouldContinue, feltGenericFallback, continuityScore, reasons, criticalIssues, strengths, nextUserProbe.",
+          "Do not return markdown. Do not return summary-only JSON.",
+        ].join("\n");
+
+        const schemaRepairRes = runJudge(judgeName, schemaRepairPrompt);
+        const schemaRepairRawFile = path.join(
+          rawDir,
+          `${judgeName}.batch${String(bi + 1).padStart(2, "0")}.schema-retry.txt`,
+        );
+        fs.writeFileSync(schemaRepairRawFile, schemaRepairRes.stdout || schemaRepairRes.stderr || "", "utf8");
+
+        if (!schemaRepairRes.ok) {
+          throw new Error(
+            `${judgeName} schema-retry failed on batch ${bi + 1}/${batches.length}: exit=${schemaRepairRes.status} ${truncate(schemaRepairRes.stderr, 280)}`,
+          );
+        }
+
+        const schemaRepairCandidate = stripJsonHostileControlChars(extractJsonCandidate(schemaRepairRes.stdout));
+        let parsedRepair;
+        try {
+          parsedRepair = JSON.parse(schemaRepairCandidate);
+        } catch (repairParseErr) {
+          throw new Error(
+            `${judgeName} schema-retry returned non-JSON on batch ${bi + 1}: ${
+              repairParseErr instanceof Error ? repairParseErr.message : String(repairParseErr)
+            }`,
+          );
+        }
+
+        rows = validateJudgeBatch(parsedRepair, judgeName, expectedIds);
+      }
+
       allRatings.push(...rows);
+      const synthesizedInBatch = rows.filter((row) => Boolean(row?.synthesized)).length;
+      if (synthesizedInBatch > 0) {
+        diagnostics.synthesizedBatches += 1;
+        diagnostics.synthesizedRatingCount += synthesizedInBatch;
+      }
       process.stdout.write(`[${judgeName}] batch ${bi + 1}/${batches.length} ok (${rows.length} ratings)\n`);
     }
 
     const summary = aggregate(allRatings);
-    judges.push({ judge: judgeName, summary, ratings: allRatings });
+    const totalBatches = Math.max(1, diagnostics.totalBatches);
+    const totalRatings = Math.max(1, allRatings.length);
+    diagnostics.nonJsonRetryRate = Number((diagnostics.nonJsonRetryBatches / totalBatches).toFixed(4));
+    diagnostics.schemaRetryRate = Number((diagnostics.schemaRetryBatches / totalBatches).toFixed(4));
+    diagnostics.synthesizedBatchRate = Number((diagnostics.synthesizedBatches / totalBatches).toFixed(4));
+    diagnostics.synthesizedRatingRate = Number((diagnostics.synthesizedRatingCount / totalRatings).toFixed(4));
+    judges.push({ judge: judgeName, summary, diagnostics, ratings: allRatings });
   }
 
   const byJudge = new Map(judges.map((j) => [j.judge, j]));

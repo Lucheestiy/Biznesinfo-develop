@@ -1,0 +1,359 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-07T15:10:00Z",
+      "source": "user-provided",
+      "description": "User-provided scenarios: guided sourcing, urgent contact lookup, B2B RFQ drafting"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1800,
+      "maxScenarios": null,
+      "onlyTags": [
+        "urgent_contact"
+      ],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T12-11-56-331Z-455554-16uza",
+    "startedAt": "2026-02-11T12:11:56.331Z",
+    "endedAt": "2026-02-11T12:12:13.190Z",
+    "durationMs": 16859,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-12-scenarios.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 9,
+    "passedChecks": 9,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 3,
+    "avgTurnLatencyMs": 5535,
+    "totalTurnLatencyMs": 16605,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UX111",
+      "title": "Срочно нужен контакт: телефон/адрес/график компании",
+      "tags": [
+        "urgent_contact",
+        "company_lookup",
+        "multi_turn"
+      ],
+      "personaGoal": "Логист хочет максимально быстро получить точные контактные данные компании.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 16605,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Найди телефон склада компании X в Могилеве.",
+          "requestBody": {
+            "message": "Найди телефон склада компании X в Могилеве.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 7745,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3e2b3421-c837-4249-835d-b9eeaa166a24",
+          "conversationId": "a9e9583f-d3d7-4051-81c7-0425ccd287e1",
+          "isStub": false,
+          "reply": "Контакт по карточке: **АЛЛО САЛОН СОТОВОЙ СВЯЗИ (МТС) ООО ПАТИО ПЛЮС** — /company/biznesinfo-27149\nТелефон: (+375-222) 225804\nЕсли нужно, дам короткий скрипт первого звонка под вашу задачу.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UX111.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UX111.T1.C2",
+              "type": "includes_any",
+              "description": "Должна быть фокусировка на контакте и городе",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "телефон",
+                  "склад",
+                  "могил",
+                  "компан",
+                  "контакт"
+                ],
+                "hits": [
+                  "телефон",
+                  "контакт"
+                ]
+              }
+            },
+            {
+              "id": "UX111.T1.C3",
+              "type": "not_refusal_only",
+              "description": "Не должен быть пустой отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Дай точный адрес и как проехать (если есть карта/район).",
+          "requestBody": {
+            "message": "Дай точный адрес и как проехать (если есть карта/район).",
+            "history": [
+              {
+                "role": "user",
+                "content": "Найди телефон склада компании X в Могилеве."
+              },
+              {
+                "role": "assistant",
+                "content": "Контакт по карточке: **АЛЛО САЛОН СОТОВОЙ СВЯЗИ (МТС) ООО ПАТИО ПЛЮС** — /company/biznesinfo-27149\nТелефон: (+375-222) 225804\nЕсли нужно, дам короткий скрипт первого звонка под вашу задачу."
+              }
+            ],
+            "conversationId": "a9e9583f-d3d7-4051-81c7-0425ccd287e1",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 5940,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "fbbb782e-0e72-4a79-a789-751e5da4b22f",
+          "conversationId": "a9e9583f-d3d7-4051-81c7-0425ccd287e1",
+          "isStub": false,
+          "reply": "Карточка компании: **АЛЛО САЛОН СОТОВОЙ СВЯЗИ (МТС) ООО ПАТИО ПЛЮС** — /company/biznesinfo-27149\nАдрес/локация: 212030 Могилев , Ленинская, 38 | Могилев\nЕсли нужно, подскажу, как быстро проверить реквизиты в официальном реестре egr.gov.by.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UX111.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UX111.T2.C2",
+              "type": "includes_any",
+              "description": "Должны быть адрес/навигация",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "адрес",
+                  "район",
+                  "карта",
+                  "проехать",
+                  "локац",
+                  "маршрут"
+                ],
+                "hits": [
+                  "адрес",
+                  "локац"
+                ]
+              }
+            },
+            {
+              "id": "UX111.T2.C3",
+              "type": "not_refusal_only",
+              "description": "Не должен быть пустой отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Есть ли у них график работы?",
+          "requestBody": {
+            "message": "Есть ли у них график работы?",
+            "history": [
+              {
+                "role": "user",
+                "content": "Найди телефон склада компании X в Могилеве."
+              },
+              {
+                "role": "assistant",
+                "content": "Контакт по карточке: **АЛЛО САЛОН СОТОВОЙ СВЯЗИ (МТС) ООО ПАТИО ПЛЮС** — /company/biznesinfo-27149\nТелефон: (+375-222) 225804\nЕсли нужно, дам короткий скрипт первого звонка под вашу задачу."
+              },
+              {
+                "role": "user",
+                "content": "Дай точный адрес и как проехать (если есть карта/район)."
+              },
+              {
+                "role": "assistant",
+                "content": "Карточка компании: **АЛЛО САЛОН СОТОВОЙ СВЯЗИ (МТС) ООО ПАТИО ПЛЮС** — /company/biznesinfo-27149\nАдрес/локация: 212030 Могилев , Ленинская, 38 | Могилев\nЕсли нужно, подскажу, как быстро проверить реквизиты в официальном реестре egr.gov.by."
+              }
+            ],
+            "conversationId": "a9e9583f-d3d7-4051-81c7-0425ccd287e1",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 2920,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "bc075ef9-c8b0-4e69-a3ae-8b8c3f641f84",
+          "conversationId": "a9e9583f-d3d7-4051-81c7-0425ccd287e1",
+          "isStub": false,
+          "reply": "По данным из имеющейся карточки (/company/biznesinfo-27149) график работы **не указан**.  \nЛучше уточнить по телефону: **(+375-222) 225804**.\n\nЕсли хотите, дам короткий текст для звонка, чтобы сразу спросить про склад, часы и наличие выдачи.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UX111.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UX111.T3.C2",
+              "type": "includes_any",
+              "description": "Должен быть покрыт вопрос графика",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "график",
+                  "режим",
+                  "часы",
+                  "работы",
+                  "время",
+                  "расписан"
+                ],
+                "hits": [
+                  "график",
+                  "часы",
+                  "работы"
+                ]
+              }
+            },
+            {
+              "id": "UX111.T3.C3",
+              "type": "not_refusal_only",
+              "description": "Не должен быть пустой отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 16607
+    }
+  ]
+}

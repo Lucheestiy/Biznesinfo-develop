@@ -1,0 +1,157 @@
+Now I have comprehensive data to provide concrete engineering advice. Let me compile the JSON response.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "The QA analysis reveals a critical pattern: while strict checks pass (100%), usefulness scores are poor (avg 2.47/5, usefulRate 47%). The core issue is a disconnect between retrieval and response generation. The search system (Meilisearch) returns results, but the AI fails to: (1) map user intent to correct search queries, (2) filter/rank results by relevance, (3) maintain context across turns. Worst failures: UV017 (beet suppliers) returned a college and auto parts; UV004 (juicers) returned tire/asphalt factories; UV013 (website scan) never provided companies to scan. The AI defaults to 'teaching how to search' instead of 'doing the search'.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix category-to-query mapping for product sourcing queries",
+      "why": "UV017, UV004, UV002 show the AI cannot map product queries (beet, juicers, flour) to correct search terms. Current system likely uses naive keyword matching without product category ontology.",
+      "expectedImpact": "Eliminate 60% of 'completely wrong category' hallucinations. UV017, UV004, UV002 would become useful.",
+      "validationScenarios": ["UV017", "UV004", "UV002", "UV003"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add retrieval-result validation layer before response generation",
+      "why": "The AI returns results without checking if they match the query category. UV017 returned a college for beet; UV004 returned tire factory for juicers. Need a relevance validator.",
+      "expectedImpact": "Prevent embarrassing mismatches. Force honest 'no results' fallback instead of wrong-category results.",
+      "validationScenarios": ["UV017", "UV004", "UV011", "UV003"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement multi-turn context memory for constraints",
+      "why": "UV001, UV013, UV014 show the AI forgets or ignores constraints from previous turns (manufacturer vs retail, specific product types, 'no generic advice' instructions).",
+      "expectedImpact": "Improve continuityScore from 2 to 4. Reduce generic fallback rate from 47% to <20%.",
+      "validationScenarios": ["UV001", "UV013", "UV014", "UV008"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add company shortlist minimum-fill enforcement",
+      "why": "UV005, UV007 show placeholder text ('резервный слот') instead of actual companies. Better to return 2 real companies than 1 real + 4 placeholders.",
+      "expectedImpact": "Eliminate placeholder anti-pattern. Force search expansion or honest 'only X found' responses.",
+      "validationScenarios": ["UV005", "UV007", "UV016"]
+    },
+    {
+      "priority": "P2",
+      "title": "Create rubric-to-company verification prompt chain",
+      "why": "UV012, UV013 require website verification of companies. Current AI gives methodology instead of executing checks. Need structured tool use for website scanning.",
+      "expectedImpact": "Enable actual website verification flows. UV012, UV013 become useful instead of generic.",
+      "validationScenarios": ["UV012", "UV013", "UV010"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Add product category classifier before search",
+      "action": "Before calling meiliSearch, classify user intent into a product category from a predefined taxonomy (food/agriculture, machinery/equipment, packaging, textiles, construction, services). Use this to validate retrieved results match the category. Reject results whose primary_rubric_name doesn't match the classified category.",
+      "implementationHint": "src/lib/meilisearch/search.ts: Add categoryClassifier() function. In meiliSearch(), after getting results, filter out companies where primary_rubric_slug doesn't match expected category. Log mismatches for debugging.",
+      "expectedImpact": "Eliminates UV017-type errors (college for beet). Forces search query reformulation instead of returning wrong-category results.",
+      "risk": "May reduce recall for cross-category companies (e.g., conglomerates). Mitigation: allow multi-category matches.",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV004", "UV002"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Implement retrieval relevance validator",
+      "action": "Create a post-retrieval validation function that checks if returned companies have keyword overlap with the user query. If <30% of returned companies contain query-related keywords in their keywords/description, reject and trigger 'no results' fallback instead of returning irrelevant companies.",
+      "implementationHint": "src/lib/meilisearch/search.ts: Add validateRelevance(results, queryTokens, minThreshold=0.3) function. Called after meiliSearch() before returning to API. If fails, return empty results with 'no_confident_matches' flag.",
+      "expectedImpact": "Prevents UV004 (juicers→tires) and UV017 (beet→college) type errors. Forces honest no-results response.",
+      "risk": "May be too strict for ambiguous queries. Make threshold configurable per query type.",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV004", "UV011", "UV003"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add constraint extraction and enforcement to system prompt",
+      "action": "Modify AI system prompt to: (1) explicitly list all constraints from conversation history at start of each response, (2) verify response satisfies each constraint, (3) refuse to give generic advice if user explicitly asked for companies. Add 'constraint_check' section to response format.",
+      "implementationHint": "Identify where AI prompt is defined (likely external, not in this repo). Add: 'Before responding, list: [Constraints from history]. Check: Does my response satisfy each? If user asked for specific companies and I have none, say \"В текущей базе нет подходящих компаний\" instead of generic advice.'",
+      "expectedImpact": "Reduces generic fallback rate. UV001, UV014 would correctly admit no data instead of giving types/frameworks.",
+      "risk": "May increase refusal rate. Acceptable if refusals are honest.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV014", "UV013", "UV008"]
+    },
+    {
+      "id": "R4",
+      "area": "ranking",
+      "title": "Implement shortlist quality enforcement",
+      "action": "When user requests N companies (e.g., 'top-5', 'shortlist 3-5'), enforce: (1) minimum 80% fill rate (4 real companies for top-5), (2) no placeholder text allowed, (3) if insufficient results, expand search (remove filters, use synonyms) or honestly report 'found only X'. Never use placeholder slots.",
+      "implementationHint": "Wherever shortlist generation happens (likely AI response layer): Add check - if requested N=5 and found <4, trigger search expansion with broader terms OR return honest count. Ban placeholder text pattern 'резервный слот'.",
+      "expectedImpact": "Eliminates UV005, UV007 placeholder anti-pattern. Improves user trust.",
+      "risk": "Search expansion may reduce relevance. Mitigation: clearly mark expanded results as 'less precise matches'.",
+      "effort": "M",
+      "validationScenarios": ["UV005", "UV007", "UV016"]
+    },
+    {
+      "id": "R5",
+      "area": "geo",
+      "title": "Add geo constraint validation for location queries",
+      "action": "For queries with city/region constraints, validate that returned companies actually match the location. Current system has city filtering but UV017 still returned wrong-location results. Add post-filter to ensure city field matches requested location.",
+      "implementationHint": "src/lib/meilisearch/search.ts: The city filter exists (line 552-554) but may not be strict enough. Add explicit post-filter: results = results.filter(r => normalizeCity(r.city) === normalizeCity(requestedCity)).",
+      "expectedImpact": "Prevents location mismatches. UV017 (Minsk beet) won't return companies from other cities.",
+      "risk": "May filter out valid results with slightly different city naming. Use fuzzy matching.",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV001", "UV012"]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Fix template generation to include specific recipients",
+      "action": "When generating outreach templates (Subject/Body/WhatsApp), require the AI to either: (1) include specific company name in the template, OR (2) provide a placeholder like '[Название компании из shortlist выше]' with clear instruction to fill from previous turn. Never generate template without recipient context.",
+      "implementationHint": "In AI prompt for template generation: add rule 'Template must reference specific company from shortlist. If multiple companies, generate separate template for each OR include placeholder with clear mapping instruction.'",
+      "expectedImpact": "UV001, UV004 templates become actionable instead of generic. User knows which company to contact.",
+      "risk": "Minimal. May increase response length slightly.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV005", "UV017"]
+    },
+    {
+      "id": "R7",
+      "area": "retrieval",
+      "title": "Add keyword expansion for low-recall queries",
+      "action": "When initial search returns <3 results for product queries, automatically expand with synonyms and related terms. Example: 'соковыжималка' → expand to 'бытовая техника', 'кухонные приборы', 'мелкая бытовая техника'. Use keyword taxonomy or LLM-based expansion.",
+      "implementationHint": "src/lib/meilisearch/search.ts: In meiliSearch(), if results.length < 3 and query is product-type, call expandKeywords(query) which returns array of related terms. Re-run search with OR logic.",
+      "expectedImpact": "Improves recall for niche products (UV004 juicers, UV008 minitractors). Reduces 'no results' scenarios.",
+      "risk": "May introduce irrelevant results. Use with relevance validator (R2).",
+      "effort": "M",
+      "validationScenarios": ["UV004", "UV008", "UV011"]
+    },
+    {
+      "id": "R8",
+      "area": "guardrails",
+      "title": "Add 'institution type' filter for supplier queries",
+      "action": "For sourcing queries (buying products, finding suppliers), automatically filter out educational institutions, medical facilities, government offices. These should never appear in B2B supplier shortlists.",
+      "implementationHint": "src/lib/meilisearch/search.ts: Add exclusion filter for rubrics containing 'образован', 'медицин', 'государствен', 'администрац' when query intent is 'supplier_sourcing'.",
+      "expectedImpact": "Prevents UV017-type error (college for beet). Prevents hospitals/schools appearing in supplier results.",
+      "risk": "May exclude legitimate B2B suppliers that happen to have educational divisions. Rare case.",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV003", "UV110"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV017",
+      "UV004",
+      "UV001",
+      "UV013",
+      "UV005",
+      "UV014"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.user-120-bank-b-suppliers-contractors.json",
+      "scenarios.regressions.user-120-bank-c-comparison-selection.json"
+    ],
+    "successMetrics": [
+      "averageUsefulness >= 3.5 (current: 2.47)",
+      "usefulRate >= 0.75 (current: 0.47)",
+      "zero wrong-category results in top-5 shortlists",
+      "genericFallback rate < 0.20 (current: ~0.50)",
+      "continuityScore avg >= 3.5 (current: ~2.5)"
+    ]
+  }
+}
+```

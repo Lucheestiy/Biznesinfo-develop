@@ -22,6 +22,12 @@ function parseArgs(argv) {
     outJson: path.join(repoRoot, "app", "qa", "ai-request", "reports", "geo-ambiguity-trend.json"),
     outMd: path.join(repoRoot, "app", "qa", "ai-request", "reports", "geo-ambiguity-trend.md"),
     window: 20,
+    sparklineWindow: 7,
+    emitCiSummaryOnly: false,
+    alwaysEmitGateMeta: false,
+    noWrite: false,
+    gateOrder: "target-first",
+    maxLastGreenAgeHours: null,
     minLatestPassRate: null,
     requireTargetReached: false,
   };
@@ -33,6 +39,18 @@ function parseArgs(argv) {
     else if (a === "--out-json") out.outJson = path.resolve(argv[++i]);
     else if (a === "--out-md") out.outMd = path.resolve(argv[++i]);
     else if (a === "--window") out.window = Math.max(1, Math.floor(Number(argv[++i] || 20)));
+    else if (a === "--sparkline-window") out.sparklineWindow = Math.max(1, Math.floor(Number(argv[++i] || 7)));
+    else if (a === "--emit-ci-summary-only") out.emitCiSummaryOnly = true;
+    else if (a === "--always-emit-gate-meta") out.alwaysEmitGateMeta = true;
+    else if (a === "--no-write") out.noWrite = true;
+    else if (a === "--gate-order") {
+      const raw = String(argv[++i] || "").trim().toLowerCase();
+      out.gateOrder = raw === "freshness-first" ? "freshness-first" : "target-first";
+    }
+    else if (a === "--max-last-green-age-hours") {
+      const n = Number(argv[++i]);
+      out.maxLastGreenAgeHours = Number.isFinite(n) && n >= 0 ? n : null;
+    }
     else if (a === "--min-latest-pass-rate") out.minLatestPassRate = parseRateOrNull(argv[++i]);
     else if (a === "--require-target-reached") out.requireTargetReached = true;
     else if (a === "--help" || a === "-h") {
@@ -45,6 +63,13 @@ function parseArgs(argv) {
         "  --out-json PATH             Output JSON path",
         "  --out-md PATH               Output Markdown path",
         "  --window N                  Number of recent runs in trend table (default 20)",
+        "  --sparkline-window N        Number of latest runs in sparkline (default 7)",
+        "  --emit-ci-summary-only      Print only GEO_TREND machine summary (plus gate errors, if any)",
+        "  --always-emit-gate-meta     Include gate_code/gate_name in GEO_TREND even on success",
+        "  --no-write                  Do not write output JSON/Markdown files",
+        "  --gate-order MODE           target-first (default) | freshness-first",
+        "  --max-last-green-age-hours N",
+        "                              Optional gate: fail when the last green run is older than N hours",
         "  --min-latest-pass-rate R    Optional gate for latest pass-rate (0..1 or 0..100)",
         "  --require-target-reached    Optional gate: fail if latest targetReached=false",
       ].join("\n"));
@@ -61,6 +86,28 @@ function round4(n) {
 
 function percent(n) {
   return `${(Number(n || 0) * 100).toFixed(1)}%`;
+}
+
+function formatDeltaPp(delta) {
+  if (delta == null || !Number.isFinite(Number(delta))) return "n/a";
+  const n = Number(delta);
+  const sign = n > 0 ? "+" : "";
+  return `${sign}${n.toFixed(1)} pp`;
+}
+
+function buildTrendRecommendation(trend) {
+  if (!trend?.latestRun?.targetReached) {
+    return "rerun `npm run qa:run:geo-ambiguity` and inspect `app/qa/ai-request/reports/latest.md` for failing checks";
+  }
+
+  const verdict = String(trend?.stats?.trendVerdict || "flat");
+  if (verdict === "declining") {
+    return "compare the latest two geo reports and prioritize fixes in the top failing checks";
+  }
+  if (verdict === "improving") {
+    return "keep the current course and monitor for two more runs before tightening thresholds";
+  }
+  return "trend is flat; run one focused geo hardening pass to reduce future regressions";
 }
 
 const SPARKLINE_ASCII = "._-:=+*#@";
@@ -208,7 +255,7 @@ function buildTrend(opts) {
   const previous = runs.length > 1 ? runs[runs.length - 2] : null;
   const recentWindow = Math.max(1, Math.min(opts.window, runs.length));
   const recentRuns = runs.slice(-recentWindow);
-  const recentSparklineWindow = Math.max(1, Math.min(7, runs.length));
+  const recentSparklineWindow = Math.max(1, Math.min(opts.sparklineWindow, runs.length));
   const recentSparklineRuns = runs.slice(-recentSparklineWindow);
   const lastGreenRun = [...runs].reverse().find((x) => x.targetReached) || null;
   const nowMs = Date.now();
@@ -218,6 +265,9 @@ function buildTrend(opts) {
   const checkPassRates = runs.map((x) => x.checkPassRate);
   const latestDelta = previous ? round4(latest.passRate - previous.passRate) : null;
   const trendDirection = latestDelta == null ? "flat" : latestDelta > 0 ? "up" : latestDelta < 0 ? "down" : "flat";
+  const trendVerdict = trendDirection === "up" ? "improving" : trendDirection === "down" ? "declining" : "flat";
+  const latestDeltaPp = latestDelta == null ? null : Number((latestDelta * 100).toFixed(1));
+  const lastGreenAgeHours = lastGreenAgeMs == null ? null : Number((lastGreenAgeMs / (60 * 60 * 1000)).toFixed(2));
   const failingRuns = runs.filter((x) => !x.targetReached).length;
   const targetMissRate = round4(failingRuns / Math.max(1, runs.length));
 
@@ -235,7 +285,9 @@ function buildTrend(opts) {
       latestPassedScenarios: latest.passedScenarios,
       latestTotalScenarios: latest.totalScenarios,
       latestDeltaFromPrevious: latestDelta,
+      latestDeltaPp,
       trendDirection,
+      trendVerdict,
       averagePassRate: round4(average(passRates)),
       averageCheckPassRate: round4(average(checkPassRates)),
       recentAveragePassRate: round4(average(recentRuns.map((x) => x.passRate))),
@@ -249,6 +301,7 @@ function buildTrend(opts) {
       lastGreenRunId: lastGreenRun ? lastGreenRun.runId : null,
       lastGreenStartedAt: lastGreenRun ? lastGreenRun.startedAt : null,
       lastGreenAgeMs,
+      lastGreenAgeHours,
     },
     latestRun: latest,
     recentRuns,
@@ -286,9 +339,9 @@ function writeOutputs(opts, trend) {
     md.push("- Time since last green run: n/a (no target-reached runs yet)");
   }
   if (trend.stats.latestDeltaFromPrevious != null) {
-    const sign = trend.stats.latestDeltaFromPrevious > 0 ? "+" : "";
-    md.push(`- Delta vs previous: ${sign}${(trend.stats.latestDeltaFromPrevious * 100).toFixed(1)} pp`);
+    md.push(`- Delta vs previous: ${formatDeltaPp(trend.stats.latestDeltaPp)}`);
   }
+  md.push(`- Trend verdict: ${trend.stats.trendVerdict}`);
   md.push(`- Trend direction: ${trend.stats.trendDirection}`);
   md.push(`- Average pass-rate (all): ${percent(trend.stats.averagePassRate)}`);
   md.push(`- Average pass-rate (recent ${trend.recentWindow}): ${percent(trend.stats.recentAveragePassRate)}`);
@@ -318,35 +371,126 @@ function writeOutputs(opts, trend) {
   fs.writeFileSync(opts.outMd, `${md.join("\n")}\n`, "utf8");
 }
 
-function checkGates(opts, trend) {
+function checkTargetReachedGate(opts, trend) {
   if (opts.requireTargetReached && !trend.latestRun.targetReached) {
     console.error("Gate failed: latest geo-ambiguity run has targetReached=false.");
-    return 3;
+    console.error("Hint: rerun geo regression and inspect latest failed checks before merging.");
+    return { code: 3, name: "target_reached" };
   }
 
+  return { code: 0, name: null };
+}
+
+function checkMinPassRateGate(opts, trend) {
   if (opts.minLatestPassRate != null && trend.latestRun.passRate < opts.minLatestPassRate) {
     console.error(
       `Gate failed: latest pass-rate ${percent(trend.latestRun.passRate)} < required ${percent(opts.minLatestPassRate)}.`,
     );
-    return 2;
+    console.error("Hint: improve scenario pass-rate first, then re-enable strict pass-rate gate.");
+    return { code: 2, name: "min_latest_pass_rate" };
   }
 
-  return 0;
+  return { code: 0, name: null };
+}
+
+function checkMaxLastGreenAgeGate(opts, trend) {
+  if (opts.maxLastGreenAgeHours != null) {
+    if (trend.stats.lastGreenAgeMs == null) {
+      console.error("Gate failed: no green run found, cannot satisfy max-last-green-age-hours gate.");
+      console.error("Hint: get at least one green geo run before applying age-based freshness gate.");
+      return { code: 4, name: "max_last_green_age_hours" };
+    }
+
+    const maxAgeMs = Number(opts.maxLastGreenAgeHours) * 60 * 60 * 1000;
+    if (trend.stats.lastGreenAgeMs > maxAgeMs) {
+      console.error(
+        `Gate failed: last green run age ${formatCompactDuration(trend.stats.lastGreenAgeMs)} ` +
+        `> allowed ${formatCompactDuration(maxAgeMs)}.`,
+      );
+      console.error("Hint: trigger a fresh geo run and keep cadence tighter than the configured age gate.");
+      return { code: 4, name: "max_last_green_age_hours" };
+    }
+  }
+
+  return { code: 0, name: null };
+}
+
+function checkGates(opts, trend) {
+  const orderedGateChecks =
+    opts.gateOrder === "freshness-first"
+      ? [checkMaxLastGreenAgeGate, checkTargetReachedGate, checkMinPassRateGate]
+      : [checkTargetReachedGate, checkMaxLastGreenAgeGate, checkMinPassRateGate];
+
+  for (const gateCheck of orderedGateChecks) {
+    const gateResultRaw = gateCheck(opts, trend);
+    const code = Number(gateResultRaw?.code ?? gateResultRaw ?? 0);
+    const name = gateResultRaw?.name || null;
+    if (code > 0) {
+      return { code, name };
+    }
+  }
+
+  return { code: 0, name: null };
 }
 
 function main() {
   const opts = parseArgs(process.argv);
   const trend = buildTrend(opts);
-  writeOutputs(opts, trend);
+  if (!opts.noWrite) writeOutputs(opts, trend);
+  const gateResult = checkGates(opts, trend);
+  const gateCodeMachine = Number(gateResult?.code || 0);
+  const gateNameMachine = String(gateResult?.name || "none");
+  const latestPassRatePct = (Number(trend.stats.latestPassRate || 0) * 100).toFixed(1);
+  const latestDeltaPpMachine = trend.stats.latestDeltaPp == null ? "na" : Number(trend.stats.latestDeltaPp).toFixed(1);
+  const lastGreenAgeHoursMachine = trend.stats.lastGreenAgeHours == null ? "na" : Number(trend.stats.lastGreenAgeHours).toFixed(2);
+  const latestTargetReachedMachine = trend.stats.latestTargetReached ? "yes" : "no";
+  const gateOrderMachine = String(opts.gateOrder || "target-first");
+  const recommendation = buildTrendRecommendation(trend);
+  const emitGateMetaMachine = gateCodeMachine > 0 || opts.alwaysEmitGateMeta;
+  const gateMetaMachineSuffix = emitGateMetaMachine
+    ? ` gate_code=${String(gateCodeMachine)} gate_name=${gateNameMachine}`
+    : "";
+  const ciSummaryLine =
+    `GEO_TREND verdict=${trend.stats.trendVerdict} ` +
+    `delta_pp=${latestDeltaPpMachine} ` +
+    `pass_rate=${latestPassRatePct} ` +
+    `last_green_age_hours=${lastGreenAgeHoursMachine} ` +
+    `gate_order=${gateOrderMachine} ` +
+    `target_reached=${latestTargetReachedMachine} ` +
+    `sparkline=${trend.stats.recentSparkline}` +
+    gateMetaMachineSuffix;
 
-  console.log(`Geo trend JSON: ${opts.outJson}`);
-  console.log(`Geo trend MD:   ${opts.outMd}`);
-  console.log(
-    `Latest geo-ambiguity pass-rate: ${percent(trend.latestRun.passRate)} ` +
-    `(${trend.latestRun.passedScenarios}/${trend.latestRun.totalScenarios})`,
-  );
+  if (opts.emitCiSummaryOnly) {
+    console.log(ciSummaryLine);
+  } else {
+    if (opts.noWrite) {
+      console.log("Geo trend write: skipped (--no-write)");
+    } else {
+      console.log(`Geo trend JSON: ${opts.outJson}`);
+      console.log(`Geo trend MD:   ${opts.outMd}`);
+    }
+    console.log(
+      `Latest geo-ambiguity pass-rate: ${percent(trend.latestRun.passRate)} ` +
+      `(${trend.latestRun.passedScenarios}/${trend.latestRun.totalScenarios})`,
+    );
+    console.log(
+      `Sparkline[${trend.stats.recentSparklineWindow}] old->new: ${trend.stats.recentSparkline} ` +
+      `(low='${SPARKLINE_ASCII[0]}', high='${SPARKLINE_ASCII[SPARKLINE_ASCII.length - 1]}')`,
+    );
+    console.log(`Trend verdict: ${trend.stats.trendVerdict} (delta ${formatDeltaPp(trend.stats.latestDeltaPp)} vs previous)`);
+    if (trend.stats.lastGreenRunId && trend.stats.lastGreenStartedAt) {
+      console.log(
+        `Last green run: ${trend.stats.lastGreenRunId} at ${trend.stats.lastGreenStartedAt} ` +
+        `(${formatCompactDuration(trend.stats.lastGreenAgeMs)} ago)`,
+      );
+    } else {
+      console.log("Last green run: n/a (no target-reached runs yet)");
+    }
+    console.log(ciSummaryLine);
+    console.log(`Recommendation: ${recommendation}`);
+  }
 
-  return checkGates(opts, trend);
+  return gateCodeMachine;
 }
 
 try {

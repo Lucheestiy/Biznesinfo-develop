@@ -11,6 +11,7 @@ function parseArgs(argv) {
   const out = {
     mode: "triad",
     scope: "extended",
+    dryRun: false,
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -20,14 +21,17 @@ function parseArgs(argv) {
       if (raw === "triad" || raw === "dual") out.mode = raw;
     } else if (a === "--scope") {
       const raw = String(argv[++i] || "").trim().toLowerCase();
-      if (raw === "geo" || raw === "extended") out.scope = raw;
+      if (raw === "geo" || raw === "extended" || raw === "user-ideas") out.scope = raw;
+    } else if (a === "--dry-run") {
+      out.dryRun = true;
     } else if (a === "--help" || a === "-h") {
       console.log([
         "Usage: node app/scripts/run_geo_ambiguity_long_cycle.mjs [options]",
         "",
         "Options:",
         "  --mode triad|dual        Judge/advisor contour (default triad)",
-        "  --scope geo|extended     Scenario scope (default extended)",
+        "  --scope geo|extended|user-ideas   Scenario scope (default extended)",
+        "  --dry-run                Print planned steps without executing",
       ].join("\n"));
       process.exit(0);
     }
@@ -67,6 +71,15 @@ function main() {
           { label: `Geo Advice (${opts.mode})`, args: ["run", adviseScript] },
           { label: "Geo Trend", args: ["run", "qa:trend:geo-ambiguity"] },
         ]
+      : opts.scope === "user-ideas"
+        ? [
+            { label: "User-Ideas QA Run", args: ["run", "qa:run:user-ideas"] },
+            { label: `User-Ideas Judge (${opts.mode})`, args: ["run", judgeScript] },
+            { label: `User-Ideas Advice (${opts.mode})`, args: ["run", adviseScript] },
+            { label: "User-Ideas Beet QA Run", args: ["run", "qa:run:user-ideas:beet"] },
+            { label: `User-Ideas Beet Judge (${opts.mode})`, args: ["run", judgeScript] },
+            { label: `User-Ideas Beet Advice (${opts.mode})`, args: ["run", adviseScript] },
+          ]
       : [
           { label: "Core QA Run", args: ["run", "qa:run"] },
           { label: `Core Judge (${opts.mode})`, args: ["run", judgeScript] },
@@ -79,6 +92,14 @@ function main() {
           { label: `Geo Advice (${opts.mode})`, args: ["run", adviseScript] },
           { label: "Geo Trend", args: ["run", "qa:trend:geo-ambiguity"] },
         ];
+
+  if (opts.dryRun) {
+    console.log(`\n=== Long Cycle Plan (${opts.scope}) ===`);
+    for (const step of steps) {
+      console.log(`- ${step.label}: npm ${step.args.join(" ")}`);
+    }
+    return 0;
+  }
 
   const results = [];
   for (const step of steps) {

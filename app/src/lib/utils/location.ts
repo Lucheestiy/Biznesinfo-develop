@@ -20,6 +20,26 @@ const SETTLEMENT_PREFIXES = new Set([
   "агрогородок",
 ]);
 
+const CITY_LATIN_ALIASES: Record<string, string> = {
+  minsk: "минск",
+  gomel: "гомель",
+  homel: "гомель",
+  vitebsk: "витебск",
+  brest: "брест",
+  grodno: "гродно",
+  hrodna: "гродно",
+  mogilev: "могилев",
+  mohilev: "могилев",
+  mahilyou: "могилев",
+  baranovichi: "барановичи",
+  lida: "лида",
+  pinsk: "пинск",
+  orsha: "орша",
+  slutsk: "слуцк",
+  molodechno: "молодечно",
+  kobrin: "кобрин",
+};
+
 export function normalizeCityForFilter(raw: string): string {
   const trimmed = (raw || "").trim();
   if (!trimmed) return "";
@@ -43,10 +63,12 @@ export function normalizeCityForFilter(raw: string): string {
   }
 
   if (SETTLEMENT_PREFIXES.has(parts[0])) {
-    return parts.slice(1).join(" ").trim();
+    const tail = parts.slice(1).join(" ").trim();
+    return CITY_LATIN_ALIASES[tail] || tail;
   }
 
-  return parts.join(" ").trim();
+  const joined = parts.join(" ").trim();
+  return CITY_LATIN_ALIASES[joined] || joined;
 }
 
 export function isAddressLikeLocationQuery(raw: string): boolean {
@@ -55,4 +77,3 @@ export function isAddressLikeLocationQuery(raw: string): boolean {
   if (/\d/u.test(s)) return true;
   return ADDRESS_MARKERS_RE.test(s);
 }
-

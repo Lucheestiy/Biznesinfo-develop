@@ -1,0 +1,330 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-09T21:10:00Z",
+      "source": "user-seed-ideas-expanded",
+      "description": "Multi-turn + variant regressions expanded from user business queries to stress continuity, geo refinement, shortlist quality, and outreach templates."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2600,
+      "maxScenarios": null,
+      "onlyTags": [
+        "beet"
+      ],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": false,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-10T18-35-27-280Z-2065323-w5wxy",
+    "startedAt": "2026-02-10T18:35:27.280Z",
+    "endedAt": "2026-02-10T18:36:01.342Z",
+    "durationMs": 34062,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 9,
+    "passedChecks": 9,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UV017",
+      "title": "Свекла 500 кг в Минске: защита от нерелевантных \"не-поставщиков\"",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "beet",
+        "vegetables",
+        "anti_noise",
+        "supplier_quality"
+      ],
+      "personaGoal": "Проверить, что ассистент не предлагает учебные учреждения/другие нерелевантные профили в товарном sourcing-запросе.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где в Минске купить 500 кг красного буряка оптом?",
+          "requestBody": {
+            "message": "Где в Минске купить 500 кг красного буряка оптом?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6394,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c76f5d4d-e926-4fe4-8c37-fc8f1fa65313",
+          "conversationId": "243db5dc-fb0b-44ae-b13b-e9019802782d",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n2. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\n3. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\nПодтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Минск.\nФокус: Где в Минске купить 500 кг красного буряка оптом?.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV017.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV017.T1.C2",
+              "type": "includes_any",
+              "description": "Должен удерживать товарный контекст",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "буряк",
+                  "свекл",
+                  "овощ",
+                  "корнеплод"
+                ],
+                "hits": [
+                  "буряк"
+                ]
+              }
+            },
+            {
+              "id": "UV017.T1.C3",
+              "type": "excludes_all",
+              "description": "Не должен предлагать учебные учреждения как поставщиков",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "\\bколледж\\p{L}*\\b",
+                  "\\bуниверситет\\p{L}*\\b",
+                  "\\bинститут\\p{L}*\\b",
+                  "\\bлицей\\p{L}*\\b",
+                  "\\bшкол(а|ы|е|у|ой)?\\b"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UV017.T1.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен практический ответ, а не пустой отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сделай shortlist 3 релевантных поставщиков. Если точных совпадений нет — честно скажи и дай 3 рабочих альтернативы запроса на портале.",
+          "requestBody": {
+            "message": "Сделай shortlist 3 релевантных поставщиков. Если точных совпадений нет — честно скажи и дай 3 рабочих альтернативы запроса на портале.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где в Минске купить 500 кг красного буряка оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "Shortlist по текущим данным каталога:\n1. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n2. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\n3. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\nПодтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Минск.\nФокус: Где в Минске купить 500 кг красного буряка оптом?."
+              }
+            ],
+            "conversationId": "243db5dc-fb0b-44ae-b13b-e9019802782d",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 16340,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "18a6831c-8f79-4512-8bd1-62dd83265829",
+          "conversationId": "243db5dc-fb0b-44ae-b13b-e9019802782d",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n2. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\n3. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\nПодтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Минск.\nФокус: Где в Минске купить 500 кг красного буряка оптом? Сделай shortlist 3 релевантных поставщиков. Если точных совпадений нет — честно скажи и д….\n\nКритерии отбора: релевантность профиля, надежность, риск срыва сроков, полнота контактов.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV017.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV017.T2.C2",
+              "type": "any_of",
+              "description": "Либо shortlist компаний, либо честный fallback с альтернативами",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сформируй сообщение поставщику в блоках Subject/Body/WhatsApp: объем 500 кг, Минск, поставка в течение 3 дней.",
+          "requestBody": {
+            "message": "Сформируй сообщение поставщику в блоках Subject/Body/WhatsApp: объем 500 кг, Минск, поставка в течение 3 дней.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где в Минске купить 500 кг красного буряка оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "Shortlist по текущим данным каталога:\n1. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n2. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\n3. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\nПодтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Минск.\nФокус: Где в Минске купить 500 кг красного буряка оптом?."
+              },
+              {
+                "role": "user",
+                "content": "Сделай shortlist 3 релевантных поставщиков. Если точных совпадений нет — честно скажи и дай 3 рабочих альтернативы запроса на портале."
+              },
+              {
+                "role": "assistant",
+                "content": "Shortlist по текущим данным каталога:\n1. Амифрут Частное предприятие — /company/amifruit (Оптовая торговля, торговые базы; Минск, minsk; тел: +375 (17) 200 49 81)\n2. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\n3. Резервный слот: в текущем фильтре нет подтвержденной карточки (не выдумываю компанию).\nПодтвержденных карточек меньше, чем запрошено, поэтому оставил только проверяемые позиции.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Минск.\nФокус: Где в Минске купить 500 кг красного буряка оптом? Сделай shortlist 3 релевантных поставщиков. Если точных совпадений нет — честно скажи и д….\n\nКритерии отбора: релевантность профиля, надежность, риск срыва сроков, полнота контактов."
+              }
+            ],
+            "conversationId": "243db5dc-fb0b-44ae-b13b-e9019802782d",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 11013,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "7caabb53-a1a6-4b5d-848e-7ae79ab928ec",
+          "conversationId": "243db5dc-fb0b-44ae-b13b-e9019802782d",
+          "isStub": false,
+          "reply": "Subject: Запрос на поставку красного буряка оптом (500 кг, Минск, поставка до 3 дней)\n\nBody:\nЗдравствуйте!\n\nИщем поставщика красного буряка в Минске.  \nНужен объем: 500 кг.  \nЖелаемый срок поставки: в течение 3 календарных дней.\n\nПросьба сообщить:\n- цену за 1 кг и итоговую стоимость за 500 кг;\n- сорт/калибр, происхождение и качество продукции;\n- условия фасовки (мешки/сетки, вес упаковки);\n- наличие товара на складе и ближайшую дату отгрузки;\n- условия и стоимость доставки по Минску;\n- форму оплаты и условия по документам (накладная, сертификаты при наличии).\n\nГотовы оперативно подтвердить заказ после согласования цены и сроков.\n\nСпасибо!  \nС уважением.\n\nWhatsApp:\nЗдравствуйте! Нужен красный буряк оптом: 500 кг, Минск, поставка в течение 3 дней. Напишите, пожалуйста, цену за кг, наличие, условия доставки и оплаты. Готовы быстро подтвердить заказ.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV017.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV017.T3.C2",
+              "type": "template_blocks",
+              "description": "Ожидаются блоки Subject/Body/WhatsApp",
+              "passed": true,
+              "reason": "Template blocks present",
+              "details": {
+                "hasSubject": true,
+                "hasBody": true,
+                "hasWhatsapp": true
+              }
+            },
+            {
+              "id": "UV017.T3.C3",
+              "type": "includes_any",
+              "description": "Учитываются базовые параметры запроса",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "500",
+                  "минск",
+                  "3",
+                  "дн"
+                ],
+                "hits": [
+                  "500",
+                  "минск",
+                  "3",
+                  "дн"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 33755
+    }
+  ]
+}

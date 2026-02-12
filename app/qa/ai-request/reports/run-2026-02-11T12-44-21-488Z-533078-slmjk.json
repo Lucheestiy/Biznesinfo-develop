@@ -1,0 +1,287 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-09T21:10:00Z",
+      "source": "user-seed-ideas-expanded",
+      "description": "Multi-turn + variant regressions expanded from user business queries to stress continuity, geo refinement, shortlist quality, and outreach templates."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 3500,
+      "maxScenarios": null,
+      "onlyTags": [
+        "company_card"
+      ],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T12-44-21-488Z-533078-slmjk",
+    "startedAt": "2026-02-11T12:44:21.488Z",
+    "endedAt": "2026-02-11T12:44:34.482Z",
+    "durationMs": 12994,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 7,
+    "passedChecks": 7,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 2,
+    "avgTurnLatencyMs": 6355,
+    "totalTurnLatencyMs": 12710,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UV020",
+      "title": "Ирис Интер групп: команда «Найди на карточке компании» без запроса ссылки у пользователя",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "company_card",
+        "news_lookup",
+        "anti_link_gate",
+        "context_carryover"
+      ],
+      "personaGoal": "Проверить, что ассистент использует контекст компании из диалога и не отвечает шаблоном «не вижу карточку, пришлите ссылку».",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 12710,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "У меня компания называется Ирис Интер групп. Найди последние новости на сайте.",
+          "requestBody": {
+            "message": "У меня компания называется Ирис Интер групп. Найди последние новости на сайте.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 9034,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "df039e89-95b7-4fce-ae6e-97ca4fb755dc",
+          "conversationId": "8ac95f2b-6d30-45f5-bd6b-927d465dd8a7",
+          "isStub": false,
+          "reply": "Понял. Чтобы найти **последние новости именно вашей компании**, нужен точный источник — сейчас у меня нет подтверждённой ссылки на сайт **«Ирис Интер групп»**.\n\nЧто могу сделать сразу:\n1. Если пришлёте **URL сайта** (или карточку компании в каталоге Biznesinfo), я выберу и перечислю последние новости с датами и ссылками.  \n2. Если новостей на сайте нет, проверю разделы типа: «Новости», «Блог», «Пресс-центр», «Публикации», «Наши проекты».  \n3. Отдельно отмечу, если информация выглядит устаревшей.\n\nПришлите, пожалуйста, только один из вариантов:\n- ссылку на сайт, или  \n- ссылку на карточку компании в Biznesinfo.\n\nСобрал данные прямо с сайтов компаний (best-effort):\n1. Лунинецкий хлебозавод Филиал ОАО Берестейский пекарь — /company/hl-lyninec (источник: https://www.instagram.com/lunineckiixz/)\n   - Заголовок страницы: Лунинецкий хлебозавод (@lunineckiixz) • Instagram photos and videos\n   - Кратко: 634 Followers, 1,079 Following, 36 Posts - See Instagram photos and videos from Лунинецкий хлебозавод (@lunineckiixz)\n   - Фрагмент: Лунинецкий хлебозавод (@lunineckiixz) • Instagram photos and videos\n   - Контакты с сайта: тел: 936619743392459, 1033258198\n2. Коммунарка СОАО — /company/kommunarka (источник: https://www.instagram.com/kommunarka.by)\n   - Заголовок страницы: Кондитерская фабрика «КОММУНАРКА» (@kommunarka.by) • Instagram photos and videos\n   - Кратко: 97K Followers, 86 Following, 1,279 Posts - See Instagram photos and videos from Кондитерская фабрика «КОММУНАРКА» (@kommunarka.by)\n   - Фрагмент: Кондитерская фабрика «КОММУНАРКА» (@kommunarka.by) • Instagram photos and videos\n   - Контакты с сайта: тел: 936619743392459, 1033258198\nЕсли нужно, сравню эти компании по конкретному критерию (цена/срок/условия/сертификаты).\n\nФакты с сайтов (источники):\n1. Лунинецкий хлебозавод Филиал ОАО Берестейский пекарь — источник: https://www.instagram.com/lunineckiixz/\n   Контакты с сайта: тел: 936619743392459, 1033258198\n   Фрагмент: Лунинецкий хлебозавод (@lunineckiixz) • Instagram photos and videos\n2. Коммунарка СОАО — источник: https://www.instagram.com/kommunarka.by\n   Контакты с сайта: тел: 936619743392459, 1033258198\n   Фрагмент: Кондитерская фабрика «КОММУНАРКА» (@kommunarka.by) • Instagram photos and videos",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV020.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV020.T1.C2",
+              "type": "includes_any",
+              "description": "Должен удержать контекст компании и новости",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "ирис",
+                  "сайт",
+                  "новост",
+                  "провер",
+                  "найд"
+                ],
+                "hits": [
+                  "ирис",
+                  "сайт",
+                  "новост",
+                  "провер"
+                ]
+              }
+            },
+            {
+              "id": "UV020.T1.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен практичный ход, а не отфутболивание",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Найди на карточке компании.",
+          "requestBody": {
+            "message": "Найди на карточке компании.",
+            "history": [
+              {
+                "role": "user",
+                "content": "У меня компания называется Ирис Интер групп. Найди последние новости на сайте."
+              },
+              {
+                "role": "assistant",
+                "content": "Понял. Чтобы найти **последние новости именно вашей компании**, нужен точный источник — сейчас у меня нет подтверждённой ссылки на сайт **«Ирис Интер групп»**.\n\nЧто могу сделать сразу:\n1. Если пришлёте **URL сайта** (или карточку компании в каталоге Biznesinfo), я выберу и перечислю последние новости с датами и ссылками.  \n2. Если новостей на сайте нет, проверю разделы типа: «Новости», «Блог», «Пресс-центр», «Публикации», «Наши проекты».  \n3. Отдельно отмечу, если информация выглядит устаревшей.\n\nПришлите, пожалуйста, только один из вариантов:\n- ссылку на сайт, или  \n- ссылку на карточку компании в Biznesinfo.\n\nСобрал данные прямо с сайтов компаний (best-effort):\n1. Лунинецкий хлебозавод Филиал ОАО Берестейский пекарь — /company/hl-lyninec (источник: https://www.instagram.com/lunineckiixz/)\n   - Заголовок страницы: Лунинецкий хлебозавод (@lunineckiixz) • Instagram photos and videos\n   - Кратко: 634 Followers, 1,079 Following, 36 Posts - See Instagram photos and videos from Лунинецкий хлебозавод (@lunineckiixz)\n   - Фрагмент: Лунинецкий хлебозавод (@lunineckiixz) • Instagram photos and videos\n   - Контакты с сайта: тел: 936619743392459, 1033258198\n2. Коммунарка СОАО — /company/kommunarka (источник: https://www.instagram.com/kommunarka.by)\n   - Заголовок страницы: Кондитерская фабрика «КОММУНАРКА» (@kommunarka.by) • Instagram photos and videos\n   - Кратко: 97K Followers, 86 Following, 1,279 Posts - See Instagram photos and videos from Кондитерская фабрика «КОММУНАРКА» (@kommunarka.by)\n   - Фрагмент: Кондитерская фабрика «КОММУНАРКА» (@kommunarka.by) • Instagram photos and videos\n   - Контакты с сайта: тел: 936619743392459, 1033258198\nЕсли нужно, сравню эти компании по конкретному критерию (цена/срок/условия/сертификаты).\n\nФакты с сайтов (источники):\n1. Лунинецкий хлебозавод Филиал ОАО Берестейский пекарь — источник: https://www.instagram.com/lunineckiixz/\n   Контакты с сайта: тел: 936619743392459, 1033258198\n   Фрагмент: Лунинецкий хлебозавод (@lunineckiixz) • Instagram photos and videos\n2. Коммунарка СОАО — источник: https://www.instagram.com/kommunarka.by\n   Контакты с сайта: тел: 936619743392459, 1033258198\n   Фрагмент: Кондитерская фабрика «КОММУНАРКА» (@kommunarka.by) • Instagram photos and videos"
+              }
+            ],
+            "conversationId": "8ac95f2b-6d30-45f5-bd6b-927d465dd8a7",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 3676,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2f04a7f1-e6c2-4c1c-8e22-817336d7fe59",
+          "conversationId": "8ac95f2b-6d30-45f5-bd6b-927d465dd8a7",
+          "isStub": false,
+          "reply": "Отлично, тогда ищем по **карточке компании**.\n\nПо вашему сообщению у меня пока нет самой ссылки на карточку **«Ирис Интер групп»**, а в доступных данных видны карточки других компаний (Лунинецкий хлебозавод, Коммунарка), не вашей.\n\nПришлите, пожалуйста, **URL карточки в Biznesinfo** (формат вроде `/company/...` или полная ссылка), и я сразу:\n1. проверю разделы новости/публикации,  \n2. дам список последних новостей с датами,  \n3. коротко отмечу, что самое свежее.\n\nЕсли хотите, можете просто прислать slug карточки (например: `iris-inter-group`) — этого тоже достаточно.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV020.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV020.T2.C2",
+              "type": "includes_any",
+              "description": "Должен явно продолжить работу через карточку компании",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "карточк",
+                  "компан",
+                  "сайт",
+                  "новост",
+                  "провер"
+                ],
+                "hits": [
+                  "карточк",
+                  "компан",
+                  "новост",
+                  "провер"
+                ]
+              }
+            },
+            {
+              "id": "UV020.T2.C3",
+              "type": "excludes_all",
+              "description": "Не должен просить у пользователя ссылку на карточку после команды найти на карточке",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "не вижу в чате саму карточку",
+                  "пришлите ссылк",
+                  "нужна ссылк",
+                  "дайте ссылк",
+                  "отправьте ссылку на карточку"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UV020.T2.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен конкретный next step/результат, а не отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 12712
+    }
+  ]
+}

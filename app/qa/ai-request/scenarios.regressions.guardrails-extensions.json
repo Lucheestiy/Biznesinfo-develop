@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-11T01:30:00Z",
+    "source": "assistant-guardrails-extension",
+    "description": "Focused regressions for fallback guardrails: alternative hypotheses, reverse-buyer shortlist backfill, and forced compare-by-4 criteria blocks."
+  },
+  "scenarios": [
+    {
+      "id": "UG001",
+      "title": "Молочный бренд: альтернативные гипотезы и логика проверки",
+      "personaGoal": "Проверить, что при запросе альтернатив ассистент выдает минимум 3 гипотезы и шаги проверки.",
+      "tags": ["regression", "guardrails", "brand_recall", "hypotheses", "dairy"],
+      "turns": [
+        {
+          "user": "Как называется молочная компания, не помню точно торговую марку, кажется Савушкин продукт, которая выпускает молоко и творожки?",
+          "checks": [
+            { "id": "UG001.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UG001.T1.C2",
+              "type": "includes_any",
+              "patterns": ["савуш", "молок", "творож"],
+              "description": "Должен удержать ключевые маркеры запроса"
+            },
+            { "id": "UG001.T1.C3", "type": "not_refusal_only", "description": "Нужен полезный ответ даже при неполных данных" }
+          ]
+        },
+        {
+          "user": "Да, похоже это она. Но дай 2-3 альтернативные гипотезы на случай, если я ошибаюсь.",
+          "checks": [
+            { "id": "UG001.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UG001.T2.C2", "type": "numbered_list_min", "min": 3, "description": "Должны быть минимум 3 гипотезы/варианта" },
+            {
+              "id": "UG001.T2.C3",
+              "type": "includes_any",
+              "patterns": ["гипот", "провер", "возмож"],
+              "description": "Должна быть логика проверки гипотез"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UG002",
+      "title": "Reverse-buyer: добор top-4 при дефиците карточек",
+      "personaGoal": "Проверить, что ассистент добирает структурированный top-list покупателей, а не оставляет 1 пункт.",
+      "tags": ["regression", "guardrails", "reverse_buyer", "packaging", "shortlist"],
+      "turns": [
+        {
+          "user": "Найди мне на портале предприятия, которые потенциально могут заказать у меня продукцию.",
+          "checks": [
+            { "id": "UG002.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UG002.T1.C2", "type": "not_refusal_only", "description": "Должен предложить рабочий reverse-поиск" }
+          ]
+        },
+        {
+          "user": "Я продаю пластиковую пищевую тару (банки, ведра, крышки). Ищу потенциальных заказчиков в Беларуси.",
+          "checks": [
+            { "id": "UG002.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UG002.T2.C2",
+              "type": "includes_any",
+              "patterns": ["тара", "пищев", "покупател"],
+              "description": "Должен учитывать товарную специфику и buyer-фокус"
+            }
+          ]
+        },
+        {
+          "user": "Сделай top-4 потенциальных заказчиков и почему им это может быть интересно.",
+          "checks": [
+            { "id": "UG002.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UG002.T3.C2", "type": "numbered_list_min", "min": 4, "description": "Ожидается минимум 4 пункта в топ-листе" },
+            {
+              "id": "UG002.T3.C3",
+              "type": "includes_any",
+              "patterns": ["заказчик", "покупател", "подходит", "интерес"],
+              "description": "Нужны buyer-термины и аргументация"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UG003",
+      "title": "Сравнение по 4 критериям: принудительный матричный блок",
+      "personaGoal": "Проверить, что ассистент всегда выдает 4 критерия при прямом compare-by-4 запросе.",
+      "tags": ["regression", "guardrails", "minitractor", "comparison"],
+      "turns": [
+        {
+          "user": "Кто в Беларуси продает минитракторы для фермы? Нужны варианты для первичного отбора.",
+          "checks": [
+            { "id": "UG003.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UG003.T1.C2",
+              "type": "includes_any",
+              "patterns": ["беларус", "минитракт", "ферм"],
+              "description": "Должен удержать товар и гео-фильтр"
+            }
+          ]
+        },
+        {
+          "user": "Сравни по 4 критериям: цена, гарантия, сервис, наличие навесного оборудования.",
+          "checks": [
+            { "id": "UG003.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UG003.T2.C2", "type": "numbered_list_min", "min": 4, "description": "Ожидается сравнение минимум по 4 пунктам" },
+            {
+              "id": "UG003.T2.C3",
+              "type": "includes_any",
+              "patterns": ["цена", "гарант", "сервис", "навес"],
+              "description": "Должны быть ключевые критерии сравнения"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

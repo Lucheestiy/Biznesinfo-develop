@@ -1,0 +1,99 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "UV017 scenario passes strict checks with 100% pass rate and 4/5 usefulness from both judges. The core issue is marginal relevance of third supplier (БелМолдКом) due to sparse card data. Current system correctly surfaces uncertainty via disclaimer, but retrieval ranking allows weak candidates into top-3. Concrete fix: boost ranking signal for card completeness and add explicit relevance threshold before inclusion.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Add card-data-completeness boost to supplier ranking",
+      "why": "БелМолдКом ranked top-3 despite minimal facts; judges flagged weak relevance. Boosting complete cards reduces marginal candidates without hard filtering.",
+      "expectedImpact": "Eliminates low-info suppliers from results; improves avgUsefulness 4→4.5+ on multi-supplier queries.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement minimum relevance threshold with fallback messaging",
+      "why": "Current disclaimer is honest but passive. Active threshold with 'найдено N релевантных, вот лучшие' sets clearer expectations.",
+      "expectedImpact": "Reduces user surprise when <3 strong matches exist; improves perceived usefulness.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P2",
+      "title": "Log retrieval scores per supplier for QA attribution",
+      "why": "Cannot debug why weak cards rank high without visibility into ranking signals.",
+      "expectedImpact": "Enables data-driven tuning of ranking weights; faster RCA for relevance issues.",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "ranking",
+      "title": "Boost suppliers with populated key fields (products, volume, delivery_terms)",
+      "action": "In supplier ranking function, add multiplicative boost factor 1.2-1.5 if card has ≥3 of: products list, volume/delivery info, contact preferences, recent activity. Apply before final top-K selection.",
+      "implementationHint": "Modify ranking/scoring module (likely src/lib/ranking.ts or similar); update scoreSupplier() to check card.completenessScore or field presence.",
+      "expectedImpact": "Filters sparse cards like БелМолдКом down the list; stronger candidates surface.",
+      "risk": "May over-penalize new but relevant suppliers with minimal data; monitor with A/B.",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Add explicit relevance floor before including in shortlist",
+      "action": "After retrieval, filter candidates below combined score threshold (e.g., 0.6). If <3 candidates pass, return exactly those with message: 'Найдено X подходящих поставщиков (показываем всех).'",
+      "implementationHint": "In retrieval pipeline post-processing; check getSuppliers() or similar in src/app/api/chat/ or src/lib/search.ts.",
+      "expectedImpact": "Prevents weak matches from diluting results; aligns with judge expectations.",
+      "risk": "False negatives if threshold too aggressive; start with 0.5 and tune via QA.",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Instruct LLM to proactively comment on data gaps per supplier",
+      "action": "Add to system prompt: 'Для каждого поставщика укажи, какие именно данные из запроса подтверждены в карточке, а какие — нет. Если данных мало, скажи это прямо.'",
+      "implementationHint": "Update prompt template in src/prompts/ or src/lib/prompts/system.ts; version control prompt.",
+      "expectedImpact": "Increases transparency; justifies weak candidates when they appear; matches current honest behavior but more structured.",
+      "risk": "Slightly longer responses; acceptable tradeoff.",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "qa",
+      "title": "Add retrieval-score assertions to strict checks",
+      "action": "Extend QA strict checks to verify logged retrieval scores for each returned supplier; fail if any included supplier has score < threshold or completeness < minimum.",
+      "implementationHint": "Modify QA runner in app/qa/ or scripts/qa/; parse response metadata or logs.",
+      "expectedImpact": "Catches ranking regressions automatically; prevents UV017-type issues recurring.",
+      "risk": "Requires exposing scores in API response or logs; minor plumbing.",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "geo",
+      "title": "Strengthen geo-match weighting for city-specific queries",
+      "action": "For queries containing 'в [City]', boost suppliers with explicit city match in delivery_areas or location by 1.3x; demote those without by 0.7x.",
+      "implementationHint": "In ranking module, detect geo intent from query; apply geoBoost factor.",
+      "expectedImpact": "Improves relevance for 'в Минске' type queries; may have helped elevate better candidates over БелМолдКом if geo data sparse.",
+      "risk": "Over-boost if city mentioned but not critical; test with variant queries.",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "supplier_quality tagged scenarios"
+    ],
+    "successMetrics": [
+      "strictPassRate >= 0.95",
+      "avgUsefulness >= 4.5",
+      "zero suppliers with <3 populated key fields in top-3 results",
+      "retrieval score logged for 100% of supplier recommendations"
+    ]
+  }
+}
+```

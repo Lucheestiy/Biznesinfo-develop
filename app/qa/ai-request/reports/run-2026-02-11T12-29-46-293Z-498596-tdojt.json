@@ -1,0 +1,236 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-11T00:00:00Z",
+      "source": "manual-regression",
+      "description": "Ensure lookup context is not carried into analytics tag request."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": false,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T12-29-46-293Z-498596-tdojt",
+    "startedAt": "2026-02-11T12:29:46.293Z",
+    "endedAt": "2026-02-11T12:30:17.045Z",
+    "durationMs": 30752,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/qa-tags-after-lookup.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 4,
+    "passedChecks": 4,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 2,
+    "avgTurnLatencyMs": 15238,
+    "totalTurnLatencyMs": 30476,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "TAGS002",
+      "title": "Tagging request after supplier lookup should not trigger no-results supplier fallback",
+      "tags": [
+        "multi_turn",
+        "analytics",
+        "tags",
+        "context_carryover"
+      ],
+      "personaGoal": "Second turn is marketing-tag task, not supplier search.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 30476,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить тонну молока в Бресте?",
+          "requestBody": {
+            "message": "Где купить тонну молока в Бресте?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 22372,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f8451207-9272-4711-86f5-cb8cdd0e82e9",
+          "conversationId": "7ccc81f5-b847-4668-94d2-892a94b24370",
+          "isStub": false,
+          "reply": "В Бресте из релевантных поставщиков молочной продукции в каталоге вижу такие варианты:\n\n1. **Савушкин продукт ОАО**  \n   Почему подходит: в карточке указано **«Производство молочной продукции»**, крупный профильный производитель в Бресте.  \n   Путь: **/company/savushkin**  \n   Контакты: +375 (162) 30 45 45, info@savushkin.com, savushkin.by\n\n2. **Брестское мороженое ОАО**  \n   Почему подходит: в карточке есть молочная линейка (**сметана, творог, сыры, сырки**), компания в Бресте.  \n   Путь: **/company/brestmoroj**  \n   Контакты: +375 (162) 22 15 41, info@ice-cream.by, ice-cream.by\n\n3. **УК холдинга «Концерн Брестмясомолпром»**  \n   Почему может подойти: объединяет предприятия по переработке молока — можно запросить, какое предприятие холдинга отгружает молоко оптом.  \n   Путь: **/company/brestmmp**  \n   Контакты: +375 (162) 58 28 01, info@brestmmp.by, brestmmp.by\n\nКого лучше обзванивать первым для **1 тонны**:  \n**1) Савушкин**, **2) Брестмясомолпром**, **3) Брестское мороженое** — по вероятности оптовой отгрузки сырого/питьевого молока.\n\nЧтобы быстро получить цену, уточняйте сразу:  \n- молоко **сырое или пастеризованное**;  \n- жирность (например, 2.5%/3.2%);  \n- фасовка (налив/еврокуб/канистры);  \n- самовывоз или доставка по Бресту;  \n- разовая поставка или регулярная.\n\nЕсли хотите, сразу подготовлю короткий текст запроса (звонок/email/WhatsApp), чтобы отправить всем трем за 5 минут.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "TAGS002.T1.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике",
+          "requestBody": {
+            "message": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить тонну молока в Бресте?"
+              },
+              {
+                "role": "assistant",
+                "content": "В Бресте из релевантных поставщиков молочной продукции в каталоге вижу такие варианты:\n\n1. **Савушкин продукт ОАО**  \n   Почему подходит: в карточке указано **«Производство молочной продукции»**, крупный профильный производитель в Бресте.  \n   Путь: **/company/savushkin**  \n   Контакты: +375 (162) 30 45 45, info@savushkin.com, savushkin.by\n\n2. **Брестское мороженое ОАО**  \n   Почему подходит: в карточке есть молочная линейка (**сметана, творог, сыры, сырки**), компания в Бресте.  \n   Путь: **/company/brestmoroj**  \n   Контакты: +375 (162) 22 15 41, info@ice-cream.by, ice-cream.by\n\n3. **УК холдинга «Концерн Брестмясомолпром»**  \n   Почему может подойти: объединяет предприятия по переработке молока — можно запросить, какое предприятие холдинга отгружает молоко оптом.  \n   Путь: **/company/brestmmp**  \n   Контакты: +375 (162) 58 28 01, info@brestmmp.by, brestmmp.by\n\nКого лучше обзванивать первым для **1 тонны**:  \n**1) Савушкин**, **2) Брестмясомолпром**, **3) Брестское мороженое** — по вероятности оптовой отгрузки сырого/питьевого молока.\n\nЧтобы быстро получить цену, уточняйте сразу:  \n- молоко **сырое или пастеризованное**;  \n- жирность (например, 2.5%/3.2%);  \n- фасовка (налив/еврокуб/канистры);  \n- самовывоз или доставка по Бресту;  \n- разовая поставка или регулярная.\n\nЕсли хотите, сразу подготовлю короткий текст запроса (звонок/email/WhatsApp), чтобы отправить всем трем за 5 минут."
+              }
+            ],
+            "conversationId": "7ccc81f5-b847-4668-94d2-892a94b24370",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 8104,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "57b5fb49-20c0-4cba-b1bb-904d5f3d07c4",
+          "conversationId": "7ccc81f5-b847-4668-94d2-892a94b24370",
+          "isStub": false,
+          "reply": "Отлично, для **Ирис Интер Групп** (международные грузоперевозки/логистика) вот 20 релевантных тегов для структуры в **Google Analytics / Яндекс Метрике** (как UTM content/term, внутренние метки кампаний, группировка трафика и контента):\n\n1. международные грузоперевозки  \n2. логистическая компания  \n3. транспортно-экспедиторские услуги  \n4. доставка грузов Беларусь  \n5. перевозки в Иран  \n6. перевозки в Ирак  \n7. перевозки в ОАЭ  \n8. перевозки в Турцию  \n9. перевозки в Индию  \n10. мультимодальные перевозки  \n11. автомобильные грузоперевозки  \n12. морские грузоперевозки  \n13. авиаперевозки грузов  \n14. таможенное оформление грузов  \n15. консолидация грузов  \n16. сборные грузы  \n17. B2B логистика  \n18. импорт экспорт логистика  \n19. расчет стоимости перевозки  \n20. надежный логистический партнер  \n\nКоротко по источнику контекста (как непроверенная подсказка из веб-сниппетов): компания позиционируется как международная логистика с фокусом на направления Иран/Ближний Восток/Азия — **source:** https://www.irisintergroup.com/\n\nЕсли хотите, следующим шагом дам готовую **структуру UTM-меток** (utm_source/utm_medium/utm_campaign/utm_content/utm_term) под ваши каналы: Google Ads, Яндекс Директ, SEO, Telegram и email.\n\nПо товару: молоко.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "TAGS002.T2.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "TAGS002.T2.C2",
+              "type": "excludes_all",
+              "description": "Must not switch to supplier no-results fallback on second turn.",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "нет подтвержденных карточек компаний",
+                  "Временный shortlist",
+                  "3 рабочих запроса для портала",
+                  "Не подставляю нерелевантные компании"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "TAGS002.T2.C3",
+              "type": "includes_any",
+              "description": "Should provide tag-oriented content on second turn.",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "тег",
+                  "ключев",
+                  "аналитик",
+                  "метрик"
+                ],
+                "hits": [
+                  "тег",
+                  "метрик"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 30477
+    }
+  ]
+}

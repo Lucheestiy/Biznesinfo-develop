@@ -1,0 +1,331 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-07T14:25:00Z",
+      "source": "user-provided",
+      "description": "User-provided scenarios: procurement, fuzzy company lookup, due-diligence"
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2000,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-09T21-18-59-758Z-3264798-32y3u",
+    "startedAt": "2026-02-09T21:18:59.758Z",
+    "endedAt": "2026-02-09T21:19:52.822Z",
+    "durationMs": 53064,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-3-scenarios.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 9,
+    "passedChecks": 9,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UX101",
+      "title": "Закупка гофрокоробов: Минск, опт, доставка, брендирование",
+      "tags": [
+        "sourcing",
+        "packaging",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Менеджер по закупкам хочет получить 3-5 поставщиков и короткое сравнение по условиям.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики гофрокоробов в Минске. Интересует опт, доставка, сроки до 7 дней.",
+          "requestBody": {
+            "message": "Нужны поставщики гофрокоробов в Минске. Интересует опт, доставка, сроки до 7 дней.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 8826,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "d5e98f13-a9df-4a5b-ac46-98193d34787d",
+          "conversationId": "23caeea4-fd36-4ad7-bb3f-48d588834b1b",
+          "isStub": false,
+          "reply": "Короткий план на срочный запрос:\n1. Абсолютпак ООО — /company/absp (Тара и упаковка; Минск, minsk; тел: +375 (44) 504 74 74)\n2. Адара-трейдинг ОДО — /company/adara (Тара и упаковка; Минск, minsk; тел: +375 (17) 388 01 80)\n3. Анкортсервис Плюс ТЧУП — /company/ankortserv (Тара и упаковка; Минск, minsk; тел: +375 (17) 303 88 15)\nУчет ограничений: срок отгрузки: до 7 дней, срочные сроки, локация: Минск.\nЧто проверить в первом звонке:\n1. Реальный срок готовности/отгрузки под ваш дедлайн.\n2. Возможность безнала/условия оплаты.\n3. Адрес выдачи и возможность доставки/самовывоза под вашу локацию.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UX101.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UX101.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме упаковки/поставщиков",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "гофр",
+                  "короб",
+                  "упаков",
+                  "поставщ",
+                  "опт",
+                  "достав"
+                ],
+                "hits": [
+                  "упаков",
+                  "достав"
+                ]
+              }
+            },
+            {
+              "id": "UX101.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть содержательным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 140,
+                "len": 594
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Отфильтруй тех, кто делает брендирование/печать.",
+          "requestBody": {
+            "message": "Отфильтруй тех, кто делает брендирование/печать.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики гофрокоробов в Минске. Интересует опт, доставка, сроки до 7 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "Короткий план на срочный запрос:\n1. Абсолютпак ООО — /company/absp (Тара и упаковка; Минск, minsk; тел: +375 (44) 504 74 74)\n2. Адара-трейдинг ОДО — /company/adara (Тара и упаковка; Минск, minsk; тел: +375 (17) 388 01 80)\n3. Анкортсервис Плюс ТЧУП — /company/ankortserv (Тара и упаковка; Минск, minsk; тел: +375 (17) 303 88 15)\nУчет ограничений: срок отгрузки: до 7 дней, срочные сроки, локация: Минск.\nЧто проверить в первом звонке:\n1. Реальный срок готовности/отгрузки под ваш дедлайн.\n2. Возможность безнала/условия оплаты.\n3. Адрес выдачи и возможность доставки/самовывоза под вашу локацию."
+              }
+            ],
+            "conversationId": "23caeea4-fd36-4ad7-bb3f-48d588834b1b",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 7311,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "66823bd9-276b-4c4b-874c-046715f2eb1f",
+          "conversationId": "23caeea4-fd36-4ad7-bb3f-48d588834b1b",
+          "isStub": false,
+          "reply": "Хорошо. По текущему списку как **первичный приоритет на проверку брендирования/печати**:\n\n1. **Абсолютпак ООО** — /company/absp  \n2. **Адара-трейдинг ОДО** — /company/adara  \n3. **Анкортсервис Плюс ТЧУП** — /company/ankortserv  \n\nПочему так: это компании из рубрики «Тара и упаковка» в Минске; у таких поставщиков чаще встречаются услуги нанесения логотипа/флексопечати.  \n⚠️ Но чтобы не ошибиться, нужно подтвердить на карточке компании или звонком (я не буду выдумывать услуги без проверки).\n\nЧто спросить для быстрого фильтра (1–2 минуты на звонок):\n1. Делаете ли печать по гофрокоробам (1–4 цвета, флексо/другое)?\n2. Минимальный тираж на брендированный короб?\n3. Срок производства с печатью (интересует до 7 дней)?\n4. Есть ли доставка по Минску и стоимость?\n5. Нужен ли готовый макет, и есть ли доплата за клише/подготовку?\n\nЕсли хотите, сразу подготовлю короткий текст запроса для звонка/WhatsApp, чтобы разослать всем 3 компаниям одним шаблоном.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UX101.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UX101.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраняться связь с исходным товаром",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "гофро",
+                  "короб",
+                  "упаков"
+                ],
+                "min": 1,
+                "hits": [
+                  "гофро",
+                  "короб",
+                  "упаков"
+                ]
+              }
+            },
+            {
+              "id": "UX101.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться условие брендирования/печати",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "бренд",
+                  "печат",
+                  "нанес",
+                  "логотип",
+                  "этикет"
+                ],
+                "hits": [
+                  "бренд",
+                  "печат",
+                  "нанес",
+                  "логотип"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сравни 5 вариантов: цена/срок/мин. партия. Дай контакты и сайт.",
+          "requestBody": {
+            "message": "Сравни 5 вариантов: цена/срок/мин. партия. Дай контакты и сайт.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики гофрокоробов в Минске. Интересует опт, доставка, сроки до 7 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "Короткий план на срочный запрос:\n1. Абсолютпак ООО — /company/absp (Тара и упаковка; Минск, minsk; тел: +375 (44) 504 74 74)\n2. Адара-трейдинг ОДО — /company/adara (Тара и упаковка; Минск, minsk; тел: +375 (17) 388 01 80)\n3. Анкортсервис Плюс ТЧУП — /company/ankortserv (Тара и упаковка; Минск, minsk; тел: +375 (17) 303 88 15)\nУчет ограничений: срок отгрузки: до 7 дней, срочные сроки, локация: Минск.\nЧто проверить в первом звонке:\n1. Реальный срок готовности/отгрузки под ваш дедлайн.\n2. Возможность безнала/условия оплаты.\n3. Адрес выдачи и возможность доставки/самовывоза под вашу локацию."
+              },
+              {
+                "role": "user",
+                "content": "Отфильтруй тех, кто делает брендирование/печать."
+              },
+              {
+                "role": "assistant",
+                "content": "Хорошо. По текущему списку как **первичный приоритет на проверку брендирования/печати**:\n\n1. **Абсолютпак ООО** — /company/absp  \n2. **Адара-трейдинг ОДО** — /company/adara  \n3. **Анкортсервис Плюс ТЧУП** — /company/ankortserv  \n\nПочему так: это компании из рубрики «Тара и упаковка» в Минске; у таких поставщиков чаще встречаются услуги нанесения логотипа/флексопечати.  \n⚠️ Но чтобы не ошибиться, нужно подтвердить на карточке компании или звонком (я не буду выдумывать услуги без проверки).\n\nЧто спросить для быстрого фильтра (1–2 минуты на звонок):\n1. Делаете ли печать по гофрокоробам (1–4 цвета, флексо/другое)?\n2. Минимальный тираж на брендированный короб?\n3. Срок производства с печатью (интересует до 7 дней)?\n4. Есть ли доставка по Минску и стоимость?\n5. Нужен ли готовый макет, и есть ли доплата за клише/подготовку?\n\nЕсли хотите, сразу подготовлю короткий текст запроса для звонка/WhatsApp, чтобы разослать всем 3 компаниям одним шаблоном."
+              }
+            ],
+            "conversationId": "23caeea4-fd36-4ad7-bb3f-48d588834b1b",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 36611,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "7c6ae8c6-de81-4730-89dd-f0fbdf0b3f41",
+          "conversationId": "23caeea4-fd36-4ad7-bb3f-48d588834b1b",
+          "isStub": false,
+          "reply": "Ниже прозрачное сравнение по доступным данным.  \nВажно: в текущем списке есть только **3 явно релевантных** поставщика гофроупаковки в Минске; до 5 без «слабых» кандидатов расширить нельзя без дополнительного поиска.\n\n### Сравнение (цена / срок / мин. партия)\n\n| # | Компания | Цена | Срок (до 7 дней) | Мин. партия | Контакты | Сайт |\n|---|---|---|---|---|---|---|\n| 1 | **Абсолютпак ООО** /company/absp | По запросу | По запросу (нужно подтвердить) | По запросу | +375 (44) 504 74 74, info@absp.by | http://absp.by |\n| 2 | **Адара-трейдинг ОДО** /company/adara | По запросу | По запросу (нужно подтвердить) | По запросу | +375 (17) 388 01 80, commerce@adara.by | http://shop-adara.by |\n| 3 | **Анкортсервис Плюс ТЧУП** /company/ankortserv | По запросу | По запросу (нужно подтвердить) | По запросу | +375 (17) 303 88 15, info@ankortservice.by | http://ankortservice.by |\n\n### Почему только 3 из 5\n- В доступном срезе каталога это самые релевантные по запросу «гофрокороба + Минск + опт».  \n- Остальные кандидаты из списка либо не про гофрокороба напрямую, либо профиль слабее.\n\n### Как быстро получить финальную таблицу «цена/срок/мин. партия»\n1. Отправить одинаковый RFQ этим 3 компаниям (объем, размер короба, марка картона, печать/без печати, доставка).  \n2. Добрать ещё 2 компании через расширение поиска по рубрике **«Тара и упаковка»** в Минске и ключам:  \n   - «гофрокороба опт», «коробки из гофрокартона», «флексопечать на коробах», «производство гофроупаковки».  \n\nЕсли хотите, сразу соберу вам короткий чек-лист для обзвона, чтобы за 20–30 минут получить сопоставимые КП.\n\nШаблон сравнения поставщиков:\n1. Цена за единицу и условия оплаты.\n2. Срок изготовления/отгрузки и доступность доставки.\n3. Минимальная партия (MOQ) и ограничения по тиражу.\n4. Контакты менеджера и сайт компании для быстрой верификации.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UX101.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UX101.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "UX101.T3.C3",
+              "type": "any_of",
+              "description": "Нужен shortlist с компаниями или прозрачное структурированное сравнение",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 52750
+    }
+  ]
+}

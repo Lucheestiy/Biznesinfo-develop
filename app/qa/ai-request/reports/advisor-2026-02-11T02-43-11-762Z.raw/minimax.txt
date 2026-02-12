@@ -1,0 +1,135 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "UV017 passed all checks with 4/5 usefulness. The core issue is low-confidence supplier (БелМолдКом) included with 'условно релевантен' flag. While assistant honesty mitigates this, the pattern indicates retrieval returns companies with insufficient evidence. Recommend adding explicit confidence scoring and retrieval filtering for low-info cards to improve shortlist quality from conditional to high-confidence matches.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Add explicit confidence scoring to shortlist output",
+      "why": "Both judges flagged БелМолдКом as 'conditionally relevant' - current 'условно релевантен' disclaimer is insufficient. Need explicit signals (HIGH/MEDIUM/LOW confidence) so users immediately know which suppliers to prioritize.",
+      "expectedImpact": "Expected usefulness score improvement from 4→4.5 by eliminating ' условно релевантен' ambiguity. Judges explicitly cited this as critical issue.",
+      "validationScenarios": [
+        "UV017.T2",
+        "UV001.T3",
+        "UV014.T2"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement low-info card detection in retrieval layer",
+      "why": "БелМолдКом has 'мало фактов в карточке' yet still appears in results. Current retrieval lacks filtering for minimum evidence threshold. This is systemic across vegetable/produce sourcing scenarios.",
+      "expectedImpact": "Reduce noise by 20-30% in sourcing queries. Fewer conditional matches = higher user satisfaction.",
+      "validationScenarios": [
+        "UV017.T1",
+        "UV002.T3",
+        "UV005.T3"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Add 'DO NOT CONTACT' marker for LOW confidence suppliers",
+      "why": "Users need clear guidance. If assistant includes a supplier with low confidence, it should have explicit '⚠️ Проверьте перед контактом' or similar marker, not buried in text.",
+      "expectedImpact": "Clearer user action items, fewer wasted outreach attempts on unverified suppliers.",
+      "validationScenarios": [
+        "UV017.T2",
+        "UV012.T2",
+        "UV013.T2"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Shortlist confidence scoring template",
+      "action": "Update assistant system prompt to require explicit confidence scoring in format: '[HIGH|MEDIUM|LOW] Company Name — reason'. For LOW confidence, add '⚠️ Проверка обязательна' marker.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts - modify response formatting section to enforce confidence badges. Pattern: Add confidence badge rendering before company name.",
+      "expectedImpact": "Users immediately see which suppliers to prioritize. Reduces ambiguity of 'условно релевантен' phrasing.",
+      "risk": "Low - visual change only, no behavioral modification",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017.T2",
+        "UV001.T3"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Minimum evidence threshold filter",
+      "action": "Add post-retrieval filter that excludes companies with <3 evidence signals (e.g., phone, address, category description, product mentions). Companies with sparse cards should be flagged as 'insufficient data' rather than returned.",
+      "implementationHint": "File: app/src/lib/utils/location.ts or similar retrieval utility. Add evidenceCount check after company card fetch. Return empty list if min threshold not met, then fallback to alternative query suggestions.",
+      "expectedImpact": "Fewer low-quality matches in shortlists. Cleaner retrieval for B2B sourcing queries.",
+      "risk": "Medium - may reduce recall if threshold too strict. Start with conservative threshold (2 signals).",
+      "effort": "M",
+      "validationScenarios": [
+        "UV017.T1",
+        "UV002.T1",
+        "UV006.T1"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Card enrichment extraction prompt",
+      "action": "Update assistant to extract and cite specific evidence from cards: phone numbers, address, specific products, delivery claims. If card lacks these, assistant should state 'Карточка компании не содержит достаточных данных для подтверждения' rather than including it.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts - enhance prompt to require evidence citation before adding supplier to shortlist.",
+      "expectedImpact": "More honest shortlists, fewer conditional matches. Users trust assistant more when evidence is explicit.",
+      "risk": "Low - improves transparency",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017.T2",
+        "UV012.T2",
+        "UV013.T2"
+      ]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Unified template blocks with priority ordering",
+      "action": "Ensure Subject/Body/WhatsApp blocks are consistently ordered with priority markers (e.g., '🎯 НАЧНИТЕ С ЭТОГО: Амифрут ЧП' before template). This reinforces shortlist priority.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts - modify template rendering to include priority header for #1 ranked supplier.",
+      "expectedImpact": "Users know exactly which supplier to contact first. Better actionability.",
+      "risk": "Low - visual enhancement",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017.T3",
+        "UV001.T4",
+        "UV003.T4"
+      ]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Conditional match handling protocol",
+      "action": "Add explicit rule: if >50% of shortlist candidates are ' условно релевантен', assistant must offer expanded search alternatives BEFORE presenting shortlist, not as footer.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts - add conditional check before shortlist rendering. If low-confidence rate > threshold, trigger 'Предлагаю сначала расширить поиск' flow.",
+      "expectedImpact": "Users get better results by seeing expanded alternatives first, rather than noisy shortlist.",
+      "risk": "Medium - changes conversation flow, requires testing",
+      "effort": "M",
+      "validationScenarios": [
+        "UV017.T2",
+        "UV011.T2",
+        "UV006.T3"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV017.T2",
+      "UV001.T3",
+      "UV014.T2"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+      "app/qa/ai-request/scenarios.regressions.branching-live-judge.json"
+    ],
+    "successMetrics": [
+      "Average usefulness score >= 4.2 (improvement from 4.0)",
+      "LOW confidence supplier count per shortlist <= 1",
+      "Evidence citation rate in shortlist reasons >= 90%",
+      "Generic fallback rate <= 0.1 (current: 0)"
+    ]
+  }
+}
+```
+

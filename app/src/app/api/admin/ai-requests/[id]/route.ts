@@ -4,6 +4,62 @@ import { getDbPool } from "@/lib/auth/db";
 
 export const runtime = "nodejs";
 
+type WebsiteScanSummary = {
+  attempted: boolean;
+  targetCount: number;
+  insightCount: number;
+  depth: {
+    deepScanUsed: boolean;
+    deepScanUsedCount: number;
+    scannedPagesTotal: number;
+  };
+};
+
+function parseWebsiteScanSummary(payloadRaw: unknown): WebsiteScanSummary | null {
+  if (!payloadRaw || typeof payloadRaw !== "object" || Array.isArray(payloadRaw)) return null;
+  const payload = payloadRaw as Record<string, unknown>;
+  const assistant =
+    payload._assistant && typeof payload._assistant === "object" && !Array.isArray(payload._assistant)
+      ? (payload._assistant as Record<string, unknown>)
+      : null;
+  if (!assistant) return null;
+  const request =
+    assistant.request && typeof assistant.request === "object" && !Array.isArray(assistant.request)
+      ? (assistant.request as Record<string, unknown>)
+      : null;
+  if (!request) return null;
+
+  const depthRaw =
+    request.websiteScanDepth && typeof request.websiteScanDepth === "object" && !Array.isArray(request.websiteScanDepth)
+      ? (request.websiteScanDepth as Record<string, unknown>)
+      : null;
+
+  const targetCount =
+    typeof request.websiteScanTargetCount === "number" ? Math.max(0, Math.floor(request.websiteScanTargetCount)) : 0;
+  const insightCount =
+    typeof request.websiteScanInsightCount === "number" ? Math.max(0, Math.floor(request.websiteScanInsightCount)) : 0;
+  const attempted = Boolean(request.websiteScanAttempted);
+
+  const deepScanUsed = Boolean(depthRaw?.deepScanUsed);
+  const deepScanUsedCount = typeof depthRaw?.deepScanUsedCount === "number" ? Math.max(0, Math.floor(depthRaw.deepScanUsedCount)) : 0;
+  const scannedPagesTotal = typeof depthRaw?.scannedPagesTotal === "number" ? Math.max(0, Math.floor(depthRaw.scannedPagesTotal)) : 0;
+
+  if (!attempted && targetCount === 0 && insightCount === 0 && !deepScanUsed && deepScanUsedCount === 0 && scannedPagesTotal === 0) {
+    return null;
+  }
+
+  return {
+    attempted,
+    targetCount,
+    insightCount,
+    depth: {
+      deepScanUsed,
+      deepScanUsedCount,
+      scannedPagesTotal,
+    },
+  };
+}
+
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
   if (!isAuthEnabled()) return NextResponse.json({ error: "AuthDisabled" }, { status: 404 });
   const me = await getCurrentUser();
@@ -39,6 +95,8 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
 
   const row = res.rows[0];
   if (!row) return NextResponse.json({ error: "NotFound" }, { status: 404 });
+  const payload = row.payload ?? null;
+  const websiteScan = parseWebsiteScanSummary(payload);
 
   return NextResponse.json(
     {
@@ -49,10 +107,10 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
         user: { id: row.user_id, email: row.email, name: row.name, plan: row.plan },
         companyId: row.company_id,
         message: row.message,
-        payload: row.payload ?? null,
+        websiteScan,
+        payload,
       },
     },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
-

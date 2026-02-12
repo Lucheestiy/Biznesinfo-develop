@@ -1,0 +1,223 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-10T00:00:00Z",
+      "source": "live-judge-branching-demo",
+      "description": "Demo scenarios for live judge branching by pass/fail, failed check id, and reply-content conditions."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2600,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T02-20-08-822Z-3292951-381ic",
+    "startedAt": "2026-02-11T02:20:08.822Z",
+    "endedAt": "2026-02-11T02:20:22.333Z",
+    "durationMs": 13511,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.branching-live-judge.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 4,
+    "passedChecks": 4,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 2,
+    "avgTurnLatencyMs": 6619,
+    "totalTurnLatencyMs": 13238,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "BR001",
+      "title": "Pass/fail branch with explicit nextOnPass/nextOnFail",
+      "tags": [
+        "branching",
+        "live_judge",
+        "demo"
+      ],
+      "personaGoal": "Проверить базовую ветвизацию: при PASS переход дальше, при FAIL повтор хода.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 13238,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:nextOnPass->2",
+        "2:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Дай минимум 2 карточки компаний /company/... по поставке упаковки в Минске.",
+          "requestBody": {
+            "message": "Дай минимум 2 карточки компаний /company/... по поставке упаковки в Минске.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 7203,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "bea50bdb-67c0-421a-a325-157d68103fb6",
+          "conversationId": "2f8f1c83-4523-498c-af77-1d27fdc672f2",
+          "isStub": false,
+          "reply": "По текущему срезу кандидатов **сильных и явно релевантных именно “поставщикам упаковки” в Минске почти нет**.  \nИз списка могу дать только наиболее близкие варианты для первичного контакта:\n\n1. **НП-Сервис ОДО** — `/company/np-service`  \n   Почему может подойти: в описании указана **многопрофильность + логистика**, что иногда включает снабжение/упаковочные процессы для B2B.  \n   Город: Минск.\n\n2. **Мерчендайз Сервис Компани ООО** — `/company/msservice`  \n   Почему может подойти: профиль — **мерчендайзинг**, может быть связан с POS/упаковкой для выкладки и промо.  \n   Город: Минск.\n\n⚠️ Прозрачно: это **не прямые “производители/дистрибьюторы упаковки” по карточкам**, а ближайшие по косвенной релевантности из доступного списка.  \n\nЧтобы быстро добрать точные карточки (уже профильные по упаковке), ищите в каталоге по запросам:\n- **упаковка оптом**\n- **упаковочные материалы**\n- **картонная упаковка**\n- **пластиковая тара**\n- **гофротара**\n- **стрейч пленка / скотч / паллетная упаковка**\n\nФильтр: **Минск / minsk**.  \n\nЕсли хотите, сразу дам короткий чек‑лист, как отсеивать карточки за 1 минуту (по ассортименту, MOQ, срокам и доставке).",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "nextOnPass",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "BR001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "BR001.T1.C2",
+              "type": "company_path_min_count",
+              "description": "Минимум 2 ссылки /company/...",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 2,
+                "count": 2
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сделай шаблон контакта в блоках Subject/Body/WhatsApp.",
+          "requestBody": {
+            "message": "Сделай шаблон контакта в блоках Subject/Body/WhatsApp.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Дай минимум 2 карточки компаний /company/... по поставке упаковки в Минске."
+              },
+              {
+                "role": "assistant",
+                "content": "По текущему срезу кандидатов **сильных и явно релевантных именно “поставщикам упаковки” в Минске почти нет**.  \nИз списка могу дать только наиболее близкие варианты для первичного контакта:\n\n1. **НП-Сервис ОДО** — `/company/np-service`  \n   Почему может подойти: в описании указана **многопрофильность + логистика**, что иногда включает снабжение/упаковочные процессы для B2B.  \n   Город: Минск.\n\n2. **Мерчендайз Сервис Компани ООО** — `/company/msservice`  \n   Почему может подойти: профиль — **мерчендайзинг**, может быть связан с POS/упаковкой для выкладки и промо.  \n   Город: Минск.\n\n⚠️ Прозрачно: это **не прямые “производители/дистрибьюторы упаковки” по карточкам**, а ближайшие по косвенной релевантности из доступного списка.  \n\nЧтобы быстро добрать точные карточки (уже профильные по упаковке), ищите в каталоге по запросам:\n- **упаковка оптом**\n- **упаковочные материалы**\n- **картонная упаковка**\n- **пластиковая тара**\n- **гофротара**\n- **стрейч пленка / скотч / паллетная упаковка**\n\nФильтр: **Минск / minsk**.  \n\nЕсли хотите, сразу дам короткий чек‑лист, как отсеивать карточки за 1 минуту (по ассортименту, MOQ, срокам и доставке)."
+              }
+            ],
+            "conversationId": "2f8f1c83-4523-498c-af77-1d27fdc672f2",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6035,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "69f99253-e283-4a41-ad20-853cc35afdab",
+          "conversationId": "2f8f1c83-4523-498c-af77-1d27fdc672f2",
+          "isStub": false,
+          "reply": "Subject: Запрос на поставку упаковки в Минск (B2B)\nBody:\nДобрый день!\n\nМеня зовут [Имя], компания [Название компании], г. Минск.  \nИщем надежного поставщика упаковки для регулярных закупок.\n\nИнтересуют:\n- тип упаковки: картонная / пластиковая тара / пленка / скотч / гофротара;\n- формат поставки: опт;\n- доставка: Минск.\n\nПросим направить:\n1) актуальный прайс-лист,  \n2) минимальный объем заказа,  \n3) сроки поставки,  \n4) условия оплаты,  \n5) наличие сертификатов/документов качества,  \n6) возможность брендирования (если есть).\n\nПланируем старт закупки в ближайший срок, готовы обсудить долгосрочное сотрудничество.  \nБудем признательны за ответ на этот email или по телефону [Контактный номер].\n\nС уважением,  \n[Имя Фамилия]  \n[Должность]  \n[Название компании]  \n[Телефон]  \n[Email]\nWhatsApp:\nЗдравствуйте! [Имя], компания [Название компании], Минск. Ищем поставщика упаковки (опт): картон/пленка/скотч/тара. Пришлите, пожалуйста, прайс, MOQ, сроки поставки в Минск и условия оплаты. Спасибо!",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "BR001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "BR001.T2.C2",
+              "type": "template_blocks",
+              "description": "Ожидаются блоки Subject/Body/WhatsApp",
+              "passed": true,
+              "reason": "Template blocks present",
+              "details": {
+                "hasSubject": true,
+                "hasBody": true,
+                "hasWhatsapp": true
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 13239
+    }
+  ]
+}

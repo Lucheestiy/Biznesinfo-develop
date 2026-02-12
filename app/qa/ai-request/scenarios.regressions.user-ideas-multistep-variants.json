@@ -1,0 +1,1001 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-09T21:10:00Z",
+    "source": "user-seed-ideas-expanded",
+    "description": "Multi-turn + variant regressions expanded from user business queries to stress continuity, geo refinement, shortlist quality, and outreach templates."
+  },
+  "scenarios": [
+    {
+      "id": "UV001",
+      "title": "Производители обуви в Минске: уточнение типа + shortlist + шаблон контакта",
+      "personaGoal": "Проверить, что ассистент удерживает производственный фокус и после уточнений дает структурированный shortlist.",
+      "tags": ["regression", "multi_turn", "variants", "footwear", "minsk", "manufacturers", "template"],
+      "turns": [
+        {
+          "user": "Какие в Минске есть производители обуви?",
+          "checks": [
+            { "id": "UV001.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV001.T1.C2", "type": "mentions_any_terms", "terms": ["обув", "производ"], "min": 1, "description": "Должен удержать производственный контекст" },
+            { "id": "UV001.T1.C3", "type": "includes_any", "patterns": ["минск"], "description": "Должен учитывать город запроса" },
+            { "id": "UV001.T1.C4", "type": "not_refusal_only", "description": "Нужен practical first-pass, а не отказ" }
+          ]
+        },
+        {
+          "user": "Нужны именно производители, не розничные магазины. Больше интересует мужская классическая обувь.",
+          "checks": [
+            { "id": "UV001.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV001.T2.C2", "type": "mentions_any_terms", "terms": ["производ", "обув"], "min": 1, "description": "Должен сохранить фокус на производителях" },
+            { "id": "UV001.T2.C3", "type": "includes_any", "patterns": ["мужск", "классич"], "description": "Должен учитывать уточнение по типу обуви" },
+            { "id": "UV001.T2.C4", "type": "not_refusal_only", "description": "Нужен полезный ответ по уточнению" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist 3-5 и объясни, кого лучше проверить первым.",
+          "checks": [
+            { "id": "UV001.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV001.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist ссылок или структурированный рейтинг с критериями",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Хотя бы одна ссылка на карточку /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 пункта" },
+                    { "type": "includes_any", "patterns": ["критер", "почему", "перв"], "description": "Есть приоритизация и причины" }
+                  ],
+                  "description": "Есть осмысленный рейтинг"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сделай первое сообщение поставщику в блоках Subject/Body/WhatsApp.",
+          "checks": [
+            { "id": "UV001.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV001.T4.C2", "type": "template_blocks", "description": "Ожидаются блоки Subject/Body/WhatsApp" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV002",
+      "title": "Заводы муки: Беларусь -> качество -> экспортные документы -> shortlist",
+      "personaGoal": "Проверить устойчивость к b2b-критериям качества и экспорта в многоходовом запросе.",
+      "tags": ["regression", "multi_turn", "variants", "flour", "factories", "export", "quality"],
+      "turns": [
+        {
+          "user": "Какие заводы в Беларуси производят муку высшего качества?",
+          "checks": [
+            { "id": "UV002.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV002.T1.C2", "type": "mentions_any_terms", "terms": ["мук", "завод"], "min": 1, "description": "Должен держать контекст по муке и заводам" },
+            { "id": "UV002.T1.C3", "type": "includes_any", "patterns": ["беларус"], "description": "Должен учитывать страновой фильтр" }
+          ]
+        },
+        {
+          "user": "Нужны еще критерии: белизна, клейковина, стабильность партии.",
+          "checks": [
+            { "id": "UV002.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV002.T2.C2", "type": "includes_any", "patterns": ["клейков", "белизн", "парт"], "description": "Должен учесть критерии качества" },
+            { "id": "UV002.T2.C3", "type": "not_refusal_only", "description": "Ожидается полезный follow-up" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist и отдельно укажи, у кого вероятнее экспортная готовность.",
+          "checks": [
+            { "id": "UV002.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV002.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist с экспортным акцентом",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 пункта" },
+                    { "type": "includes_any", "patterns": ["экспорт", "сертифик", "документ"], "description": "Есть экспортные критерии" }
+                  ],
+                  "description": "Есть структурированная экспортная оценка"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Дай чеклист из 6 пунктов, какие документы спросить перед контрактом.",
+          "checks": [
+            { "id": "UV002.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV002.T4.C2", "type": "numbered_list_min", "min": 6, "description": "Нужен подробный чеклист по документам" },
+            { "id": "UV002.T4.C3", "type": "includes_any", "patterns": ["сертифик", "протокол", "декларац", "договор"], "description": "Есть релевантные документы" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV003",
+      "title": "Где поблизости вкусно поесть: consumer запрос -> b2b переформулировка",
+      "personaGoal": "Проверить, что ассистент не ломается на consumer-вопросе и дает полезный мост к b2b-поиску.",
+      "tags": ["regression", "multi_turn", "variants", "consumer_to_b2b", "restaurants", "reframing"],
+      "turns": [
+        {
+          "user": "Где поблизости можно поесть вкусно?",
+          "checks": [
+            { "id": "UV003.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV003.T1.C2", "type": "not_refusal_only", "description": "Даже при нехватке данных нужен полезный ответ" }
+          ]
+        },
+        {
+          "user": "Я в Минске, район Уручье. Если на портале нет ресторанов, предложи близкий b2b-формат поиска.",
+          "checks": [
+            { "id": "UV003.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV003.T2.C2", "type": "includes_any", "patterns": ["минск", "уруч"], "description": "Должен учитывать уточнение локации" },
+            { "id": "UV003.T2.C3", "type": "includes_any", "patterns": ["поставщик", "кафе", "рестора", "общепит"], "description": "Должен дать b2b-направление, а не тупик" }
+          ]
+        },
+        {
+          "user": "Сделай 3 варианта запросов для портала: продукты, оборудование и услуги для кафе.",
+          "checks": [
+            { "id": "UV003.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV003.T3.C2", "type": "numbered_list_min", "min": 3, "description": "Ожидаются минимум 3 варианта запросов" },
+            { "id": "UV003.T3.C3", "type": "includes_any", "patterns": ["продукт", "оборуд", "услуг"], "description": "Покрыты три категории" }
+          ]
+        },
+        {
+          "user": "Сформируй короткое сообщение поставщику продуктов в блоках Subject/Body/WhatsApp.",
+          "checks": [
+            { "id": "UV003.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV003.T4.C2", "type": "template_blocks", "description": "Ожидаются блоки Subject/Body/WhatsApp" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV004",
+      "title": "Белорусские соковыжималки: заводы -> OEM/ODM -> shortlist -> RFQ",
+      "personaGoal": "Проверить производство non-food оборудования с переходом к RFQ.",
+      "tags": ["regression", "multi_turn", "variants", "juicers", "manufacturing", "oem", "rfq"],
+      "turns": [
+        {
+          "user": "Какой белорусский завод производит соковыжималки?",
+          "checks": [
+            { "id": "UV004.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV004.T1.C2", "type": "mentions_any_terms", "terms": ["соковыжим", "завод"], "min": 1, "description": "Должен удержать товар+завод" },
+            { "id": "UV004.T1.C3", "type": "includes_any", "patterns": ["беларус"], "description": "Должен учитывать страновой фильтр" }
+          ]
+        },
+        {
+          "user": "Интересует и контрактное производство под моим брендом (OEM/ODM), если такое есть.",
+          "checks": [
+            { "id": "UV004.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV004.T2.C2", "type": "includes_any", "patterns": ["oem", "odm", "контракт"], "description": "Должен учитывать OEM/ODM вариант" },
+            { "id": "UV004.T2.C3", "type": "not_refusal_only", "description": "Нужен practical next step" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist, кого сначала проверять по надежности и сервису.",
+          "checks": [
+            { "id": "UV004.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV004.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist ссылок или рейтинг с критериями",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть хотя бы одна ссылка /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 пункта" },
+                    { "type": "includes_any", "patterns": ["надеж", "сервис", "гарант"], "description": "Есть критерии надежности/сервиса" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сделай RFQ в блоках Subject/Body/WhatsApp с запросом MOQ, сроков и гарантии.",
+          "checks": [
+            { "id": "UV004.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV004.T4.C2", "type": "template_blocks", "description": "Ожидаются блоки Subject/Body/WhatsApp" },
+            { "id": "UV004.T4.C3", "type": "includes_any", "patterns": ["moq", "срок", "гарант"], "description": "Должны быть ключевые параметры запроса" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV005",
+      "title": "Экспортеры пищевой промышленности: сегментация по рынкам и продукту",
+      "personaGoal": "Проверить, что ассистент умеет сегментировать экспортеров по рынкам/категориям и выдавать shortlist.",
+      "tags": ["regression", "multi_turn", "variants", "food_export", "segmentation", "shortlist"],
+      "turns": [
+        {
+          "user": "Предприятия-экспортеры пищевой промышленности.",
+          "checks": [
+            { "id": "UV005.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV005.T1.C2", "type": "includes_any", "patterns": ["экспорт", "пищев"], "description": "Должен удержать экспортно-пищевой фокус" },
+            { "id": "UV005.T1.C3", "type": "not_refusal_only", "description": "Нужен полезный старт" }
+          ]
+        },
+        {
+          "user": "Нужны те, кто работает с рынками ЕАЭС и СНГ, желательно с молочной и кондитерской продукцией.",
+          "checks": [
+            { "id": "UV005.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV005.T2.C2", "type": "includes_any", "patterns": ["еаэс", "снг"], "description": "Должен учесть рынки экспорта" },
+            { "id": "UV005.T2.C3", "type": "includes_any", "patterns": ["молоч", "кондитер"], "description": "Должен учесть продуктовые сегменты" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist top-5 и кому первым писать по вероятности ответа.",
+          "checks": [
+            { "id": "UV005.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV005.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist компаний или структурированный top",
+              "checks": [
+                { "type": "company_path_min_count", "min": 2, "description": "Желательно несколько ссылок /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 4, "description": "Минимум 4 пункта в top-выдаче" },
+                    { "type": "includes_any", "patterns": ["перв", "вероят", "ответ"], "description": "Есть приоритизация контакта" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сделай короткий outreach шаблон (email + WhatsApp).",
+          "checks": [
+            { "id": "UV005.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV005.T4.C2", "type": "template_blocks", "description": "Ожидаются блоки Subject/Body/WhatsApp" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV006",
+      "title": "Лес на экспорт: условия качества + логистика + RFQ",
+      "personaGoal": "Проверить экспортный multi-step по лесоматериалам и форматирование RFQ.",
+      "tags": ["regression", "multi_turn", "variants", "timber", "export", "rfq", "logistics"],
+      "turns": [
+        {
+          "user": "Где купить лес на экспорт?",
+          "checks": [
+            { "id": "UV006.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV006.T1.C2", "type": "mentions_any_terms", "terms": ["лес", "экспорт"], "min": 1, "description": "Должен удержать лес+экспорт" },
+            { "id": "UV006.T1.C3", "type": "not_refusal_only", "description": "Нужен practical ответ" }
+          ]
+        },
+        {
+          "user": "Нужна сухая доска, желательно с FSC и с доставкой до границы.",
+          "checks": [
+            { "id": "UV006.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV006.T2.C2", "type": "includes_any", "patterns": ["fsc", "сух", "границ", "достав"], "description": "Должен учесть критерии качества и логистики" },
+            { "id": "UV006.T2.C3", "type": "not_refusal_only", "description": "Нужен полезный follow-up" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist поставщиков и что проверить по контракту.",
+          "checks": [
+            { "id": "UV006.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV006.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist ссылок или список с контрактными критериями",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылка /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 пункта" },
+                    { "type": "includes_any", "patterns": ["контракт", "инкотерм", "сертифик"], "description": "Есть контрактные проверки" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сформируй RFQ в блоках Subject/Body/WhatsApp.",
+          "checks": [
+            { "id": "UV006.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV006.T4.C2", "type": "template_blocks", "description": "Ожидаются блоки Subject/Body/WhatsApp" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV007",
+      "title": "Найти потенциальных заказчиков моей продукции: reverse поиск + shortlist",
+      "personaGoal": "Проверить reverse-b2b режим (поиск потенциальных покупателей, а не поставщиков).",
+      "tags": ["regression", "multi_turn", "variants", "reverse_search", "buyers", "shortlist", "template"],
+      "turns": [
+        {
+          "user": "Найди мне на портале предприятия, которые потенциально могут заказать у меня продукцию.",
+          "checks": [
+            { "id": "UV007.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV007.T1.C2", "type": "not_refusal_only", "description": "Должен предложить путь для reverse-поиска" }
+          ]
+        },
+        {
+          "user": "Я продаю пластиковую пищевую тару (банки, ведра, крышки). Ищу потенциальных заказчиков в Беларуси.",
+          "checks": [
+            { "id": "UV007.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV007.T2.C2", "type": "includes_any", "patterns": ["тара", "упаков", "пищев"], "description": "Должен учесть товарную специфику" },
+            { "id": "UV007.T2.C3", "type": "includes_any", "patterns": ["заказчик", "покупател", "потенциал"], "description": "Нужен фокус на потенциальных покупателях" }
+          ]
+        },
+        {
+          "user": "Сделай top-5 потенциальных заказчиков и почему им это может быть интересно.",
+          "checks": [
+            { "id": "UV007.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV007.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist покупателей с аргументацией",
+              "checks": [
+                { "type": "company_path_min_count", "min": 2, "description": "Есть ссылки на карточки компаний" },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 4, "description": "Минимум 4 кандидата" },
+                    { "type": "includes_any", "patterns": ["почему", "интерес", "подходит"], "description": "Есть причины релевантности" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сделай первое сообщение для холодного контакта (Subject/Body/WhatsApp).",
+          "checks": [
+            { "id": "UV007.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV007.T4.C2", "type": "template_blocks", "description": "Ожидаются блоки Subject/Body/WhatsApp" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV008",
+      "title": "Белорусский минитрактор: покупка + критерии + сравнение",
+      "personaGoal": "Проверить поиск производителей/продавцов техники с переходом в сравнение.",
+      "tags": ["regression", "multi_turn", "variants", "minitractor", "equipment", "comparison"],
+      "turns": [
+        {
+          "user": "У кого можно купить белорусский минитрактор?",
+          "checks": [
+            { "id": "UV008.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV008.T1.C2", "type": "mentions_any_terms", "terms": ["минитракт", "белорус"], "min": 1, "description": "Должен удержать контекст техники" },
+            { "id": "UV008.T1.C3", "type": "not_refusal_only", "description": "Нужен полезный старт" }
+          ]
+        },
+        {
+          "user": "Нужны варианты до 30 л.с., желательно с навесным и сервисом в Минской области.",
+          "checks": [
+            { "id": "UV008.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV008.T2.C2", "type": "includes_any", "patterns": ["30", "л.с", "навес", "сервис", "минск"], "description": "Должен учесть ограничения по характеристикам и сервису" },
+            { "id": "UV008.T2.C3", "type": "not_refusal_only", "description": "Нужен практический follow-up" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist и кого лучше обзвонить первым.",
+          "checks": [
+            { "id": "UV008.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV008.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist поставщиков/производителей",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть хотя бы одна ссылка /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 варианта" },
+                    { "type": "includes_any", "patterns": ["перв", "обзвон", "приоритет"], "description": "Есть очередность контакта" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сравни 3 лучших варианта по цене, сроку поставки и гарантии.",
+          "checks": [
+            { "id": "UV008.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV008.T4.C2", "type": "numbered_list_min", "min": 3, "description": "Ожидается сравнительный список минимум из 3 позиций" },
+            { "id": "UV008.T4.C3", "type": "includes_any", "patterns": ["цен", "срок", "гарант"], "description": "Есть все ключевые критерии сравнения" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV009",
+      "title": "Стоматология с микроскопом в Минске: сложный consumer кейс + полезный fallback",
+      "personaGoal": "Проверить, что ассистент дает полезный и безопасный guidance даже на медицинском локальном запросе.",
+      "tags": ["regression", "multi_turn", "variants", "dentistry", "minsk", "consumer", "fallback"],
+      "turns": [
+        {
+          "user": "Найди стоматологию, где лечат каналы под микроскопом в Минске.",
+          "checks": [
+            { "id": "UV009.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV009.T1.C2", "type": "includes_any", "patterns": ["минск", "стомат", "микроскоп"], "description": "Должен удержать суть запроса" },
+            { "id": "UV009.T1.C3", "type": "not_refusal_only", "description": "Нужен полезный next step, а не пустой отказ" }
+          ]
+        },
+        {
+          "user": "Если на портале такого мало, дай как минимум 3 критерия выбора клиники и что уточнить при звонке.",
+          "checks": [
+            { "id": "UV009.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV009.T2.C2", "type": "numbered_list_min", "min": 3, "description": "Должны быть критерии выбора" },
+            { "id": "UV009.T2.C3", "type": "includes_any", "patterns": ["врач", "микроскоп", "гарант", "диагност"], "description": "Критерии должны быть предметными" }
+          ]
+        },
+        {
+          "user": "Сделай чеклист вопросов перед записью (минимум 7 пунктов).",
+          "checks": [
+            { "id": "UV009.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV009.T3.C2", "type": "numbered_list_min", "min": 7, "description": "Нужен детальный чеклист" }
+          ]
+        },
+        {
+          "user": "Сделай короткий скрипт звонка на 30-40 секунд.",
+          "checks": [
+            { "id": "UV009.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV009.T4.C2", "type": "reply_length_min", "min": 120, "description": "Ожидается достаточно содержательный скрипт" },
+            { "id": "UV009.T4.C3", "type": "not_refusal_only", "description": "Нельзя уйти в общий отказ" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV010",
+      "title": "Не помню точный бренд молочной компании: гипотезы + проверка + уточнение",
+      "personaGoal": "Проверить работу ассистента с неполным воспоминанием и мягкой идентификацией бренда/компании.",
+      "tags": ["regression", "multi_turn", "variants", "dairy", "brand_recall", "hypotheses", "savushkin"],
+      "turns": [
+        {
+          "user": "Как называется молочная компания, не помню точно торговую марку, кажется Савушкин продукт, которая выпускает молоко и творожки?",
+          "checks": [
+            { "id": "UV010.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV010.T1.C2", "type": "includes_any", "patterns": ["савуш", "молок", "творож"], "description": "Должен удержать ключевые маркеры запроса" },
+            { "id": "UV010.T1.C3", "type": "not_refusal_only", "description": "Нужен полезный ответ даже при неполных данных" }
+          ]
+        },
+        {
+          "user": "Да, похоже это она. Но дай 2-3 альтернативные гипотезы на случай, если я ошибаюсь.",
+          "checks": [
+            { "id": "UV010.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV010.T2.C2", "type": "numbered_list_min", "min": 3, "description": "Должны быть гипотезы, а не одна компания" },
+            { "id": "UV010.T2.C3", "type": "includes_any", "patterns": ["гипот", "возмож", "провер"], "description": "Должна быть логика проверки гипотез" }
+          ]
+        },
+        {
+          "user": "Сделай короткий алгоритм, как быстро проверить на портале, что это именно нужная компания.",
+          "checks": [
+            { "id": "UV010.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV010.T3.C2", "type": "numbered_list_min", "min": 4, "description": "Нужен пошаговый алгоритм" },
+            { "id": "UV010.T3.C3", "type": "includes_any", "patterns": ["поиск", "карточк", "бренд", "продукц"], "description": "Алгоритм должен быть привязан к порталу и карточкам" }
+          ]
+        },
+        {
+          "user": "Сформируй один точный запрос для портала и один запрос для звонка поставщику.",
+          "checks": [
+            { "id": "UV010.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV010.T4.C2", "type": "numbered_list_min", "min": 2, "description": "Нужно минимум два четких запроса" },
+            { "id": "UV010.T4.C3", "type": "includes_any", "patterns": ["портал", "звон"], "description": "Должны быть оба контекста: портал и звонок" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV011",
+      "title": "No-results ветка: сверхузкий запрос на производителей обуви",
+      "personaGoal": "Проверить, что при сверхузком запросе ассистент честно сообщает об ограничениях и предлагает полезные альтернативы без галлюцинаций.",
+      "tags": ["regression", "multi_turn", "variants", "no_results", "footwear", "guardrails", "fallback"],
+      "turns": [
+        {
+          "user": "Нужны в Минске производители классических мужских туфель ручной работы из кордована с карбоновым супинатором.",
+          "checks": [
+            { "id": "UV011.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV011.T1.C2", "type": "includes_any", "patterns": ["минск", "производ", "обув"], "description": "Должен удержать контекст запроса" },
+            { "id": "UV011.T1.C3", "type": "not_refusal_only", "description": "Даже если точных результатов нет, нужен полезный ответ" }
+          ]
+        },
+        {
+          "user": "Нужны именно производители, не продавцы. Если такого нет — так и скажи и дай 2-3 рабочих альтернативы.",
+          "checks": [
+            { "id": "UV011.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV011.T2.C2", "type": "includes_any", "patterns": ["не найден", "нет", "альтернатив"], "description": "Должен корректно отработать no-results ветку и предложить альтернативы" },
+            { "id": "UV011.T2.C3", "type": "numbered_list_min", "min": 2, "description": "Ожидаются минимум 2 альтернативных пути" }
+          ]
+        },
+        {
+          "user": "Сформируй один расширенный запрос для портала, чтобы повысить шанс найти релевантных производителей.",
+          "checks": [
+            { "id": "UV011.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV011.T3.C2", "type": "includes_any", "patterns": ["запрос", "обув", "производ"], "description": "Должен дать готовую формулировку запроса" },
+            { "id": "UV011.T3.C3", "type": "question_count_max", "max": 2, "description": "Не должен уходить в длинный опрос вместо решения" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV012",
+      "title": "Проверка по сайтам компаний: источник + контакты + честная пометка подтверждения",
+      "personaGoal": "Проверить, что ассистент по явному запросу идет в сайты компаний, ссылается на источник и не выдумывает подтверждения.",
+      "tags": ["regression", "multi_turn", "website_scan", "sources", "contacts", "footwear", "minsk"],
+      "turns": [
+        {
+          "user": "Какие в Минске есть производители обуви? Дай сначала 3 варианта для проверки.",
+          "checks": [
+            { "id": "UV012.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV012.T1.C2", "type": "mentions_any_terms", "terms": ["минск", "обув", "производ"], "min": 2, "description": "Должен удержать товарно-гео контекст" },
+            { "id": "UV012.T1.C3", "type": "not_refusal_only", "description": "Нужен practical first-pass" }
+          ]
+        },
+        {
+          "user": "Проверь на сайтах первых компаний, где прямо указано, что это производители, и дай источник + контакты.",
+          "checks": [
+            { "id": "UV012.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV012.T2.C2",
+              "type": "any_of",
+              "description": "Либо есть явный источник с сайта, либо честный fallback о невозможности проверить текущую тройку",
+              "checks": [
+                {
+                  "type": "includes_any",
+                  "patterns": ["source:", "источник:", "http://", "https://"],
+                  "description": "Есть ссылка на источник"
+                },
+                {
+                  "type": "includes_any",
+                  "patterns": ["нет", "не удалось", "не могу", "нет самих 3 компаний", "не удалось надежно прочитать сайты"],
+                  "description": "Есть честная фиксация, почему источники пока не даны"
+                }
+              ]
+            },
+            {
+              "id": "UV012.T2.C3",
+              "type": "includes_any",
+              "patterns": ["контакт", "тел", "email", "e-mail", "почт"],
+              "description": "Должны присутствовать контакты или явная контактная информация"
+            }
+          ]
+        },
+        {
+          "user": "Если по сайту не подтверждается, так и отметь и предложи, кого проверить дальше.",
+          "checks": [
+            { "id": "UV012.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV012.T3.C2",
+              "type": "includes_any",
+              "patterns": ["не подтверж", "не найден", "провер", "дальше", "следующ"],
+              "description": "Должна быть честная пометка статуса и следующий шаг"
+            },
+            { "id": "UV012.T3.C3", "type": "not_refusal_only", "description": "Нужен полезный follow-up, а не пустой отказ" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV013",
+      "title": "Deep website-scan: внутренняя навигация сайта (контакты/о компании/продукция)",
+      "personaGoal": "Проверить, что ассистент пытается углубиться во внутренние разделы сайта и возвращает источник/контакты либо честный fallback.",
+      "tags": ["regression", "multi_turn", "website_scan", "website_scan_deep", "sources", "contacts", "minsk", "footwear"],
+      "turns": [
+        {
+          "user": "Подбери 3 производителей обуви в Минске для проверки по сайтам.",
+          "checks": [
+            { "id": "UV013.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV013.T1.C2", "type": "mentions_any_terms", "terms": ["минск", "обув", "производ"], "min": 2, "description": "Сохраняется товарно-гео контекст" },
+            { "id": "UV013.T1.C3", "type": "not_refusal_only", "description": "Нужен practical first-pass" }
+          ]
+        },
+        {
+          "user": "Пройди по их сайтам глубже: проверь разделы контакты/о компании/продукция, и дай источник + контакты.",
+          "checks": [
+            { "id": "UV013.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV013.T2.C2",
+              "type": "any_of",
+              "description": "Либо есть источник, либо честный fallback о невозможности прочитать сайт",
+              "checks": [
+                { "type": "includes_any", "patterns": ["source:", "источник:", "http://", "https://"], "description": "Есть источник" },
+                { "type": "includes_any", "patterns": ["не удалось надежно прочитать сайты", "не удалось", "не могу"], "description": "Есть честный fallback" }
+              ]
+            },
+            {
+              "id": "UV013.T2.C3",
+              "type": "any_of",
+              "description": "Есть контактные данные или явная подсказка для ручной проверки",
+              "checks": [
+                { "type": "includes_any", "patterns": ["контакты с сайта", "контакт", "тел", "email", "e-mail", "почт"], "description": "Есть контактные сигналы" },
+                { "type": "includes_any", "patterns": ["даю прямые ссылки", "проверь", "раздел", "контакты"], "description": "Есть явная fallback-навигация" }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Если на главной нет подтверждения, пометь это и предложи следующего кандидата для проверки.",
+          "checks": [
+            { "id": "UV013.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV013.T3.C2", "type": "includes_any", "patterns": ["главн", "не подтверж", "не найден", "следующ", "провер"], "description": "Есть честная пометка статуса и следующий шаг" },
+            { "id": "UV013.T3.C3", "type": "not_refusal_only", "description": "Нужен полезный follow-up" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV014",
+      "title": "Reverse-buyer вариативный: пищевая тара -> целевые сегменты -> shortlist без общих советов",
+      "personaGoal": "Проверить, что ассистент удерживает reverse-поиск заказчиков и не срывается в общий консалтинг после жесткого уточнения.",
+      "tags": ["regression", "multi_turn", "variants", "reverse_buyer", "packaging", "strict_mode"],
+      "turns": [
+        {
+          "user": "Найди на портале компании, которым можно продать пластиковую пищевую тару (банки, ведра, крышки).",
+          "checks": [
+            { "id": "UV014.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV014.T1.C2", "type": "includes_any", "patterns": ["тара", "пищев", "компан"], "description": "Должен удержать reverse-buyer контекст" },
+            { "id": "UV014.T1.C3", "type": "not_refusal_only", "description": "Нужен practical first-pass" }
+          ]
+        },
+        {
+          "user": "Нужны в Беларуси, приоритет: молочка, соусы, кулинария. Сделай top-5.",
+          "checks": [
+            { "id": "UV014.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV014.T2.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist или top-структура",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 4, "description": "Есть структурированный top" },
+                    { "type": "includes_any", "patterns": ["молоч", "соус", "кулинар"], "description": "Учитываются сегменты" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Без общих советов. Дай кого первым прозвонить и 3 вопроса для первого контакта.",
+          "checks": [
+            { "id": "UV014.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV014.T3.C2", "type": "includes_any", "patterns": ["кого первым", "прозвон", "вопрос"], "description": "Должен дать call-priority и вопросы" },
+            { "id": "UV014.T3.C3", "type": "numbered_list_min", "min": 3, "description": "Минимум 3 конкретных вопроса" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV015",
+      "title": "Вариант по минитракторам: покупка -> сравнение условий -> запрос для звонка",
+      "personaGoal": "Проверить устойчивость к формулировкам с акцентом на сравнение условий покупки и первичный созвон.",
+      "tags": ["regression", "multi_turn", "variants", "minitractor", "comparison", "call_script"],
+      "turns": [
+        {
+          "user": "Кто в Беларуси продает минитракторы для фермы? Нужны варианты для первичного отбора.",
+          "checks": [
+            { "id": "UV015.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV015.T1.C2", "type": "includes_any", "patterns": ["беларус", "минитракт", "ферм"], "description": "Должен удержать товар и гео-фильтр" },
+            { "id": "UV015.T1.C3", "type": "not_refusal_only", "description": "Нужен полезный старт" }
+          ]
+        },
+        {
+          "user": "Сравни по 4 критериям: цена, гарантия, сервис, наличие навесного оборудования.",
+          "checks": [
+            { "id": "UV015.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV015.T2.C2", "type": "numbered_list_min", "min": 4, "description": "Ожидается сравнение минимум по 4 пунктам" },
+            { "id": "UV015.T2.C3", "type": "includes_any", "patterns": ["цена", "гарант", "сервис", "навес"], "description": "Должны быть ключевые критерии" }
+          ]
+        },
+        {
+          "user": "Сделай один запрос для портала и короткий скрипт для первого звонка поставщику.",
+          "checks": [
+            { "id": "UV015.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV015.T3.C2", "type": "numbered_list_min", "min": 2, "description": "Нужно минимум два отдельных блока/пункта" },
+            { "id": "UV015.T3.C3", "type": "includes_any", "patterns": ["портал", "звон"], "description": "Должны быть оба контекста: портал и звонок" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV016",
+      "title": "Вариативный экспорт муки: shortlist + документная проверка + шаблон запроса",
+      "personaGoal": "Проверить, что ассистент стабильно держит экспортный контур и переходит к прикладным документам/шаблонам.",
+      "tags": ["regression", "multi_turn", "variants", "flour", "export", "documents", "template"],
+      "turns": [
+        {
+          "user": "Нужны белорусские производители муки высшего сорта, ориентированные на экспорт.",
+          "checks": [
+            { "id": "UV016.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV016.T1.C2", "type": "includes_any", "patterns": ["беларус", "мук", "экспорт"], "description": "Должен удержать экспортно-продуктовый фокус" },
+            { "id": "UV016.T1.C3", "type": "not_refusal_only", "description": "Нужен practical first-pass" }
+          ]
+        },
+        {
+          "user": "Сделай top-4 и укажи, у кого выше вероятность экспортной готовности.",
+          "checks": [
+            { "id": "UV016.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV016.T2.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist или структурированный top",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 4, "description": "Есть top-4" },
+                    { "type": "includes_any", "patterns": ["экспорт", "готов", "документ"], "description": "Есть экспортная логика" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Дай шаблон письма (Subject/Body/WhatsApp) и отдельно 5 документов для первичной проверки.",
+          "checks": [
+            { "id": "UV016.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV016.T3.C2", "type": "template_blocks", "description": "Ожидаются блоки Subject/Body/WhatsApp" },
+            { "id": "UV016.T3.C3", "type": "numbered_list_min", "min": 5, "description": "Нужен список минимум из 5 документов" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV017",
+      "title": "Свекла 500 кг в Минске: защита от нерелевантных \"не-поставщиков\"",
+      "personaGoal": "Проверить, что ассистент не предлагает учебные учреждения/другие нерелевантные профили в товарном sourcing-запросе.",
+      "tags": ["regression", "multi_turn", "variants", "beet", "vegetables", "anti_noise", "supplier_quality"],
+      "turns": [
+        {
+          "user": "Где в Минске купить 500 кг красного буряка оптом?",
+          "checks": [
+            { "id": "UV017.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV017.T1.C2", "type": "includes_any", "patterns": ["буряк", "свекл", "овощ", "корнеплод"], "description": "Должен удерживать товарный контекст" },
+            {
+              "id": "UV017.T1.C3",
+              "type": "excludes_all",
+              "patterns": ["\\bколледж\\p{L}*\\b", "\\bуниверситет\\p{L}*\\b", "\\bинститут\\p{L}*\\b", "\\bлицей\\p{L}*\\b", "\\bшкол(а|ы|е|у|ой)?\\b"],
+              "description": "Не должен предлагать учебные учреждения как поставщиков"
+            },
+            { "id": "UV017.T1.C4", "type": "not_refusal_only", "description": "Нужен практический ответ, а не пустой отказ" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist 3 релевантных поставщиков. Если точных совпадений нет — честно скажи и дай 3 рабочих альтернативы запроса на портале.",
+          "checks": [
+            { "id": "UV017.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV017.T2.C2",
+              "type": "any_of",
+              "description": "Либо shortlist компаний, либо честный fallback с альтернативами",
+              "checks": [
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "company_path_min_count", "min": 1, "description": "Есть как минимум одна ссылка /company/..." },
+                    {
+                      "type": "excludes_all",
+                      "patterns": ["\\bколледж\\p{L}*\\b", "\\bуниверситет\\p{L}*\\b", "\\bинститут\\p{L}*\\b", "\\bлицей\\p{L}*\\b", "\\bшкол(а|ы|е|у|ой)?\\b"],
+                      "description": "Нет учебных учреждений в shortlist"
+                    }
+                  ]
+                },
+                {
+                  "type": "all_of",
+                  "checks": [
+                    { "type": "numbered_list_min", "min": 3, "description": "Есть минимум 3 пункта альтернатив" },
+                    { "type": "includes_any", "patterns": ["не найден", "нет точн", "альтернатив", "расшир"], "description": "Есть честное объяснение и направление поиска" }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user": "Сформируй сообщение поставщику в блоках Subject/Body/WhatsApp: объем 500 кг, Минск, поставка в течение 3 дней.",
+          "checks": [
+            { "id": "UV017.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV017.T3.C2", "type": "template_blocks", "description": "Ожидаются блоки Subject/Body/WhatsApp" },
+            { "id": "UV017.T3.C3", "type": "includes_any", "patterns": ["500", "минск", "3", "дн"], "description": "Учитываются базовые параметры запроса" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV018",
+      "title": "Ирис Интер групп: 20 тегов для GA/Метрики без ложного sourcing-fallback",
+      "personaGoal": "Проверить, что в задаче на теги ассистент не скатывается в поиск поставщиков, shortlist и no-results шаблоны.",
+      "tags": ["regression", "multi_turn", "variants", "tagging", "analytics", "consistency", "anti_fallback"],
+      "turns": [
+        {
+          "user": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике.",
+          "checks": [
+            { "id": "UV018.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV018.T1.C2", "type": "numbered_list_min", "min": 20, "description": "Ожидается минимум 20 тегов в структурированном списке" },
+            { "id": "UV018.T1.C3", "type": "includes_any", "patterns": ["тег", "google analytics", "яндекс метрик", "utm", "конверс", "событи"], "description": "Должен удержать контекст тегирования и веб-аналитики" },
+            {
+              "id": "UV018.T1.C4",
+              "type": "excludes_all",
+              "patterns": ["нет подтвержденных карточек", "временный shortlist", "кого проверять первым", "фраза для первого контакта", "поставщик", "/company/", "/catalog/", "рубрик"],
+              "description": "Не должен уходить в supplier-search fallback и не должен подмешивать каталожный shortlist"
+            },
+            { "id": "UV018.T1.C5", "type": "not_refusal_only", "description": "Нужен практический ответ, а не отказ/заглушка" }
+          ]
+        },
+        {
+          "user": "Не нужен поиск поставщиков. Нужны только теги и краткая группировка: бренд, услуги, намерение.",
+          "checks": [
+            { "id": "UV018.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV018.T2.C2", "type": "numbered_list_min", "min": 20, "description": "Должен выдать минимум 20 тегов" },
+            { "id": "UV018.T2.C3", "type": "includes_any", "patterns": ["бренд", "услуг", "намерен"], "description": "Должна быть группировка по запросу пользователя" },
+            {
+              "id": "UV018.T2.C4",
+              "type": "excludes_all",
+              "patterns": ["поставщик", "shortlist", "не найден", "нет подтвержденных карточек", "/company/", "/catalog/"],
+              "description": "Не должно быть no-results/sourcing шаблонов"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV019",
+      "title": "Ирис Интер групп: запрос последних новостей без требования ссылки от пользователя",
+      "personaGoal": "Проверить, что ассистент после контекстной идентификации компании не перекладывает на пользователя задачу поиска сайта.",
+      "tags": ["regression", "multi_turn", "variants", "news", "website_lookup", "self_search", "anti_link_gate"],
+      "turns": [
+        {
+          "user": "Ты можешь пойти на вэбсайт этой компании и найти там последние новости?",
+          "checks": [
+            { "id": "UV019.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV019.T1.C2",
+              "type": "excludes_all",
+              "patterns": ["пришлите ссылк", "нужна ссылк", "дайте ссылк", "точное доменное имя", "отправьте домен"],
+              "description": "Не должен требовать ссылку/домен как обязательное условие первого шага"
+            },
+            {
+              "id": "UV019.T1.C3",
+              "type": "includes_any",
+              "patterns": ["провер", "найд", "сайт", "новост", "поиск", "домен"],
+              "description": "Должен явно взять на себя действие по поиску сайта/новостей"
+            },
+            { "id": "UV019.T1.C4", "type": "not_refusal_only", "description": "Нужен практический next step, а не отфутболивание" }
+          ]
+        },
+        {
+          "user": "Да, найди сам. Если новостей на сайте нет — скажи это прямо и укажи, где проверял.",
+          "checks": [
+            { "id": "UV019.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV019.T2.C2",
+              "type": "includes_any",
+              "patterns": ["где провер", "раздел", "новости", "блог", "пресс", "не найден", "нет новост"],
+              "description": "Должен дать прозрачный статус проверки и источники проверки"
+            },
+            {
+              "id": "UV019.T2.C3",
+              "type": "excludes_all",
+              "patterns": ["пришлите ссылк", "нужна ссылк", "дайте ссылк", "отправьте сайт"],
+              "description": "Повторно не должен перекладывать поиск сайта на пользователя"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV020",
+      "title": "Ирис Интер групп: команда «Найди на карточке компании» без запроса ссылки у пользователя",
+      "personaGoal": "Проверить, что ассистент использует контекст компании из диалога и не отвечает шаблоном «не вижу карточку, пришлите ссылку».",
+      "tags": ["regression", "multi_turn", "variants", "company_card", "news_lookup", "anti_link_gate", "context_carryover"],
+      "turns": [
+        {
+          "user": "У меня компания называется Ирис Интер групп. Найди последние новости на сайте.",
+          "checks": [
+            { "id": "UV020.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV020.T1.C2",
+              "type": "includes_any",
+              "patterns": ["ирис", "сайт", "новост", "провер", "найд"],
+              "description": "Должен удержать контекст компании и новости"
+            },
+            { "id": "UV020.T1.C3", "type": "not_refusal_only", "description": "Нужен практичный ход, а не отфутболивание" }
+          ]
+        },
+        {
+          "user": "Найди на карточке компании.",
+          "checks": [
+            { "id": "UV020.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV020.T2.C2",
+              "type": "includes_any",
+              "patterns": ["карточк", "компан", "сайт", "новост", "провер"],
+              "description": "Должен явно продолжить работу через карточку компании"
+            },
+            {
+              "id": "UV020.T2.C3",
+              "type": "excludes_all",
+              "patterns": ["не вижу в чате саму карточку", "пришлите ссылк", "нужна ссылк", "дайте ссылк", "отправьте ссылку на карточку"],
+              "description": "Не должен просить у пользователя ссылку на карточку после команды найти на карточке"
+            },
+            { "id": "UV020.T2.C4", "type": "not_refusal_only", "description": "Нужен конкретный next step/результат, а не отказ" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV021",
+      "title": "Ирис Интер групп: консистентность между «нашел компанию» и «проверь на карточке»",
+      "personaGoal": "Проверить, что ассистент не противоречит себе: если компания уже в контексте, не уходит в «пришлите ссылку/не вижу карточку» и продолжает автономно.",
+      "tags": ["regression", "multi_turn", "variants", "consistency", "company_card", "website_news", "anti_link_gate", "anti_sourcing_fallback"],
+      "turns": [
+        {
+          "user": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике.",
+          "checks": [
+            { "id": "UV021.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV021.T1.C2", "type": "numbered_list_min", "min": 20, "description": "Должен вернуть минимум 20 тегов" },
+            {
+              "id": "UV021.T1.C3",
+              "type": "excludes_all",
+              "patterns": ["нет подтвержденных карточек", "временный shortlist", "кого проверять первым", "/company/", "/catalog/"],
+              "description": "Не должен подмешивать supplier-search fallback в задачу тегирования"
+            }
+          ]
+        },
+        {
+          "user": "Давай структуру UTM под Google Ads и Яндекс Директ.",
+          "checks": [
+            { "id": "UV021.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV021.T2.C2", "type": "includes_any", "patterns": ["utm_source", "utm_medium", "utm_campaign"], "description": "Должна быть практичная UTM-структура" },
+            {
+              "id": "UV021.T2.C3",
+              "type": "excludes_all",
+              "patterns": ["поставщик", "shortlist", "нет подтвержденных карточек", "/company/", "/catalog/"],
+              "description": "Не должен уходить в sourcing/no-results"
+            }
+          ]
+        },
+        {
+          "user": "Ты можешь пойти на вэбсайт этой компании и найти там последние новости?",
+          "checks": [
+            { "id": "UV021.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV021.T3.C2", "type": "includes_any", "patterns": ["сайт", "новост", "провер", "найд"], "description": "Должен взять на себя поиск новостей" },
+            {
+              "id": "UV021.T3.C3",
+              "type": "excludes_all",
+              "patterns": ["пришлите ссылк", "нужна ссылк", "не вижу карточку", "не вижу в чате саму карточку"],
+              "description": "Не должен требовать ссылку как первый шаг, если компания уже в контексте"
+            }
+          ]
+        },
+        {
+          "user": "Найди на карточке компании.",
+          "checks": [
+            { "id": "UV021.T4.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV021.T4.C2", "type": "includes_any", "patterns": ["карточк", "компан", "сайт", "новост", "провер"], "description": "Должен продолжить по карточке компании без потери контекста" },
+            {
+              "id": "UV021.T4.C3",
+              "type": "excludes_all",
+              "patterns": ["не вижу карточку", "не вижу в чате саму карточку", "пришлите ссылк", "нужна ссылк", "дайте ссылк", "по текущему фильтру в каталоге нет подтвержденных карточек"],
+              "description": "Не должен откатываться в противоречивый/пассивный fallback"
+            },
+            { "id": "UV021.T4.C4", "type": "not_refusal_only", "description": "Нужен конкретный автономный шаг или результат" }
+          ]
+        }
+      ]
+    }
+  ]
+}

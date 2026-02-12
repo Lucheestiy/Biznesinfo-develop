@@ -10,10 +10,29 @@ type RequestCityRegionHint = {
   region: string | null;
   phrase: string | null;
 };
+type RequestWebsiteScanDepth = {
+  deepScanUsed: boolean;
+  deepScanUsedCount: number;
+  scannedPagesTotal: number;
+};
 
 function clampInt(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
   return Math.max(min, Math.min(max, Math.floor(value)));
+}
+
+function parseBoolQueryParam(raw: string | null): boolean {
+  const value = (raw || "").trim().toLowerCase();
+  if (!value) return false;
+  return value === "1" || value === "true" || value === "yes" || value === "on";
+}
+
+type ProviderFilter = "stub" | "openai" | "codex";
+
+function parseProviderFilter(raw: string | null): ProviderFilter | null {
+  const value = (raw || "").trim().toLowerCase();
+  if (value === "stub" || value === "openai" || value === "codex") return value;
+  return null;
 }
 
 function truncate(raw: string, max: number): string {
@@ -57,9 +76,28 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limit = clampInt(Number(searchParams.get("limit") || "100"), 1, 200);
   const offset = clampInt(Number(searchParams.get("offset") || "0"), 0, 10_000);
+  const provider = parseProviderFilter(searchParams.get("provider"));
+  const onlyErrors = parseBoolQueryParam(searchParams.get("onlyErrors"));
+  const onlyWebsiteAttempted = parseBoolQueryParam(searchParams.get("onlyWebsiteAttempted"));
+  const onlyWebsiteDeep = parseBoolQueryParam(searchParams.get("onlyWebsiteDeep"));
+  const providerValue = provider || "";
 
   const pool = getDbPool();
-  const res = await pool.query<{
+  const countRes = await pool.query<{ total_count: string }>(
+    `
+      SELECT COUNT(*)::bigint AS total_count
+      FROM ai_requests r
+      JOIN users u ON u.id = r.user_id
+      WHERE ($1::boolean = FALSE OR (r.payload #>> '{_assistant,request,websiteScanDepth,deepScanUsed}') = 'true')
+        AND ($2::text = '' OR COALESCE(NULLIF(LOWER(r.payload #>> '{_assistant,response,provider}'), ''), 'stub') = $2::text)
+        AND ($3::boolean = FALSE OR COALESCE(jsonb_typeof(r.payload #> '{_assistant,response,providerError}') = 'object', FALSE))
+        AND ($4::boolean = FALSE OR COALESCE((r.payload #>> '{_assistant,request,websiteScanAttempted}') = 'true', FALSE))
+    `,
+    [onlyWebsiteDeep, providerValue, onlyErrors, onlyWebsiteAttempted],
+  );
+  const total = Math.max(0, Number(countRes.rows[0]?.total_count || "0") || 0);
+
+  const listRes = await pool.query<{
     id: string;
     user_id: string;
     company_id: string | null;
@@ -75,13 +113,17 @@ export async function GET(request: Request) {
              u.email, u.name, u.plan
       FROM ai_requests r
       JOIN users u ON u.id = r.user_id
+      WHERE ($3::boolean = FALSE OR (r.payload #>> '{_assistant,request,websiteScanDepth,deepScanUsed}') = 'true')
+        AND ($4::text = '' OR COALESCE(NULLIF(LOWER(r.payload #>> '{_assistant,response,provider}'), ''), 'stub') = $4::text)
+        AND ($5::boolean = FALSE OR COALESCE(jsonb_typeof(r.payload #> '{_assistant,response,providerError}') = 'object', FALSE))
+        AND ($6::boolean = FALSE OR COALESCE((r.payload #>> '{_assistant,request,websiteScanAttempted}') = 'true', FALSE))
       ORDER BY r.created_at DESC
       LIMIT $1 OFFSET $2
     `,
-    [limit, offset],
+    [limit, offset, onlyWebsiteDeep, providerValue, onlyErrors, onlyWebsiteAttempted],
   );
 
-  const requests = res.rows.map((row) => {
+  const requests = listRes.rows.map((row) => {
     const payload = row.payload ?? null;
     const assistant = payload && typeof payload === "object" && !Array.isArray(payload) ? payload._assistant : null;
     const requestMeta = assistant && typeof assistant === "object" && !Array.isArray(assistant) ? assistant.request : null;
@@ -179,6 +221,26 @@ export async function GET(request: Request) {
           .filter((x: RequestCityRegionHint) => Boolean(x.city || x.region || x.phrase))
           .slice(0, 6)
       : [];
+    const websiteScanDepthRaw =
+      requestMeta?.websiteScanDepth && typeof requestMeta.websiteScanDepth === "object" && !Array.isArray(requestMeta.websiteScanDepth)
+        ? requestMeta.websiteScanDepth
+        : null;
+    const websiteScanDepth: RequestWebsiteScanDepth = {
+      deepScanUsed: Boolean(websiteScanDepthRaw?.deepScanUsed),
+      deepScanUsedCount:
+        typeof websiteScanDepthRaw?.deepScanUsedCount === "number"
+          ? Math.max(0, Math.floor(websiteScanDepthRaw.deepScanUsedCount))
+          : 0,
+      scannedPagesTotal:
+        typeof websiteScanDepthRaw?.scannedPagesTotal === "number"
+          ? Math.max(0, Math.floor(websiteScanDepthRaw.scannedPagesTotal))
+          : 0,
+    };
+    const websiteScanTargetCount =
+      typeof requestMeta?.websiteScanTargetCount === "number" ? Math.max(0, Math.floor(requestMeta.websiteScanTargetCount)) : 0;
+    const websiteScanInsightCount =
+      typeof requestMeta?.websiteScanInsightCount === "number" ? Math.max(0, Math.floor(requestMeta.websiteScanInsightCount)) : 0;
+    const websiteScanAttempted = Boolean(requestMeta?.websiteScanAttempted);
 
     const plan = typeof requestMeta?.plan === "string" ? requestMeta.plan : row.plan;
     const guardrailsVersion = typeof guardrails?.version === "number" ? guardrails.version : null;
@@ -193,6 +255,12 @@ export async function GET(request: Request) {
       companyIds,
       vendorLookupFilters,
       cityRegionHints,
+      websiteScan: {
+        attempted: websiteScanAttempted,
+        targetCount: websiteScanTargetCount,
+        insightCount: websiteScanInsightCount,
+        depth: websiteScanDepth,
+      },
       messagePreview: truncate(row.message, 240),
       provider: provider || "stub",
       model,
@@ -211,8 +279,17 @@ export async function GET(request: Request) {
     };
   });
 
+  const returned = requests.length;
+  const hasMore = offset + returned < total;
+
   return NextResponse.json(
-    { success: true, status: getProviderStatus(), requests },
+    {
+      success: true,
+      status: getProviderStatus(),
+      filters: { provider, onlyErrors, onlyWebsiteAttempted, onlyWebsiteDeep },
+      pagination: { limit, offset, returned, total, hasMore },
+      requests,
+    },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

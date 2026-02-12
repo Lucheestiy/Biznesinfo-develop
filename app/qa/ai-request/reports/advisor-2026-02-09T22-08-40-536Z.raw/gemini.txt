@@ -1,0 +1,83 @@
+```json
+{
+  "advisor": "gemini",
+  "executiveSummary": "The AI assistant demonstrates a critical failure in identifying relevant businesses based on specific criteria (e.g., 'shoe manufacturers in Minsk'), leading to significantly low usefulness scores. The current fallback mechanism provides irrelevant information rather than acknowledging limitations or suggesting alternative search strategies. This indicates weaknesses in either the retrieval system's ability to filter by business type, the prompt engineering for detailed classification, or the lack of a robust 'no results' handling strategy.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Улучшить точность идентификации компаний по типу бизнеса",
+      "why": "Основная проблема заключается в том, что помощник предоставляет нерелевантные компании (не производители обуви), даже после уточнения. Это приводит к нулевой полезности от судьи.",
+      "expectedImpact": "Значительно повысит полезность ответов, сократит количество 'строгих' ошибок и повысит удовлетворенность пользователей за счет предоставления точной информации.",
+      "validationScenarios": [
+        "UV013"
+      ]
+    },
+    {
+      "priority": "P0",
+      "title": "Внедрить корректную обработку сценариев отсутствия результатов поиска",
+      "why": "Вместо того чтобы признать неспособность найти кандидатов, помощник генерирует 'нерелевантный список-заполнитель'. Это подрывает доверие и полезность.",
+      "expectedImpact": "Улучшит взаимодействие с пользователем при отсутствии прямых совпадений, предлагая конструктивные альтернативы или уточнения, а не вводя в заблуждение.",
+      "validationScenarios": [
+        "UV013"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Усилить фильтрацию результатов поиска по категориям бизнеса/производства",
+      "action": "Проверить и скорректировать логику извлечения/фильтрации компаний, чтобы убедиться, что они соответствуют запрашиваемому типу (например, 'производитель обуви'). Это может включать более точное извлечение ключевых слов из запроса пользователя ('мужская классическая обувь'), улучшение поисковых запросов к базе данных компаний, или добавление пост-фильтрации результатов на основе категорий/тегов бизнеса. Возможно, потребуется улучшить тегирование компаний в базе данных.",
+      "implementationHint": "app/src/lib/data/company-search.ts (гипотетически); review prompt for `deep website-scan` to ensure clear instruction for business type validation.",
+      "expectedImpact": "Компании, предлагаемые помощником, будут соответствовать запросам пользователей по типу производства, что значительно повысит релевантность и полезность.",
+      "risk": "Средний (требуется глубокий анализ и, возможно, переработка логики поиска)",
+      "effort": "L",
+      "validationScenarios": [
+        "UV013"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Внедрить явные инструкции в промпт для обработки случаев 'нет результатов'",
+      "action": "Добавить в системный промпт (или специальный промпт для веб-сканирования) четкие инструкции о том, как действовать, если нет релевантных результатов. Например: 'Если после тщательного поиска ни одна компания не соответствует критериям, четко сообщите пользователю об этом и предложите альтернативные варианты поиска (например, 'хотите расширить поиск на другие регионы или на магазины обуви?'). Ни в коем случае не предоставляйте нерелевантный список-заполнитель.'",
+      "implementationHint": "devloop/AI_ASSISTANT_MASTER_PLAN.md (обновить план); app/src/lib/prompt-templates/website-scan.js (гипотетически)",
+      "expectedImpact": "Помощник будет вести себя более предсказуемо и полезно в случаях отсутствия прямых совпадений, избегая предоставления неверной информации и улучшая пользовательский опыт.",
+      "risk": "Низкий (изменения промпта могут быть относительно легко протестированы)",
+      "effort": "S",
+      "validationScenarios": [
+        "UV013"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Улучшить структуру ответа для 'глубокого сканирования сайта'",
+      "action": "Пересмотреть шаблон ответа, чтобы он более явно демонстрировал процесс проверки и статус 'Не подтверждено на главной', как это было запрошено пользователем. Убедиться, что помощник не переходит к 'следующему кандидату', если текущий не прошел проверку, но при этом четко отмечает причину. Это может потребовать более структурированного вывода для каждого кандидата (например, JSON-подобный формат).",
+      "implementationHint": "app/src/lib/templates/deep-scan-response.js (гипотетически)",
+      "expectedImpact": "Увеличит прозрачность работы помощника и позволит пользователю лучше понять ход проверки, что может повысить оценку полезности.",
+      "risk": "Низкий (изменения в шаблоне ответа)",
+      "effort": "M",
+      "validationScenarios": [
+        "UV013"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV013"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+      "qa_judge_mx001_005_revised.json",
+      "qa_judge_mx001_005.json"
+    ],
+    "successMetrics": [
+      "Average usefulness for UV013 > 3 (on a 5-point scale)",
+      "0 instances of 'turn 3 shortlist is completely wrong'",
+      "0 instances of 'generic fallback pattern: instead of admitting inability to find candidates and suggesting alternatives, assistant produced irrelevant filler list'",
+      "Successful identification of at least one actual shoe producer in Minsk if such data exists"
+    ]
+  }
+}
+```

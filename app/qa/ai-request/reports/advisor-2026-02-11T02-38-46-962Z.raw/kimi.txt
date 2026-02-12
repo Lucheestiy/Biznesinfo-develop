@@ -1,0 +1,107 @@
+Based on my analysis of the QA results and the codebase, I can now provide concrete engineering advice. The key issues are:
+
+1. **Cyclic refusal pattern** (UV012, UV013): Assistant gets stuck in a loop repeating "нет самих 3 компаний" without providing candidates
+2. **Generic fallback to criteria** (UV001, UV002, UV004): When asked for shortlist, provides abstract criteria instead of company names
+3. **Context loss in multi-turn** (UV005, UV014): Forgets specific companies from earlier turns
+4. **Hallucination in no-results scenarios** (UV011): Lists irrelevant companies instead of honest fallback
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Biznesinfo assistant suffers from systematic failures in multi-turn sourcing scenarios: cyclic refusal patterns (UV012/UV013), generic criteria fallback instead of concrete shortlists (UV001/UV002), and context loss between turns (UV005/UV014). Root cause: over-restrictive candidate filtering in refineConcreteShortlistCandidates() and insufficient continuity enforcement in postProcessAssistantReply(). Fixable with 3 small PRs.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix cyclic refusal in website-scan scenarios",
+      "why": "UV012 and UV013 both scored usefulness=1 - assistant repeats 'нет самих 3 компаний' 3x without providing candidates. This is a hard failure in the website-scan flow.",
+      "expectedImpact": "Eliminates 2 of 5 lowest-scoring scenarios; fixes core UX loop where user explicitly asks for companies to check.",
+      "validationScenarios": ["UV012", "UV013"]
+    },
+    {
+      "priority": "P0",
+      "title": "Enforce concrete shortlist output in ranking mode",
+      "why": "UV001, UV002, UV004 all fail when user asks for 'shortlist' - assistant returns generic criteria instead of /company/ links. The buildRankingFallbackAppendix() triggers too aggressively.",
+      "expectedImpact": "Fixes 3 high-frequency failure patterns; ensures continuity of concrete company references across turns.",
+      "validationScenarios": ["UV001", "UV002", "UV004", "UV014"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add hallucination guard for no-results scenarios",
+      "why": "UV011 shows assistant listing construction materials companies for footwear query instead of honest 'no results' fallback.",
+      "expectedImpact": "Prevents misleading outputs; maintains trust in narrow/specialized queries.",
+      "validationScenarios": ["UV011"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Relax strictIntent hard-stop in refineConcreteShortlistCandidates",
+      "action": "Remove or soften lines 1976-1977 in route.ts: `if (strictIntent && ranked.length === 0) return []`. When strictIntent=true but ranked=[], fall back to base pool filtered by geo instead of returning empty. This causes the 'нет самих 3 компаний' loop.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1976-1977 - change `return []` to `pool = base.filter(c => companyMatchesGeoScope(c, {region, city}))`",
+      "expectedImpact": "UV012/UV013 will return candidates for website-scan instead of empty refusal",
+      "risk": "Low - geo-scoped fallback is safe; maintains relevance",
+      "effort": "S",
+      "validationScenarios": ["UV012", "UV013"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Inject forced shortlist appendix before ranking fallback",
+      "action": "In postProcessAssistantReply(), when mode.rankingRequested=true AND continuityCandidates.length>0, prepend concrete shortlist before any generic ranking text. Current code at line 2788 only appends fallback if no company links detected - move this earlier.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2678-2829 - insert `out = buildForcedShortlistAppendix({candidates: rankingCandidates, message})` at start of ranking block, before any fallback logic",
+      "expectedImpact": "UV001/UV002/UV004 will show /company/ links instead of criteria-only output",
+      "risk": "Low - forced shortlist uses verified candidates only",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV002", "UV004"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Add commodity-domain validation to no-results fallback",
+      "action": "In buildGenericNoResultsCriteriaGuidance() and related fallbacks, check if commodityTag is set but no commodity-aligned candidates exist. If so, emit honest 'no results' message instead of generic criteria or unrelated companies.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:747-764 - add early return if commodityTag && candidates.filter(c=>candidateMatchesCoreCommodity(c, commodityTag)).length===0",
+      "expectedImpact": "UV011 will honestly report no footwear manufacturers instead of hallucinating construction companies",
+      "risk": "Low - only affects true no-results cases",
+      "effort": "S",
+      "validationScenarios": ["UV011"]
+    },
+    {
+      "id": "R4",
+      "area": "ranking",
+      "title": "Preserve history candidates in continuityShortlistForAppend",
+      "action": "UV014 shows context loss - turn 2 had good candidates but turn 3 degraded to placeholders. Ensure historyVendorCandidates are merged into continuityShortlistForAppend even when fresh lookup returns empty.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2368-2377 - expand logic to always include historyOnlyCandidatesRaw when lockToHistoryCandidates=true, regardless of fresh lookup results",
+      "expectedImpact": "UV014 maintains concrete companies across 'без общих советов' turn",
+      "risk": "Low - history candidates already validated in prior turns",
+      "effort": "M",
+      "validationScenarios": ["UV014"]
+    },
+    {
+      "id": "R5",
+      "area": "template",
+      "title": "Fix truncated response in document checklist requests",
+      "action": "UV016 turn 3 was truncated mid-response. Add output length validation and chunking for document checklist + template combo requests.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2483-2490 - split template and documents into separate messages if combined length exceeds threshold, or prioritize template blocks over document list",
+      "expectedImpact": "UV016 delivers complete 5-document checklist instead of truncation",
+      "risk": "Low - formatting change only",
+      "effort": "M",
+      "validationScenarios": ["UV016"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV012", "UV013", "UV001", "UV002", "UV004", "UV011", "UV014"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.milk-brest-mogilev.json",
+      "scenarios.regressions.geo-ambiguity.json"
+    ],
+    "successMetrics": [
+      "usefulRate >= 0.8 for UV012/UV013 (currently 0)",
+      "avgUsefulness >= 3.5 for UV001/UV002/UV004 (currently 1.5-2)",
+      "Zero hallucination rate in no-results scenarios",
+      "Continuity score = 1.0 (company names from turn N appear in turn N+1)"
+    ]
+  }
+}
+```

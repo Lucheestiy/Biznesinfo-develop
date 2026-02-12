@@ -1,0 +1,164 @@
+Now I have all the data needed. Let me analyze the patterns and provide concrete engineering advice.
+
+Based on my analysis of the QA judge results across 35+ scenarios (D001-D010, MX001-MX005, UX101-UX115, S016-S020, GA001-GA002), here are the concrete engineering recommendations:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical pattern: Assistant degrades to generic fallback (category advice, template text) when search returns <3 candidates or geo constraints tighten. Core issues: (1) Missing keyword coverage for niche B2B categories (footwear manufacturing, LED rental, security systems), (2) No graceful degradation path - instead of admitting 'only 1 found, here are 2 alternatives', assistant hallucinates or drops to rubric advice, (3) Template text corruption ('уточняется до уточняется') indicates prompt/template injection issues, (4) Geo refinement (city→district) not triggering re-search. Fix priority: retrieval > prompt engineering > guardrails.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix keyword coverage gaps for high-failure categories",
+      "why": "Scenarios UV013, S017, S018, D009 all fail because search cannot find: shoe manufacturers, LED rental, security systems, printed boxes. Current CATEGORY_KEYWORDS only covers food/transport.",
+      "expectedImpact": "Reduces 'completely wrong results' failures by ~40% (4 of 10 critical failures)",
+      "validationScenarios": ["UV013", "S017", "S018", "D009", "UX110"]
+    },
+    {
+      "priority": "P0",
+      "title": "Implement graceful degradation for low-result searches",
+      "why": "When search returns <3 results, assistant currently hallucinates (S017: tractor parts for LED) or drops to generic rubric advice (MX001: real estate for milk). Need explicit branch: if hits<3, admit shortage + suggest broader search terms + offer to check nearby locations.",
+      "expectedImpact": "Eliminates 'feltGenericFallback=true' in 60% of failures; improves user trust",
+      "validationScenarios": ["MX001", "MX002", "UX101", "UX107", "S016"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix template text corruption / prompt injection",
+      "why": "Recurring garbled text 'уточняется до уточняется', 'сформируй rfq' appearing in output indicates template variables not being replaced or prompt boundary issues.",
+      "expectedImpact": "Eliminates quality degradation signals in D001, D003, MX004, MX005",
+      "validationScenarios": ["D001", "D003", "MX004", "MX005"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enable geo refinement re-search (district level)",
+      "why": "User specifies 'Малиновка', 'Уручье', 'Советский район', 'Колодищи' - assistant repeats same city-level results without re-searching. Location filter is binary (city match), not hierarchical.",
+      "expectedImpact": "Improves usefulness score in 5 scenarios (D001, UX107, S019, S020, MX004)",
+      "validationScenarios": ["D001", "UX107", "S019", "S020", "MX004"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add RFQ template validation layer",
+      "why": "RFQ outputs contain placeholders ('уточняется') instead of resolved values from conversation context. Need post-generation validation to ensure placeholders are filled or removed.",
+      "expectedImpact": "Improves template task completion rate from current ~50% to >90%",
+      "validationScenarios": ["MX001", "MX004", "MX005", "UV001", "UV004"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Expand CATEGORY_KEYWORDS with manufacturing and services",
+      "action": "Add entries for: обувная_промышленность=['производство обуви','обувная фабрика','обувь оптом'], event_equipment=['аренда led','экраны прокат','event оборудование'], security_systems=['охранные системы','сигнализация','видеонаблюдение установка'], packaging=['коробки производство','упаковка картон','печать на коробках']. Also add footwear to PRODUCT_INDICATORS in keywords.ts.",
+      "implementationHint": "src/lib/biznesinfo/keywords.ts lines 63-74 add new category mappings; verify search.ts lines 33-105 include new category filters",
+      "expectedImpact": "Enables finding shoe manufacturers, LED rental, security installers - fixes 4 critical failures",
+      "risk": "May increase false positives if keywords too broad; test with negative queries",
+      "effort": "S",
+      "validationScenarios": ["UV013", "S017", "S018", "D009"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add explicit low-results branch in system prompt",
+      "action": "When search returns <3 results, assistant MUST: (1) State exact count found, (2) Admit if zero/insufficient, (3) Suggest 2-3 broader search queries user can try, (4) Offer to check nearby locations. NEVER invent companies or show unrelated categories.",
+      "implementationHint": "Modify prompt template in src/app/api/chat/route.ts or wherever system prompt defined; add conditional logic based on search result count",
+      "expectedImpact": "Eliminates hallucination fallback; improves continuityScore in MX001, MX002, UX101",
+      "risk": "Users may be disappointed by 'not found' - but better than wrong info",
+      "effort": "S",
+      "validationScenarios": ["MX001", "MX002", "UX101", "UX107", "S016"]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Fix template variable substitution pipeline",
+      "action": "Audit template rendering: 'уточняется' and garbled text suggests variable substitution failing. Add validation: if output contains 'уточняется' or repeated phrases like 'уточняется до уточняется', reject and retry with stricter prompt. Replace unfilled placeholders with empty string or explicit '[не указано]'.",
+      "implementationHint": "Add post-processing in chat API route; regex check for /уточняется|сформируй rfq/i; implement retry with explicit variable mapping",
+      "expectedImpact": "Eliminates quality degradation signals; improves perceived competence",
+      "risk": "Retry may increase latency; cap at 1 retry",
+      "effort": "M",
+      "validationScenarios": ["D001", "D003", "MX004", "MX005"]
+    },
+    {
+      "id": "R4",
+      "area": "geo",
+      "title": "Implement district/address-aware search fallback",
+      "action": "When user mentions district (Малиновка, Уручье, Советский район), extract and use as secondary filter. If exact district match fails, return city results WITH explicit note 'В [district] не найдено, показываю результаты по [city]'. Use address field search for district names.",
+      "implementationHint": "src/lib/utils/location.ts add DISTRICT_PATTERNS; modify search.ts line 528-553 to extract district from query and apply as soft filter; meilisearch filter on address field",
+      "expectedImpact": "Improves geo-constraint handling in 5 scenarios; reduces 'ignored my district' complaints",
+      "risk": "Address field may not be normalized; test with various district name variants",
+      "effort": "M",
+      "validationScenarios": ["D001", "UX107", "S019", "S020", "MX004"]
+    },
+    {
+      "id": "R5",
+      "area": "ranking",
+      "title": "Add explicit ranking criteria disclosure",
+      "action": "When delivering 'top-3' or shortlist, always include 1-sentence rationale per candidate: 'Приоритет: [критерий]'. Criteria: contact completeness, website available, matching keywords count, location proximity. This prevents generic 'риск несоответствия задаче' placeholders.",
+      "implementationHint": "Modify ranking prompt section; require structured output with 'candidates[].name', 'candidates[].url', 'candidates[].rationale'",
+      "expectedImpact": "Improves usefulness score from 2→3 in D004, D006, D007, S019, S020",
+      "risk": "May increase response length; acceptable tradeoff",
+      "effort": "S",
+      "validationScenarios": ["D004", "D006", "D007", "S019", "S020"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Add relevance validator before returning candidates",
+      "action": "Before presenting candidates to user, verify keyword overlap between query intent and company keywords. If overlap < threshold (e.g., security systems query vs auto cosmetics company = 0 overlap), reject and search again with broader terms. Log mismatches for index improvement.",
+      "implementationHint": "Add pre-response check in chat route; use existing keywords.ts functions; fallback to broader search if relevance fails",
+      "expectedImpact": "Prevents S018 (auto cosmetics for security), S017 (tractor parts for LED), UX110 (restaurant for coffee supplies)",
+      "risk": "May increase latency; cache keyword vectors",
+      "effort": "M",
+      "validationScenarios": ["S017", "S018", "UX110", "D009"]
+    },
+    {
+      "id": "R7",
+      "area": "prompt",
+      "title": "Fix context continuity on topic switchback",
+      "action": "When user returns to original topic after brief digression (e.g., milk → auto parts → milk), assistant must restore full context of original query including all constraints. Current failure: MX003 Turn 3 returned to milk but lost company specifics.",
+      "implementationHint": "Maintain turn history with constraint extraction; on switchback detection, re-inject original constraints into context window",
+      "expectedImpact": "Improves continuityScore in multi-turn scenarios; prevents 'where were we' failures",
+      "risk": "Complex state management; use explicit constraint tracking object",
+      "effort": "L",
+      "validationScenarios": ["MX003", "MX001", "MX002"]
+    },
+    {
+      "id": "R8",
+      "area": "ui",
+      "title": "Add 'no results' explicit handling with actionable next steps",
+      "action": "When MeiliSearch returns 0 hits, return structured response: 'По запросу [X] в [location] не найдено компаний. Попробуйте: (1) [broader term 1], (2) [broader term 2], (3) [nearby location].' Never show unrelated categories or generic 'search in rubrics' advice.",
+      "implementationHint": "Modify search.ts meiliSearch function return; add explicit zero-results branch with suggestion generation",
+      "expectedImpact": "Improves UX101, UX107, S016 zero-result handling",
+      "risk": "Suggestion generation requires synonym dictionary",
+      "effort": "M",
+      "validationScenarios": ["UX101", "UX107", "S016", "UV011"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV013",
+      "MX001",
+      "MX002",
+      "S017",
+      "S018",
+      "D001",
+      "D003",
+      "UX101",
+      "UX107",
+      "UV011"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.milk-onion-city-switch.json",
+      "scenarios.regressions.geo-ambiguity.json",
+      "scenarios.regressions.multi-step-journeys.json"
+    ],
+    "successMetrics": [
+      "feltGenericFallback rate < 0.15 (currently ~0.35 in failing scenarios)",
+      "averageUsefulness >= 3.5 for P0 scenarios (currently 1.0-2.0)",
+      "continuityScore >= 3 for multi-turn scenarios (currently 1-2 in failures)",
+      "Zero hallucination candidates (wrong category) in top-3",
+      "Template placeholder leakage = 0 (no 'уточняется' in output)"
+    ]
+  }
+}
+```

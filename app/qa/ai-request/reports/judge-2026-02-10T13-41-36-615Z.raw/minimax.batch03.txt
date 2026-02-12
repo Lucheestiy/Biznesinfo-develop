@@ -1,0 +1,116 @@
+{
+  "judge": "minimax",
+  "ratings": [
+    {
+      "scenarioId": "UV011",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3 presents fake/hallucinated search results (construction materials factory, grocery store as shoe manufacturers)",
+        "Query generation failed to find real manufacturers, but assistant masked failure by presenting unrelated companies as results"
+      ],
+      "criticalIssues": [
+        "Clear hallucination: Минский завод строительных материалов listed as shoe manufacturer candidate"
+      ],
+      "strengths": [
+        "Honest admission in turn 2 that no manufacturers found",
+        "Reasonable alternative strategies proposed"
+      ],
+      "nextUserProbe": "Ты серьёзно? Это завод стройматериалов и продуктовый магазин — при чём тут обувь?"
+    },
+    {
+      "scenarioId": "UV012",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Assistant refuses to work across all 3 turns - keeps asking for companies user expects assistant to find",
+        "No actual website verification performed despite explicit user request"
+      ],
+      "criticalIssues": [
+        "Complete refusal to perform requested task after 3 turns",
+        "Assistant claims no access to company list but should be able to search/provide candidates"
+      ],
+      "strengths": [
+        "Clear verification framework defined"
+      ],
+      "nextUserProbe": "Я жду, когда ТЫ найдёшь компании, а не когда ты просишь меня их прислать."
+    },
+    {
+      "scenarioId": "UV013",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Same refusal pattern as UV012 - no actual website scanning performed",
+        "Assistant keeps deflecting instead of finding companies and scanning their websites"
+      ],
+      "criticalIssues": [
+        "Zero progress after 3 turns - no companies checked, no contacts retrieved"
+      ],
+      "strengths": [
+        "Clear methodology defined for verification process"
+      ],
+      "nextUserProbe": "Опять ты просишь ссылки вместо того, чтобы искать самому. Это третий ответ подряд."
+    },
+    {
+      "scenarioId": "UV014",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "User explicitly said 'without general advice' but turn 3 still uses generic placeholders instead of real company criteria",
+        "Turn 3 questions are reasonable but could be more specific to packaging sales"
+      ],
+      "criticalIssues": [
+        "Turn 1 too generic - could have given fewer segments with more depth",
+        "Turn 3 placeholders like 'молочный производитель с фасовкой' instead of concrete guidance"
+      ],
+      "strengths": [
+        "Good reverse-buyer segment prioritization (dairy #1 makes sense)",
+        "Questions in turn 3 are actionable for cold calling"
+      ],
+      "nextUserProbe": "Дай мне конкретные названия компаний из Минска, а не типы компаний."
+    },
+    {
+      "scenarioId": "UV015",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.98,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3 completely ignores context - returns dairy product companies instead of mini tractor suppliers",
+        "Call script is for verifying dairy company, not tractors - total context loss"
+      ],
+      "criticalIssues": [
+        "Severe hallucination: Савушкин продукт suggested as mini tractor supplier (dairy company!)",
+        "Total disregard for conversation context and user request"
+      ],
+      "strengths": [
+        "Turn 1-2 were reasonable framework for tractor comparison"
+      ],
+      "nextUserProbe": "Ты понимаешь, что Савушкин продукт — это молочный завод, а не продавец тракторов?!"
+    }
+  ]
+}
+

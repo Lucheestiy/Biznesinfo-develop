@@ -1,0 +1,117 @@
+{
+  "judge": "minimax",
+  "ratings": [
+    {
+      "scenarioId": "UV001",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turns 1-2 give good search strategy with relevant keywords and negative filters",
+        "Turns 3-4 give generic numbered placeholders instead of real companies",
+        "Assistant uses 'пока нет карточек компаний' and 'Кандидат №1, №2, №3' instead of actual data"
+      ],
+      "criticalIssues": [
+        "Generic fallback when concrete shortlist requested",
+        "No actual company names/contacts despite user explicitly asking for shortlist 3-5"
+      ],
+      "strengths": ["Good initial search guidance", "Good negative keywords for filtering retail"],
+      "nextUserProbe": "Дай мне реальные названия компаний из каталога, не примеры"
+    },
+    {
+      "scenarioId": "UV002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turns 1-2 give good company names (Pkhp, Brestkhleboproduct, Borisovsky) and quality criteria",
+        "Turn 3 completely breaks conversation - gives reverse-B2B nonsense and 'легальный формат' irrelevant content",
+        "Assistant ignores export readiness question entirely, provides nonsensical ranking"
+      ],
+      "criticalIssues": [
+        "Turn 3 gives completely broken response unrelated to user request",
+        "No export documentation guidance despite specific request in Turn 3",
+        "Trust completely broken - user cannot trust assistant after Turn 3"
+      ],
+      "strengths": ["Good companies identified in Turn 1", "Quality criteria detailed in Turn 2"],
+      "nextUserProbe": "Почему ты в прошлом сообщении начал говорить про reverse-B2B? Это не имеет отношения к экспорту муки"
+    },
+    {
+      "scenarioId": "UV003",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Good B2B bridging strategy in Turns 1-2, useful for business users",
+        "Turn 3 provides good search queries but then lists completely irrelevant company",
+        "Автоцентр РМ Маркет is an auto leasing company, not food supplier"
+      ],
+      "criticalIssues": [
+        "Lists auto-related company (leasing) for food supplier search",
+        "Irrelevant company listing breaks user trust immediately"
+      ],
+      "strengths": ["Good transformation from consumer to B2B query", "Practical search queries provided"],
+      "nextUserProbe": "Почему ты предложил автоцентр для поиска поставщиков продуктов для кафе?"
+    },
+    {
+      "scenarioId": "UV004",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.5,
+      "wouldContinue": true,
+      "feltGenericFallback": true,
+      "continuityScore": 3,
+      "reasons": [
+        "Honest admission in Turn 1 that no dedicated juicer factories exist",
+        "Good expansion to OEM/ODM search strategy in Turn 2",
+        "Turn 3 is minimal - just states lack of data, doesn't provide bad recommendations",
+        "Turn 4 provides excellent RFQ template with all requested elements (MOQ, timeline, warranty)"
+      ],
+      "criticalIssues": [
+        "Turn 3 provides no actionable follow-up, essentially gives up on finding candidates",
+        "Empty parentheses () for companies indicates lack of data"
+      ],
+      "strengths": ["Honest about database limitations", "RFQ template in Turn 4 is comprehensive and actionable"],
+      "nextUserProbe": "Какие еще производители бытовой техники в Беларуси могут выпускать соковыжималки?"
+    },
+    {
+      "scenarioId": "UV005",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turns 1-2 give good search strategy for food exporters",
+        "Turn 3 provides completely irrelevant companies",
+        "Агрострой СПФ - construction/reinforced concrete company (Животноводство category wrong)",
+        "Адаменки - agriculture/animal husbandry (not food production)",
+        "1 Мая - animal husbandry company",
+        "None are food manufacturers, dairy, or confectionery exporters"
+      ],
+      "criticalIssues": [
+        "Companies listed are construction and agriculture, NOT food exporters",
+        "Contradicts user's request for dairy AND confectionery",
+        "Focus note says 'по товару: молоко' (by product: milk) - wrong product category"
+      ],
+      "strengths": ["Good search queries in Turns 1-2", "Outreach template in Turn 4 is usable"],
+      "nextUserProbe": "Почему в списке строительная компания и животноводство, когда я спрашивал про экспортеров молочной и кондитерской продукции?"
+    }
+  ]
+}
+

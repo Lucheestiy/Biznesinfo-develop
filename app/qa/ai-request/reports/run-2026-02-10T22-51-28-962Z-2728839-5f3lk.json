@@ -1,0 +1,637 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-09T21:10:00Z",
+      "source": "user-seed-ideas-expanded",
+      "description": "Multi-turn + variant regressions expanded from user business queries to stress continuity, geo refinement, shortlist quality, and outreach templates."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2600,
+      "maxScenarios": null,
+      "onlyTags": [
+        "website_scan"
+      ],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": false,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-10T22-51-28-962Z-2728839-5f3lk",
+    "startedAt": "2026-02-10T22:51:28.962Z",
+    "endedAt": "2026-02-10T22:52:24.691Z",
+    "durationMs": 55729,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+    "totalScenarios": 2,
+    "passedScenarios": 0,
+    "failedScenarios": 2,
+    "passRate": 0,
+    "totalChecks": 18,
+    "passedChecks": 16,
+    "failedChecks": 2,
+    "checkPassRate": 0.8889,
+    "targetPassCount": 2,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:includes_any:Должна быть честная пометка статуса и следующий шаг",
+      "count": 1
+    },
+    {
+      "key": "check:includes_any:Есть честная пометка статуса и следующий шаг",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "UV012",
+      "title": "Проверка по сайтам компаний: источник + контакты + честная пометка подтверждения",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "website_scan",
+        "sources",
+        "contacts",
+        "footwear",
+        "minsk"
+      ],
+      "personaGoal": "Проверить, что ассистент по явному запросу идет в сайты компаний, ссылается на источник и не выдумывает подтверждения.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV012.T3.C2",
+          "type": "includes_any",
+          "description": "Должна быть честная пометка статуса и следующий шаг",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "не подтверж",
+              "не найден",
+              "провер",
+              "дальше",
+              "следующ"
+            ],
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Какие в Минске есть производители обуви? Дай сначала 3 варианта для проверки.",
+          "requestBody": {
+            "message": "Какие в Минске есть производители обуви? Дай сначала 3 варианта для проверки.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 15897,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "3380b62b-f0c6-41fd-97cc-8ff37c6226aa",
+          "conversationId": "dbc43288-fe7e-450f-a5f5-5a36a009bf8e",
+          "isStub": false,
+          "reply": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: производители, обуви, сначала.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV012.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV012.T1.C2",
+              "type": "mentions_any_terms",
+              "description": "Должен удержать товарно-гео контекст",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "минск",
+                  "обув",
+                  "производ"
+                ],
+                "min": 2,
+                "hits": [
+                  "минск",
+                  "обув",
+                  "производ"
+                ]
+              }
+            },
+            {
+              "id": "UV012.T1.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен practical first-pass",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Проверь на сайтах первых компаний, где прямо указано, что это производители, и дай источник + контакты.",
+          "requestBody": {
+            "message": "Проверь на сайтах первых компаний, где прямо указано, что это производители, и дай источник + контакты.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Какие в Минске есть производители обуви? Дай сначала 3 варианта для проверки."
+              },
+              {
+                "role": "assistant",
+                "content": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: производители, обуви, сначала.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск."
+              }
+            ],
+            "conversationId": "dbc43288-fe7e-450f-a5f5-5a36a009bf8e",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 11594,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "7e3e6fdd-2190-49bd-81c3-5d09964a1223",
+          "conversationId": "dbc43288-fe7e-450f-a5f5-5a36a009bf8e",
+          "isStub": false,
+          "reply": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: производители, обуви, сначала.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV012.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV012.T2.C2",
+              "type": "any_of",
+              "description": "Либо есть явный источник с сайта, либо честный fallback о невозможности проверить текущую тройку",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UV012.T2.C3",
+              "type": "includes_any",
+              "description": "Должны присутствовать контакты или явная контактная информация",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "контакт",
+                  "тел",
+                  "email",
+                  "e-mail",
+                  "почт"
+                ],
+                "hits": [
+                  "тел"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Если по сайту не подтверждается, так и отметь и предложи, кого проверить дальше.",
+          "requestBody": {
+            "message": "Если по сайту не подтверждается, так и отметь и предложи, кого проверить дальше.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Какие в Минске есть производители обуви? Дай сначала 3 варианта для проверки."
+              },
+              {
+                "role": "assistant",
+                "content": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: производители, обуви, сначала.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск."
+              },
+              {
+                "role": "user",
+                "content": "Проверь на сайтах первых компаний, где прямо указано, что это производители, и дай источник + контакты."
+              },
+              {
+                "role": "assistant",
+                "content": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: производители, обуви, сначала.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск."
+              }
+            ],
+            "conversationId": "dbc43288-fe7e-450f-a5f5-5a36a009bf8e",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 8663,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f76ed4e9-beb6-4e8d-bc51-cc87e2aef28d",
+          "conversationId": "dbc43288-fe7e-450f-a5f5-5a36a009bf8e",
+          "isStub": false,
+          "reply": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: производители, обуви, сначала.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV012.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV012.T3.C2",
+              "type": "includes_any",
+              "description": "Должна быть честная пометка статуса и следующий шаг",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "не подтверж",
+                  "не найден",
+                  "провер",
+                  "дальше",
+                  "следующ"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UV012.T3.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен полезный follow-up, а не пустой отказ",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 36157
+    },
+    {
+      "id": "UV013",
+      "title": "Deep website-scan: внутренняя навигация сайта (контакты/о компании/продукция)",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "website_scan",
+        "website_scan_deep",
+        "sources",
+        "contacts",
+        "minsk",
+        "footwear"
+      ],
+      "personaGoal": "Проверить, что ассистент пытается углубиться во внутренние разделы сайта и возвращает источник/контакты либо честный fallback.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV013.T3.C2",
+          "type": "includes_any",
+          "description": "Есть честная пометка статуса и следующий шаг",
+          "passed": false,
+          "reason": "No required patterns matched",
+          "details": {
+            "patterns": [
+              "главн",
+              "не подтверж",
+              "не найден",
+              "следующ",
+              "провер"
+            ],
+            "hits": []
+          }
+        }
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Подбери 3 производителей обуви в Минске для проверки по сайтам.",
+          "requestBody": {
+            "message": "Подбери 3 производителей обуви в Минске для проверки по сайтам.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 10098,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "fc2071d0-b46e-4e0c-be00-d73c48990b4c",
+          "conversationId": "e045c166-3604-455f-850a-5066683048b5",
+          "isStub": false,
+          "reply": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: подбери, производителей, обуви.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV013.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV013.T1.C2",
+              "type": "mentions_any_terms",
+              "description": "Сохраняется товарно-гео контекст",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "минск",
+                  "обув",
+                  "производ"
+                ],
+                "min": 2,
+                "hits": [
+                  "минск",
+                  "обув",
+                  "производ"
+                ]
+              }
+            },
+            {
+              "id": "UV013.T1.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен practical first-pass",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Пройди по их сайтам глубже: проверь разделы контакты/о компании/продукция, и дай источник + контакты.",
+          "requestBody": {
+            "message": "Пройди по их сайтам глубже: проверь разделы контакты/о компании/продукция, и дай источник + контакты.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Подбери 3 производителей обуви в Минске для проверки по сайтам."
+              },
+              {
+                "role": "assistant",
+                "content": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: подбери, производителей, обуви.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск."
+              }
+            ],
+            "conversationId": "e045c166-3604-455f-850a-5066683048b5",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 4667,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1eda3c45-f666-48af-b62f-e40794e64fff",
+          "conversationId": "e045c166-3604-455f-850a-5066683048b5",
+          "isStub": false,
+          "reply": "Для live-проверки беру кандидатов из каталога и продолжаю без ожидания ссылок от вас:\nСейчас не удалось получить данные с сайтов автоматически. Могу продолжить по карточкам каталога и дать, что проверять на официальных сайтах в первую очередь.\n\nШаблон сравнения поставщиков:\n1. Цена за единицу и условия оплаты.\n2. Срок изготовления/отгрузки и доступность доставки.\n3. Минимальная партия (MOQ) и ограничения по тиражу.\n4. Контакты менеджера и сайт компании для быстрой верификации.\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным.\nПо текущему товарному и гео-фильтру подтвержденных карточек в каталоге не осталось.\nНе подставляю нерелевантные компании. Могу расширить поиск по соседним рубрикам и регионам.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV013.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV013.T2.C2",
+              "type": "any_of",
+              "description": "Либо есть источник, либо честный fallback о невозможности прочитать сайт",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "includes_any",
+                    "passed": false,
+                    "reason": "No required patterns matched"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "UV013.T2.C3",
+              "type": "any_of",
+              "description": "Есть контактные данные или явная подсказка для ручной проверки",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  },
+                  {
+                    "type": "includes_any",
+                    "passed": true,
+                    "reason": "Matched at least one pattern"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Если на главной нет подтверждения, пометь это и предложи следующего кандидата для проверки.",
+          "requestBody": {
+            "message": "Если на главной нет подтверждения, пометь это и предложи следующего кандидата для проверки.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Подбери 3 производителей обуви в Минске для проверки по сайтам."
+              },
+              {
+                "role": "assistant",
+                "content": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: подбери, производителей, обуви.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск."
+              },
+              {
+                "role": "user",
+                "content": "Пройди по их сайтам глубже: проверь разделы контакты/о компании/продукция, и дай источник + контакты."
+              },
+              {
+                "role": "assistant",
+                "content": "Для live-проверки беру кандидатов из каталога и продолжаю без ожидания ссылок от вас:\nСейчас не удалось получить данные с сайтов автоматически. Могу продолжить по карточкам каталога и дать, что проверять на официальных сайтах в первую очередь.\n\nШаблон сравнения поставщиков:\n1. Цена за единицу и условия оплаты.\n2. Срок изготовления/отгрузки и доступность доставки.\n3. Минимальная партия (MOQ) и ограничения по тиражу.\n4. Контакты менеджера и сайт компании для быстрой верификации.\n\nИсточник и границы данных: по данным карточек в каталоге Biznesinfo; если в карточке не указано, считаем это неизвестным.\nПо текущему товарному и гео-фильтру подтвержденных карточек в каталоге не осталось.\nНе подставляю нерелевантные компании. Могу расширить поиск по соседним рубрикам и регионам."
+              }
+            ],
+            "conversationId": "e045c166-3604-455f-850a-5066683048b5",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 4417,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "5f751afd-0af2-4843-b612-5732b9761c17",
+          "conversationId": "e045c166-3604-455f-850a-5066683048b5",
+          "isStub": false,
+          "reply": "По текущему фильтру в каталоге нет подтвержденных карточек компаний по запросу: подбери, производителей, обуви.\nНе подставляю нерелевантные компании. Могу расширить поиск по смежным рубрикам/регионам и сразу дать новый shortlist.\nЛокация в контексте: Минск.",
+          "companyPathProbeSummary": null,
+          "checks": [
+            {
+              "id": "UV013.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV013.T3.C2",
+              "type": "includes_any",
+              "description": "Есть честная пометка статуса и следующий шаг",
+              "passed": false,
+              "reason": "No required patterns matched",
+              "details": {
+                "patterns": [
+                  "главн",
+                  "не подтверж",
+                  "не найден",
+                  "следующ",
+                  "провер"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UV013.T3.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен полезный follow-up",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 19183
+    }
+  ]
+}

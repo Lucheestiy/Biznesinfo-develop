@@ -1,0 +1,119 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Biznesinfo assistant shows 100% strict pass rate but only 47-59% usefulness due to three systemic failures: (1) LLM hallucinates irrelevant company names when catalog returns sparse results (auto dealers for juicers, polytechnic college for beets), (2) fallback to generic 'types of candidates' instead of concrete companies after multiple turns, (3) context drift in multi-turn conversations (minitractor → dairy producer). Fix requires: stronger anti-hallucination guardrails, mandatory catalog grounding, and explicit context continuity enforcement.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Add mandatory catalog grounding for ALL company name generation",
+      "why": "47% of judge issues cite fabricated company names not in catalog (НИИЭВМ for juicers, auto centers for beet suppliers). Current prompt rule 'Do NOT fabricate' is ignored by LLM when catalog returns few results.",
+      "expectedImpact": "Reduce hallucinated company mentions by 80%+; improve usefulness scores from 2.5→3.5 for scenarios UV004, UV008, UV017",
+      "validationScenarios": ["UV004", "UV008", "UV017", "UV003"]
+    },
+    {
+      "priority": "P0",
+      "title": "Eliminate 'Резервный слот' placeholder pattern",
+      "why": "Placeholders like 'в текущем фильтре нет подтвержденной карточки (не выдумываю компанию)' are appearing in final output, signaling assistant failure transparently but still lowering trust. Users see empty slots as inability to deliver.",
+      "expectedImpact": "Cleaner output; reduces 'failed to deliver promised top-5' complaints; improves perceived competence",
+      "validationScenarios": ["UV005", "UV007"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce strict context continuity for multi-turn sourcing flows",
+      "why": "UV015 (minitractors) and UV013 (website scan) show complete context loss—assistant switched to unrelated topics (dairy producer, generic advice). LLM needs explicit session-state enforcement.",
+      "expectedImpact": "Prevent off-topic drifts in complex 3+ turn conversations; improve avg usefulness from 2.0→2.8 for multi-turn variants",
+      "validationScenarios": ["UV013", "UV015", "UV012"]
+    },
+    {
+      "priority": "P1",
+      "title": "Replace generic 'types of candidates' fallback with 'no results + alternative query'",
+      "why": "Multiple scenarios (UV001, UV002, UV011, UV016) show assistant responding with abstract categories ('региональные мелькомбинаты', 'молочные комбинаты') instead of concrete names when user explicitly requested 3-5 companies.",
+      "expectedImpact": "Eliminate generic fallbacks; direct users to next actionable step (expand query, try neighboring rubrics, manual verification)",
+      "validationScenarios": ["UV001", "UV002", "UV011", "UV016"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "guardrails",
+      "title": "Add explicit company name whitelist enforcement in system prompt",
+      "action": "Replace weak 'Do NOT fabricate' with hard constraint: 'OUTPUT ONLY company names that appear in the Vendor candidates block above. If no candidates match the user's request, respond: \"No matching companies found in catalog. Try broadening your search (other rubrics, larger region).\"'",
+      "implementationHint": "route.ts: buildAssistantSystemPrompt() - strengthen rule around line with 'Do NOT fabricate facts about specific companies'",
+      "expectedImpact": "Blocks hallucinations like НИИЭВМ, medical centers, auto dealers from appearing in final output",
+      "risk": "Low - makes assistant more honest when no data exists",
+      "effort": "S",
+      "validationScenarios": ["UV004", "UV008", "UV017", "UV003"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add context-tracker token to prevent multi-turn drift",
+      "action": "At start of assistant turn, inject explicit context reminder: 'Current sourcing goal: [product/category from Turn 1]. Previous turns focused on: [list]. Stay on topic unless user explicitly redirects.'",
+      "implementationHint": "route.ts: buildAssistantPrompt() - add new context tracking prompt block, similar to rubricHints",
+      "expectedImpact": "Prevents minitractor→dairy drift; keeps UV015 on track",
+      "risk": "Low - adds clarity, reduces drift",
+      "effort": "M",
+      "validationScenarios": ["UV015", "UV013", "UV012"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Expand search scope automatically when zero results",
+      "action": "When biznesinfoSearch returns <2 candidates, auto-expand: (a) neighboring rubrics, (b) relax city→region, (c) fallback to 'similar products' before answering. Return expanded results in vendorCandidates block.",
+      "implementationHint": "route.ts: vendor candidate selection logic - enhance relaxedVendorCandidateSelection() to be more aggressive; add 'expanded_search_results' flag to prompt",
+      "expectedImpact": "Fewer empty shortlists; more concrete options presented to users",
+      "risk": "Medium - may return less relevant results; needs relevance threshold",
+      "effort": "M",
+      "validationScenarios": ["UV011", "UV005"]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Remove 'Резервный слот' from final output format",
+      "action": "Modify buildForcedShortlistAppendix() to return empty string instead of placeholder rows when insufficient candidates. Replace with: 'Found X of Y requested companies. No additional matches in current filters.'",
+      "implementationHint": "route.ts: buildForcedShortlistAppendix() - change placeholder generation to concise honesty message",
+      "expectedImpact": "Cleaner output, no visible empty slots, maintains trust",
+      "risk": "Low - improves transparency",
+      "effort": "S",
+      "validationScenarios": ["UV005", "UV007"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Ban 'типы кандидатов' / category-only responses",
+      "action": "Add prompt rule: 'Never respond with only categories/types (e.g., \"молочные комбинаты\", \"региональные мелькомбинаты\") when user asks for specific companies. Either provide actual /company/... links OR explain no results + suggest alternative queries.'",
+      "implementationHint": "route.ts: buildAssistantSystemPrompt() - add explicit category-only response prohibition",
+      "expectedImpact": "Eliminates generic 'types' responses that scored 1-2 usefulness",
+      "risk": "Low - forces concrete responses or honest no-results",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV002", "UV011", "UV016"]
+    },
+    {
+      "id": "R6",
+      "area": "geo",
+      "title": "Add geographic relevance scorer before LLM generation",
+      "action": "Before showing vendorCandidates to LLM, filter out companies where (a) primary_rubric doesn't match product keyword within 1-hop taxonomy, OR (b) city/region is >100km from requested location. Return only geo+category-aligned results.",
+      "implementationHint": "route.ts: vendorCandidates filtering - add candidateMatchesCoreCommodity() check with geographic radius; route to fallback if zero matches",
+      "expectedImpact": "Prevents 'medical center for beet supplier' level irrelevance",
+      "risk": "Medium - may filter valid cross-category matches; needs fallback logic",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV004", "UV003"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV004", "UV008", "UV017", "UV015", "UV001", "UV013"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+      "app/qa/ai-request/scenarios.regressions.branching-live-judge.json"
+    ],
+    "successMetrics": [
+      "Average usefulness across judges ≥ 3.5 (currently 2.47-2.65)",
+      "Useful rate ≥ 75% (currently 47-59%)",
+      "Zero hallucinated company names in final output",
+      "Zero 'Резервный слот' placeholders visible to users",
+      "Multi-turn context continuity: no off-topic drifts in scenarios with ≥3 turns"
+    ]
+  }
+}
+```
+

@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-11T00:00:00Z",
+      "source": "manual-regression",
+      "description": "Ensure direct company contact lookup still works."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": false,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T12-29-10-300Z-497193-cj38o",
+    "startedAt": "2026-02-11T12:29:10.300Z",
+    "endedAt": "2026-02-11T12:29:17.862Z",
+    "durationMs": 7562,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/qa-contact-autoschool-verify.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 3,
+    "passedChecks": 3,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 1,
+    "avgTurnLatencyMs": 7265,
+    "totalTurnLatencyMs": 7265,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "CONTACT001",
+      "title": "Direct company contact lookup should provide concrete card info",
+      "tags": [
+        "single_turn",
+        "contact_lookup",
+        "regression"
+      ],
+      "personaGoal": "User asks contacts for exact company name.",
+      "totalTurns": 1,
+      "completedTurns": 1,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 7265,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Какие контакты БОЛЬШАЯ МЕДВЕДИЦА АВТОШКОЛА",
+          "requestBody": {
+            "message": "Какие контакты БОЛЬШАЯ МЕДВЕДИЦА АВТОШКОЛА",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 7265,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "0700d9e8-16c6-45d5-aca1-dd6b9cae9b31",
+          "conversationId": "ea8e5cbd-d373-437c-bed6-2baa0813769b",
+          "isStub": false,
+          "reply": "Контакты по карточке: **Большая Медведица Автошкола** — /company/bmedvedica\nТелефоны: +375 (162) 50 37 37, +375 (162) 50 00 92, +375 (162) 52 52 12\nE-mail: bozhko@brest.by\nСайт: http://bozhko.brest.by\nАдрес/локация: 224028, Брест, Ленинградская, 41А | Брест, brest",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "CONTACT001.T1.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "CONTACT001.T1.C2",
+              "type": "includes_any",
+              "description": "Reply should include concrete company card link.",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "/company/"
+                ],
+                "hits": [
+                  "/company/"
+                ]
+              }
+            },
+            {
+              "id": "CONTACT001.T1.C3",
+              "type": "includes_any",
+              "description": "Reply should include at least one contact marker.",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "тел",
+                  "email",
+                  "@",
+                  "http",
+                  "адрес"
+                ],
+                "hits": [
+                  "тел",
+                  "@",
+                  "http",
+                  "адрес"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 7266
+    }
+  ]
+}

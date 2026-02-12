@@ -1,0 +1,201 @@
+{
+  "judge": "kimi",
+  "task": "Rate usefulness as a real frustrated business user in realistic multi-turn sourcing conversations.",
+  "rubric": {
+    "scale": {
+      "0": "Бесполезно: не по запросу, ломает контекст, дает мусор.",
+      "1": "Почти бесполезно: очень слабая практическая ценность.",
+      "2": "Частично полезно: есть польза, но много критичных проблем.",
+      "3": "Рабочий минимум: можно использовать с правками.",
+      "4": "Полезно: хорошо помогает в задаче.",
+      "5": "Очень полезно: точный, практичный и надежный ответ."
+    },
+    "dimensions": [
+      "Relevance to user intent",
+      "Geo adherence and context continuity",
+      "Actionability and concrete next steps",
+      "Non-hallucination and honesty about limits",
+      "Formatting quality for requested mode (ranking/template/checklist)",
+      "Real-user trust: would a rushed buyer continue this dialog?",
+      "Penalty: generic fallback after user gives concrete constraints"
+    ],
+    "usefulThreshold": 3
+  },
+  "instructions": [
+    "Act as a real paying user and judge if this is actually helpful in practice.",
+    "Penalize wrong city, irrelevant supplier list, generic filler, refusal-only behavior.",
+    "Strongly penalize when assistant previously gave concrete candidates but later falls back to generic rubric advice after user clarification.",
+    "If user gives extra constraints (quality/spec/logistics), continuity is mandatory.",
+    "Do not use any external tools; evaluate only transcript content.",
+    "Return JSON only.",
+    "You MUST return top-level key `ratings` as an array.",
+    "ratings length MUST equal expectedScenarioIds length.",
+    "Every scenarioId in ratings MUST be from expectedScenarioIds and appear exactly once.",
+    "Do not return summary-only JSON. If uncertain, still output a conservative per-scenario rating with low confidence."
+  ],
+  "expectedScenarioIds": [
+    "UV001",
+    "UV002",
+    "UV003",
+    "UV004",
+    "UV005"
+  ],
+  "requiredJsonSchema": {
+    "judge": "kimi",
+    "ratings": [
+      {
+        "scenarioId": "UV001",
+        "usefulness": "integer 0..5",
+        "verdict": "useful|not_useful",
+        "confidence": "number 0..1",
+        "userSatisfaction": "number 0..1 (how satisfied real user would be)",
+        "wouldContinue": "boolean (would real user continue conversation?)",
+        "feltGenericFallback": "boolean (assistant dropped to generic advice instead of concrete progress)",
+        "continuityScore": "integer 0..5",
+        "reasons": [
+          "short reason 1",
+          "short reason 2"
+        ],
+        "criticalIssues": [
+          "optional issue"
+        ],
+        "strengths": [
+          "optional strength"
+        ],
+        "nextUserProbe": "optional short realistic follow-up message that user might type"
+      }
+    ]
+  },
+  "ratings": [
+    {
+      "scenarioId": "UV001",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Дает общие рубрики вместо конкретных производителей — пользователь просил 'какие есть', а не 'где искать'",
+        "Turn 3: Критический провал — вместо shortlist из 3-5 конкретных компаний дает шаблон-заглушку 'как быстро выбрать', не называя ни одного реального производителя",
+        "Нарушение continuity: после уточнения 'именно производители, не розничные магазины' и 'мужская классическая обувь' ассистент продолжает давать общие инструкции по поиску"
+      ],
+      "criticalIssues": [
+        "Generic fallback на Turn 3: вместо конкретных компаний дает абстрактный 'shortlist-формат'",
+        "Нет ни одного названного производителя обуви в Минске за 4 хода",
+        "Turn 4 шаблон сообщения — единственное полезное, но приходит слишком поздно, пользователь уже разочарован"
+      ],
+      "strengths": [
+        "Turn 4: Корректный структурированный шаблон контакта в нужном формате Subject/Body/WhatsApp",
+        "Turn 2: Правильно понял уточнение про мужскую классическую обувь"
+      ],
+      "nextUserProbe": "Вы так и не назвали ни одного производителя. У вас вообще есть данные по обувным фабрикам Минска или нет?"
+    },
+    {
+      "scenarioId": "UV002",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.70,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Дает конкретные 3 завода с профилями, явно указывает на ограничение данных (только Пинский КХП подтвержден по высшему сорту)",
+        "Turn 2: Хорошая continuity — добавляет критерии белизны, клейковины, стабильности партии к существующему списку",
+        "Turn 3: Ошибка — shortlist вырожденный (просто повторяет ссылки без новой информации), но не полный fallback",
+        "Turn 4: Отличный чеклист из 6 пунктов по документам, полностью соответствует b2b-контексту экспорта"
+      ],
+      "criticalIssues": [
+        "Turn 3: Shortlist слишком короткий и формальный, не добавляет ценности к Turn 1-2",
+        "Не указал явно экспортную готовность по каждому заводу (хотя был запрос)"
+      ],
+      "strengths": [
+        "Turn 1: Честность о границах данных — отмечает что только Пинский КХП явно указан как высший сорт",
+        "Turn 2: Практичный рейтинг с конкретными параметрами качества для запроса",
+        "Turn 4: Подробный чеклист документов для контракта, релевантный для экспорта"
+      ],
+      "nextUserProbe": "Уточните по Пинскому КХП — у них есть опыт экспорта в ЕС или только СНГ? И какие у них мощности по объемам?"
+    },
+    {
+      "scenarioId": "UV003",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.55,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Корректно запрашивает уточнение локации — правильная стратегия для consumer-запроса",
+        "Turn 2: Хороший pivot к b2b-формату — предлагает искать через HoReCa-оборудование и поставщиков",
+        "Turn 3: Дает 3 варианта запросов по категориям (продукты, оборудование, услуги) — полезная структуризация",
+        "Turn 4: Корректный outreach-шаблон в нужном формате"
+      ],
+      "criticalIssues": [
+        "Turn 2: Не дает конкретных компаний даже в формате 'возможно есть' — слишком осторожно",
+        "Не использует возможность порекомендовать конкретные кафе/столовые в Уручье даже как примеры"
+      ],
+      "strengths": [
+        "Успешный переход от consumer-запроса к b2b-формату без ломки диалога",
+        "Turn 3: Практичные поисковые строки для каждой категории",
+        "Turn 4: Структурированный шаблон контакта с разделением Email/WhatsApp"
+      ],
+      "nextUserProbe": "А конкретно в Уручье есть какие-то столовые или кафе в вашем каталоге? Или только поставщики?"
+    },
+    {
+      "scenarioId": "UV004",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.60,
+      "wouldContinue": true,
+      "feltGenericFallback": true,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Дает конкретных 3 кандидата (Ареса-техно, HORIZONT, Атлант) с профилями и честными оговорками",
+        "Turn 2: Хорошая continuity — добавляет OEM/ODM-фокус к существующему списку с чеклистом для скрининга",
+        "Turn 3: Критический fallback — вместо анализа надежности и сервиса дает вырожденный shortlist без оценок",
+        "Turn 4: Отличный RFQ-шаблон с запросом MOQ, сроков, гарантии — полностью соответствует запросу"
+      ],
+      "criticalIssues": [
+        "Turn 3: Полный generic fallback — просто список ссылок без анализа 'по надежности и сервису' как требовалось",
+        "Не сравнил кандидатов по критериям надежности, не дал рекомендацию кого проверять первым"
+      ],
+      "strengths": [
+        "Turn 1: Честность о границах данных — отмечает что только Ареса-техно явно по кухонной технике",
+        "Turn 2: Практичный чеклист для OEM/ODM-скрининга с конкретными пунктами",
+        "Turn 4: Профессиональный RFQ с запросом всех ключевых параметров"
+      ],
+      "nextUserProbe": "Вы не ответили — кого из трех проверять первым? У кого лучше репутация по срокам и качеству?"
+    },
+    {
+      "scenarioId": "UV005",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.20,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Общие инструкции по поиску вместо конкретных экспортеров — не отвечает на запрос",
+        "Turn 2: Продолжает давать общие поисковые фразы, не называя конкретных компаний",
+        "Turn 3: Катастрофический fallback — в shortlist попадают сельхозпредприятия (Агрострой, Адаменки, 1 Мая), которые не имеют отношения к молочной и кондитерской продукции для экспорта",
+        "Полное несоответствие запросу: пользователь просил молочную и кондитерскую продукцию, получил животноводческие фермы"
+      ],
+      "criticalIssues": [
+        "Turn 3: Абсолютно нерелевантный shortlist — сельхозпредприятия вместо молочных/кондитерских заводов",
+        "Нарушение контекста: после уточнения 'молочная и кондитерская продукция' даны компании из совершенно другой категории",
+        "Нет ни одного реального молочного или кондитерского завода в ответе",
+        "Формальный подход: 'не выдумываю компанию' используется как оправдание для нерелевантного списка"
+      ],
+      "strengths": [
+        "Turn 4: Шаблон outreach-сообщения структурирован корректно",
+        "Turn 1-2: Поисковые фразы для каталога составлены логично"
+      ],
+      "nextUserProbe": "Это какая-то ошибка? Вы назвали три сельхозфермы вместо молочных заводов. У вас есть данные по Минскому или Брестскому молочным комбинатам?"
+    }
+  ]
+}

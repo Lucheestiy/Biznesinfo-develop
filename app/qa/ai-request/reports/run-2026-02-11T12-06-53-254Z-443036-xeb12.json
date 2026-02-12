@@ -1,0 +1,333 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-08T21:10:00Z",
+      "source": "manual-regression",
+      "description": "Regression checks for broken /company links in assistant replies."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1800,
+      "maxScenarios": null,
+      "onlyTags": [
+        "company_lookup"
+      ],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T12-06-53-254Z-443036-xeb12",
+    "startedAt": "2026-02-11T12:06:53.254Z",
+    "endedAt": "2026-02-11T12:07:06.032Z",
+    "durationMs": 12778,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.link-integrity.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 6,
+    "passedChecks": 6,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 2,
+    "avgTurnLatencyMs": 6243,
+    "totalTurnLatencyMs": 12486,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "LINK003",
+      "title": "Fuzzy lookup links should open",
+      "tags": [
+        "multi_turn",
+        "link_integrity",
+        "company_lookup",
+        "fuzzy"
+      ],
+      "personaGoal": "User asks fuzzy company lookup and expects working card links.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 12486,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Компания вроде Бел...Транс...Сервис, Брест. Дай варианты со ссылками карточек.",
+          "requestBody": {
+            "message": "Компания вроде Бел...Транс...Сервис, Брест. Дай варианты со ссылками карточек.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6308,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "9c7e7e90-ca46-4bd3-b5f7-502a96cf6498",
+          "conversationId": "6459cdde-42e6-4d2c-93f6-01528a409539",
+          "isStub": false,
+          "reply": "Понял, по Бресту из доступных кандидатов с транспортно-авто релевантностью вижу такие варианты карточек:\n\n1. **Бреставтодор РУП**  \n   Причина: профиль связан с дорожной инфраструктурой и транспортно-эксплуатационными работами (наиболее близко к транспортному направлению).  \n   Ссылка: **/company/brestavtodor**\n\n2. **БелАВТОномия ООО**  \n   Причина: автонаправление (обслуживание, СТО, запчасти); может подойти, если вам нужен партнер по автосервису/автообслуживанию транспорта.  \n   Ссылка: **/company/belavtonomiya**\n\n3. **Брестмаш ОАО**  \n   Причина: находится в Бресте, но по профилю это в первую очередь промышленный производитель (менее релевантно запросу “...Транс...Сервис”).  \n   Ссылка: **/company/bmz**\n\nПо названию, похожему именно на **«Бел…Транс…Сервис»**, в текущем срезе сильного прямого совпадения не видно.  \nЧтобы точнее добить поиск, могу сразу дать узкий набор запросов для каталога (например: **«белтранссервис»**, **«транссервис брест»**, **«грузоперевозки брест»**, **«экспедирование брест»**) и отфильтровать только карточки из Бреста.",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/brestavtodor",
+              "/company/belavtonomiya",
+              "/company/bmz"
+            ],
+            "probes": {
+              "/company/brestavtodor": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/belavtonomiya": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              },
+              "/company/bmz": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "LINK003.T1.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "LINK003.T1.C2",
+              "type": "company_path_min_count",
+              "description": "Need at least 1 /company link.",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 1,
+                "count": 3
+              }
+            },
+            {
+              "id": "LINK003.T1.C3",
+              "type": "company_paths_resolve_min",
+              "description": "At least 1 /company link must resolve.",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 1,
+                "pathCount": 3,
+                "resolvedCount": 3,
+                "resolvedPaths": [
+                  "/company/brestavtodor",
+                  "/company/belavtonomiya",
+                  "/company/bmz"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/brestavtodor": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/belavtonomiya": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  },
+                  "/company/bmz": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Покажи чем отличаются и оставь ссылки, куда перейти.",
+          "requestBody": {
+            "message": "Покажи чем отличаются и оставь ссылки, куда перейти.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Компания вроде Бел...Транс...Сервис, Брест. Дай варианты со ссылками карточек."
+              },
+              {
+                "role": "assistant",
+                "content": "Понял, по Бресту из доступных кандидатов с транспортно-авто релевантностью вижу такие варианты карточек:\n\n1. **Бреставтодор РУП**  \n   Причина: профиль связан с дорожной инфраструктурой и транспортно-эксплуатационными работами (наиболее близко к транспортному направлению).  \n   Ссылка: **/company/brestavtodor**\n\n2. **БелАВТОномия ООО**  \n   Причина: автонаправление (обслуживание, СТО, запчасти); может подойти, если вам нужен партнер по автосервису/автообслуживанию транспорта.  \n   Ссылка: **/company/belavtonomiya**\n\n3. **Брестмаш ОАО**  \n   Причина: находится в Бресте, но по профилю это в первую очередь промышленный производитель (менее релевантно запросу “...Транс...Сервис”).  \n   Ссылка: **/company/bmz**\n\nПо названию, похожему именно на **«Бел…Транс…Сервис»**, в текущем срезе сильного прямого совпадения не видно.  \nЧтобы точнее добить поиск, могу сразу дать узкий набор запросов для каталога (например: **«белтранссервис»**, **«транссервис брест»**, **«грузоперевозки брест»**, **«экспедирование брест»**) и отфильтровать только карточки из Бреста."
+              }
+            ],
+            "conversationId": "6459cdde-42e6-4d2c-93f6-01528a409539",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6178,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "9534a558-3827-4dcd-99b1-5d6d3701c3c2",
+          "conversationId": "6459cdde-42e6-4d2c-93f6-01528a409539",
+          "isStub": false,
+          "reply": "Сравнение коротко — чтобы быстро понять, куда кликать:\n\n1. **Бреставтодор РУП**  \n   - **Что делает:** дорожные/инфраструктурные работы, эксплуатация дорог.  \n   - **Когда подходит:** если нужен подрядчик по дорожной теме, содержанию, спецработам.  \n   - **Когда не подходит:** если вы ищете классические грузоперевозки/экспедирование.  \n\n2. **БелАВТОномия ООО**  \n   - **Что делает:** автонаправление (СТО, обслуживание, возможно запчасти/ремонт).  \n   - **Когда подходит:** если нужен сервис для автопарка, ремонт и поддержка транспорта.  \n   - **Когда не подходит:** если нужен перевозчик как логистическая компания.  \n\n3. **Брестмаш ОАО**  \n   - **Что делает:** промышленное производство (машиностроительный профиль).  \n   - **Когда подходит:** если нужен производственный партнер/оборудование.  \n   - **Когда не подходит:** для запроса “...Транс...Сервис” обычно нерелевантно.  \n   - **Ссылка:** **/company/bmz**\n\nЕсли хотите, следующим шагом дам **точно под “Бел…Транс…Сервис”** 5 наиболее похожих карточек именно в логистике/перевозках по Бресту (с приоритетом по совпадению названия).",
+          "companyPathProbeSummary": {
+            "paths": [
+              "/company/bmz"
+            ],
+            "probes": {
+              "/company/bmz": {
+                "status": 200,
+                "okStatus": true,
+                "notFoundByBody": false,
+                "resolved": true,
+                "error": ""
+              }
+            }
+          },
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "LINK003.T2.C1",
+              "type": "not_stub",
+              "description": "Reply must not be stub.",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "LINK003.T2.C2",
+              "type": "company_path_min_count",
+              "description": "Need at least 1 /company link.",
+              "passed": true,
+              "reason": "Enough /company links",
+              "details": {
+                "min": 1,
+                "count": 1
+              }
+            },
+            {
+              "id": "LINK003.T2.C3",
+              "type": "company_paths_resolve_min",
+              "description": "At least 1 /company link must resolve.",
+              "passed": true,
+              "reason": "Enough /company links resolve successfully",
+              "details": {
+                "min": 1,
+                "pathCount": 1,
+                "resolvedCount": 1,
+                "resolvedPaths": [
+                  "/company/bmz"
+                ],
+                "unresolvedPaths": [],
+                "probes": {
+                  "/company/bmz": {
+                    "status": 200,
+                    "okStatus": true,
+                    "notFoundByBody": false,
+                    "resolved": true,
+                    "error": ""
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 12538
+    }
+  ]
+}

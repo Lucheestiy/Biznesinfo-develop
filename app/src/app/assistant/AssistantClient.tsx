@@ -42,6 +42,11 @@ type AssistantSuggestionChip = {
 
 const ASSISTANT_CHAT_STATE_KEY_PREFIX = "biznesinfo:assistant:chat:v1";
 const ASSISTANT_STORED_MESSAGES_LIMIT = 60;
+const LEGACY_ASSISTANT_INTRO_FINGERPRINTS = [
+  "я помогу разобраться с рубриками",
+  "я ваш личный помощник лориэн",
+  "готово! я могу помочь с:",
+];
 
 type PersistedAssistantChatState = {
   conversationId: string | null;
@@ -49,6 +54,16 @@ type PersistedAssistantChatState = {
   messages: AssistantMessage[];
   savedAt: string;
 };
+
+function normalizeAssistantMessageForCompare(text: string): string {
+  return String(text || "").toLowerCase().replace(/\s+/gu, " ").trim();
+}
+
+function isLegacyAssistantIntroMessage(content: string): boolean {
+  const normalized = normalizeAssistantMessageForCompare(content);
+  if (!normalized) return false;
+  return LEGACY_ASSISTANT_INTRO_FINGERPRINTS.some((fingerprint) => normalized.includes(fingerprint));
+}
 
 function sanitizeStoredAssistantMessages(input: unknown): AssistantMessage[] {
   if (!Array.isArray(input)) return [];
@@ -64,6 +79,7 @@ function sanitizeStoredAssistantMessages(input: unknown): AssistantMessage[] {
 
     const content = typeof (item as any).content === "string" ? (item as any).content : "";
     if (!content.trim()) continue;
+    if (role === "assistant" && isLegacyAssistantIntroMessage(content)) continue;
 
     const idRaw = typeof (item as any).id === "string" ? (item as any).id.trim() : "";
     const requestId = typeof (item as any).requestId === "string" ? (item as any).requestId : undefined;
@@ -221,7 +237,7 @@ export default function AssistantClient({
     role: "assistant",
     content:
       t("ai.chatIntro") ||
-      "Привет! Я помогу разобраться с рубриками, сформулировать запрос поставщикам и быстро найти нужные компании.",
+      "Здравствуйте! Я ваш личный помощник Лориэн. Помогу сформулировать запрос поставщикам, находить нужные компании по заданным критериям, подбирать релевантные ключевые слова и писать уникальный текст.",
   });
 
   const [messages, setMessages] = useState<AssistantMessage[]>(() => [buildIntroMessage()]);

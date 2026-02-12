@@ -37,6 +37,7 @@ services:
       AUTH_SESSION_DAYS: ${AUTH_SESSION_DAYS:-30}
       AUTH_RESET_TOKEN_TTL_MIN: ${AUTH_RESET_TOKEN_TTL_MIN:-30}
       AUTH_DEBUG_RESET_TOKENS: ${AUTH_DEBUG_RESET_TOKENS:-0}
+      AUTH_FEDERATION_UPSTREAM_LOGIN_URL: ${AUTH_FEDERATION_UPSTREAM_LOGIN_URL:-}
       SMTP_URL: ${SMTP_URL:-}
       EMAIL_FROM: ${EMAIL_FROM:-no-reply@biznesinfo-develop.lucheestiy.com}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://biznesinfo-develop.lucheestiy.com}
@@ -54,6 +55,9 @@ services:
     networks:
       - biznesinfo-network
       - show-default-network
+      - federation-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./app/public/data/biznesinfo:/app/public/data/biznesinfo:ro
       - ./app/public/companies:/app/public/companies:ro
@@ -113,6 +117,9 @@ services:
 networks:
   biznesinfo-network:
     driver: bridge
+  federation-network:
+    external: true
+    name: biznesinfo-auth-federation
   show-default-network:
     external: true
     name: showlucheestiycom_default

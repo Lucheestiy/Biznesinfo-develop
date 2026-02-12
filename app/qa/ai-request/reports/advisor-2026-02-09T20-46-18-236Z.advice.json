@@ -1,0 +1,211 @@
+{
+  "runId": "advisor-2026-02-09T20-46-18-236Z",
+  "generatedAt": "2026-02-09T20:46:37.928Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceJudgeReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.usefulness.json",
+  "focusScenarios": [
+    {
+      "id": "UV001",
+      "title": "Производители обуви в Минске: уточнение типа + shortlist + шаблон контакта",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "footwear",
+        "minsk",
+        "manufacturers",
+        "template"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Turn 3 shortlist is completely wrong — none of the 3 listed companies are shoe manufacturers",
+        "Assistant failed to find any actual shoe producers in Minsk despite multiple turns",
+        "After user clarification (мужская классическая обувь), assistant still provided no concrete candidates",
+        "Generic fallback pattern: instead of admitting inability to find candidates and suggesting alternatives, assistant produced irrelevant filler list"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Generic category advice without concrete manufacturers — user wanted actual producers, not rubrics",
+            "Turn 2: Assistant admits 'нет релевантных обувных производителей' but falls back to generic search tips instead of concrete progress"
+          ]
+        }
+      ],
+      "lastReply": "Subject: Запрос по производству мужской классической обуви (Минск) Body: Добрый день! Меня зовут [Имя], компания [Название компании], г. Минск. Ищем производителя мужской классической обуви для регулярных закупок/партнерства. Интересуют: - Модели: оксфорды, дерби, лоферы (мужская классика); - Материалы: натуральная кожа (верх/подкладка), варианты подошвы; - Формат работы: опт и/или контрактное производство (в т.ч. СТМ). Просьба уточнить: 1) Вы именно производитель (собственное производство в Минске/РБ) или торгова…",
+      "lastUser": "Сделай первое сообщение поставщику в блоках Subject/Body/WhatsApp."
+    }
+  ],
+  "advice": [
+    {
+      "advisor": "kimi",
+      "executiveSummary": "Scenario UV001 passes strict checks (12/12) but receives usefulness score 1/5 from judge. Core issue: assistant fails to find actual shoe manufacturers in Minsk database and falls back to generic advice + irrelevant shortlist. This is a retrieval gap masked as a prompt/template problem. Fix requires: (1) explicit 'no results' handling in prompt to prevent hallucinated shortlists, (2) geo+industry query tuning for footwear manufacturers, (3) template generation validation to ensure only verified companies are included.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Add guardrail: prohibit shortlist generation when no verified manufacturers found",
+          "why": "Current behavior hallucinates 3 irrelevant companies instead of admitting failure. This destroys user trust and wastes their time.",
+          "expectedImpact": "Eliminates false-positive shortlists; forces assistant to suggest alternative actions (broader geo, different category, contact methods)",
+          "validationScenarios": [
+            "UV001"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Tune retrieval query for footwear manufacturers in Minsk",
+          "why": "Database likely contains shoe producers but query construction fails to match them (possible NACE code mismatch, 'обувь' vs 'производство обуви' keyword gap)",
+          "expectedImpact": "Increases recall for actual manufacturers; reduces 'no results' cases",
+          "validationScenarios": [
+            "UV001"
+          ]
+        },
+        {
+          "priority": "P2",
+          "title": "Add usefulness self-check before template generation",
+          "why": "Template was generated despite no valid candidates, compounding the failure",
+          "expectedImpact": "Prevents sending contact templates for non-existent suppliers",
+          "validationScenarios": [
+            "UV001"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "guardrails",
+          "title": "Explicit 'no verified results' branch in shortlist generation",
+          "action": "Modify shortlist generation prompt: IF count(verified_manufacturers) < 1 THEN respond with explicit 'Не найдено производителей по вашему запросу' + suggest 2-3 alternatives (expand geography, similar categories, direct search methods). NEVER invent company names.",
+          "implementationHint": "app/ai/prompts/shortlist.ts or similar - add conditional logic before company list rendering; add post-processing validator that checks each company NACE code against footwear manufacturing codes",
+          "expectedImpact": "Eliminates hallucinated shortlists; UV001 usefulness score improves to 3+",
+          "risk": "User may receive 'no results' more often until retrieval is fixed - acceptable tradeoff vs false info",
+          "effort": "S",
+          "validationScenarios": [
+            "UV001"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "retrieval",
+          "title": "Expand footwear manufacturer query patterns",
+          "action": "Add synonyms and NACE codes: 'производство обуви' (NACE 15.20), 'обувная фабрика', 'швейно-обувное производство', 'кожаная обувь'. Include related keywords: 'ортопедическая обувь', 'рабочая обувь' as fallback. Test against Minsk geo filter.",
+          "implementationHint": "src/search/queries/industryMappings.ts or retrieval config - add footwear expansion map; verify Meilisearch index has NACE codes indexed",
+          "expectedImpact": "Increases recall for UV001 from 0 to potentially 3-5 actual manufacturers",
+          "risk": "May introduce false positives if expansion too broad - test precision",
+          "effort": "M",
+          "validationScenarios": [
+            "UV001"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "prompt",
+          "title": "Clarification turn should surface concrete candidates or specific blockers",
+          "action": "When user clarifies with 'мужская классическая обувь', prompt must require: (a) exact match count from DB, (b) if zero, explain WHY (no Minsk manufacturers in category vs filter too strict), (c) offer 2 concrete next steps with expected outcome",
+          "implementationHint": "app/ai/prompts/conversation.ts - modify multi-turn context handling; add structured output requirement for 'result_status: found|not_found|partial' with reasoning",
+          "expectedImpact": "Turn 2-3 usefulness improves; user gets actionable guidance instead of generic tips",
+          "risk": "May increase response length - acceptable",
+          "effort": "S",
+          "validationScenarios": [
+            "UV001"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "template",
+          "title": "Template generation gate: validate candidate existence",
+          "action": "Before generating Subject/Body/WhatsApp template, verify at least 1 candidate company exists in context with matching industry code. If none, respond: 'Для составления шаблона необходимо выбрать производителя из списка выше' and skip template generation.",
+          "implementationHint": "app/ai/prompts/template.ts or template generation handler - add pre-condition check against context.companies array",
+          "expectedImpact": "Prevents useless template generation when no valid candidates exist",
+          "risk": "None - correct behavior",
+          "effort": "S",
+          "validationScenarios": [
+            "UV001"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "ranking",
+          "title": "Add 'manufacturer verification' boost in ranking",
+          "action": "For 'производитель' queries, boost companies with: (a) NACE code matching manufacturing, (b) website with /production or /factory path, (c) 'производство' in description. Penalize trading companies.",
+          "implementationHint": "src/search/ranking.ts - add industry-specific scoring function for manufacturing queries",
+          "expectedImpact": "Actual manufacturers appear in top-3 vs trading intermediaries",
+          "risk": "Requires labeled test set to validate - build from UV001 pattern",
+          "effort": "M",
+          "validationScenarios": [
+            "UV001"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "UV001"
+        ],
+        "regressionSuites": [
+          "scenarios.regressions.user-ideas-multistep-variants.json",
+          "footwear-manufacturers-geo-filtered.json",
+          "template-generation-gate.json"
+        ],
+        "successMetrics": [
+          "usefulness_score >= 4.0 for UV001 (currently 1.0)",
+          "strict_check_pass_rate >= 0.95 (currently 1.0, maintain)",
+          "no_hallucinated_shortlists = 0 (currently 1)",
+          "actual_manufacturer_recall >= 0.5 for footwear+Minsk queries (currently 0)"
+        ]
+      }
+    }
+  ],
+  "advisorWarnings": [],
+  "consensus": {
+    "topAreas": [
+      {
+        "area": "guardrails",
+        "count": 1
+      },
+      {
+        "area": "retrieval",
+        "count": 1
+      },
+      {
+        "area": "prompt",
+        "count": 1
+      },
+      {
+        "area": "template",
+        "count": 1
+      },
+      {
+        "area": "ranking",
+        "count": 1
+      }
+    ],
+    "recurringTitles": [
+      {
+        "title": "explicit 'no verified results' branch in shortlist generation",
+        "count": 1
+      },
+      {
+        "title": "expand footwear manufacturer query patterns",
+        "count": 1
+      },
+      {
+        "title": "clarification turn should surface concrete candidates or specific blockers",
+        "count": 1
+      },
+      {
+        "title": "template generation gate: validate candidate existence",
+        "count": 1
+      },
+      {
+        "title": "add 'manufacturer verification' boost in ranking",
+        "count": 1
+      }
+    ]
+  }
+}

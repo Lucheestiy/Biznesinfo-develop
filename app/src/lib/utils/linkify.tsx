@@ -7,7 +7,7 @@ type LinkToken =
 function stripTrailingPunctuation(raw: string): { core: string; trailing: string } {
   let core = raw || "";
   let trailing = "";
-  while (core.length > 0 && /[)\],.;:!?}]+$/u.test(core)) {
+  while (core.length > 0 && /[)\],.;:!?}"'`»“”’]+$/u.test(core)) {
     const ch = core.slice(-1);
     core = core.slice(0, -1);
     trailing = ch + trailing;
@@ -46,6 +46,27 @@ function normalizeInternalPath(raw: string): string | null {
   if (!/^\/(?:company|catalog)\//u.test(s)) return null;
   if (s.includes("..")) return null;
   if (/[\\\u0000-\u001F]/u.test(s)) return null;
+
+  const pathOnly = s.split(/[?#]/u, 1)[0] || s;
+
+  if (pathOnly.startsWith("/company/")) {
+    const rawSlug = pathOnly.slice("/company/".length);
+    if (!rawSlug) return null;
+
+    let decoded = rawSlug;
+    try {
+      decoded = decodeURIComponent(rawSlug);
+    } catch {
+      decoded = rawSlug;
+    }
+
+    let cleaned = decoded.replace(/[)"'`»“”’.,;:!?}]+$/gu, "").trim();
+    if (!cleaned) return null;
+    cleaned = cleaned.replace(/[^\p{L}\p{N}-]/gu, "");
+    if (!cleaned) return null;
+    return `/company/${encodeURIComponent(cleaned)}`;
+  }
+
   if (s.length > 300) return s.slice(0, 300);
   return s;
 }

@@ -1,0 +1,238 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-10T00:00:00Z",
+    "source": "live-judge-branching-demo",
+    "description": "Demo scenarios for live judge branching by pass/fail, failed check id, and reply-content conditions."
+  },
+  "scenarios": [
+    {
+      "id": "BR001",
+      "title": "Pass/fail branch with explicit nextOnPass/nextOnFail",
+      "personaGoal": "Проверить базовую ветвизацию: при PASS переход дальше, при FAIL повтор хода.",
+      "tags": ["branching", "live_judge", "demo"],
+      "turns": [
+        {
+          "id": "BR001.T1",
+          "user": "Дай минимум 2 карточки компаний /company/... по поставке упаковки в Минске.",
+          "nextOnPassTurnNumber": 2,
+          "nextOnFailTurnNumber": 1,
+          "checks": [
+            {
+              "id": "BR001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub"
+            },
+            {
+              "id": "BR001.T1.C2",
+              "type": "company_path_min_count",
+              "min": 2,
+              "description": "Минимум 2 ссылки /company/..."
+            }
+          ]
+        },
+        {
+          "id": "BR001.T2",
+          "user": "Сделай шаблон контакта в блоках Subject/Body/WhatsApp.",
+          "checks": [
+            {
+              "id": "BR001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub"
+            },
+            {
+              "id": "BR001.T2.C2",
+              "type": "template_blocks",
+              "description": "Ожидаются блоки Subject/Body/WhatsApp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BR002",
+      "title": "Branch by failed check id",
+      "personaGoal": "Проверить условную ветку: если не учтен город, отправить в уточняющий ход.",
+      "tags": ["branching", "failed_check_id", "geo"],
+      "turns": [
+        {
+          "id": "BR002.T1",
+          "user": "Найди производителей дверей и сразу сделай shortlist.",
+          "branches": [
+            {
+              "id": "need_geo",
+              "label": "Не указан город",
+              "when": {
+                "verdict": "fail",
+                "failedCheckIdsAny": ["BR002.T1.C2"]
+              },
+              "nextTurnNumber": 2
+            },
+            {
+              "id": "go_shortlist",
+              "label": "Гео есть",
+              "when": {
+                "verdict": "pass"
+              },
+              "nextTurnNumber": 3
+            }
+          ],
+          "checks": [
+            {
+              "id": "BR002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub"
+            },
+            {
+              "id": "BR002.T1.C2",
+              "type": "includes_any",
+              "patterns": ["минск", "брест", "гомел", "могилев", "витебск", "гродно"],
+              "description": "Должен быть явно учтен город"
+            }
+          ]
+        },
+        {
+          "id": "BR002.T2",
+          "user": "Город: Минск. Продолжай по производителям дверей.",
+          "nextOnPassTurnNumber": 3,
+          "nextOnFailTurnNumber": 2,
+          "checks": [
+            {
+              "id": "BR002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub"
+            },
+            {
+              "id": "BR002.T2.C2",
+              "type": "includes_any",
+              "patterns": ["минск"],
+              "description": "Должен учитывать уточнение по городу"
+            }
+          ]
+        },
+        {
+          "id": "BR002.T3",
+          "user": "Сделай shortlist минимум из 2 пунктов и объясни, кого проверять первым.",
+          "checks": [
+            {
+              "id": "BR002.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub"
+            },
+            {
+              "id": "BR002.T3.C2",
+              "type": "numbered_list_min",
+              "min": 2,
+              "description": "Нужны минимум 2 пункта shortlist"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BR003",
+      "title": "Live branch by assistant reply content (questions vs direct shortlist)",
+      "personaGoal": "Проверить, что судья выбирает следующий ход по содержанию ответа ассистента, а не только по id-фейлов.",
+      "tags": ["branching", "live_judge", "reply_content", "multi_step"],
+      "turns": [
+        {
+          "id": "BR003.T1",
+          "user": "Найди производителей муки высшего сорта в Беларуси. Если не хватает данных, задай уточняющий вопрос.",
+          "branches": [
+            {
+              "id": "assistant_asked_question",
+              "label": "Ассистент задал уточняющий вопрос",
+              "when": {
+                "checksAny": [
+                  {
+                    "type": "question_count_min",
+                    "min": 1
+                  }
+                ]
+              },
+              "nextTurnNumber": 2
+            },
+            {
+              "id": "assistant_ready_without_questions",
+              "label": "Ассистент сразу готов к shortlist",
+              "when": {
+                "checksAll": [
+                  {
+                    "type": "question_count_max",
+                    "max": 0
+                  }
+                ]
+              },
+              "nextTurnNumber": 3
+            }
+          ],
+          "checks": [
+            {
+              "id": "BR003.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub"
+            },
+            {
+              "id": "BR003.T1.C2",
+              "type": "mentions_any_terms",
+              "terms": ["мук", "производ"],
+              "min": 1,
+              "description": "Должен удержать товарный контекст"
+            }
+          ]
+        },
+        {
+          "id": "BR003.T2",
+          "user": "Уточнение: нужны экспортеры в РФ, объем от 20 т/месяц, приоритет ЦФО и СЗФО.",
+          "nextOnPassTurnNumber": 3,
+          "nextOnFailTurnNumber": 3,
+          "checks": [
+            {
+              "id": "BR003.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub"
+            },
+            {
+              "id": "BR003.T2.C2",
+              "type": "includes_any",
+              "patterns": ["мук", "экспорт", "рф"],
+              "description": "Ответ должен отразить экспортный контекст"
+            }
+          ]
+        },
+        {
+          "id": "BR003.T3",
+          "user": "Сделай shortlist из 3 приоритетных компаний и дай чеклист первичного звонка.",
+          "checks": [
+            {
+              "id": "BR003.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub"
+            },
+            {
+              "id": "BR003.T3.C2",
+              "type": "any_of",
+              "description": "Ожидаем shortlist ссылками или нумерованный рейтинг",
+              "checks": [
+                {
+                  "type": "company_path_min_count",
+                  "min": 1
+                },
+                {
+                  "type": "numbered_list_min",
+                  "min": 3
+                }
+              ]
+            },
+            {
+              "id": "BR003.T3.C3",
+              "type": "includes_any",
+              "patterns": ["звон", "чеклист", "вопрос"],
+              "description": "Должен быть практический чеклист звонка"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

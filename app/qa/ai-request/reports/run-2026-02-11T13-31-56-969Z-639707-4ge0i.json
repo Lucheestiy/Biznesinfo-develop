@@ -1,0 +1,521 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-09T21:10:00Z",
+      "source": "user-seed-ideas-expanded",
+      "description": "Multi-turn + variant regressions expanded from user business queries to stress continuity, geo refinement, shortlist quality, and outreach templates."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2600,
+      "maxScenarios": null,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T13-31-56-969Z-639707-4ge0i",
+    "startedAt": "2026-02-11T13:31:56.969Z",
+    "endedAt": "2026-02-11T13:32:41.643Z",
+    "durationMs": 44674,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/tmp/tmp.5ZwVS7Er12",
+    "totalScenarios": 1,
+    "passedScenarios": 0,
+    "failedScenarios": 1,
+    "passRate": 0,
+    "totalChecks": 13,
+    "passedChecks": 12,
+    "failedChecks": 1,
+    "checkPassRate": 0.9231,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 4,
+    "avgTurnLatencyMs": 11105.25,
+    "totalTurnLatencyMs": 44421,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:excludes_all:Не должен откатываться в противоречивый/пассивный fallback",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "UV021",
+      "title": "Ирис Интер групп: консистентность между «нашел компанию» и «проверь на карточке»",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "consistency",
+        "company_card",
+        "website_news",
+        "anti_link_gate",
+        "anti_sourcing_fallback"
+      ],
+      "personaGoal": "Проверить, что ассистент не противоречит себе: если компания уже в контексте, не уходит в «пришлите ссылку/не вижу карточку» и продолжает автономно.",
+      "totalTurns": 4,
+      "completedTurns": 4,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV021.T4.C3",
+          "type": "excludes_all",
+          "description": "Не должен откатываться в противоречивый/пассивный fallback",
+          "passed": false,
+          "reason": "Forbidden patterns found",
+          "details": {
+            "patterns": [
+              "не вижу карточку",
+              "не вижу в чате саму карточку",
+              "пришлите ссылк",
+              "нужна ссылк",
+              "дайте ссылк",
+              "по текущему фильтру в каталоге нет подтвержденных карточек"
+            ],
+            "hits": [
+              "пришлите ссылк"
+            ]
+          },
+          "turn": 4,
+          "tolerated": false,
+          "blocking": true
+        }
+      ],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 44421,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->4",
+        "4:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике.",
+          "requestBody": {
+            "message": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 12243,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "e6a46eac-715e-42f3-af36-231f7bf7c778",
+          "conversationId": "1f7caab1-a165-43a1-a7c7-41c5a5b56499",
+          "isStub": false,
+          "reply": "Отлично! Для компании **Ирис Интер Групп** (международная логистика/грузоперевозки) вот 20 релевантных тегов для использования в **Google Analytics 4** и **Яндекс.Метрике** (как UTM-метки, аудитории, группировки трафика, контент-теги):\n\n1. международные грузоперевозки  \n2. логистическая компания  \n3. грузоперевозки Беларусь  \n4. доставка в Иран  \n5. перевозки в ОАЭ  \n6. доставка в Турцию  \n7. перевозки в Индию  \n8. грузоперевозки СНГ  \n9. грузоперевозки Азия  \n10. грузоперевозки Ближний Восток  \n11. экспедирование грузов  \n12. мультимодальные перевозки  \n13. автомобильные грузоперевозки  \n14. контейнерные перевозки  \n15. таможенное оформление  \n16. импорт экспорт логистика  \n17. B2B логистика  \n18. расчет стоимости перевозки  \n19. доставка сборных грузов  \n20. международная доставка под ключ  \n\nЕсли хотите, следующим шагом могу сразу дать:  \n1) набор **UTM-меток** под Google Ads/Яндекс Директ,  \n2) список **целей/событий** для GA4 и Метрики (заявка, клик по телефону, WhatsApp, расчет стоимости),  \n3) готовую структуру **групп каналов и отчетов** под вашу логистику.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV021.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV021.T1.C2",
+              "type": "numbered_list_min",
+              "description": "Должен вернуть минимум 20 тегов",
+              "passed": true,
+              "reason": "Enough numbered items",
+              "details": {
+                "min": 20,
+                "count": 23
+              }
+            },
+            {
+              "id": "UV021.T1.C3",
+              "type": "excludes_all",
+              "description": "Не должен подмешивать supplier-search fallback в задачу тегирования",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "нет подтвержденных карточек",
+                  "временный shortlist",
+                  "кого проверять первым",
+                  "/company/",
+                  "/catalog/"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Давай структуру UTM под Google Ads и Яндекс Директ.",
+          "requestBody": {
+            "message": "Давай структуру UTM под Google Ads и Яндекс Директ.",
+            "history": [
+              {
+                "role": "user",
+                "content": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике."
+              },
+              {
+                "role": "assistant",
+                "content": "Отлично! Для компании **Ирис Интер Групп** (международная логистика/грузоперевозки) вот 20 релевантных тегов для использования в **Google Analytics 4** и **Яндекс.Метрике** (как UTM-метки, аудитории, группировки трафика, контент-теги):\n\n1. международные грузоперевозки  \n2. логистическая компания  \n3. грузоперевозки Беларусь  \n4. доставка в Иран  \n5. перевозки в ОАЭ  \n6. доставка в Турцию  \n7. перевозки в Индию  \n8. грузоперевозки СНГ  \n9. грузоперевозки Азия  \n10. грузоперевозки Ближний Восток  \n11. экспедирование грузов  \n12. мультимодальные перевозки  \n13. автомобильные грузоперевозки  \n14. контейнерные перевозки  \n15. таможенное оформление  \n16. импорт экспорт логистика  \n17. B2B логистика  \n18. расчет стоимости перевозки  \n19. доставка сборных грузов  \n20. международная доставка под ключ  \n\nЕсли хотите, следующим шагом могу сразу дать:  \n1) набор **UTM-меток** под Google Ads/Яндекс Директ,  \n2) список **целей/событий** для GA4 и Метрики (заявка, клик по телефону, WhatsApp, расчет стоимости),  \n3) готовую структуру **групп каналов и отчетов** под вашу логистику."
+              }
+            ],
+            "conversationId": "1f7caab1-a165-43a1-a7c7-41c5a5b56499",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 19681,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "da5b5426-e2dd-4c29-bed7-52f2d229248f",
+          "conversationId": "1f7caab1-a165-43a1-a7c7-41c5a5b56499",
+          "isStub": false,
+          "reply": "Отлично, даю практичную и единую структуру UTM, чтобы корректно сводить данные в **GA4** и **Яндекс.Метрике**.\n\n## 1) Базовые правила (единые для обеих систем)\n\nИспользуем обязательные:\n- `utm_source`\n- `utm_medium`\n- `utm_campaign`\n\nИ доп. для детализации:\n- `utm_content` (креатив/объявление/плейсмент)\n- `utm_term` (ключевая фраза)\n- `utm_id` (внутренний ID кампании, удобно для склейки отчетов)\n\nРекомендации:\n1. Все значения в нижнем регистре, через дефис/подчеркивание.  \n2. Не смешивать кириллицу и латиницу в одной логике.  \n3. Единый нейминг по всем каналам.  \n4. Не использовать пробелы (лучше `-` или `_`).  \n\n---\n\n## 2) Шаблон UTM для Google Ads\n\nЕсли авторазметка Google (gclid) включена — UTM всё равно полезны для унификации отчетов.\n\n**Рекомендуемый шаблон:**\n\n`https://site.by/?utm_source=google&utm_medium=cpc&utm_campaign=logistika_уточняется_уточняется_уточняется&utm_content=уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\nГде:\n- `geo`: by, minsk, gomel, etc.\n- `service`: mezhdunarodnye-perevozki / tamozhennoe-oformlenie\n- `goal`: lead / call / price-request\n- `уточняется`, `уточняется` — ValueTrack Google Ads\n- `уточняется`, `уточняется` — можно подставлять через свои правила\n\n**Пример (поиск, Беларусь):**  \n`https://site.by/?utm_source=google&utm_medium=cpc&utm_campaign=logistika_by_mezhdunarodnye-perevozki_lead&utm_content=textad_search&utm_term=уточняется&utm_id=уточняется`\n\n---\n\n## 3) Шаблон UTM для Яндекс Директ\n\n**Рекомендуемый шаблон:**\n\n`https://site.by/?utm_source=yandex&utm_medium=cpc&utm_campaign=logistika_уточняется_уточняется_уточняется&utm_content=уточняется_уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\nЧасто используемые макросы Директа:\n- `уточняется`\n- `уточняется`\n- `уточняется`\n- `уточняется`\n- `уточняется`\n\n**Пример (поиск, международные перевозки):**  \n`https://site.by/?utm_source=yandex&utm_medium=cpc&utm_campaign=logistika_by_mezhdunarodnye-perevozki_lead&utm_content=уточняется_уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\n---\n\n## 4) Единый справочник значений (чтобы отчеты не “сыпались”)\n\n- `utm_source`: `google` / `yandex`\n- `utm_medium`: `cpc`\n- `utm_campaign`: `logistika_уточняется_уточняется_уточняется`\n- `utm_content`:  \n  - поиск: `textad_уточняется`  \n  - РСЯ/КМС: `banner_уточняется_уточняется`  \n  - ретаргет: `retarget_уточняется`\n- `utm_term`: ключ (динамически)\n- `utm_id`: ID кампании из рекламной системы\n\n---\n\n## 5) Рекомендуемая структура campaign именно для вас (Ирис Интер Групп)\n\nВарианты:\n1. `logistika_by_mezhdunarodnye-perevozki_lead`\n2. `logistika_by_tamozhennoe-oformlenie_lead`\n3. `logistika_by_sbornye-gruzy_price-request`\n4. `logistika_by_iran-dostavka_lead`\n5. `logistika_by_oae-dostavka_lead`\n6. `logistika_by_turciya-dostavka_lead`\n\n---\n\n## 6) Минимальная проверка перед запуском\n\n1. Клик по тестовому объявлению → URL открывается без ошибок.  \n2. В GA4 в Realtime видны `source/medium = google/cpc` или `yandex/cpc`.  \n3. В Метрике в источниках видны UTM-кампании и метки не обрезаются.  \n4. Нет дублей имен кампаний с разным смыслом.  \n\n---\n\nЕсли хотите, следующим сообщением соберу вам **готовые финальные шаблоны под 3–5 ваших кампаний** (поиск, РСЯ/КМС, ретаргет) уже в копируемом виде под вставку в Google Ads и Директ.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV021.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV021.T2.C2",
+              "type": "includes_any",
+              "description": "Должна быть практичная UTM-структура",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "utm_source",
+                  "utm_medium",
+                  "utm_campaign"
+                ],
+                "hits": [
+                  "utm_source",
+                  "utm_medium",
+                  "utm_campaign"
+                ]
+              }
+            },
+            {
+              "id": "UV021.T2.C3",
+              "type": "excludes_all",
+              "description": "Не должен уходить в sourcing/no-results",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "поставщик",
+                  "shortlist",
+                  "нет подтвержденных карточек",
+                  "/company/",
+                  "/catalog/"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Ты можешь пойти на вэбсайт этой компании и найти там последние новости?",
+          "requestBody": {
+            "message": "Ты можешь пойти на вэбсайт этой компании и найти там последние новости?",
+            "history": [
+              {
+                "role": "user",
+                "content": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике."
+              },
+              {
+                "role": "assistant",
+                "content": "Отлично! Для компании **Ирис Интер Групп** (международная логистика/грузоперевозки) вот 20 релевантных тегов для использования в **Google Analytics 4** и **Яндекс.Метрике** (как UTM-метки, аудитории, группировки трафика, контент-теги):\n\n1. международные грузоперевозки  \n2. логистическая компания  \n3. грузоперевозки Беларусь  \n4. доставка в Иран  \n5. перевозки в ОАЭ  \n6. доставка в Турцию  \n7. перевозки в Индию  \n8. грузоперевозки СНГ  \n9. грузоперевозки Азия  \n10. грузоперевозки Ближний Восток  \n11. экспедирование грузов  \n12. мультимодальные перевозки  \n13. автомобильные грузоперевозки  \n14. контейнерные перевозки  \n15. таможенное оформление  \n16. импорт экспорт логистика  \n17. B2B логистика  \n18. расчет стоимости перевозки  \n19. доставка сборных грузов  \n20. международная доставка под ключ  \n\nЕсли хотите, следующим шагом могу сразу дать:  \n1) набор **UTM-меток** под Google Ads/Яндекс Директ,  \n2) список **целей/событий** для GA4 и Метрики (заявка, клик по телефону, WhatsApp, расчет стоимости),  \n3) готовую структуру **групп каналов и отчетов** под вашу логистику."
+              },
+              {
+                "role": "user",
+                "content": "Давай структуру UTM под Google Ads и Яндекс Директ."
+              },
+              {
+                "role": "assistant",
+                "content": "Отлично, даю практичную и единую структуру UTM, чтобы корректно сводить данные в **GA4** и **Яндекс.Метрике**.\n\n## 1) Базовые правила (единые для обеих систем)\n\nИспользуем обязательные:\n- `utm_source`\n- `utm_medium`\n- `utm_campaign`\n\nИ доп. для детализации:\n- `utm_content` (креатив/объявление/плейсмент)\n- `utm_term` (ключевая фраза)\n- `utm_id` (внутренний ID кампании, удобно для склейки отчетов)\n\nРекомендации:\n1. Все значения в нижнем регистре, через дефис/подчеркивание.  \n2. Не смешивать кириллицу и латиницу в одной логике.  \n3. Единый нейминг по всем каналам.  \n4. Не использовать пробелы (лучше `-` или `_`).  \n\n---\n\n## 2) Шаблон UTM для Google Ads\n\nЕсли авторазметка Google (gclid) включена — UTM всё равно полезны для унификации отчетов.\n\n**Рекомендуемый шаблон:**\n\n`https://site.by/?utm_source=google&utm_medium=cpc&utm_campaign=logistika_уточняется_уточняется_уточняется&utm_content=уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\nГде:\n- `geo`: by, minsk, gomel, etc.\n- `service`: mezhdunarodnye-perevozki / tamozhennoe-oformlenie\n- `goal`: lead / call / price-request\n- `уточняется`, `уточняется` — ValueTrack Google Ads\n- `уточняется`, `уточняется` — можно подставлять через свои правила\n\n**Пример (поиск, Беларусь):**  \n`https://site.by/?utm_source=google&utm_medium=cpc&utm_campaign=logistika_by_mezhdunarodnye-perevozki_lead&utm_content=textad_search&utm_term=уточняется&utm_id=уточняется`\n\n---\n\n## 3) Шаблон UTM для Яндекс Директ\n\n**Рекомендуемый шаблон:**\n\n`https://site.by/?utm_source=yandex&utm_medium=cpc&utm_campaign=logistika_уточняется_уточняется_уточняется&utm_content=уточняется_уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\nЧасто используемые макросы Директа:\n- `уточняется`\n- `уточняется`\n- `уточняется`\n- `уточняется`\n- `уточняется`\n\n**Пример (поиск, международные перевозки):**  \n`https://site.by/?utm_source=yandex&utm_medium=cpc&utm_campaign=logistika_by_mezhdunarodnye-perevozki_lead&utm_content=уточняется_уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\n---\n\n## 4) Единый справочник значений (чтобы отчеты не “сыпались”)\n\n- `utm_source`: `google` / `yandex`\n- `utm_medium`: `cpc`\n- `utm_campaign`: `logistika_уточняется_уточняется_уточняется`\n- `utm_content`:  \n  - поиск: `textad_уточняется`  \n  - РСЯ/КМС: `banner_уточняется_уточняется`  \n  - ретаргет: `retarget_уточняется`\n- `utm_term`: ключ (динамически)\n- `utm_id`: ID кампании из рекламной системы\n\n---\n\n## 5) Рекомендуемая структура campaign именно для вас (Ирис Интер Групп)\n\nВарианты:\n1. `logistika_by_mezhdunarodnye-perevozki_lead`\n2. `logistika_by_tamozhennoe-oformlenie_lead`\n3. `logistika_by_sbornye-gruzy_price-request`\n4. `logistika_by_iran-dostavka_lead`\n5. `logistika_by_oae-dostavka_lead`\n6. `logistika_by_turciya-dostavka_lead`\n\n---\n\n## 6) Минимальная проверка перед запуском\n\n1. Клик по тестовому объявлению → URL открывается без ошибок.  \n2. В GA4 в Realtime видны `source/medium = google/cpc` или `yandex/cpc`.  \n3. В Метрике в источниках видны UTM-кампании и метки не обрезаются.  \n4. Нет дублей имен кампаний с разным смыслом.  \n\n---\n\nЕсли хотите, следующим сообщением соберу вам **готовые финальные шаблоны под 3–5 ваших кампаний** (поиск, РСЯ/КМС, ретаргет) уже в копируемом виде под вставку в Google Ads и Директ."
+              }
+            ],
+            "conversationId": "1f7caab1-a165-43a1-a7c7-41c5a5b56499",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 5027,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2d78762c-875d-48dc-a5b2-b661d50d1735",
+          "conversationId": "1f7caab1-a165-43a1-a7c7-41c5a5b56499",
+          "isStub": false,
+          "reply": "Да, могу помочь, но сейчас у меня нет ссылки на сайт **Ирис Интер Групп**, и без неё есть риск ошибиться с компанией.\n\nПришлите, пожалуйста, **URL сайта** (или страницу “Новости/Блог”), и я сразу:\n1. Найду последние публикации,  \n2. Дам краткую выжимку по каждой (дата + тема),  \n3. Отмечу, что подтверждено на сайте, со ссылками на конкретные страницы.  \n\nЕсли хотите, могу также отфильтровать только новости по темам: **логистика, таможня, направления (Иран/ОАЭ/Турция)**.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 4,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV021.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV021.T3.C2",
+              "type": "includes_any",
+              "description": "Должен взять на себя поиск новостей",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "сайт",
+                  "новост",
+                  "провер",
+                  "найд"
+                ],
+                "hits": [
+                  "сайт",
+                  "новост",
+                  "найд"
+                ]
+              }
+            },
+            {
+              "id": "UV021.T3.C3",
+              "type": "excludes_all",
+              "description": "Не должен требовать ссылку как первый шаг, если компания уже в контексте",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "пришлите ссылк",
+                  "нужна ссылк",
+                  "не вижу карточку",
+                  "не вижу в чате саму карточку"
+                ],
+                "hits": []
+              }
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "user": "Найди на карточке компании.",
+          "requestBody": {
+            "message": "Найди на карточке компании.",
+            "history": [
+              {
+                "role": "user",
+                "content": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике."
+              },
+              {
+                "role": "assistant",
+                "content": "Отлично! Для компании **Ирис Интер Групп** (международная логистика/грузоперевозки) вот 20 релевантных тегов для использования в **Google Analytics 4** и **Яндекс.Метрике** (как UTM-метки, аудитории, группировки трафика, контент-теги):\n\n1. международные грузоперевозки  \n2. логистическая компания  \n3. грузоперевозки Беларусь  \n4. доставка в Иран  \n5. перевозки в ОАЭ  \n6. доставка в Турцию  \n7. перевозки в Индию  \n8. грузоперевозки СНГ  \n9. грузоперевозки Азия  \n10. грузоперевозки Ближний Восток  \n11. экспедирование грузов  \n12. мультимодальные перевозки  \n13. автомобильные грузоперевозки  \n14. контейнерные перевозки  \n15. таможенное оформление  \n16. импорт экспорт логистика  \n17. B2B логистика  \n18. расчет стоимости перевозки  \n19. доставка сборных грузов  \n20. международная доставка под ключ  \n\nЕсли хотите, следующим шагом могу сразу дать:  \n1) набор **UTM-меток** под Google Ads/Яндекс Директ,  \n2) список **целей/событий** для GA4 и Метрики (заявка, клик по телефону, WhatsApp, расчет стоимости),  \n3) готовую структуру **групп каналов и отчетов** под вашу логистику."
+              },
+              {
+                "role": "user",
+                "content": "Давай структуру UTM под Google Ads и Яндекс Директ."
+              },
+              {
+                "role": "assistant",
+                "content": "Отлично, даю практичную и единую структуру UTM, чтобы корректно сводить данные в **GA4** и **Яндекс.Метрике**.\n\n## 1) Базовые правила (единые для обеих систем)\n\nИспользуем обязательные:\n- `utm_source`\n- `utm_medium`\n- `utm_campaign`\n\nИ доп. для детализации:\n- `utm_content` (креатив/объявление/плейсмент)\n- `utm_term` (ключевая фраза)\n- `utm_id` (внутренний ID кампании, удобно для склейки отчетов)\n\nРекомендации:\n1. Все значения в нижнем регистре, через дефис/подчеркивание.  \n2. Не смешивать кириллицу и латиницу в одной логике.  \n3. Единый нейминг по всем каналам.  \n4. Не использовать пробелы (лучше `-` или `_`).  \n\n---\n\n## 2) Шаблон UTM для Google Ads\n\nЕсли авторазметка Google (gclid) включена — UTM всё равно полезны для унификации отчетов.\n\n**Рекомендуемый шаблон:**\n\n`https://site.by/?utm_source=google&utm_medium=cpc&utm_campaign=logistika_уточняется_уточняется_уточняется&utm_content=уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\nГде:\n- `geo`: by, minsk, gomel, etc.\n- `service`: mezhdunarodnye-perevozki / tamozhennoe-oformlenie\n- `goal`: lead / call / price-request\n- `уточняется`, `уточняется` — ValueTrack Google Ads\n- `уточняется`, `уточняется` — можно подставлять через свои правила\n\n**Пример (поиск, Беларусь):**  \n`https://site.by/?utm_source=google&utm_medium=cpc&utm_campaign=logistika_by_mezhdunarodnye-perevozki_lead&utm_content=textad_search&utm_term=уточняется&utm_id=уточняется`\n\n---\n\n## 3) Шаблон UTM для Яндекс Директ\n\n**Рекомендуемый шаблон:**\n\n`https://site.by/?utm_source=yandex&utm_medium=cpc&utm_campaign=logistika_уточняется_уточняется_уточняется&utm_content=уточняется_уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\nЧасто используемые макросы Директа:\n- `уточняется`\n- `уточняется`\n- `уточняется`\n- `уточняется`\n- `уточняется`\n\n**Пример (поиск, международные перевозки):**  \n`https://site.by/?utm_source=yandex&utm_medium=cpc&utm_campaign=logistika_by_mezhdunarodnye-perevozki_lead&utm_content=уточняется_уточняется_уточняется&utm_term=уточняется&utm_id=уточняется`\n\n---\n\n## 4) Единый справочник значений (чтобы отчеты не “сыпались”)\n\n- `utm_source`: `google` / `yandex`\n- `utm_medium`: `cpc`\n- `utm_campaign`: `logistika_уточняется_уточняется_уточняется`\n- `utm_content`:  \n  - поиск: `textad_уточняется`  \n  - РСЯ/КМС: `banner_уточняется_уточняется`  \n  - ретаргет: `retarget_уточняется`\n- `utm_term`: ключ (динамически)\n- `utm_id`: ID кампании из рекламной системы\n\n---\n\n## 5) Рекомендуемая структура campaign именно для вас (Ирис Интер Групп)\n\nВарианты:\n1. `logistika_by_mezhdunarodnye-perevozki_lead`\n2. `logistika_by_tamozhennoe-oformlenie_lead`\n3. `logistika_by_sbornye-gruzy_price-request`\n4. `logistika_by_iran-dostavka_lead`\n5. `logistika_by_oae-dostavka_lead`\n6. `logistika_by_turciya-dostavka_lead`\n\n---\n\n## 6) Минимальная проверка перед запуском\n\n1. Клик по тестовому объявлению → URL открывается без ошибок.  \n2. В GA4 в Realtime видны `source/medium = google/cpc` или `yandex/cpc`.  \n3. В Метрике в источниках видны UTM-кампании и метки не обрезаются.  \n4. Нет дублей имен кампаний с разным смыслом.  \n\n---\n\nЕсли хотите, следующим сообщением соберу вам **готовые финальные шаблоны под 3–5 ваших кампаний** (поиск, РСЯ/КМС, ретаргет) уже в копируемом виде под вставку в Google Ads и Директ."
+              },
+              {
+                "role": "user",
+                "content": "Ты можешь пойти на вэбсайт этой компании и найти там последние новости?"
+              },
+              {
+                "role": "assistant",
+                "content": "Да, могу помочь, но сейчас у меня нет ссылки на сайт **Ирис Интер Групп**, и без неё есть риск ошибиться с компанией.\n\nПришлите, пожалуйста, **URL сайта** (или страницу “Новости/Блог”), и я сразу:\n1. Найду последние публикации,  \n2. Дам краткую выжимку по каждой (дата + тема),  \n3. Отмечу, что подтверждено на сайте, со ссылками на конкретные страницы.  \n\nЕсли хотите, могу также отфильтровать только новости по темам: **логистика, таможня, направления (Иран/ОАЭ/Турция)**."
+              }
+            ],
+            "conversationId": "1f7caab1-a165-43a1-a7c7-41c5a5b56499",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 7470,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "b0a9c94c-15fe-4149-8e16-daf494680f23",
+          "conversationId": "1f7caab1-a165-43a1-a7c7-41c5a5b56499",
+          "isStub": false,
+          "reply": "Понял. Чтобы взять новости именно **из карточки компании**, мне нужна сама карточка (ссылка или точное совпадение в каталоге).\n\nСейчас у меня нет в контексте данных карточки, поэтому даю быстрый следующий шаг:\n\n1. Пришлите ссылку на карточку **Ирис Интер Групп** в каталоге Biznesinfo.  \n2. Я сразу извлеку:\n   - последние новости (если есть раздел/лента),\n   - дату и заголовок,\n   - краткое резюме 1–2 строки по каждой новости.\n\nЕсли ссылку неудобно отправлять, дайте 2 уточнения:\n1) город компании,  \n2) как написано в карточке (ИП/ООО/ЗАО и т.д.).  \n\nПосле этого я смогу точнее найти нужную карточку и продолжить.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "fail",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV021.T4.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV021.T4.C2",
+              "type": "includes_any",
+              "description": "Должен продолжить по карточке компании без потери контекста",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "карточк",
+                  "компан",
+                  "сайт",
+                  "новост",
+                  "провер"
+                ],
+                "hits": [
+                  "карточк",
+                  "компан",
+                  "новост"
+                ]
+              }
+            },
+            {
+              "id": "UV021.T4.C3",
+              "type": "excludes_all",
+              "description": "Не должен откатываться в противоречивый/пассивный fallback",
+              "passed": false,
+              "reason": "Forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "не вижу карточку",
+                  "не вижу в чате саму карточку",
+                  "пришлите ссылк",
+                  "нужна ссылк",
+                  "дайте ссылк",
+                  "по текущему фильтру в каталоге нет подтвержденных карточек"
+                ],
+                "hits": [
+                  "пришлите ссылк"
+                ]
+              }
+            },
+            {
+              "id": "UV021.T4.C4",
+              "type": "not_refusal_only",
+              "description": "Нужен конкретный автономный шаг или результат",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 44423
+    }
+  ]
+}

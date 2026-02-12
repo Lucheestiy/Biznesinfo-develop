@@ -567,6 +567,149 @@ function evaluateCheck(check, ctx) {
   }
 }
 
+function normalizeTurnNumber(value, maxTurns) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  const turnNumber = Math.floor(n);
+  if (turnNumber < 1 || turnNumber > maxTurns) return null;
+  return turnNumber;
+}
+
+function asArrayOfStrings(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+}
+
+function branchWhenMatches(when, ctx) {
+  if (!when || typeof when !== "object") return true;
+
+  if (typeof when.verdict === "string") {
+    const expected = String(when.verdict || "").trim().toLowerCase();
+    if (expected && expected !== ctx.verdict) return false;
+  }
+
+  const failedAny = asArrayOfStrings(when.failedCheckIdsAny);
+  if (failedAny.length > 0 && !failedAny.some((id) => ctx.failedCheckIds.has(id))) return false;
+
+  const failedAll = asArrayOfStrings(when.failedCheckIdsAll);
+  if (failedAll.length > 0 && !failedAll.every((id) => ctx.failedCheckIds.has(id))) return false;
+
+  const passedAny = asArrayOfStrings(when.passedCheckIdsAny);
+  if (passedAny.length > 0 && !passedAny.some((id) => ctx.passedCheckIds.has(id))) return false;
+
+  const passedAll = asArrayOfStrings(when.passedCheckIdsAll);
+  if (passedAll.length > 0 && !passedAll.every((id) => ctx.passedCheckIds.has(id))) return false;
+
+  const checksAll = Array.isArray(when.checksAll)
+    ? when.checksAll
+    : Array.isArray(when.checks)
+      ? when.checks
+      : [];
+  if (checksAll.length > 0) {
+    for (const check of checksAll) {
+      if (!check || typeof check !== "object") return false;
+      const result = evaluateCheck(check, ctx);
+      if (!result.passed) return false;
+    }
+  }
+
+  const checksAny = Array.isArray(when.checksAny) ? when.checksAny : [];
+  if (checksAny.length > 0) {
+    let matched = false;
+    for (const check of checksAny) {
+      if (!check || typeof check !== "object") continue;
+      const result = evaluateCheck(check, ctx);
+      if (result.passed) {
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) return false;
+  }
+
+  return true;
+}
+
+function resolveTurnTransition(params) {
+  const {
+    turn,
+    maxTurns,
+    currentTurnNumber,
+    verdict,
+    failedCheckIds,
+    passedCheckIds,
+    currentReplyText,
+    currentIsStub,
+    companyPaths,
+    companyPathProbes,
+    history,
+    scenario,
+    turnIndex,
+  } = params;
+  const failedSet = new Set(asArrayOfStrings(failedCheckIds));
+  const passedSet = new Set(asArrayOfStrings(passedCheckIds));
+  const branchCtx = {
+    verdict,
+    failedCheckIds: failedSet,
+    passedCheckIds: passedSet,
+    currentReplyText: String(currentReplyText || ""),
+    currentIsStub: Boolean(currentIsStub),
+    companyPaths: Array.isArray(companyPaths) ? companyPaths : [],
+    companyPathProbes: companyPathProbes && typeof companyPathProbes === "object" ? companyPathProbes : {},
+    history: Array.isArray(history) ? history : [],
+    scenario: scenario || null,
+    turn: turn || null,
+    turnIndex: Number.isFinite(turnIndex) ? turnIndex : null,
+  };
+
+  const branches = Array.isArray(turn?.branches) ? turn.branches : [];
+  for (let i = 0; i < branches.length; i++) {
+    const branch = branches[i];
+    if (!branchWhenMatches(branch?.when, branchCtx)) continue;
+    const nextTurnNumber = normalizeTurnNumber(branch?.nextTurnNumber, maxTurns);
+    if (nextTurnNumber == null) continue;
+    const branchId = String(branch?.id || `branch_${i + 1}`);
+    return {
+      nextTurnNumber,
+      source: "branch",
+      branchId,
+      viaFailPath: verdict === "fail",
+    };
+  }
+
+  if (verdict === "pass") {
+    const nextOnPass = normalizeTurnNumber(turn?.nextOnPassTurnNumber, maxTurns);
+    if (nextOnPass != null) {
+      return {
+        nextTurnNumber: nextOnPass,
+        source: "nextOnPass",
+        branchId: null,
+        viaFailPath: false,
+      };
+    }
+  } else if (verdict === "fail") {
+    const nextOnFail = normalizeTurnNumber(turn?.nextOnFailTurnNumber, maxTurns);
+    if (nextOnFail != null) {
+      return {
+        nextTurnNumber: nextOnFail,
+        source: "nextOnFail",
+        branchId: null,
+        viaFailPath: true,
+      };
+    }
+  }
+
+  const sequential = currentTurnNumber + 1;
+  return {
+    nextTurnNumber: sequential <= maxTurns ? sequential : null,
+    source: "sequential",
+    branchId: null,
+    viaFailPath: false,
+  };
+}
+
 async function main() {
   const opts = parseArgs(process.argv);
   const startedAt = new Date();
@@ -686,14 +829,41 @@ async function main() {
   for (let si = 0; si < scenarios.length; si++) {
     const scenario = scenarios[si];
     const scenarioStart = Date.now();
+    const scenarioTurns = Array.isArray(scenario.turns) ? scenario.turns : [];
     const history = [];
     let scenarioConversationId = null;
     const turnResults = [];
+    const blockingFailedChecksList = [];
+    const toleratedFailedChecksList = [];
+    let nextTurnNumber = scenarioTurns.length > 0 ? 1 : null;
+    let scenarioStep = 0;
+    const maxScenarioSteps = Math.max(8, scenarioTurns.length * 4);
 
     let scenarioHardError = null;
 
-    for (let ti = 0; ti < scenario.turns.length; ti++) {
-      const turn = scenario.turns[ti];
+    while (nextTurnNumber != null) {
+      if (scenarioStep >= maxScenarioSteps) {
+        scenarioHardError = {
+          status: 0,
+          error: "BranchingLoopDetected",
+          message: `Exceeded max scenario steps (${maxScenarioSteps}) while executing branching transitions.`,
+        };
+        failurePatterns.set("flow:BranchingLoopDetected", (failurePatterns.get("flow:BranchingLoopDetected") || 0) + 1);
+        break;
+      }
+      scenarioStep += 1;
+
+      const ti = nextTurnNumber - 1;
+      const turn = scenarioTurns[ti];
+      if (!turn || typeof turn !== "object") {
+        scenarioHardError = {
+          status: 0,
+          error: "InvalidTurnReference",
+          message: `Turn ${nextTurnNumber} is missing or invalid in scenario ${scenario.id}.`,
+        };
+        failurePatterns.set("flow:InvalidTurnReference", (failurePatterns.get("flow:InvalidTurnReference") || 0) + 1);
+        break;
+      }
       const requestBody = {
         message: turn.user,
         history,
@@ -884,6 +1054,54 @@ async function main() {
         });
       }
 
+      const failedTurnChecks = checkResults.filter((item) => !item.passed);
+      const failedTurnCheckIds = failedTurnChecks.map((item) => String(item.id || "").trim()).filter(Boolean);
+      const passedTurnCheckIds = checkResults
+        .filter((item) => item.passed)
+        .map((item) => String(item.id || "").trim())
+        .filter(Boolean);
+      const turnVerdict = failedTurnChecks.length === 0 ? "pass" : "fail";
+      const transition = resolveTurnTransition({
+        turn,
+        maxTurns: scenarioTurns.length,
+        currentTurnNumber: nextTurnNumber,
+        verdict: turnVerdict,
+        failedCheckIds: failedTurnCheckIds,
+        passedCheckIds: passedTurnCheckIds,
+        currentReplyText: replyText,
+        currentIsStub: isStub,
+        companyPaths,
+        companyPathProbes,
+        history,
+        scenario,
+        turnIndex: ti,
+      });
+      const failHandledByBranch = failedTurnChecks.length > 0 && transition.viaFailPath;
+      if (failHandledByBranch) {
+        for (const item of checkResults) {
+          if (item.passed) continue;
+          item.tolerated = true;
+          item.blocking = false;
+        }
+        for (const item of failedTurnChecks) {
+          toleratedFailedChecksList.push({
+            ...item,
+            turn: ti + 1,
+            tolerated: true,
+            blocking: false,
+          });
+        }
+      } else {
+        for (const item of failedTurnChecks) {
+          blockingFailedChecksList.push({
+            ...item,
+            turn: ti + 1,
+            tolerated: false,
+            blocking: true,
+          });
+        }
+      }
+
       turnResults.push({
         turn: ti + 1,
         user: turn.user,
@@ -908,6 +1126,13 @@ async function main() {
               probes: companyPathProbes,
             }
           : null,
+        transition: {
+          source: transition.source,
+          branchId: transition.branchId || null,
+          verdict: turnVerdict,
+          nextTurnNumber: transition.nextTurnNumber,
+          failHandledByBranch,
+        },
         checks: checkResults,
       });
 
@@ -944,21 +1169,51 @@ async function main() {
 
       history.push({ role: "user", content: turn.user });
       history.push({ role: "assistant", content: replyText });
+      nextTurnNumber = transition.nextTurnNumber;
     }
 
-    const failedChecksList = turnResults.flatMap((t) => (t.checks || []).filter((c) => !c.passed));
-    const pass = !scenarioHardError && failedChecksList.length === 0;
+    const pass = !scenarioHardError && blockingFailedChecksList.length === 0;
+    const scenarioTurnLatencyMs = turnResults.reduce((sum, turnResult) => sum + Number(turnResult.latencyMs || 0), 0);
+    const scenarioStubReplies = turnResults.filter((turnResult) => Boolean(turnResult.isStub)).length;
+    const scenarioBusyRetries = turnResults.reduce(
+      (sum, turnResult) => sum + Number(turnResult.retryMeta?.busy || 0),
+      0,
+    );
+    const scenarioRateLimitRetries = turnResults.reduce(
+      (sum, turnResult) => sum + Number(turnResult.retryMeta?.rateLimited || 0),
+      0,
+    );
+    const scenarioStubRetries = turnResults.reduce(
+      (sum, turnResult) => sum + Number(turnResult.retryMeta?.stub || 0),
+      0,
+    );
+    const scenarioBranchTrace = turnResults
+      .map((turnResult) => {
+        const tr = turnResult.transition;
+        if (!tr || typeof tr !== "object") return null;
+        const branch = tr.branchId ? `(${tr.branchId})` : "";
+        const next = tr.nextTurnNumber == null ? "end" : String(tr.nextTurnNumber);
+        return `${turnResult.turn}:${tr.source}${branch}->${next}`;
+      })
+      .filter(Boolean);
 
     scenarioResults.push({
       id: scenario.id,
       title: scenario.title,
       tags: scenario.tags || [],
       personaGoal: scenario.personaGoal,
-      totalTurns: scenario.turns.length,
+      totalTurns: scenarioTurns.length,
       completedTurns: turnResults.length,
       pass,
       hardError: scenarioHardError,
-      failedChecks: failedChecksList,
+      failedChecks: blockingFailedChecksList,
+      toleratedFailedChecks: toleratedFailedChecksList,
+      turnLatencyMs: scenarioTurnLatencyMs,
+      stubReplies: scenarioStubReplies,
+      busyRetries: scenarioBusyRetries,
+      rateLimitRetries: scenarioRateLimitRetries,
+      stubRetries: scenarioStubRetries,
+      branchTrace: scenarioBranchTrace,
       turns: turnResults,
       durationMs: Date.now() - scenarioStart,
     });
@@ -977,6 +1232,15 @@ async function main() {
   const failedScenarios = scenarioResults.length - passedScenarios;
   const endedAt = new Date();
   const durationMs = endedAt.getTime() - startedAt.getTime();
+  const totalTurnsExecuted = scenarioResults.reduce((sum, scenarioResult) => sum + Number(scenarioResult.completedTurns || 0), 0);
+  const totalTurnLatencyMs = scenarioResults.reduce((sum, scenarioResult) => sum + Number(scenarioResult.turnLatencyMs || 0), 0);
+  const totalStubReplies = scenarioResults.reduce((sum, scenarioResult) => sum + Number(scenarioResult.stubReplies || 0), 0);
+  const totalBusyRetries = scenarioResults.reduce((sum, scenarioResult) => sum + Number(scenarioResult.busyRetries || 0), 0);
+  const totalRateLimitRetries = scenarioResults.reduce(
+    (sum, scenarioResult) => sum + Number(scenarioResult.rateLimitRetries || 0),
+    0,
+  );
+  const totalStubRetries = scenarioResults.reduce((sum, scenarioResult) => sum + Number(scenarioResult.stubRetries || 0), 0);
 
   const sortedPatterns = Array.from(failurePatterns.entries())
     .map(([key, count]) => ({ key, count }))
@@ -1011,6 +1275,13 @@ async function main() {
     targetPassRate: Number(derivedTargetRate.toFixed(4)),
     targetReached: passedScenarios >= targetPassCount,
     authUser: userMeta,
+    totalTurnsExecuted,
+    avgTurnLatencyMs: Number((totalTurnLatencyMs / Math.max(1, totalTurnsExecuted)).toFixed(2)),
+    totalTurnLatencyMs,
+    totalStubReplies,
+    totalBusyRetries,
+    totalRateLimitRetries,
+    totalStubRetries,
     stoppedEarly: Boolean(outageStop),
     stopReason: outageStop,
   };
@@ -1073,6 +1344,10 @@ async function main() {
   md.push(`- Failed: ${summary.failedScenarios}`);
   md.push(`- Pass rate: ${(summary.passRate * 100).toFixed(1)}%`);
   md.push(`- Checks: ${summary.passedChecks}/${summary.totalChecks} passed (${(summary.checkPassRate * 100).toFixed(1)}%)`);
+  md.push(`- Turns executed: ${summary.totalTurnsExecuted}`);
+  md.push(`- Avg turn latency: ${summary.avgTurnLatencyMs} ms`);
+  md.push(`- Busy retries: ${summary.totalBusyRetries}, rate-limit retries: ${summary.totalRateLimitRetries}, stub retries: ${summary.totalStubRetries}`);
+  md.push(`- Stub replies observed: ${summary.totalStubReplies}`);
   md.push(`- Target ${summary.targetPassCount}/${summary.totalScenarios} reached: ${summary.targetReached ? "yes" : "no"}`);
   md.push("");
 
@@ -1110,6 +1385,22 @@ async function main() {
       md.push("");
     }
   }
+  md.push("");
+
+  md.push("## Scenario Ledger");
+  md.push("");
+  for (const s of scenarioResults) {
+    const verdict = s.pass ? "PASS" : "FAIL";
+    const branchPreview = Array.isArray(s.branchTrace) && s.branchTrace.length > 0 ? s.branchTrace.join(" | ") : "none";
+    const scenarioAvgLatencyMs = Number(
+      (Number(s.turnLatencyMs || 0) / Math.max(1, Number(s.completedTurns || 0))).toFixed(1),
+    );
+    md.push(
+      `- ${verdict} ${s.id} — turns ${s.completedTurns}/${s.totalTurns}, blocking fails ${s.failedChecks.length}, tolerated fails ${s.toleratedFailedChecks.length}, avg latency ${scenarioAvgLatencyMs} ms`,
+    );
+    md.push(`  branch: ${branchPreview}`);
+  }
+  md.push("");
 
     fs.writeFileSync(mdOut, `${md.join("\n")}\n`, "utf8");
     fs.writeFileSync(latestMd, `${md.join("\n")}\n`, "utf8");

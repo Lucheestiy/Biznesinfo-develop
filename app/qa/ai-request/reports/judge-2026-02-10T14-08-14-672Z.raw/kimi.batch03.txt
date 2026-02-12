@@ -1,0 +1,139 @@
+Now I have a reference for the expected JSON format. Let me evaluate the 5 scenarios (UV011-UV015) based on the provided transcripts.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV011",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Honestly admitted no relevant manufacturers found, provided search rubrics and keywords",
+        "Turn 2: Correctly stated no producers exist in current data, gave 3 practical alternatives (bespoke ateliers, contract manufacturing, neighboring regions)",
+        "Turn 3: Delivered expanded search query with Boolean operators and negative terms"
+      ],
+      "criticalIssues": [
+        "Turn 1 started with completely irrelevant companies (construction materials, grocery store) — confusing and wastes time",
+        "Turn 3 search query is good but then repeated the same irrelevant companies at the end",
+        "No actual company names provided despite user asking for manufacturers multiple times"
+      ],
+      "strengths": [
+        "Honest about limitations — did not hallucinate manufacturers",
+        "Alternatives in Turn 2 are practical and actionable (bespoke workshops, contract production)",
+        "Search query construction in Turn 3 is technically sound with proper Boolean logic"
+      ],
+      "nextUserProbe": "А есть ли вообще в Беларуси производители обуви? Или только импорт?"
+    },
+    {
+      "scenarioId": "UV012",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.50,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Generic category advice instead of concrete companies — user explicitly asked for 3 candidates to check",
+        "Turn 2: Refused to check websites because 'no companies provided' — circular logic, user asked assistant to find them",
+        "Turn 3: Still waiting for user to provide companies instead of proactively finding them"
+      ],
+      "criticalIssues": [
+        "Critical failure: 3 turns and still no actual company names or websites provided",
+        "Assistant keeps asking user to 'send 3 companies' — user asked assistant to FIND them",
+        "Turn 2 response is essentially a refusal disguised as helpful format template",
+        "No attempt to actually search catalog or suggest specific candidates with URLs"
+      ],
+      "strengths": [
+        "Proposed structured verification format with status indicators (✅/⚠️)",
+        "Mentioned official registry egr.gov.by for verification"
+      ],
+      "nextUserProbe": "Ну так найди мне эти 3 компании! Я же к тебе за этим обратился."
+    },
+    {
+      "scenarioId": "UV013",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.70,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Admitted no relevant manufacturers, gave generic category advice — acceptable but not actionable",
+        "Turn 2: Again asked user to provide companies instead of finding them",
+        "Turn 3: Described algorithm but still no actual companies to check"
+      ],
+      "criticalIssues": [
+        "Same pattern as UV012: 3 turns, zero concrete company names or URLs",
+        "Assistant keeps asking 'пришлите компании' — user wants assistant to find them",
+        "passInStrictHarness=false but assistant still didn't attempt to browse websites",
+        "Deep scan promise not fulfilled — no actual website navigation performed"
+      ],
+      "strengths": [
+        "Described good verification algorithm with clear steps",
+        "Honest about not having candidates in current data"
+      ],
+      "nextUserProbe": "Ты можешь просто дать мне 3 названия с сайтами? Или нет?"
+    },
+    {
+      "scenarioId": "UV014",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.68,
+      "userSatisfaction": 0.60,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Provided relevant category guidance for finding buyers of plastic food containers",
+        "Turn 2: Delivered top-5 segments prioritized by user's criteria (dairy, sauces, ready meals)",
+        "Turn 3: Gave prioritized call list and 3 specific questions for first contact"
+      ],
+      "criticalIssues": [
+        "Turn 3 still no actual company names — 'as soon as you extract cards' — user asked for concrete names",
+        "Turn 3 questions got cut off ('3 вопроса для первог…') — incomplete response",
+        "Reverse-buyer search not executed — only segment categories provided"
+      ],
+      "strengths": [
+        "Good prioritization by segment (dairy #1 due to volume, sauces #2, etc.)",
+        "Segment rationale is practical and business-savvy",
+        "Maintained context: Belarus, food packaging, specific industries"
+      ],
+      "nextUserProbe": "А конкретные названия компаний есть? Кто из молочки закупает тару?"
+    },
+    {
+      "scenarioId": "UV015",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.65,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Admitted no relevant tractor suppliers in data, gave search rubrics",
+        "Turn 2: Provided comparison framework by seller types instead of concrete companies",
+        "Turn 3: Complete context failure — gave query about dairy products instead of mini tractors"
+      ],
+      "criticalIssues": [
+        "Critical failure Turn 3: Query is about 'Савушкин продукт молоко' — completely wrong topic!",
+        "Call script in Turn 3 also about dairy/milk — not mini tractors at all",
+        "3 turns and zero actual tractor suppliers provided",
+        "Comparison in Turn 2 is generic seller-type analysis, not company comparison"
+      ],
+      "strengths": [
+        "Turn 2 comparison framework by seller types (official dealers vs multi-brand vs regional) is structurally sound",
+        "Honest in Turn 1 about lack of relevant candidates"
+      ],
+      "nextUserProbe": "Ты о чем вообще? Я про тракторы спрашивал, а не про молоко!"
+    }
+  ]
+}
+```

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -26,6 +27,16 @@ type AiRequestListRow = {
     region: string | null;
     phrase: string | null;
   }>;
+  websiteScan: {
+    attempted: boolean;
+    targetCount: number;
+    insightCount: number;
+    depth: {
+      deepScanUsed: boolean;
+      deepScanUsedCount: number;
+      scannedPagesTotal: number;
+    };
+  };
   messagePreview: string;
   provider: string;
   model: string | null;
@@ -49,8 +60,59 @@ type AiRequestDetail = {
   user: { id: string; email: string; name: string | null; plan: string };
   companyId: string | null;
   message: string;
+  websiteScan: {
+    attempted: boolean;
+    targetCount: number;
+    insightCount: number;
+    depth: {
+      deepScanUsed: boolean;
+      deepScanUsedCount: number;
+      scannedPagesTotal: number;
+    };
+  } | null;
   payload: unknown;
 };
+
+type ProviderFilterOption = "all" | "stub" | "openai" | "codex";
+type FilterPreset = "errors_non_stub" | "web_attempted_deep" | "down_feedback";
+type ListPagination = {
+  limit: number;
+  offset: number;
+  returned: number;
+  total: number;
+  hasMore: boolean;
+};
+
+const DEFAULT_PAGE_SIZE = 100;
+const PAGE_SIZE_OPTIONS = [50, 100, 200] as const;
+
+function parseBoolSearchParam(raw: string | null): boolean {
+  const value = (raw || "").trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes" || value === "on";
+}
+
+function parseIntSearchParam(raw: string | null, fallback: number, min: number, max: number): number {
+  const value = Number(raw || "");
+  if (!Number.isFinite(value)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(value)));
+}
+
+function parseProviderFilterOption(raw: string | null): ProviderFilterOption {
+  const value = (raw || "").trim().toLowerCase();
+  if (value === "stub" || value === "openai" || value === "codex") return value;
+  return "all";
+}
+
+function parseFilterPreset(raw: string | null): FilterPreset | null {
+  const value = (raw || "").trim().toLowerCase();
+  if (value === "errors_non_stub" || value === "web_attempted_deep" || value === "down_feedback") return value;
+  return null;
+}
+
+function parsePageSize(raw: string | null): number {
+  const value = parseIntSearchParam(raw, DEFAULT_PAGE_SIZE, 1, 200);
+  return PAGE_SIZE_OPTIONS.includes(value as (typeof PAGE_SIZE_OPTIONS)[number]) ? value : DEFAULT_PAGE_SIZE;
+}
 
 function formatDateTime(value: string): string {
   const d = new Date(value);
@@ -91,37 +153,200 @@ function formatGeoHintsPreview(hints: AiRequestListRow["cityRegionHints"]): stri
 
 export default function AiRequestsClient() {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
+
+  const initialPreset = parseFilterPreset(searchParams.get("preset"));
+  const initialLimit = parsePageSize(searchParams.get("limit"));
+  const initialOffset = parseIntSearchParam(searchParams.get("offset"), 0, 0, 10_000);
+  const initialQuery = (searchParams.get("q") || "").trim();
+  const initialProvider = initialPreset ? "all" : parseProviderFilterOption(searchParams.get("provider"));
+  const initialOnlyErrors = initialPreset ? initialPreset === "errors_non_stub" : parseBoolSearchParam(searchParams.get("onlyErrors"));
+  const initialOnlyInjected = initialPreset ? false : parseBoolSearchParam(searchParams.get("onlyInjected"));
+  const initialOnlyNonStub = initialPreset ? initialPreset === "errors_non_stub" : parseBoolSearchParam(searchParams.get("onlyNonStub"));
+  const initialOnlyRated = initialPreset ? false : parseBoolSearchParam(searchParams.get("onlyRated"));
+  const initialOnlyDown = initialPreset ? initialPreset === "down_feedback" : parseBoolSearchParam(searchParams.get("onlyDown"));
+  const initialOnlyGeoHints = initialPreset ? false : parseBoolSearchParam(searchParams.get("onlyGeoHints"));
+  const initialOnlyWebsiteAttempted = initialPreset
+    ? initialPreset === "web_attempted_deep"
+    : parseBoolSearchParam(searchParams.get("onlyWebsiteAttempted"));
+  const initialOnlyWebsiteDeep = initialPreset
+    ? initialPreset === "web_attempted_deep"
+    : parseBoolSearchParam(searchParams.get("onlyWebsiteDeep"));
+
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<ProviderStatus | null>(null);
   const [requests, setRequests] = useState<AiRequestListRow[]>([]);
+  const [pagination, setPagination] = useState<ListPagination>({
+    limit: initialLimit,
+    offset: initialOffset,
+    returned: 0,
+    total: 0,
+    hasMore: false,
+  });
   const [error, setError] = useState<string | null>(null);
 
-  const [query, setQuery] = useState("");
-  const [providerFilter, setProviderFilter] = useState<"all" | "stub" | "openai" | "codex">("all");
-  const [onlyErrors, setOnlyErrors] = useState(false);
-  const [onlyInjected, setOnlyInjected] = useState(false);
-  const [onlyNonStub, setOnlyNonStub] = useState(false);
-  const [onlyRated, setOnlyRated] = useState(false);
-  const [onlyDown, setOnlyDown] = useState(false);
-  const [onlyGeoHints, setOnlyGeoHints] = useState(false);
+  const [query, setQuery] = useState(initialQuery);
+  const [limit, setLimit] = useState(initialLimit);
+  const [offset, setOffset] = useState(initialOffset);
+  const [providerFilter, setProviderFilter] = useState<ProviderFilterOption>(initialProvider);
+  const [onlyErrors, setOnlyErrors] = useState(initialOnlyErrors);
+  const [onlyInjected, setOnlyInjected] = useState(initialOnlyInjected);
+  const [onlyNonStub, setOnlyNonStub] = useState(initialOnlyNonStub);
+  const [onlyRated, setOnlyRated] = useState(initialOnlyRated);
+  const [onlyDown, setOnlyDown] = useState(initialOnlyDown);
+  const [onlyGeoHints, setOnlyGeoHints] = useState(initialOnlyGeoHints);
+  const [onlyWebsiteAttempted, setOnlyWebsiteAttempted] = useState(initialOnlyWebsiteAttempted);
+  const [onlyWebsiteDeep, setOnlyWebsiteDeep] = useState(initialOnlyWebsiteDeep);
+  const [jumpPageInput, setJumpPageInput] = useState("1");
 
   const [openId, setOpenId] = useState<string | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detail, setDetail] = useState<AiRequestDetail | null>(null);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [copyLinkState, setCopyLinkState] = useState<"idle" | "ok" | "error">("idle");
+  const [showShortcutLegend, setShowShortcutLegend] = useState(false);
+
+  const isPresetActive = (preset: FilterPreset): boolean => {
+    if (preset === "errors_non_stub") {
+      return (
+        providerFilter === "all" &&
+        onlyErrors &&
+        onlyNonStub &&
+        !onlyInjected &&
+        !onlyRated &&
+        !onlyDown &&
+        !onlyGeoHints &&
+        !onlyWebsiteAttempted &&
+        !onlyWebsiteDeep
+      );
+    }
+    if (preset === "web_attempted_deep") {
+      return (
+        providerFilter === "all" &&
+        !onlyErrors &&
+        !onlyNonStub &&
+        !onlyInjected &&
+        !onlyRated &&
+        !onlyDown &&
+        !onlyGeoHints &&
+        onlyWebsiteAttempted &&
+        onlyWebsiteDeep
+      );
+    }
+    return (
+      providerFilter === "all" &&
+      !onlyErrors &&
+      !onlyNonStub &&
+      !onlyInjected &&
+      !onlyRated &&
+      onlyDown &&
+      !onlyGeoHints &&
+      !onlyWebsiteAttempted &&
+      !onlyWebsiteDeep
+    );
+  };
+
+  const applyPreset = (preset: FilterPreset) => {
+    setProviderFilter("all");
+    setOnlyErrors(false);
+    setOnlyInjected(false);
+    setOnlyNonStub(false);
+    setOnlyRated(false);
+    setOnlyDown(false);
+    setOnlyGeoHints(false);
+    setOnlyWebsiteAttempted(false);
+    setOnlyWebsiteDeep(false);
+
+    if (preset === "errors_non_stub") {
+      setOnlyErrors(true);
+      setOnlyNonStub(true);
+    } else if (preset === "web_attempted_deep") {
+      setOnlyWebsiteAttempted(true);
+      setOnlyWebsiteDeep(true);
+    } else {
+      setOnlyDown(true);
+    }
+    setOffset(0);
+  };
+
+  const getActivePreset = (): FilterPreset | null => {
+    if (isPresetActive("errors_non_stub")) return "errors_non_stub";
+    if (isPresetActive("web_attempted_deep")) return "web_attempted_deep";
+    if (isPresetActive("down_feedback")) return "down_feedback";
+    return null;
+  };
+
+  const resetFilters = () => {
+    setQuery("");
+    setProviderFilter("all");
+    setOnlyErrors(false);
+    setOnlyInjected(false);
+    setOnlyNonStub(false);
+    setOnlyRated(false);
+    setOnlyDown(false);
+    setOnlyGeoHints(false);
+    setOnlyWebsiteAttempted(false);
+    setOnlyWebsiteDeep(false);
+    setOffset(0);
+  };
+
+  const copyTriageLink = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopyLinkState("ok");
+    } catch {
+      setCopyLinkState("error");
+    }
+  }, []);
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/ai-requests?limit=200", { cache: "no-store" });
+      const params = new URLSearchParams();
+      params.set("limit", String(limit));
+      params.set("offset", String(offset));
+      if (providerFilter !== "all") params.set("provider", providerFilter);
+      if (onlyErrors) params.set("onlyErrors", "1");
+      if (onlyWebsiteAttempted) params.set("onlyWebsiteAttempted", "1");
+      if (onlyWebsiteDeep) params.set("onlyWebsiteDeep", "1");
+      const res = await fetch(`/api/admin/ai-requests?${params.toString()}`, { cache: "no-store" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(data?.error || "Ошибка");
         return;
       }
+      const nextRequests: AiRequestListRow[] = Array.isArray(data?.requests) ? data.requests : [];
+      const apiPaginationRaw = data?.pagination && typeof data.pagination === "object" ? data.pagination : null;
+      const nextPagination: ListPagination = {
+        limit:
+          apiPaginationRaw && typeof (apiPaginationRaw as { limit?: unknown }).limit === "number"
+            ? Math.max(1, Math.min(200, Math.floor((apiPaginationRaw as { limit: number }).limit)))
+            : limit,
+        offset:
+          apiPaginationRaw && typeof (apiPaginationRaw as { offset?: unknown }).offset === "number"
+            ? Math.max(0, Math.floor((apiPaginationRaw as { offset: number }).offset))
+            : offset,
+        returned:
+          apiPaginationRaw && typeof (apiPaginationRaw as { returned?: unknown }).returned === "number"
+            ? Math.max(0, Math.floor((apiPaginationRaw as { returned: number }).returned))
+            : nextRequests.length,
+        total:
+          apiPaginationRaw && typeof (apiPaginationRaw as { total?: unknown }).total === "number"
+            ? Math.max(0, Math.floor((apiPaginationRaw as { total: number }).total))
+            : nextRequests.length,
+        hasMore:
+          apiPaginationRaw && typeof (apiPaginationRaw as { hasMore?: unknown }).hasMore === "boolean"
+            ? Boolean((apiPaginationRaw as { hasMore: boolean }).hasMore)
+            : false,
+      };
+
       setStatus(data?.status || null);
-      setRequests(Array.isArray(data?.requests) ? data.requests : []);
+      setRequests(nextRequests);
+      setPagination(nextPagination);
+      if (nextPagination.limit !== limit) setLimit(nextPagination.limit);
+      if (nextPagination.offset !== offset) setOffset(nextPagination.offset);
     } catch {
       setError("Ошибка сети");
     } finally {
@@ -130,8 +355,49 @@ export default function AiRequestsClient() {
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    void load();
+    // Re-fetch from server for heavy filters to avoid client-only post-filtering.
+  }, [limit, offset, providerFilter, onlyErrors, onlyWebsiteAttempted, onlyWebsiteDeep]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams();
+    const activePreset = getActivePreset();
+    if (query.trim()) params.set("q", query.trim());
+    if (limit !== DEFAULT_PAGE_SIZE) params.set("limit", String(limit));
+    if (offset > 0) params.set("offset", String(offset));
+    if (activePreset) params.set("preset", activePreset);
+    if (providerFilter !== "all") params.set("provider", providerFilter);
+    if (!activePreset) {
+      if (onlyErrors) params.set("onlyErrors", "1");
+      if (onlyInjected) params.set("onlyInjected", "1");
+      if (onlyNonStub) params.set("onlyNonStub", "1");
+      if (onlyRated) params.set("onlyRated", "1");
+      if (onlyDown) params.set("onlyDown", "1");
+      if (onlyGeoHints) params.set("onlyGeoHints", "1");
+      if (onlyWebsiteAttempted) params.set("onlyWebsiteAttempted", "1");
+      if (onlyWebsiteDeep) params.set("onlyWebsiteDeep", "1");
+    }
+
+    const nextSearch = params.toString();
+    const currentSearch = window.location.search.startsWith("?") ? window.location.search.slice(1) : "";
+    if (nextSearch === currentSearch) return;
+    const nextUrl = nextSearch ? `${window.location.pathname}?${nextSearch}` : window.location.pathname;
+    window.history.replaceState(null, "", nextUrl);
+  }, [
+    query,
+    limit,
+    offset,
+    providerFilter,
+    onlyErrors,
+    onlyInjected,
+    onlyNonStub,
+    onlyRated,
+    onlyDown,
+    onlyGeoHints,
+    onlyWebsiteAttempted,
+    onlyWebsiteDeep,
+  ]);
 
   const stats = useMemo(() => {
     const total = requests.length;
@@ -143,7 +409,9 @@ export default function AiRequestsClient() {
     const down = requests.filter((r) => r.feedback?.rating === "down").length;
     const templateOk = requests.filter((r) => r.template?.isCompliant).length;
     const geoHints = requests.filter((r) => Array.isArray(r.cityRegionHints) && r.cityRegionHints.length > 0).length;
-    return { total, stub, nonStub, errors, injected, rated, down, templateOk, geoHints };
+    const websiteAttempted = requests.filter((r) => Boolean(r.websiteScan?.attempted)).length;
+    const websiteDeep = requests.filter((r) => Boolean(r.websiteScan?.depth?.deepScanUsed)).length;
+    return { total, stub, nonStub, errors, injected, rated, down, templateOk, geoHints, websiteAttempted, websiteDeep };
   }, [requests]);
 
   const filtered = useMemo(() => {
@@ -161,6 +429,8 @@ export default function AiRequestsClient() {
       if (onlyRated && !r.feedback) return false;
       if (onlyDown && r.feedback?.rating !== "down") return false;
       if (onlyGeoHints && (!Array.isArray(r.cityRegionHints) || r.cityRegionHints.length === 0)) return false;
+      if (onlyWebsiteAttempted && !r.websiteScan?.attempted) return false;
+      if (onlyWebsiteDeep && !r.websiteScan?.depth?.deepScanUsed) return false;
       if (!q) return true;
 
       const hay = [
@@ -173,6 +443,10 @@ export default function AiRequestsClient() {
         ...(Array.isArray(r.cityRegionHints)
           ? r.cityRegionHints.flatMap((hint) => [hint.city || "", hint.region || "", hint.phrase || "", hint.source || ""])
           : []),
+        r.websiteScan?.attempted ? "website_scan_attempted" : "",
+        r.websiteScan?.depth?.deepScanUsed ? "website_scan_deep" : "",
+        r.websiteScan?.targetCount ? String(r.websiteScan.targetCount) : "",
+        r.websiteScan?.insightCount ? String(r.websiteScan.insightCount) : "",
         r.messagePreview || "",
         r.replyPreview || "",
       ]
@@ -180,7 +454,19 @@ export default function AiRequestsClient() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [requests, query, providerFilter, onlyErrors, onlyInjected, onlyNonStub, onlyRated, onlyDown, onlyGeoHints]);
+  }, [
+    requests,
+    query,
+    providerFilter,
+    onlyErrors,
+    onlyInjected,
+    onlyNonStub,
+    onlyRated,
+    onlyDown,
+    onlyGeoHints,
+    onlyWebsiteAttempted,
+    onlyWebsiteDeep,
+  ]);
 
   const openDetails = async (id: string) => {
     setOpenId(id);
@@ -217,6 +503,84 @@ export default function AiRequestsClient() {
     }
   };
 
+  const pageSize = Math.max(1, pagination.limit || limit);
+  const pageFrom = pagination.total === 0 ? 0 : pagination.offset + 1;
+  const pageTo = pagination.total === 0 ? 0 : Math.min(pagination.offset + Math.max(0, pagination.returned), pagination.total);
+  const pageNumber = pagination.total === 0 ? 1 : Math.floor(pagination.offset / pageSize) + 1;
+  const totalPages = Math.max(1, Math.ceil(pagination.total / pageSize));
+  const lastPageOffset = Math.max(0, (totalPages - 1) * pageSize);
+  const hasActiveFilterState =
+    query.trim().length > 0 ||
+    providerFilter !== "all" ||
+    onlyErrors ||
+    onlyInjected ||
+    onlyNonStub ||
+    onlyRated ||
+    onlyDown ||
+    onlyGeoHints ||
+    onlyWebsiteAttempted ||
+    onlyWebsiteDeep ||
+    offset > 0;
+  const canGoFirst = pagination.offset > 0;
+  const canGoPrev = pagination.offset > 0;
+  const canGoNext = pagination.hasMore;
+  const canGoLast = pagination.total > 0 && pagination.offset < lastPageOffset;
+
+  const goToPage = (targetPageRaw: string | number) => {
+    const raw = typeof targetPageRaw === "number" ? targetPageRaw : Number(targetPageRaw || "");
+    if (!Number.isFinite(raw)) {
+      setJumpPageInput(String(pageNumber));
+      return;
+    }
+    const targetPage = Math.max(1, Math.min(totalPages, Math.floor(raw)));
+    const nextOffset = (targetPage - 1) * pageSize;
+    setOffset(nextOffset);
+    setJumpPageInput(String(targetPage));
+  };
+
+  useEffect(() => {
+    setJumpPageInput(String(pageNumber));
+  }, [pageNumber]);
+
+  useEffect(() => {
+    if (copyLinkState === "idle") return;
+    const timer = window.setTimeout(() => setCopyLinkState("idle"), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copyLinkState]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.repeat) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      const key = event.key || "";
+      if (key === "Escape") {
+        setShowShortcutLegend(false);
+        return;
+      }
+      const isHelpShortcut = key === "?" || (key === "/" && event.shiftKey);
+      if (isHelpShortcut) {
+        event.preventDefault();
+        setShowShortcutLegend((prev) => !prev);
+        return;
+      }
+      const isCopyShortcut = key === "c" || key === "C";
+      if (!isCopyShortcut) return;
+
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target) {
+        const tag = target.tagName.toLowerCase();
+        const editableTag = tag === "input" || tag === "textarea" || tag === "select";
+        const contentEditable = target.isContentEditable || Boolean(target.closest('[contenteditable="true"]'));
+        if (editableTag || contentEditable) return;
+      }
+
+      void copyTriageLink();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [copyTriageLink]);
+
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100">
       <Header />
@@ -233,7 +597,8 @@ export default function AiRequestsClient() {
               </div>
               <h1 className="text-3xl font-bold text-gray-800 mt-1">AI запросы</h1>
               <div className="text-sm text-gray-600 mt-2">
-                Загружено: <span className="font-semibold">{stats.total}</span> • Stub:{" "}
+                На странице: <span className="font-semibold">{stats.total}</span> • Всего по серверным фильтрам:{" "}
+                <span className="font-semibold">{pagination.total}</span> • Stub:{" "}
                 <span className="font-semibold">{stats.stub}</span> • Non-stub:{" "}
                 <span className="font-semibold">{stats.nonStub}</span> • Ошибки:{" "}
                 <span className="font-semibold">{stats.errors}</span> • Injection:{" "}
@@ -241,7 +606,9 @@ export default function AiRequestsClient() {
                 <span className="font-semibold">{stats.rated}</span> • 👎:{" "}
                 <span className="font-semibold">{stats.down}</span> • Template OK:{" "}
                 <span className="font-semibold">{stats.templateOk}</span> • Geo hints:{" "}
-                <span className="font-semibold">{stats.geoHints}</span>
+                <span className="font-semibold">{stats.geoHints}</span> • Web attempted:{" "}
+                <span className="font-semibold">{stats.websiteAttempted}</span> • Web deep:{" "}
+                <span className="font-semibold">{stats.websiteDeep}</span>
               </div>
               {status && (
                 <div className="text-xs text-gray-500 mt-2">
@@ -272,6 +639,14 @@ export default function AiRequestsClient() {
               </Link>
               <button
                 type="button"
+                onClick={() => void copyTriageLink()}
+                className="bg-white text-gray-800 border border-gray-300 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50"
+                title="Copy triage link (c / Shift+C)"
+              >
+                Copy triage link (c / Shift+C)
+              </button>
+              <button
+                type="button"
                 onClick={load}
                 className="bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-black"
               >
@@ -279,6 +654,18 @@ export default function AiRequestsClient() {
               </button>
             </div>
           </div>
+
+          {copyLinkState !== "idle" && (
+            <div
+              className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
+                copyLinkState === "ok"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-amber-200 bg-amber-50 text-amber-700"
+              }`}
+            >
+              {copyLinkState === "ok" ? "Ссылка скопирована" : "Не удалось скопировать ссылку"}
+            </div>
+          )}
 
           {(error || detailError) && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">
@@ -291,7 +678,76 @@ export default function AiRequestsClient() {
           ) : (
             <>
               <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-gray-600">Пресеты:</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowShortcutLegend((prev) => !prev)}
+                    className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-2 py-1 hover:bg-gray-100"
+                    title="Shortcut help (?)"
+                  >
+                    <span>Shortcut help</span>
+                    <kbd className="rounded border border-gray-300 bg-white px-1.5 py-0.5 font-mono text-[11px] leading-none">?</kbd>
+                  </button>
+                  {showShortcutLegend && (
+                    <span className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-2 py-1">
+                      <span>Copy triage link:</span>
+                      <kbd className="rounded border border-gray-300 bg-white px-1.5 py-0.5 font-mono text-[11px] leading-none">
+                        c
+                      </kbd>
+                      <span>/</span>
+                      <kbd className="rounded border border-gray-300 bg-white px-1.5 py-0.5 font-mono text-[11px] leading-none">
+                        Shift+C
+                      </kbd>
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => applyPreset("errors_non_stub")}
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs ${
+                      isPresetActive("errors_non_stub")
+                        ? "border-red-300 bg-red-50 text-red-700"
+                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    Ошибки + Non-stub
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset("web_attempted_deep")}
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs ${
+                      isPresetActive("web_attempted_deep")
+                        ? "border-cyan-300 bg-cyan-50 text-cyan-800"
+                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    Web attempted + deep
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset("down_feedback")}
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs ${
+                      isPresetActive("down_feedback")
+                        ? "border-amber-300 bg-amber-50 text-amber-800"
+                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    Down feedback
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!hasActiveFilterState}
+                    onClick={resetFilters}
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs ${
+                      hasActiveFilterState
+                        ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                        : "border-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}
+                  >
+                    Сбросить фильтры
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                   <div className="lg:col-span-2">
                     <label className="block text-xs text-gray-600 mb-1">Поиск</label>
                     <input
@@ -305,7 +761,10 @@ export default function AiRequestsClient() {
                     <label className="block text-xs text-gray-600 mb-1">Provider</label>
                     <select
                       value={providerFilter}
-                      onChange={(e) => setProviderFilter(e.target.value as "all" | "stub" | "openai" | "codex")}
+                      onChange={(e) => {
+                        setProviderFilter(e.target.value as ProviderFilterOption);
+                        setOffset(0);
+                      }}
                       className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
                     >
                       <option value="all">Все</option>
@@ -314,9 +773,34 @@ export default function AiRequestsClient() {
                       <option value="codex">codex</option>
                     </select>
                   </div>
-                  <div className="flex items-end gap-3 flex-wrap">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">На странице</label>
+                    <select
+                      value={limit}
+                      onChange={(e) => {
+                        const nextLimit = parsePageSize(e.target.value);
+                        setLimit(nextLimit);
+                        setOffset(0);
+                      }}
+                      className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
+                    >
+                      {PAGE_SIZE_OPTIONS.map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="lg:col-span-2 flex items-end gap-3 flex-wrap">
                     <label className="inline-flex items-center gap-2 text-sm text-gray-700">
-                      <input type="checkbox" checked={onlyErrors} onChange={(e) => setOnlyErrors(e.target.checked)} />
+                      <input
+                        type="checkbox"
+                        checked={onlyErrors}
+                        onChange={(e) => {
+                          setOnlyErrors(e.target.checked);
+                          setOffset(0);
+                        }}
+                      />
                       Ошибки
                     </label>
                     <label className="inline-flex items-center gap-2 text-sm text-gray-700">
@@ -338,6 +822,28 @@ export default function AiRequestsClient() {
                     <label className="inline-flex items-center gap-2 text-sm text-gray-700">
                       <input type="checkbox" checked={onlyGeoHints} onChange={(e) => setOnlyGeoHints(e.target.checked)} />
                       Geo hints
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={onlyWebsiteAttempted}
+                        onChange={(e) => {
+                          setOnlyWebsiteAttempted(e.target.checked);
+                          setOffset(0);
+                        }}
+                      />
+                      Web attempted
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={onlyWebsiteDeep}
+                        onChange={(e) => {
+                          setOnlyWebsiteDeep(e.target.checked);
+                          setOffset(0);
+                        }}
+                      />
+                      Web deep
                     </label>
                   </div>
                 </div>
@@ -382,6 +888,12 @@ export default function AiRequestsClient() {
                           {(r.vendorLookupFilters?.city || r.vendorLookupFilters?.region) && (
                             <div className="text-xs text-gray-500 mt-1">
                               geo: {[r.vendorLookupFilters.city, r.vendorLookupFilters.region].filter(Boolean).join(", ")}
+                            </div>
+                          )}
+                          {r.websiteScan?.attempted && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              web: targets {r.websiteScan.targetCount} • insights {r.websiteScan.insightCount}
+                              {r.websiteScan.depth?.scannedPagesTotal > 0 ? ` • pages ${r.websiteScan.depth.scannedPagesTotal}` : ""}
                             </div>
                           )}
                         </td>
@@ -434,6 +946,11 @@ export default function AiRequestsClient() {
                                 geo
                               </span>
                             )}
+                            {r.websiteScan?.depth?.deepScanUsed && (
+                              <span className="inline-flex items-center rounded-full bg-cyan-100 text-cyan-800 px-2 py-0.5 text-xs">
+                                web-deep
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-gray-700">
@@ -476,6 +993,88 @@ export default function AiRequestsClient() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600">
+                <div>
+                  Показаны {pageFrom}–{pageTo} из {pagination.total}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={!canGoFirst}
+                    onClick={() => setOffset(0)}
+                    className={`px-3 py-1.5 rounded-lg border text-sm ${
+                      canGoFirst
+                        ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                        : "border-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}
+                  >
+                    В начало
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!canGoPrev}
+                    onClick={() => setOffset(Math.max(0, offset - limit))}
+                    className={`px-3 py-1.5 rounded-lg border text-sm ${
+                      canGoPrev
+                        ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                        : "border-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}
+                  >
+                    Назад
+                  </button>
+                  <span className="text-gray-700">
+                    Страница {pageNumber} / {totalPages}
+                  </span>
+                  <form
+                    className="flex items-center gap-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      goToPage(jumpPageInput);
+                    }}
+                  >
+                    <label className="text-gray-600">Перейти:</label>
+                    <input
+                      value={jumpPageInput}
+                      onChange={(e) => setJumpPageInput(e.target.value)}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      aria-label="Страница"
+                      className="w-16 rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#a0006d]/20"
+                    />
+                    <button
+                      type="submit"
+                      className="px-2.5 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
+                    >
+                      OK
+                    </button>
+                  </form>
+                  <button
+                    type="button"
+                    disabled={!canGoNext}
+                    onClick={() => setOffset(offset + limit)}
+                    className={`px-3 py-1.5 rounded-lg border text-sm ${
+                      canGoNext
+                        ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                        : "border-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}
+                  >
+                    Вперед
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!canGoLast}
+                    onClick={() => setOffset(lastPageOffset)}
+                    className={`px-3 py-1.5 rounded-lg border text-sm ${
+                      canGoLast
+                        ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                        : "border-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}
+                  >
+                    В конец
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -523,6 +1122,19 @@ export default function AiRequestsClient() {
                         <Link href={`/company/${detail.companyId}`} className="text-[#820251] hover:underline">
                           {detail.companyId}
                         </Link>
+                      ) : (
+                        "—"
+                      )}
+                    </div>
+                    <div className="mt-1">
+                      <span className="text-gray-500">Website scan:</span>{" "}
+                      {detail.websiteScan ? (
+                        <>
+                          {detail.websiteScan.attempted ? "attempted" : "not-attempted"} • targets{" "}
+                          {detail.websiteScan.targetCount} • insights {detail.websiteScan.insightCount} • pages{" "}
+                          {detail.websiteScan.depth.scannedPagesTotal} • deep{" "}
+                          {detail.websiteScan.depth.deepScanUsed ? "yes" : "no"}
+                        </>
                       ) : (
                         "—"
                       )}

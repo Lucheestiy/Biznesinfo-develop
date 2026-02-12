@@ -1,0 +1,439 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-09T21:10:00Z",
+      "source": "user-seed-ideas-expanded",
+      "description": "Multi-turn + variant regressions expanded from user business queries to stress continuity, geo refinement, shortlist quality, and outreach templates."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 2600,
+      "maxScenarios": null,
+      "onlyTags": [
+        "brand_recall"
+      ],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T01-18-16-183Z-3144996-vdzpv",
+    "startedAt": "2026-02-11T01:18:16.183Z",
+    "endedAt": "2026-02-11T01:18:39.320Z",
+    "durationMs": 23137,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+    "totalScenarios": 1,
+    "passedScenarios": 1,
+    "failedScenarios": 0,
+    "passRate": 1,
+    "totalChecks": 12,
+    "passedChecks": 12,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [],
+  "scenarios": [
+    {
+      "id": "UV010",
+      "title": "Не помню точный бренд молочной компании: гипотезы + проверка + уточнение",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "dairy",
+        "brand_recall",
+        "hypotheses",
+        "savushkin"
+      ],
+      "personaGoal": "Проверить работу ассистента с неполным воспоминанием и мягкой идентификацией бренда/компании.",
+      "totalTurns": 4,
+      "completedTurns": 4,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Как называется молочная компания, не помню точно торговую марку, кажется Савушкин продукт, которая выпускает молоко и творожки?",
+          "requestBody": {
+            "message": "Как называется молочная компания, не помню точно торговую марку, кажется Савушкин продукт, которая выпускает молоко и творожки?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 10459,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "86e8e633-4712-4043-8f79-83465cccce69",
+          "conversationId": "e4183edd-5d9b-4799-a0f2-ae0ff03e5421",
+          "isStub": false,
+          "reply": "Скорее всего, вы имеете в виду **«Савушкин продукт»** (часто так и называется компания/бренд в каталоге и на упаковке).\n\nЧтобы точно проверить в Biznesinfo, ищите по вариантам:\n1. **Савушкин**\n2. **Савушкин продукт**\n3. **молочная промышленность** — раздел: `/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`\n\nЕсли хотите, помогу сразу составить короткий запрос для связи с ними (по поставкам/дистрибуции/закупке).\n\nПо товару: молоко.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV010.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV010.T1.C2",
+              "type": "includes_any",
+              "description": "Должен удержать ключевые маркеры запроса",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "савуш",
+                  "молок",
+                  "творож"
+                ],
+                "hits": [
+                  "савуш",
+                  "молок"
+                ]
+              }
+            },
+            {
+              "id": "UV010.T1.C3",
+              "type": "not_refusal_only",
+              "description": "Нужен полезный ответ даже при неполных данных",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Да, похоже это она. Но дай 2-3 альтернативные гипотезы на случай, если я ошибаюсь.",
+          "requestBody": {
+            "message": "Да, похоже это она. Но дай 2-3 альтернативные гипотезы на случай, если я ошибаюсь.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Как называется молочная компания, не помню точно торговую марку, кажется Савушкин продукт, которая выпускает молоко и творожки?"
+              },
+              {
+                "role": "assistant",
+                "content": "Скорее всего, вы имеете в виду **«Савушкин продукт»** (часто так и называется компания/бренд в каталоге и на упаковке).\n\nЧтобы точно проверить в Biznesinfo, ищите по вариантам:\n1. **Савушкин**\n2. **Савушкин продукт**\n3. **молочная промышленность** — раздел: `/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`\n\nЕсли хотите, помогу сразу составить короткий запрос для связи с ними (по поставкам/дистрибуции/закупке).\n\nПо товару: молоко."
+              }
+            ],
+            "conversationId": "e4183edd-5d9b-4799-a0f2-ae0ff03e5421",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 5742,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "79e0a4dd-286e-4669-9234-c72428f06cec",
+          "conversationId": "e4183edd-5d9b-4799-a0f2-ae0ff03e5421",
+          "isStub": false,
+          "reply": "Да, логично. На случай ошибки — вот 3 рабочие гипотезы, которые часто путают с «Савушкин продукт» в категории «молоко + творожки»:\n\n1. **Бабушкина крынка**  \n2. **Молочный Мир**  \n3. **Минский молочный завод №1** (бренды могут быть более заметны, чем юрлицо)\n\nКак проверить быстро в каталоге:\n- Ищите по ключам: **«молоко», «творожок», «молочная продукция»**  \n- Раздел: **Молочная промышленность** (`/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`)  \n- Фильтр по городу (если помните регион производства/поставки)\n\nЕсли хотите, подскажу, как за 2–3 шага отличить нужную компанию по карточке (ассортимент, контакты, география).",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV010.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV010.T2.C2",
+              "type": "numbered_list_min",
+              "description": "Должны быть гипотезы, а не одна компания",
+              "passed": true,
+              "reason": "Enough numbered items",
+              "details": {
+                "min": 3,
+                "count": 3
+              }
+            },
+            {
+              "id": "UV010.T2.C3",
+              "type": "includes_any",
+              "description": "Должна быть логика проверки гипотез",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "гипот",
+                  "возмож",
+                  "провер"
+                ],
+                "hits": [
+                  "гипот",
+                  "провер"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сделай короткий алгоритм, как быстро проверить на портале, что это именно нужная компания.",
+          "requestBody": {
+            "message": "Сделай короткий алгоритм, как быстро проверить на портале, что это именно нужная компания.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Как называется молочная компания, не помню точно торговую марку, кажется Савушкин продукт, которая выпускает молоко и творожки?"
+              },
+              {
+                "role": "assistant",
+                "content": "Скорее всего, вы имеете в виду **«Савушкин продукт»** (часто так и называется компания/бренд в каталоге и на упаковке).\n\nЧтобы точно проверить в Biznesinfo, ищите по вариантам:\n1. **Савушкин**\n2. **Савушкин продукт**\n3. **молочная промышленность** — раздел: `/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`\n\nЕсли хотите, помогу сразу составить короткий запрос для связи с ними (по поставкам/дистрибуции/закупке).\n\nПо товару: молоко."
+              },
+              {
+                "role": "user",
+                "content": "Да, похоже это она. Но дай 2-3 альтернативные гипотезы на случай, если я ошибаюсь."
+              },
+              {
+                "role": "assistant",
+                "content": "Да, логично. На случай ошибки — вот 3 рабочие гипотезы, которые часто путают с «Савушкин продукт» в категории «молоко + творожки»:\n\n1. **Бабушкина крынка**  \n2. **Молочный Мир**  \n3. **Минский молочный завод №1** (бренды могут быть более заметны, чем юрлицо)\n\nКак проверить быстро в каталоге:\n- Ищите по ключам: **«молоко», «творожок», «молочная продукция»**  \n- Раздел: **Молочная промышленность** (`/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`)  \n- Фильтр по городу (если помните регион производства/поставки)\n\nЕсли хотите, подскажу, как за 2–3 шага отличить нужную компанию по карточке (ассортимент, контакты, география)."
+              }
+            ],
+            "conversationId": "e4183edd-5d9b-4799-a0f2-ae0ff03e5421",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 4304,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "cb3b43d2-a110-4c06-9b6d-1eefdeebf19d",
+          "conversationId": "e4183edd-5d9b-4799-a0f2-ae0ff03e5421",
+          "isStub": false,
+          "reply": "Короткий алгоритм проверки на портале:\n1. Введите точный запрос по компании/продукту (пример: «Савушкин продукт молоко творожки Беларусь производитель официальный сайт»).\n2. Откройте карточку компании и сверьте: юрназвание, регион и профиль (молочная компания).\n3. Проверьте совпадение по бренду в описании карточки и на сайте компании (если указан).\n4. Для финальной верификации сопоставьте контакты (телефон/e-mail) и зафиксируйте 1 карточку с полным совпадением.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 4,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV010.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV010.T3.C2",
+              "type": "numbered_list_min",
+              "description": "Нужен пошаговый алгоритм",
+              "passed": true,
+              "reason": "Enough numbered items",
+              "details": {
+                "min": 4,
+                "count": 4
+              }
+            },
+            {
+              "id": "UV010.T3.C3",
+              "type": "includes_any",
+              "description": "Алгоритм должен быть привязан к порталу и карточкам",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "поиск",
+                  "карточк",
+                  "бренд",
+                  "продукц"
+                ],
+                "hits": [
+                  "карточк",
+                  "бренд"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "user": "Сформируй один точный запрос для портала и один запрос для звонка поставщику.",
+          "requestBody": {
+            "message": "Сформируй один точный запрос для портала и один запрос для звонка поставщику.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Как называется молочная компания, не помню точно торговую марку, кажется Савушкин продукт, которая выпускает молоко и творожки?"
+              },
+              {
+                "role": "assistant",
+                "content": "Скорее всего, вы имеете в виду **«Савушкин продукт»** (часто так и называется компания/бренд в каталоге и на упаковке).\n\nЧтобы точно проверить в Biznesinfo, ищите по вариантам:\n1. **Савушкин**\n2. **Савушкин продукт**\n3. **молочная промышленность** — раздел: `/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`\n\nЕсли хотите, помогу сразу составить короткий запрос для связи с ними (по поставкам/дистрибуции/закупке).\n\nПо товару: молоко."
+              },
+              {
+                "role": "user",
+                "content": "Да, похоже это она. Но дай 2-3 альтернативные гипотезы на случай, если я ошибаюсь."
+              },
+              {
+                "role": "assistant",
+                "content": "Да, логично. На случай ошибки — вот 3 рабочие гипотезы, которые часто путают с «Савушкин продукт» в категории «молоко + творожки»:\n\n1. **Бабушкина крынка**  \n2. **Молочный Мир**  \n3. **Минский молочный завод №1** (бренды могут быть более заметны, чем юрлицо)\n\nКак проверить быстро в каталоге:\n- Ищите по ключам: **«молоко», «творожок», «молочная продукция»**  \n- Раздел: **Молочная промышленность** (`/catalog/promyshlennost-pishchevaya/molochnaya-promyshlennost`)  \n- Фильтр по городу (если помните регион производства/поставки)\n\nЕсли хотите, подскажу, как за 2–3 шага отличить нужную компанию по карточке (ассортимент, контакты, география)."
+              },
+              {
+                "role": "user",
+                "content": "Сделай короткий алгоритм, как быстро проверить на портале, что это именно нужная компания."
+              },
+              {
+                "role": "assistant",
+                "content": "Короткий алгоритм проверки на портале:\n1. Введите точный запрос по компании/продукту (пример: «Савушкин продукт молоко творожки Беларусь производитель официальный сайт»).\n2. Откройте карточку компании и сверьте: юрназвание, регион и профиль (молочная компания).\n3. Проверьте совпадение по бренду в описании карточки и на сайте компании (если указан).\n4. Для финальной верификации сопоставьте контакты (телефон/e-mail) и зафиксируйте 1 карточку с полным совпадением."
+              }
+            ],
+            "conversationId": "e4183edd-5d9b-4799-a0f2-ae0ff03e5421",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 2221,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1fd2f42e-e9ee-4427-9498-ed5325952172",
+          "conversationId": "e4183edd-5d9b-4799-a0f2-ae0ff03e5421",
+          "isStub": false,
+          "reply": "1. Запрос для портала: \"Савушкин продукт молоко творожки Беларусь производитель официальный сайт\".\n2. Запрос для звонка поставщику: \"Подтвердите, пожалуйста, что это ОАО «Савушкин продукт» и что в линейке есть молоко и творожки; подскажите актуальный бренд/линейку.\"",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV010.T4.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV010.T4.C2",
+              "type": "numbered_list_min",
+              "description": "Нужно минимум два четких запроса",
+              "passed": true,
+              "reason": "Enough numbered items",
+              "details": {
+                "min": 2,
+                "count": 2
+              }
+            },
+            {
+              "id": "UV010.T4.C3",
+              "type": "includes_any",
+              "description": "Должны быть оба контекста: портал и звонок",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "портал",
+                  "звон"
+                ],
+                "hits": [
+                  "портал",
+                  "звон"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 22728
+    }
+  ]
+}

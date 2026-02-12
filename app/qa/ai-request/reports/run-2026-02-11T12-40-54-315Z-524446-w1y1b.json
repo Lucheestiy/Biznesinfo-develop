@@ -1,0 +1,369 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": "1.0",
+      "generatedAt": "2026-02-09T21:10:00Z",
+      "source": "user-seed-ideas-expanded",
+      "description": "Multi-turn + variant regressions expanded from user business queries to stress continuity, geo refinement, shortlist quality, and outreach templates."
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 3500,
+      "maxScenarios": null,
+      "onlyTags": [
+        "anti_fallback"
+      ],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": true,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-11T12-40-54-315Z-524446-w1y1b",
+    "startedAt": "2026-02-11T12:40:54.315Z",
+    "endedAt": "2026-02-11T12:41:07.958Z",
+    "durationMs": 13643,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+    "totalScenarios": 1,
+    "passedScenarios": 0,
+    "failedScenarios": 1,
+    "passRate": 0,
+    "totalChecks": 9,
+    "passedChecks": 7,
+    "failedChecks": 2,
+    "checkPassRate": 0.7778,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 2,
+    "avgTurnLatencyMs": 6698.5,
+    "totalTurnLatencyMs": 13397,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:numbered_list_min:Должен выдать минимум 20 тегов",
+      "count": 1
+    },
+    {
+      "key": "check:excludes_all:Не должно быть no-results/sourcing шаблонов",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "UV018",
+      "title": "Ирис Интер групп: 20 тегов для GA/Метрики без ложного sourcing-fallback",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "tagging",
+        "analytics",
+        "consistency",
+        "anti_fallback"
+      ],
+      "personaGoal": "Проверить, что в задаче на теги ассистент не скатывается в поиск поставщиков, shortlist и no-results шаблоны.",
+      "totalTurns": 2,
+      "completedTurns": 2,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV018.T2.C2",
+          "type": "numbered_list_min",
+          "description": "Должен выдать минимум 20 тегов",
+          "passed": false,
+          "reason": "Not enough numbered items",
+          "details": {
+            "min": 20,
+            "count": 3
+          },
+          "turn": 2,
+          "tolerated": false,
+          "blocking": true
+        },
+        {
+          "id": "UV018.T2.C4",
+          "type": "excludes_all",
+          "description": "Не должно быть no-results/sourcing шаблонов",
+          "passed": false,
+          "reason": "Forbidden patterns found",
+          "details": {
+            "patterns": [
+              "поставщик",
+              "shortlist",
+              "не найден",
+              "нет подтвержденных карточек",
+              "/company/",
+              "/catalog/"
+            ],
+            "hits": [
+              "поставщик",
+              "shortlist",
+              "/company/"
+            ]
+          },
+          "turn": 2,
+          "tolerated": false,
+          "blocking": true
+        }
+      ],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 13397,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике.",
+          "requestBody": {
+            "message": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 7557,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "36d7586e-5ca9-4626-9057-6ea616ef577f",
+          "conversationId": "6df9b99e-6238-4c99-a37a-8e8f43541bb0",
+          "isStub": false,
+          "reply": "Отлично. Для **Ирис Интер Групп** (по контексту — международная логистика/грузоперевозки) вот 20 SEO‑тегов, которые можно использовать в **Google Analytics 4** и **Яндекс Метрике** (как UTM content/term, группы страниц, сегменты и рекламные метки):\n\n1. международные грузоперевозки  \n2. логистическая компания Беларусь  \n3. доставка грузов в Иран  \n4. перевозки Беларусь Иран  \n5. доставка грузов в Ирак  \n6. перевозки в ОАЭ  \n7. перевозки в Турцию  \n8. доставка грузов в Индию  \n9. перевозки в Катар  \n10. доставка грузов в Пакистан  \n11. мультимодальные перевозки  \n12. автомобильные грузоперевозки  \n13. авиа доставка грузов  \n14. морские контейнерные перевозки  \n15. таможенное оформление грузов  \n16. международная логистика под ключ  \n17. расчет стоимости перевозки  \n18. экспедирование грузов  \n19. B2B логистика  \n20. надежный логистический партнер  \n\nЕсли хотите, следующим шагом сделаю:  \n- 20 тегов именно под **поисковые запросы в РБ/РФ**,  \n- отдельный набор под **Google Ads** и под **Яндекс Директ**,  \n- и структуру UTM-меток (чтобы в GA4/Метрике отчеты были чистыми и удобными).",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV018.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV018.T1.C2",
+              "type": "numbered_list_min",
+              "description": "Ожидается минимум 20 тегов в структурированном списке",
+              "passed": true,
+              "reason": "Enough numbered items",
+              "details": {
+                "min": 20,
+                "count": 20
+              }
+            },
+            {
+              "id": "UV018.T1.C3",
+              "type": "includes_any",
+              "description": "Должен удержать контекст тегирования и веб-аналитики",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "тег",
+                  "google analytics",
+                  "яндекс метрик",
+                  "utm",
+                  "конверс",
+                  "событи"
+                ],
+                "hits": [
+                  "тег",
+                  "google analytics",
+                  "яндекс метрик",
+                  "utm"
+                ]
+              }
+            },
+            {
+              "id": "UV018.T1.C4",
+              "type": "excludes_all",
+              "description": "Не должен уходить в supplier-search fallback и не должен подмешивать каталожный shortlist",
+              "passed": true,
+              "reason": "No forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "нет подтвержденных карточек",
+                  "временный shortlist",
+                  "кого проверять первым",
+                  "фраза для первого контакта",
+                  "поставщик",
+                  "/company/",
+                  "/catalog/",
+                  "рубрик"
+                ],
+                "hits": []
+              }
+            },
+            {
+              "id": "UV018.T1.C5",
+              "type": "not_refusal_only",
+              "description": "Нужен практический ответ, а не отказ/заглушка",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Не нужен поиск поставщиков. Нужны только теги и краткая группировка: бренд, услуги, намерение.",
+          "requestBody": {
+            "message": "Не нужен поиск поставщиков. Нужны только теги и краткая группировка: бренд, услуги, намерение.",
+            "history": [
+              {
+                "role": "user",
+                "content": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике."
+              },
+              {
+                "role": "assistant",
+                "content": "Отлично. Для **Ирис Интер Групп** (по контексту — международная логистика/грузоперевозки) вот 20 SEO‑тегов, которые можно использовать в **Google Analytics 4** и **Яндекс Метрике** (как UTM content/term, группы страниц, сегменты и рекламные метки):\n\n1. международные грузоперевозки  \n2. логистическая компания Беларусь  \n3. доставка грузов в Иран  \n4. перевозки Беларусь Иран  \n5. доставка грузов в Ирак  \n6. перевозки в ОАЭ  \n7. перевозки в Турцию  \n8. доставка грузов в Индию  \n9. перевозки в Катар  \n10. доставка грузов в Пакистан  \n11. мультимодальные перевозки  \n12. автомобильные грузоперевозки  \n13. авиа доставка грузов  \n14. морские контейнерные перевозки  \n15. таможенное оформление грузов  \n16. международная логистика под ключ  \n17. расчет стоимости перевозки  \n18. экспедирование грузов  \n19. B2B логистика  \n20. надежный логистический партнер  \n\nЕсли хотите, следующим шагом сделаю:  \n- 20 тегов именно под **поисковые запросы в РБ/РФ**,  \n- отдельный набор под **Google Ads** и под **Яндекс Директ**,  \n- и структуру UTM-меток (чтобы в GA4/Метрике отчеты были чистыми и удобными)."
+              }
+            ],
+            "conversationId": "6df9b99e-6238-4c99-a37a-8e8f43541bb0",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 5840,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1e094758-0fdb-424c-8cbd-19acf1b4934b",
+          "conversationId": "6df9b99e-6238-4c99-a37a-8e8f43541bb0",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. Коммунарка СОАО — /company/kommunarka (Кондитерские изделия; Минск, minsk; тел: +375 (17) 238 63 14)\n2. Лунинецкий хлебозавод Филиал ОАО Берестейский пекарь — /company/hl-lyninec (Кондитерские изделия; Лунинец, brest; тел: +375 (1647) 4 56 90)\n3. БЕЛСПОРТОБЕСПЕЧЕНИЕ ГУ — /company/biznesinfo-10555 (Транспортные услуги и экспедирование грузов; Минск, minsk; тел: (+375-17) 2261718)\nФокус: У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике. Не нужен поиск поставщик….",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "fail",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "UV018.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "UV018.T2.C2",
+              "type": "numbered_list_min",
+              "description": "Должен выдать минимум 20 тегов",
+              "passed": false,
+              "reason": "Not enough numbered items",
+              "details": {
+                "min": 20,
+                "count": 3
+              }
+            },
+            {
+              "id": "UV018.T2.C3",
+              "type": "includes_any",
+              "description": "Должна быть группировка по запросу пользователя",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "бренд",
+                  "услуг",
+                  "намерен"
+                ],
+                "hits": [
+                  "услуг"
+                ]
+              }
+            },
+            {
+              "id": "UV018.T2.C4",
+              "type": "excludes_all",
+              "description": "Не должно быть no-results/sourcing шаблонов",
+              "passed": false,
+              "reason": "Forbidden patterns found",
+              "details": {
+                "patterns": [
+                  "поставщик",
+                  "shortlist",
+                  "не найден",
+                  "нет подтвержденных карточек",
+                  "/company/",
+                  "/catalog/"
+                ],
+                "hits": [
+                  "поставщик",
+                  "shortlist",
+                  "/company/"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 13399
+    }
+  ]
+}

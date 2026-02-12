@@ -1,0 +1,125 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "The assistant shows 100% strict pass rate but only 47% useful rate. Core problem: generic fallbacks, hallucinated companies, and context loss in multi-turn flows. Fix prompts to enforce 'company-first' behavior and eliminate empty placeholders.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Enforce 'No Empty Placeholders' Rule",
+      "why": "UV014 and UV001 fail because assistant returns '/company/belmilk' or empty 'Профиль:' instead of real company names. This is the single most common failure pattern.",
+      "expectedImpact": "Eliminate placeholder responses; forcing real company names or explicit 'no data' answers.",
+      "validationScenarios": ["UV014", "UV001"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add 'Must Name 3 Companies' Constraint",
+      "why": "UV012, UV013, UV011 repeatedly claim 'no companies found' without ever listing candidates. Prompt should force at least 3 named candidates even if imperfect.",
+      "expectedImpact": "Reduce hallucinated 'no results' claims; ensure users get actionable starting points.",
+      "validationScenarios": ["UV012", "UV013", "UV011"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix Company Type Guardrails for Food Export",
+      "why": "UV005 recommended livestock farms (Agrostroy SPF) for dairy/confectionery export. Cross-category hallucination is severe.",
+      "expectedImpact": "Prevent recommending cement factories for food, livestock farms for dairy.",
+      "validationScenarios": ["UV005"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add 'Deliverable Checklist' to Prompts",
+      "why": "UV009, UV001 fail to deliver requested outputs (call script, RFQ template). Prompt should explicitly require confirmation of deliverable type before guidance.",
+      "expectedImpact": "Ensure users get requested formats (script/template) not generic advice.",
+      "validationScenarios": ["UV009", "UV001"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add Context Retention Checkpoint",
+      "why": "UV002, UV014 lose criteria from earlier turns. Assistant should summarize remembered constraints before each response.",
+      "expectedImpact": "Prevent continuity breaks in multi-turn flows.",
+      "validationScenarios": ["UV002", "UV014", "UV008"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add 'Company Count Enforcement' to Shortlist Prompts",
+      "action": "Add to all shortlist templates: 'YOU MUST list at least 3 company names. If no confirmed companies exist, explicitly state: \"No verified companies found for X. Candidates based on keyword matching: [name 1], [name 2], [name 3].\" Never use placeholder links like /company/id.'",
+      "implementationHint": "Edit shortlist templates in app/src/lib/prompts/ or equivalent. Search for 'shortlist' pattern in prompt files.",
+      "expectedImpact": "Eliminate empty placeholders; force real names or honest 'no verified data' answers.",
+      "risk": "Low - only changes output format",
+      "effort": "S",
+      "validationScenarios": ["UV014", "UV001", "UV013"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Add Cross-Category Validation for Food Requests",
+      "action": "Before suggesting companies for food/dairy export requests, validate: is this company a manufacturer (not farm, not retail)? Add category blacklist for food requests: farms, retail, construction, automotive.",
+      "implementationHint": "Add validation function in app/src/lib/utils/location.ts or new guardrails file. Call before company list generation.",
+      "expectedImpact": "Prevent recommending livestock farms for dairy exports, cement factories for food.",
+      "risk": "Low - filtering only",
+      "effort": "M",
+      "validationScenarios": ["UV005"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add 'Deliverable Confirmation' Step",
+      "action": "For any user request, first identify deliverable type (template/script/list/advice). If user asks for 'сделай скрипт' or 'сделай шаблон', assistant must output that format first, THEN add context. Never lead with 'guidance' when specific format requested.",
+      "implementationHint": "Modify assistant response logic to parse intent type. Search for 'script' or 'template' keywords in user requests.",
+      "expectedImpact": "UV009 would deliver call script; UV001 would deliver RFQ template.",
+      "risk": "Medium - changes response structure",
+      "effort": "M",
+      "validationScenarios": ["UV009", "UV001", "UV004"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Add 'Criteria Echo' Before Each Multi-Turn Response",
+      "action": "At start of each turn 2+ response, include: 'Помню критерии: [list from turn 1]. Корректировки: [if any]. Кандидаты по этим критериям:' This forces context retention verification.",
+      "implementationHint": "Add to multi-turn prompt template. Search for 'turn 2' or 'multi_turn' patterns.",
+      "expectedImpact": "Prevent context loss in UV002, UV014, UV008.",
+      "risk": "Low - adds structure",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV014", "UV008"]
+    },
+    {
+      "id": "R5",
+      "area": "geo",
+      "title": "Expand Search Radius Before Empty Results",
+      "why": "UV011, UV012 give up too early on ultra-narrow searches. Prompt should auto-expand geographic or product scope when zero confirmed results.",
+      "expectedImpact": "More useful fallback with broader candidates instead of 'no results'.",
+      "risk": "Medium - may reduce precision",
+      "effort": "M",
+      "validationScenarios": ["UV011", "UV012"]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Create 'Website Scan Failure Template'",
+      "why": "UV012, UV013 repeatedly fail to provide website scans. Create explicit template: 'Status: [confirmed/partial/no data]. Next action: [specific next step]. Candidates checked: [names].'",
+      "implementationHint": "Create template in app/src/lib/templates/. Use when user requests website verification.",
+      "expectedImpact": "Structured response instead of circular 'cannot verify' statements.",
+      "risk": "Low",
+      "effort": "S",
+      "validationScenarios": ["UV012", "UV013"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV001", "UV005", "UV009", "UV011", "UV012", "UV013", "UV014"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "Useful rate > 0.7 (current: 0.47)",
+      "Average usefulness > 3.0 (current: 2.53)",
+      "Zero empty placeholder responses",
+      "Zero cross-category hallucinations (food → construction)"
+    ]
+  }
+}
+```
+

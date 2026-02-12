@@ -1,0 +1,119 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Critical failure in vendor lookup fallback: assistant produces wrong shortlists instead of admitting inability. P0 fix needed for `buildRankingFallbackAppendix` to detect when no relevant candidates exist and return honest 'no results' with alternatives instead of hallucinated irrelevant companies. Secondary P1 issue: multi-turn continuity breaks when user clarifies intent (мужская классическая обувь) — lookup context not properly refined.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix vendor shortlist hallucination in fallback mode",
+      "why": "Judge reports assistant generated completely wrong shortlist (non-shoe companies) when no shoe manufacturers exist. This is hallucination: presenting irrelevant companies as verified candidates destroys user trust.",
+      "expectedImpact": "Eliminate generic fallback hallucination; users will receive honest 'no results' with alternatives instead of wrong company lists. Expected 100% reduction in this failure mode.",
+      "validationScenarios": [
+        "UV001.T3",
+        "Any vendor search with zero relevant results in category/geography"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Improve multi-turn vendor lookup context refinement",
+      "why": "After user clarification (мужская классическая обувь), assistant failed to update search context. Turn 2 already had 'нет релевантных обувных производителей' but didn't trigger proper alternative flow.",
+      "expectedImpact": "Better continuity when users refine their request; lookup context will incorporate new terms from clarification messages.",
+      "validationScenarios": [
+        "UV001.T2",
+        "Any multi-turn vendor search with intent refinement"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add explicit 'admit inability' instruction for zero-result vendor searches",
+      "action": "Add system-level instruction in `buildRankingFallbackAppendix`: when `vendorCandidates.length === 0` AND search is for specific manufacturer/category, return honest admission first before alternatives. Example: 'Не нашёл производителей обуви в Минске по текущему запросу' before suggesting broader searches.",
+      "implementationHint": "File: `app/src/app/api/ai/request/route.ts`, function `buildRankingFallbackAppendix`. Add early return block for zero-relevance case with honest admission.",
+      "expectedImpact": "Users get honest feedback when no results exist, reducing confusion and trust damage from hallucinated shortlists.",
+      "risk": "Low — improves honesty, no data exposure",
+      "effort": "S",
+      "validationScenarios": [
+        "UV001.T3"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Add relevance filter before shortlist generation",
+      "action": "Before generating shortlist, verify each candidate's `primary_rubric_name` or `primary_category_name` matches search terms. If none match, skip shortlist generation entirely and return 'no results' flow.",
+      "implementationHint": "File: `app/src/app/api/ai/request/route.ts`, in `buildRankingFallbackAppendix` before `rankedRowsPool` assignment. Add filter: `candidates.filter(c => searchTerms.some(term => c.primary_rubric_name?.includes(term) || c.primary_category_name?.includes(term)))`",
+      "expectedImpact": "Prevents presenting irrelevant companies as verified candidates. Zero false positives in shortlist.",
+      "risk": "Low — filtering, not generation",
+      "effort": "S",
+      "validationScenarios": [
+        "UV001.T3",
+        "Any vendor shortlist request"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Enhance multi-turn context to capture clarification intent",
+      "action": "When user adds clarification (e.g., 'мужская классическая обувь'), update `vendorLookupContext.searchText` by appending new terms to existing search terms, not replacing. This preserves geo filter (Минск) while adding product refinement.",
+      "implementationHint": "File: `app/src/app/api/ai/request/route.ts`, function detecting clarification intent. Modify to: `searchText = existingSearchText + ' ' + newClarificationTerms` instead of complete replacement.",
+      "expectedImpact": "Turn 2+ vendor searches will incorporate both location (Минск) and product refinement (мужская классическая обувь), improving result relevance.",
+      "risk": "Medium — affects search behavior",
+      "effort": "M",
+      "validationScenarios": [
+        "UV001.T2",
+        "UV001.T3"
+      ]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Create 'no vendor results' response template",
+      "action": "Add dedicated response template for cases when vendor search yields no relevant results. Template should include: (1) honest admission, (2) suggested alternative search terms, (3) suggestion to broaden geographic scope, (4) offer to help with other aspects of sourcing.",
+      "implementationHint": "File: `app/src/app/api/ai/request/route.ts`, new function `buildNoVendorResultsReply(params)`. Return structure: admission → alternatives → broadening options → next steps.",
+      "expectedImpact": "Consistent, helpful response when no vendors found; users receive actionable alternatives instead of filler.",
+      "risk": "Low — improves response quality",
+      "effort": "S",
+      "validationScenarios": [
+        "UV001.T2",
+        "UV001.T3"
+      ]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add validation: shortlist must match search intent",
+      "action": "Before returning shortlist, validate that each listed company has at least one matching term between company's rubric/category and search terms. Log warning and skip shortlist if validation fails.",
+      "implementationHint": "File: `app/src/app/api/ai/request/route.ts`, add `validateShortlistRelevance(candidates, searchTerms)` function. Call before returning shortlist in any response mode.",
+      "expectedImpact": "Runtime guard against hallucinated shortlists; explicit logging for debugging.",
+      "risk": "Low — validation only",
+      "effort": "S",
+      "validationScenarios": [
+        "UV001.T3",
+        "All shortlist-generating scenarios"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV001.T1",
+      "UV001.T2",
+      "UV001.T3",
+      "UV001.T4"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+      "app/qa/ai-request/scenarios.regressions.multi-step-journeys.json",
+      "app/qa/ai-request/scenarios.json (vendor search subset)"
+    ],
+    "successMetrics": [
+      "Judge usefulness: average >= 4.0 for vendor search scenarios",
+      "Generic fallback rate: < 10% for multi-turn vendor searches",
+      "Shortlist relevance: 100% of listed companies match search category",
+      "Honest admission rate: 100% when zero relevant results exist"
+    ]
+  }
+}
+```
+

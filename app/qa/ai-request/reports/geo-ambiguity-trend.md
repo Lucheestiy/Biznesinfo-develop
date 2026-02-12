@@ -1,6 +1,6 @@
 # Geo Ambiguity QA Pass-Rate Trend
 
-- Generated: 2026-02-09T19:51:59.248Z
+- Generated: 2026-02-09T20:30:08.412Z
 - Reports dir: /home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports
 - Scenario: /home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.geo-ambiguity.json
 - Matched runs: 33
@@ -9,8 +9,9 @@
 - Latest check pass-rate: 88.2%
 - Latest target reached: no
 - Last 7-run sparkline (old->new): @@@@=== (low='.', high='@')
-- Time since last green run: 8h 5m (since 2026-02-09T11:46:50.181Z, run-2026-02-09T11-46-50-181Z-1887568-w7t2e)
+- Time since last green run: 8h 43m (since 2026-02-09T11:46:50.181Z, run-2026-02-09T11-46-50-181Z-1887568-w7t2e)
 - Delta vs previous: 0.0 pp
+- Trend verdict: flat
 - Trend direction: flat
 - Average pass-rate (all): 74.2%
 - Average pass-rate (recent 20): 85.0%

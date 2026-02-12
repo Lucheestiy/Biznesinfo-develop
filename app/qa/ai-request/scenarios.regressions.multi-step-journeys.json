@@ -208,7 +208,13 @@
           "checks": [
             { "id": "MX004.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
             { "id": "MX004.T1.C2", "type": "includes_any", "patterns": ["кабель", "ввгнг", "гомел"], "description": "Должен учитывать товар и город" },
-            { "id": "MX004.T1.C3", "type": "not_refusal_only", "description": "Нужен practical first-pass" }
+            { "id": "MX004.T1.C3", "type": "not_refusal_only", "description": "Нужен practical first-pass" },
+            {
+              "id": "MX004.T1.C4",
+              "type": "excludes_all",
+              "patterns": ["\\bколледж\\p{L}*\\b", "\\bуниверситет\\p{L}*\\b", "\\bинститут\\p{L}*\\b", "\\bлицей\\p{L}*\\b", "\\bшкол(а|ы|е|у|ой)?\\b"],
+              "description": "Не должен подставлять образовательные организации как поставщиков кабеля"
+            }
           ]
         },
         {
@@ -216,7 +222,13 @@
           "checks": [
             { "id": "MX004.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
             { "id": "MX004.T2.C2", "type": "mentions_any_terms", "terms": ["кабель", "ввгнг"], "min": 1, "description": "Должен сохранить тему кабеля" },
-            { "id": "MX004.T2.C3", "type": "includes_any", "patterns": ["гомел", "советск"], "description": "Должен учитывать гео-уточнение" }
+            { "id": "MX004.T2.C3", "type": "includes_any", "patterns": ["гомел", "советск"], "description": "Должен учитывать гео-уточнение" },
+            {
+              "id": "MX004.T2.C4",
+              "type": "excludes_all",
+              "patterns": ["\\bколледж\\p{L}*\\b", "\\bуниверситет\\p{L}*\\b", "\\bинститут\\p{L}*\\b", "\\bлицей\\p{L}*\\b", "\\bшкол(а|ы|е|у|ой)?\\b"],
+              "description": "После geo-уточнения тоже не должен возвращать образовательные дистракторы"
+            }
           ]
         },
         {

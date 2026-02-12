@@ -17,6 +17,20 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+function sanitizeCompanyRequestId(rawId: string): string {
+  const raw = (rawId || "").trim();
+  if (!raw) return "";
+
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    decoded = raw;
+  }
+
+  return decoded.replace(/[)"'`»“”’.,;:!?}]+$/gu, "").trim();
+}
+
 function toAbsoluteUrl(value: string): string {
   const raw = (value || "").trim();
   if (!raw) return metadataBase.toString();
@@ -26,7 +40,7 @@ function toAbsoluteUrl(value: string): string {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const requested = (id || "").trim();
+  const requested = sanitizeCompanyRequestId(id || "");
 
   if (!requested) {
     return {
@@ -85,7 +99,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CompanyPage({ params }: PageProps) {
   const { id } = await params;
-  const requested = (id || "").trim();
+  const requested = sanitizeCompanyRequestId(id || "");
 
   let initialData = null;
   if (requested) {
