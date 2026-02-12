@@ -2236,6 +2236,7 @@ function sanitizeUnfilledPlaceholdersInNonTemplateReply(text: string): string {
   for (const [re, value] of replacements) out = out.replace(re, value);
   out = out.replace(/\{[^{}]{1,48}\}/gu, "уточняется");
   out = out.replace(/(?:уточняется[ \t,;:]*){2,}/giu, "уточняется");
+  out = out.replace(/уточняется\s+(?:до|по|и|или)\s+уточняется/giu, "уточняется");
   out = out.replace(/(?:по[ \t]+вашему[ \t]+тз[ \t,;:]*){2,}/giu, "по вашему ТЗ");
   return out;
 }
@@ -11314,6 +11315,7 @@ function buildAssistantSystemPrompt(): string {
     "- Always provide a useful first-pass answer from available context before asking clarifying questions.",
     "- Ask up to 3 clarifying questions only for missing details that block a better next step.",
     "- If the latest user message is a short location-only clarification (for example, just a city), treat it as refinement of the previous sourcing request.",
+    "- If the user adds constraints (e.g. 'only with logo printing', 'only in Minsk', 'with delay'), **re-evaluate** the previous candidates. **Drop** candidates that do not fit the new criteria. If all previous candidates are dropped, say so and suggest new search terms. Do not persist irrelevant candidates just for continuity.",
     "- If vendor candidates are provided in context, start with concrete supplier options from that list first.",
     "- For supplier lookup, do not return only generic rubric advice when concrete candidates are provided.",
     "- When naming rubrics/categories, use only confirmed entries from provided rubric hints or company cards; do not invent rubric/category names.",
@@ -11331,7 +11333,7 @@ function buildAssistantSystemPrompt(): string {
     "- For requests like 'collect N companies', provide the first 3-5 concrete candidates immediately when available, then ask only minimal clarifying questions.",
     "- For ranking/checklist requests, prefer numbered items (1., 2., 3.) for clarity.",
     "- In supplier-sourcing dialogs, never switch to company-listing instructions (/add-company, placement tariffs, moderation flow) unless the user explicitly asks about adding their own company.",
-    "- When providing templates, do not output raw placeholders in braces; replace them with inferred values or neutral labels.",
+    "- When providing templates, do not output raw placeholders in braces; replace them with inferred values or neutral labels. In normal text (not templates), NEVER use placeholders.",
   ].join("\n");
 }
 
@@ -11383,7 +11385,7 @@ function buildAssistantPrompt(params: {
     prompt.push({
       role: "system",
       content:
-        "Vendor guidance (mandatory): if the user is asking who can sell/supply/buy from or requests best/reliable/nearby service options, use only clearly relevant vendors from the candidate list below (do not fill top-3 with weak/irrelevant options). For each included vendor: name, short fit reason with evidence from the candidate line, and /company/... path. If strong candidates are fewer than requested, state this explicitly and provide a transparent fallback (ranking criteria + what to verify next). If this is a follow-up/refinement turn, keep continuity with previously suggested relevant vendors and explain briefly why any earlier option was dropped. If location filters are present in context, honor them and avoid asking location again.",
+        "Vendor guidance (mandatory): if the user is asking who can sell/supply/buy from or requests best/reliable/nearby service options, use only clearly relevant vendors from the candidate list below (do not fill top-3 with weak/irrelevant options). For each included vendor: name, short fit reason with evidence from the candidate line, and /company/... path. If strong candidates are fewer than requested, state this explicitly and provide a transparent fallback (ranking criteria + what to verify next). If this is a follow-up/refinement turn, **strict filtering applies**: drop any previously suggested vendors that do not match the new constraints (e.g. wrong city, missing service). Do not keep irrelevant vendors for continuity. If location filters are present in context, honor them and avoid asking location again.",
     });
     prompt.push({ role: "system", content: params.vendorCandidates });
   } else if (params.vendorLookupContext) {
