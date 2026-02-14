@@ -10837,12 +10837,17 @@ function filterAndRankVendorCandidates(params: {
   const cleaningIntent = !reverseBuyerIntent && isCleaningIntentByTerms(termsForScoring);
   const excludeTerms = uniqNonEmpty((params.excludeTerms || []).flatMap((t) => tokenizeComparable(t))).slice(0, 12);
 
-  const scored = scoped.map((c) => ({
-    company: c,
-    relevance: scoreVendorCandidateRelevance(c, termsForScoring),
-    contacts: candidateContactCompletenessScore(c),
-    haystack: buildVendorCompanyHaystack(c),
-  }));
+  const scored = scoped.map((c) => {
+    const confidence = calculateCompanyConfidence(c);
+    const confidenceBoost = confidence === "HIGH" ? 1.3 : confidence === "MEDIUM" ? 1.0 : 0.7;
+    return {
+      company: c,
+      relevance: scoreVendorCandidateRelevance(c, termsForScoring),
+      contacts: candidateContactCompletenessScore(c),
+      confidenceBoost,
+      haystack: buildVendorCompanyHaystack(c),
+    };
+  });
 
   const withCoverage = scored.map((row) => ({
     ...row,
@@ -10926,6 +10931,8 @@ function filterAndRankVendorCandidates(params: {
     }
     if (b.relevance.strongMatches !== a.relevance.strongMatches) return b.relevance.strongMatches - a.relevance.strongMatches;
     if (b.contacts !== a.contacts) return b.contacts - a.contacts;
+    // Apply confidence boost: HIGH confidence companies get priority over LOW
+    if ((b.confidenceBoost || 1) !== (a.confidenceBoost || 1)) return (b.confidenceBoost || 1) - (a.confidenceBoost || 1);
     return (a.company.name || "").localeCompare(b.company.name || "", "ru", { sensitivity: "base" });
   });
 
