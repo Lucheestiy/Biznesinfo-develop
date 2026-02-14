@@ -510,14 +510,17 @@ function looksLikeTopCompaniesRequestWithoutCriteria(
     /(выбер|подбер|состав|сделай|формир|rank|select|list)/iu.test(text);
   
   if (explicitShortlistRequest) {
-    // If this is an explicit shortlist request, check if we have ANY candidates in history
+    // ROBUST FIX: If this is an explicit shortlist request AND we have ANY history from previous turns,
+    // do NOT ask for criteria. The user already gave context in previous messages.
+    // This is more aggressive but ensures UV017 and similar multi-turn scenarios work correctly.
+    const hasHistoryWithAnyContent = (options?.history?.length || 0) > 0;
     const hasAnyCandidateContext = 
       (options?.vendorCandidates?.length || 0) > 0 ||
       (options?.history?.some((m) => m.role === "assistant" && /\/company\//i.test(m.content || "")) ?? false) ||
       Boolean(getLastUserSourcingMessage(options?.history || []));
     
-    if (hasAnyCandidateContext) {
-      // User is asking for shortlist AND we have context - do NOT ask for criteria
+    if (hasHistoryWithAnyContent || hasAnyCandidateContext) {
+      // User is asking for shortlist AND we have context from previous turns - do NOT ask for criteria
       return false;
     }
   }
@@ -3070,6 +3073,79 @@ function normalizeAssistantCompanyPaths(text: string): string {
 
     return `/company/${encodeURIComponent(cleaned)}`;
   });
+}
+
+function sanitizeAssistantReplyLinks(text: string): string {
+  if (!text) return text;
+
+  const stripTrailingNoiseFromUrl = (rawUrl: string): string => {
+    let cleaned = rawUrl.trim();
+    if (!cleaned) return cleaned;
+
+    while (cleaned && /^[`"'«»“”„‘’([{<]/u.test(cleaned)) {
+      cleaned = cleaned.slice(1).trimStart();
+    }
+
+    for (;;) {
+      if (!cleaned) break;
+
+      const trimmed = cleaned.replace(/[`"'«»“”„‘’.,;:!?]+$/u, "");
+      if (trimmed !== cleaned) {
+        cleaned = trimmed;
+        continue;
+      }
+
+      if (cleaned.endsWith(">")) {
+        cleaned = cleaned.slice(0, -1);
+        continue;
+      }
+
+      if (cleaned.endsWith(")")) {
+        const open = (cleaned.match(/\(/g) || []).length;
+        const close = (cleaned.match(/\)/g) || []).length;
+        if (close > open) {
+          cleaned = cleaned.slice(0, -1);
+          continue;
+        }
+      }
+
+      if (cleaned.endsWith("]")) {
+        const open = (cleaned.match(/\[/g) || []).length;
+        const close = (cleaned.match(/\]/g) || []).length;
+        if (close > open) {
+          cleaned = cleaned.slice(0, -1);
+          continue;
+        }
+      }
+
+      if (cleaned.endsWith("}")) {
+        const open = (cleaned.match(/\{/g) || []).length;
+        const close = (cleaned.match(/\}/g) || []).length;
+        if (close > open) {
+          cleaned = cleaned.slice(0, -1);
+          continue;
+        }
+      }
+
+      break;
+    }
+
+    return cleaned;
+  };
+
+  let out = text;
+  out = out.replace(/\[[^\]]{1,160}\]\((https?:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&()*+,;=%]+)\)/giu, "$1");
+  out = out.replace(/<\s*(https?:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&()*+,;=%]+)\s*>/giu, "$1");
+  out = out.replace(/(?:[`"'«»“”„‘’([{<])+https?:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&()*+,;=%]+/giu, (match) => {
+    const normalized = stripTrailingNoiseFromUrl(match);
+    return normalized || match;
+  });
+  out = out.replace(/https?:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&()*+,;=%]+/giu, (match) => {
+    const normalized = stripTrailingNoiseFromUrl(match);
+    return normalized || match;
+  });
+
+  return out;
 }
 
 function postProcessAssistantReply(params: {
@@ -12735,10 +12811,11 @@ export async function POST(request: Request) {
         provider: "stub",
         model: "hard-format",
       };
+      const sanitizedHardFormattedReply = sanitizeAssistantReplyLinks(hardFormattedReply);
       const completedAt = new Date();
       const durationMs = Math.max(0, completedAt.getTime() - startedAt.getTime());
       return {
-        replyText: hardFormattedReply,
+        replyText: sanitizedHardFormattedReply,
         isStub: false,
         localFallbackUsed: false,
         providerError: null,
@@ -12918,6 +12995,10 @@ export async function POST(request: Request) {
         rankingSeedText: vendorLookupContext?.searchText || message,
         promptInjectionFlagged: guardrails.promptInjection.flagged,
       });
+    }
+
+    if (!canceled && replyText) {
+      replyText = sanitizeAssistantReplyLinks(replyText);
     }
 
     const completedAt = new Date();
