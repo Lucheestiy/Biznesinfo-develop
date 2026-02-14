@@ -7730,7 +7730,7 @@ function looksLikeVendorLookupIntent(message: string): boolean {
     /(купить|куплю|покупк|прода[её]т|поставщ|поставк|производ\p{L}*|фабрик\p{L}*|завод\p{L}*|оптом|\bопт\b|закупк|аренд\p{L}*|прокат\p{L}*|lease|rent|hire|partner|vendor|supplier|manufacturer|factory|oem|odm|buy|sell)/u.test(
       text,
     );
-  const hasFind = /(где|кто|какие|какой|какая|какое|какую|найти|подобрать|порекомендуй|where|who|which|find|recommend)/u.test(text);
+  const hasFind = /(где|кто|какие|какой|какая|какое|какую|найти|подобрать|подбери|порекомендуй|where|who|which|find|recommend)/u.test(text);
   const hasServiceLookup =
     /(шиномонтаж|вулканизац|балансировк|клининг|уборк|вентиляц|охран\p{L}*|сигнализац|led|экран|3pl|фулфилмент|склад|логист|грузоперевоз\p{L}*|перевоз\p{L}*|реф\p{L}*|рефриж\p{L}*|спецтехник|манипулятор|автовышк|типограф|полиграф|кофе|кафе|ресторан\p{L}*|общепит\p{L}*|столов\p{L}*|поесть|покушать|food|eat|подшип|паллет|поддон|тара|упаков\p{L}*|короб\p{L}*|гофро\p{L}*|бетон|кабел|ввг|свароч|металлопрокат\p{L}*|металл\p{L}*|металлоконструкц|бух\p{L}*|бухуч\p{L}*|аутсорс\p{L}*|1с|эдо|сертифик\p{L}*|сертификац\p{L}*|декларац\p{L}*|испытательн\p{L}*|обув\p{L}*|shoe|footwear|ботин\p{L}*|туфл\p{L}*|кроссов\p{L}*|лофер\p{L}*|дерби|оксфорд\p{L}*|сапог\p{L}*|сто\b|автосервис|сервис|ремонт|монтаж|установк|мастерск|service|repair|workshop|garage|tire|tyre|warehouse|delivery|fulfillment|freight|carrier|accounting|bookkeep|packaging|boxes?)/u.test(
       text,
