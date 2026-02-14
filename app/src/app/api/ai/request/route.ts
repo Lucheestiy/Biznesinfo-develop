@@ -6094,10 +6094,43 @@ function postProcessAssistantReply(params: {
             ].filter(Boolean).join(" "))
           );
         
+        // CRITICAL FIX: Also detect intent anchors for anti-noise filtering
+        // This prevents hospitals/polyclinics from appearing in footwear queries
+        const websiteRecoveryIntentAnchors = detectVendorIntentAnchors(
+          expandVendorSearchTermCandidates([
+            ...extractVendorSearchTerms(
+              oneLine([
+                params.vendorLookupContext?.searchText || "",
+                getLastUserSourcingMessage(params.history || []) || "",
+                params.message || "",
+              ].filter(Boolean).join(" "))
+            ),
+            ...suggestSourcingSynonyms(
+              oneLine([
+                params.vendorLookupContext?.searchText || "",
+                getLastUserSourcingMessage(params.history || []) || "",
+                params.message || "",
+              ].filter(Boolean).join(" "))
+            ),
+          ])
+        );
+        
         // Filter candidates by commodity if tag is detected, otherwise use all candidates
-        const commodityFilteredCandidates = websiteRecoveryCommodityTag
+        let commodityFilteredCandidates = websiteRecoveryCommodityTag
           ? continuityCandidates.filter((c) => candidateMatchesCoreCommodity(c, websiteRecoveryCommodityTag))
           : continuityCandidates;
+        
+        // NEW: Apply anti-noise filtering using VENDOR_INTENT_CONFLICT_RULES
+        // This filters out hospitals/polyclinics for footwear queries, etc.
+        if (websiteRecoveryIntentAnchors.length > 0) {
+          commodityFilteredCandidates = commodityFilteredCandidates.filter((candidate) => {
+            const haystack = buildVendorCompanyHaystack(candidate);
+            if (!haystack) return false;
+            // Don't filter out if candidate matches the required intent
+            if (candidateViolatesIntentConflictRules(haystack, websiteRecoveryIntentAnchors)) return false;
+            return true;
+          });
+        }
         
         // Fall back to filtered candidates or original if no filter match
         const websiteRecoveryCandidates = commodityFilteredCandidates.length > 0 
@@ -6121,8 +6154,39 @@ function postProcessAssistantReply(params: {
 
       // NEW FIX: If websiteResearchIntent is true but no continuityCandidates,
       // try to use vendorCandidates from the current lookup for website verification
+      // Also apply anti-noise filtering here
       if (websiteResearchIntent && continuityCandidates.length === 0 && params.vendorCandidates && params.vendorCandidates.length > 0) {
-        const websiteFallbackCandidates = params.vendorCandidates.slice(0, 3);
+        // Detect intent anchors for anti-noise filtering
+        const websiteFallbackIntentAnchors = detectVendorIntentAnchors(
+          expandVendorSearchTermCandidates([
+            ...extractVendorSearchTerms(
+              oneLine([
+                params.vendorLookupContext?.searchText || "",
+                getLastUserSourcingMessage(params.history || []) || "",
+                params.message || "",
+              ].filter(Boolean).join(" "))
+            ),
+            ...suggestSourcingSynonyms(
+              oneLine([
+                params.vendorLookupContext?.searchText || "",
+                getLastUserSourcingMessage(params.history || []) || "",
+                params.message || "",
+              ].filter(Boolean).join(" "))
+            ),
+          ])
+        );
+        
+        // Apply anti-noise filtering if intent anchors are detected
+        let websiteFallbackCandidates = params.vendorCandidates.slice(0, 3);
+        if (websiteFallbackIntentAnchors.length > 0) {
+          websiteFallbackCandidates = websiteFallbackCandidates.filter((candidate) => {
+            const haystack = buildVendorCompanyHaystack(candidate);
+            if (!haystack) return false;
+            if (candidateViolatesIntentConflictRules(haystack, websiteFallbackIntentAnchors)) return false;
+            return true;
+          });
+        }
+        
         const websiteFallbackRows = formatVendorShortlistRows(
           websiteFallbackCandidates,
           Math.min(3, Math.max(1, websiteFallbackCandidates.length)),
