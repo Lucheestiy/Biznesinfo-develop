@@ -124,7 +124,6 @@ export default function AiChatsClient({ currentUser }: { currentUser: CurrentUse
 
   useEffect(() => {
     loadSessions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scope, isAdmin]);
 
   useEffect(() => {
@@ -292,4 +291,3 @@ export default function AiChatsClient({ currentUser }: { currentUser: CurrentUse
     </div>
   );
 }
-
