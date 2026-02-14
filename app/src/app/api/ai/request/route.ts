@@ -1526,6 +1526,38 @@ function resolveCandidateDisplayName(candidate: BiznesinfoCompanySummary): strin
   return (!rawName || genericName ? prettifyCompanySlug(slug) : rawName) || `#${candidate.id}`;
 }
 
+type ConfidenceLevel = "HIGH" | "MEDIUM" | "LOW";
+
+function calculateCompanyConfidence(candidate: BiznesinfoCompanySummary): ConfidenceLevel {
+  let evidenceCount = 0;
+
+  // Count evidence signals based on available fields in BiznesinfoCompanySummary
+  const hasPhone = Array.isArray(candidate.phones) && candidate.phones.length > 0 && candidate.phones[0]?.length >= 7;
+  const hasEmail = Array.isArray(candidate.emails) && candidate.emails.length > 0;
+  const hasAddress = candidate.address && candidate.address.length > 5;
+  const hasRubric = (candidate.primary_rubric_name || candidate.primary_category_name || "").length > 3;
+  const hasWebsite = Array.isArray(candidate.websites) && candidate.websites.length > 0 && candidate.websites[0]?.length > 5;
+  // Check description/about for content richness (they indicate more complete company data)
+  const hasRichContent = (candidate.description?.length || 0) > 50 || (candidate.about?.length || 0) > 50;
+
+  if (hasPhone) evidenceCount += 1;
+  if (hasEmail) evidenceCount += 1;
+  if (hasAddress) evidenceCount += 1;
+  if (hasRubric) evidenceCount += 1;
+  if (hasWebsite) evidenceCount += 1;
+  if (hasRichContent) evidenceCount += 1;
+
+  if (evidenceCount >= 3) return "HIGH";
+  if (evidenceCount >= 2) return "MEDIUM";
+  return "LOW";
+}
+
+function getConfidenceBadge(confidence: ConfidenceLevel): string {
+  if (confidence === "HIGH") return "✅";
+  if (confidence === "MEDIUM") return "⚠️";
+  return "⚠️"; // LOW also uses warning
+}
+
 function formatVendorShortlistRows(candidates: BiznesinfoCompanySummary[], maxItems = 4): string[] {
   return (candidates || []).slice(0, maxItems).map((c, idx) => {
     const name = resolveCandidateDisplayName(c);
@@ -1535,8 +1567,11 @@ function formatVendorShortlistRows(candidates: BiznesinfoCompanySummary[], maxIt
     const phone = truncate(oneLine(Array.isArray(c.phones) ? c.phones[0] || "" : ""), 48);
     const email = truncate(oneLine(Array.isArray(c.emails) ? c.emails[0] || "" : ""), 72);
     const contact = phone ? `тел: ${phone}` : email ? `email: ${email}` : "";
+    const confidence = calculateCompanyConfidence(c);
+    const badge = getConfidenceBadge(confidence);
+    const confidenceNote = confidence === "LOW" ? " [проверьте данные]" : "";
     const meta = [rubric, location, contact].filter(Boolean).join("; ");
-    return `${idx + 1}. ${name} — ${path}${meta ? ` (${meta})` : ""}`;
+    return `${idx + 1}. ${badge} ${name} — ${path}${meta ? ` (${meta})` : ""}${confidenceNote}`;
   });
 }
 
