@@ -3084,8 +3084,8 @@ function postProcessAssistantReply(params: {
     ? params.historyVendorCandidates.slice(0, 3)
     : [];
   const linkGateRequested = linkGateCandidates.length > 0 && (
-    /^(дай|покажи|пришли|скинь|send|show|give)\s+(ссылку|сайт|link|url|адрес|контакт)/iu.test(params.message || "") ||
-    /(на\s+сайте|из\s+карточки|проверь\s+сайт|посмотри\s+сайт)\b/iu.test(params.message || "") ||
+    /^(дай|покажи|пришли|скинь|send|show|give)\s+(ссылку|сайт|сайты|link|url|адрес|контакт)/iu.test(params.message || "") ||
+    /(на\s+сайте|из\s+карточки|проверь\s+сайт|посмотри\s+сайт|проверим\s+сайты)\b/iu.test(params.message || "") ||
     /(карточк\p{L}*|сайт\p{L}*)\s+(эт\p{L}*|это|этой|данн\p{L}*)/iu.test(params.message || "")
   );
   const linkGateAsksForNewLink = linkGateRequested && /(пришли|дай|покажи)\s+(мне\s+)?(ссылку|сайт|url)/iu.test(out) && !/\/company\/[a-z0-9-]+/iu.test(out);
@@ -6883,7 +6883,7 @@ function looksLikeWebsiteResearchIntent(message: string): boolean {
   const text = normalizeComparableText(message || "");
   if (!text) return false;
 
-  const hasWebsiteCue = /(на\s+сайте|официальн\p{L}*\s+сайт|сайт|website|web\s*site|url|домен|site|карточк\p{L}*\s+компан\p{L}*|на\s+карточк\p{L}*|из\s+карточк\p{L}*|с\s+карточк\p{L}*)/u.test(text);
+  const hasWebsiteCue = /(на\s+сайте|официальн\p{L}*\s+сайт|сайт|сайты|website|web\s*site|url|домен|site|карточк\p{L}*\s+компан\p{L}*|на\s+карточк\p{L}*|из\s+карточк\p{L}*|с\s+карточк\p{L}*)/u.test(text);
   const hasResearchVerb = /(проверь|посмотр\p{L}*|уточн\p{L}*|выясн\p{L}*|найд\p{L}*|check|verify|look\s*up|browse|scan|find)/u.test(text);
   const hasDetailCue =
     /(что\s+указан|что\s+пишут|услов|достав|гарант|сертифик|лиценз|каталог|ассортимент|контакт|телефон|email|почт|прайс|цена|время\s+работ|график|о\s+компан|услуг|продукц|канал\p{L}*|микроскоп|новост\p{L}*|блог|пресс-?центр)/u.test(
@@ -6909,7 +6909,7 @@ function looksLikeWebsiteResearchFollowUpIntent(
 
   const hasCardCue = /(карточк\p{L}*|на\s+карточк\p{L}*|из\s+карточк\p{L}*|с\s+карточк\p{L}*)/u.test(text);
   const hasFollowUpAction = /(найд\p{L}*|проверь|посмотр\p{L}*|продолж\p{L}*|дальше|оттуда|по\s+ней|по\s+карточк\p{L}*)/u.test(text);
-  const hasWebsiteNeed = /(сайт|website|url|домен|новост\p{L}*|блог|пресс-?центр|контакт)/u.test(text);
+  const hasWebsiteNeed = /(сайт|сайты|website|url|домен|новост\p{L}*|блог|пресс-?центр|контакт)/u.test(text);
 
   const recentUserMessages = (history || [])
     .filter((entry) => entry.role === "user")
@@ -11608,6 +11608,11 @@ function buildAssistantSystemPrompt(): string {
     "- If the user adds constraints (e.g. 'only with logo printing', 'only in Minsk', 'with delay'), re-evaluate previous candidates and drop non-matching options.",
     "- If vendor candidates are provided in context, start with concrete options from that list first.",
     "- For supplier lookup, do not return only generic rubric advice when concrete candidates are provided.",
+    "",
+    "Правило для поиска на сайте:",
+    "- Если пользователь просит найти информацию на сайте компании — ты должен сам найти company card, извлечь website URL, и выполнить lookup.",
+    "- Запрещено просить пользователя 'пришлите ссылку' или 'откройте карточку и пришлите сайт'.",
+    "- Используй известные компании из контекста диалога (/company/...) для автоматического поиска.",
     "- When naming rubrics/categories, use only confirmed entries from provided rubric hints or company cards; do not invent rubric/category names.",
     "- If confirmed rubric hints are absent, avoid exact rubric titles and suggest keyword + city/region filter strategy.",
     "- For single-company detail questions, autonomously locate matching company card(s) by name first; ask minimal clarification only if exact match is ambiguous.",
