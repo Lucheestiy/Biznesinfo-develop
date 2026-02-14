@@ -1,0 +1,714 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generatedAt": "2026-02-14T23:45:00Z",
+    "source": "user-seed-ideas-expansion",
+    "description": "Additional multi-turn scenarios to expand coverage to 100+ scenarios. Includes electronics, furniture, construction, automotive, and new edge cases."
+  },
+  "scenarios": [
+    {
+      "id": "UV023",
+      "title": "Электроника и компоненты: найти поставщиков микросхем в Беларуси",
+      "personaGoal": "Проверить, что ассистент корректно работает с электронными компонентами и не путает с consumer электроникой.",
+      "tags": ["regression", "multi_turn", "electronics", "components", "suppliers", "minsk"],
+      "turns": [
+        {
+          "user": "Где в Минске найти поставщиков электронных компонентов?",
+          "checks": [
+            { "id": "UV023.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV023.T1.C2", "type": "mentions_any_terms", "terms": ["электрон", "компонент", "микросхем", "поставщик"], "min": 1, "description": "Должен удержать контекст электронных компонентов" }
+          ]
+        },
+        {
+          "user": "Интересуют микроконтроллеры и датчики. Есть что-то под заказ?",
+          "checks": [
+            { "id": "UV023.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV023.T2.C2", "type": "mentions_any_terms", "terms": ["микроконтроллер", "датчик", "электрон"], "min": 1, "description": "Должен сохранить фокус на электронике" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist из 3-5 компаний с контактами.",
+          "checks": [
+            { "id": "UV023.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV023.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Хотя бы одна ссылка /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 пункта" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV024",
+      "title": "Мебель для офиса: производители и поставщики в регионах",
+      "personaGoal": "Проверить работу с мебельной темой и понимание B2B vs B2C.",
+      "tags": ["regression", "multi_turn", "furniture", "office", "manufacturers", "regional"],
+      "turns": [
+        {
+          "user": "Какие в Гомеле есть производители офисной мебели?",
+          "checks": [
+            { "id": "UV024.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV024.T1.C2", "type": "mentions_any_terms", "terms": ["мебель", "офис", "производ"], "min": 1, "description": "Должен удержать тему мебели" },
+            { "id": "UV024.T1.C3", "type": "includes_any", "patterns": ["гомел"], "description": "Должен учитывать город" }
+          ]
+        },
+        {
+          "user": "Нужны столы и кресла для закупки на 50 рабочих мест.",
+          "checks": [
+            { "id": "UV024.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV024.T2.C2", "type": "mentions_any_terms", "terms": ["стол", "кресло", "мебель"], "min": 1, "description": "Должен учитывать тип мебели" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist с указанием ценового сегмента.",
+          "checks": [
+            { "id": "UV024.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV024.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV025",
+      "title": "Стройматериалы: кирпич и бетон с доставкой",
+      "personaGoal": "Проверить работу со строительными материалами и логистикой.",
+      "tags": ["regression", "multi_turn", "construction", "materials", "delivery", "brick"],
+      "turns": [
+        {
+          "user": "Где купить кирпич в Бресте с доставкой?",
+          "checks": [
+            { "id": "UV025.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV025.T1.C2", "type": "mentions_any_terms", "terms": ["кирпич", "строительн", "доставк"], "min": 1, "description": "Должен удержать тему стройматериалов" }
+          ]
+        },
+        {
+          "user": "А есть бетон с завода? Нужен М300.",
+          "checks": [
+            { "id": "UV025.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV025.T2.C2", "type": "mentions_any_terms", "terms": ["бетон", "завод", "м300"], "min": 1, "description": "Должен переключиться на бетон" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist производителей с марками бетона.",
+          "checks": [
+            { "id": "UV025.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV025.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV026",
+      "title": "Автозапчасти: поиск дистрибьюторов шин",
+      "personaGoal": "Проверить работу с автомобильной темой и дистрибьюторской сетью.",
+      "tags": ["regression", "multi_turn", "automotive", "tires", "distributors", "wholesale"],
+      "turns": [
+        {
+          "user": "Кто в Беларуси дистрибьютор шин Michelin?",
+          "checks": [
+            { "id": "UV026.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV026.T1.C2", "type": "mentions_any_terms", "terms": ["шина", "дистрибьютор", "авто"], "min": 1, "description": "Должен удержать автомобильную тему" }
+          ]
+        },
+        {
+          "user": "Нужны также грузовые шины. Есть склад в Минске?",
+          "checks": [
+            { "id": "UV026.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV026.T2.C2", "type": "mentions_any_terms", "terms": ["грузов", "шина", "склад"], "min": 1, "description": "Должен учесть грузовые шины" }
+          ]
+        },
+        {
+          "user": "Дай shortlist из 3-5 поставщиков с условиями.",
+          "checks": [
+            { "id": "UV026.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV026.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV027",
+      "title": "Продукты питания: кондитерская фабрика с экспортом",
+      "personaGoal": "Проверить работу с пищевой промышленностью и экспортными требованиями.",
+      "tags": ["regression", "multi_turn", "food", "confectionery", "export", "factory"],
+      "turns": [
+        {
+          "user": "Какие в Беларуси кондитерские фабрики экспортируют в ЕАЭС?",
+          "checks": [
+            { "id": "UV027.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV027.T1.C2", "type": "mentions_any_terms", "terms": ["кондитер", "фабрик", "экспорт"], "min": 1, "description": "Должен удержать тему кондитерского экспорта" }
+          ]
+        },
+        {
+          "user": "Интересует шоколад и конфеты. Какие объемы?",
+          "checks": [
+            { "id": "UV027.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV027.T2.C2", "type": "mentions_any_terms", "terms": ["шоколад", "конфет", "объем"], "min": 1, "description": "Должен уточнить по ассортименту" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist с контактами для закупки.",
+          "checks": [
+            { "id": "UV027.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV027.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV028",
+      "title": "Сельхозтехника: тракторы и комбайны",
+      "personaGoal": "Проверить работу с сельскохозяйственной техникой.",
+      "tags": ["regression", "multi_turn", "agricultural", "machinery", "tractors", "harvesters"],
+      "turns": [
+        {
+          "user": "Где купить трактор МТЗ в Витебской области?",
+          "checks": [
+            { "id": "UV028.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV028.T1.C2", "type": "mentions_any_terms", "terms": ["трактор", "мтз", "сельхоз"], "min": 1, "description": "Должен удержать тему сельхозтехники" }
+          ]
+        },
+        {
+          "user": "А комбайны есть? Нужны для уборки зерна.",
+          "checks": [
+            { "id": "UV028.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV028.T2.C2", "type": "mentions_any_terms", "terms": ["комбайн", "уборк", "зерно"], "min": 1, "description": "Должен переключиться на комбайны" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist дилеров с ценами.",
+          "checks": [
+            { "id": "UV028.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV028.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV029",
+      "title": "Поиск покупателей: кто покупает зерно в Беларуси",
+      "personaGoal": "Проверить reverse B2B - поиск покупателей, а не поставщиков.",
+      "tags": ["regression", "multi_turn", "reverse_b2b", "buyers", "grain", "agriculture"],
+      "turns": [
+        {
+          "user": "Кто в Беларуси покупает зерно оптом?",
+          "checks": [
+            { "id": "UV029.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV029.T1.C2", "type": "mentions_any_terms", "terms": ["зерно", "покупатель", "опт"], "min": 1, "description": "Должен понять reverse B2B" }
+          ]
+        },
+        {
+          "user": "Интересуют переработчики и экспортеры.",
+          "checks": [
+            { "id": "UV029.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV029.T2.C2", "type": "mentions_any_terms", "terms": ["переработ", "экспорт", "зерно"], "min": 1, "description": "Должен уточнить тип покупателей" }
+          ]
+        },
+        {
+          "user": "Дай shortlist из 5 компаний с контактами.",
+          "checks": [
+            { "id": "UV029.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV029.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV030",
+      "title": "Упаковка и тара: пластиковые контейнеры",
+      "personaGoal": "Проверить работу с упаковочными материалами.",
+      "tags": ["regression", "multi_turn", "packaging", "plastic", "containers", "tara"],
+      "turns": [
+        {
+          "user": "Где купить пластиковую тару для жидких продуктов?",
+          "checks": [
+            { "id": "UV030.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV030.T1.C2", "type": "mentions_any_terms", "terms": ["тара", "пластик", "упаковк"], "min": 1, "description": "Должен удержать тему упаковки" }
+          ]
+        },
+        {
+          "user": "Нужны бутылки и банки от 0.5 до 5 литров.",
+          "checks": [
+            { "id": "UV030.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV030.T2.C2", "type": "mentions_any_terms", "terms": ["бутылк", "банк", "литр"], "min": 1, "description": "Должен уточнить объемы" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist производителей.",
+          "checks": [
+            { "id": "UV030.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV030.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV031",
+      "title": "Косметика и бытовая химия: производители",
+      "personaGoal": "Проверить работу с косметической и химической отраслью.",
+      "tags": ["regression", "multi_turn", "cosmetics", "chemistry", "household", "manufacturers"],
+      "turns": [
+        {
+          "user": "Какие в Беларуси производят косметику?",
+          "checks": [
+            { "id": "UV031.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV031.T1.C2", "type": "mentions_any_terms", "terms": ["косметик", "производ", "средств"], "min": 1, "description": "Должен удержать тему косметики" }
+          ]
+        },
+        {
+          "user": "Интересует профессиональная косметика для салонов.",
+          "checks": [
+            { "id": "UV031.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV031.T2.C2", "type": "mentions_any_terms", "terms": ["профессионал", "салон", "косметик"], "min": 1, "description": "Должен уточнить сегмент" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist поставщиков.",
+          "checks": [
+            { "id": "UV031.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV031.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV032",
+      "title": "Медицинское оборудование и инструменты",
+      "personaGoal": "Проверить работу с медицинской темой без путаницы с лечебными учреждениями.",
+      "tags": ["regression", "multi_turn", "medical", "equipment", "instruments", "suppliers"],
+      "turns": [
+        {
+          "user": "Где купить медицинское оборудование в Минске?",
+          "checks": [
+            { "id": "UV032.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV032.T1.C2", "type": "mentions_any_terms", "terms": ["медицин", "оборудован", "инструмент"], "min": 1, "description": "Должен удержать тему медоборудования" }
+          ]
+        },
+        {
+          "user": "Нужны стерилизаторы и диагностические приборы.",
+          "checks": [
+            { "id": "UV032.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV032.T2.C2", "type": "mentions_any_terms", "terms": ["стерилизатор", "диагностик", "прибор"], "min": 1, "description": "Должен уточнить тип оборудования" }
+          ]
+        },
+        {
+          "user": "Дай shortlist дистрибьюторов.",
+          "checks": [
+            { "id": "UV032.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV032.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV033",
+      "title": "Трубы и сантехника: отопление и водоснабжение",
+      "personaGoal": "Проверить работу со строительной сантехникой.",
+      "tags": ["regression", "multi_turn", "plumbing", "pipes", "heating", "construction"],
+      "turns": [
+        {
+          "user": "Где купить трубы для отопления в Минске?",
+          "checks": [
+            { "id": "UV033.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV033.T1.C2", "type": "mentions_any_terms", "terms": ["труб", "отоплен", "сантехник"], "min": 1, "description": "Должен удержать тему труб" }
+          ]
+        },
+        {
+          "user": "Интересуют полипропиленовые и металлопластиковые трубы.",
+          "checks": [
+            { "id": "UV033.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV033.T2.C2", "type": "mentions_any_terms", "terms": ["полипропилен", "металлопластик", "труб"], "min": 1, "description": "Должен уточнить материал" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist поставщиков.",
+          "checks": [
+            { "id": "UV033.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV033.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV034",
+      "title": "Топливо и ГСМ для промышленности",
+      "personaGoal": "Проверить работу с топливной темой.",
+      "tags": ["regression", "multi_turn", "fuel", "oil", "lubricants", "industrial"],
+      "turns": [
+        {
+          "user": "Кто поставляет дизельное топливо для промышленных нужд?",
+          "checks": [
+            { "id": "UV034.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV034.T1.C2", "type": "mentions_any_terms", "terms": ["топливо", "дизел", "гсм"], "min": 1, "description": "Должен удержать тему топлива" }
+          ]
+        },
+        {
+          "user": "Также нужны смазочные масла и охлаждающие жидкости.",
+          "checks": [
+            { "id": "UV034.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV034.T2.C2", "type": "mentions_any_terms", "terms": ["масло", "смазк", "охлаждающ"], "min": 1, "description": "Должен расширить ассортимент" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist поставщиков с доставкой.",
+          "checks": [
+            { "id": "UV034.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV034.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV035",
+      "title": "Текстиль и швейное производство",
+      "personaGoal": "Проверить работу с текстильной отраслью.",
+      "tags": ["regression", "multi_turn", "textile", "fabric", "sewing", "manufacturers"],
+      "turns": [
+        {
+          "user": "Где купить ткань для производства одежды в Беларуси?",
+          "checks": [
+            { "id": "UV035.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV035.T1.C2", "type": "mentions_any_terms", "terms": ["ткань", "текстиль", "швейн"], "min": 1, "description": "Должен удержать текстильную тему" }
+          ]
+        },
+        {
+          "user": "Интересует трикотаж и синтетика.",
+          "checks": [
+            { "id": "UV035.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV035.T2.C2", "type": "mentions_any_terms", "terms": ["трикотаж", "синтетик", "ткань"], "min": 1, "description": "Должен уточнить тип ткани" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist производителей и оптовиков.",
+          "checks": [
+            { "id": "UV035.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV035.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV036",
+      "title": "Металлопрокат и стальные конструкции",
+      "personaGoal": "Проверить работу с металлургической темой.",
+      "tags": ["regression", "multi_turn", "metal", "steel", "construction", "rolling"],
+      "turns": [
+        {
+          "user": "Где купить металлопрокат в Могилеве?",
+          "checks": [
+            { "id": "UV036.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV036.T1.C2", "type": "mentions_any_terms", "terms": ["металл", "прокат", "сталь"], "min": 1, "description": "Должен удержать металлургическую тему" }
+          ]
+        },
+        {
+          "user": "Нужны арматура и профильные трубы.",
+          "checks": [
+            { "id": "UV036.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV036.T2.C2", "type": "mentions_any_terms", "terms": ["арматур", "профильн", "труб"], "min": 1, "description": "Должен уточнить тип проката" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist металлобаз и производителей.",
+          "checks": [
+            { "id": "UV036.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV036.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV037",
+      "title": "Полиграфия и рекламные материалы",
+      "personaGoal": "Проверить работу с полиграфической отраслью.",
+      "tags": ["regression", "multi_turn", "printing", "advertising", "promo", "services"],
+      "turns": [
+        {
+          "user": "Где заказать печать рекламных листовок в Минске?",
+          "checks": [
+            { "id": "UV037.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV037.T1.C2", "type": "mentions_any_terms", "terms": ["полиграф", "печат", "листовк"], "min": 1, "description": "Должен удержать полиграфическую тему" }
+          ]
+        },
+        {
+          "user": "Тираж 10000 штук, нужен полный цикл.",
+          "checks": [
+            { "id": "UV037.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV037.T2.C2", "type": "mentions_any_terms", "terms": ["тираж", "полный цикл", "печат"], "min": 1, "description": "Должен уточнить параметры" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist типографий.",
+          "checks": [
+            { "id": "UV037.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV037.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV038",
+      "title": "IT-услуги и разработка ПО",
+      "personaGoal": "Проверить работу с IT-отраслью.",
+      "tags": ["regression", "multi_turn", "it", "software", "development", "services"],
+      "turns": [
+        {
+          "user": "Какие в Минске есть IT-компании для аутсорса?",
+          "checks": [
+            { "id": "UV038.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV038.T1.C2", "type": "mentions_any_terms", "terms": ["it", "разработк", "аутсорс", "софт"], "min": 1, "description": "Должен удержать IT тему" }
+          ]
+        },
+        {
+          "user": "Нужна разработка мобильного приложения на Flutter.",
+          "checks": [
+            { "id": "UV038.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV038.T2.C2", "type": "mentions_any_terms", "terms": ["мобильн", "flutter", "разработк"], "min": 1, "description": "Должен уточнить технологию" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist компаний с опытом.",
+          "checks": [
+            { "id": "UV038.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV038.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV039",
+      "title": "Грузоперевозки и логистика",
+      "personaGoal": "Проверить работу с логистической отраслью.",
+      "tags": ["regression", "multi_turn", "logistics", "transport", "freight", "shipping"],
+      "turns": [
+        {
+          "user": "Какие в Минске грузоперевозки по Беларуси?",
+          "checks": [
+            { "id": "UV039.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV039.T1.C2", "type": "mentions_any_terms", "terms": ["грузоперевозк", "транспорт", "логистик"], "min": 1, "description": "Должен удержать логистическую тему" }
+          ]
+        },
+        {
+          "user": "Нужна доставка 20 тонн в Гродно.",
+          "checks": [
+            { "id": "UV039.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV039.T2.C2", "type": "mentions_any_terms", "terms": ["20 тонн", "гродно", "доставк"], "min": 1, "description": "Должен уточнить параметры груза" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist перевозчиков.",
+          "checks": [
+            { "id": "UV039.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV039.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV040",
+      "title": "Охрана и безопасность",
+      "personaGoal": "Проверить работу с охранными услугами.",
+      "tags": ["regression", "multi_turn", "security", "protection", "guards", "services"],
+      "turns": [
+        {
+          "user": "Какие в Минске охранные фирмы?",
+          "checks": [
+            { "id": "UV040.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV040.T1.C2", "type": "mentions_any_terms", "terms": ["охран", "безопасност", "физическ"], "min": 1, "description": "Должен удержать охранную тему" }
+          ]
+        },
+        {
+          "user": "Нужна охрана склада 5000 кв.м.",
+          "checks": [
+            { "id": "UV040.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV040.T2.C2", "type": "mentions_any_terms", "terms": ["склад", "охрана", "кв.м"], "min": 1, "description": "Должен уточнить объект" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist охранных предприятий.",
+          "checks": [
+            { "id": "UV040.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV040.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UV041",
+      "title": "Услуги клининга для бизнеса",
+      "personaGoal": "Проверить работу с клининговыми услугами.",
+      "tags": ["regression", "multi_turn", "cleaning", "services", "commercial", "office"],
+      "turns": [
+        {
+          "user": "Какие в Минске клининговые компании для офисов?",
+          "checks": [
+            { "id": "UV041.T1.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV041.T1.C2", "type": "mentions_any_terms", "terms": ["клининг", "уборк", "офис"], "min": 1, "description": "Должен удержать клининговую тему" }
+          ]
+        },
+        {
+          "user": "Нужна уборка 1000 кв.м ежедневно.",
+          "checks": [
+            { "id": "UV041.T2.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            { "id": "UV041.T2.C2", "type": "mentions_any_terms", "terms": ["ежедневн", "1000", "кв.м"], "min": 1, "description": "Должен уточнить периодичность и площадь" }
+          ]
+        },
+        {
+          "user": "Сделай shortlist компаний с ценами.",
+          "checks": [
+            { "id": "UV041.T3.C1", "type": "not_stub", "description": "Ответ не должен быть stub" },
+            {
+              "id": "UV041.T3.C2",
+              "type": "any_of",
+              "description": "Нужен shortlist",
+              "checks": [
+                { "type": "company_path_min_count", "min": 1, "description": "Есть ссылки /company/..." },
+                { "type": "numbered_list_min", "min": 3, "description": "Минимум 3 компании" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
