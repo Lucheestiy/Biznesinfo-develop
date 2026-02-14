@@ -12675,7 +12675,10 @@ export async function POST(request: Request) {
 
     const hardFormattedReply = buildHardFormattedReply(message, {
       history,
-      vendorCandidates,
+      vendorCandidates: [
+        ...vendorCandidates,
+        ...historyVendorCandidates,
+      ],
     });
     if (hardFormattedReply) {
       const hardProviderMeta: { provider: AssistantProvider; model?: string } = {
