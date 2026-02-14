@@ -1708,6 +1708,54 @@ function resolveCandidateDisplayName(candidate: BiznesinfoCompanySummary): strin
 
 type ConfidenceLevel = "HIGH" | "MEDIUM" | "LOW";
 
+// Manufacturer detection keywords (boost these in ranking)
+const MANUFACTURER_KEYWORDS = [
+  "производств",
+  "завод",
+  "фабрика",
+  "комбинат",
+  "предприят",
+  "изготовител",
+  "manufacturer",
+  "factory",
+];
+
+// Anti-manufacturer keywords (penalize these - likely retailers)
+const RETAILER_KEYWORDS = [
+  "магазин",
+  "торгов",
+  "розничн",
+  "оптов",
+  "склад",
+  "рынок",
+  "торговый центр",
+  "гипермаркет",
+  "супермаркет",
+];
+
+function detectManufacturerSignal(company: BiznesinfoCompanySummary): number {
+  // Returns: 1.0 for strong manufacturer, 0.5 for medium, 0 for none
+  const haystack = buildVendorCompanyHaystack(company);
+  const nameLower = (company.name || "").toLowerCase();
+
+  // Check company name first (stronger signal)
+  const nameHasManufacturer = MANUFACTURER_KEYWORDS.some((kw) => nameLower.includes(kw.toLowerCase()));
+  const nameHasRetailer = RETAILER_KEYWORDS.some((kw) => nameLower.includes(kw.toLowerCase()));
+
+  if (nameHasManufacturer && !nameHasRetailer) return 1.0;
+  if (nameHasManufacturer) return 0.5; // Mixed signals
+
+  // Check haystack (description, rubric)
+  const haystackHasManufacturer = MANUFACTURER_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()));
+  const haystackHasRetailer = RETAILER_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()));
+
+  if (haystackHasManufacturer && !haystackHasRetailer) return 0.7;
+  if (haystackHasManufacturer) return 0.4;
+  if (haystackHasRetailer && !haystackHasManufacturer) return -0.3; // Penalize retailers
+
+  return 0; // Neutral
+}
+
 function calculateCompanyConfidence(candidate: BiznesinfoCompanySummary): ConfidenceLevel {
   let evidenceCount = 0;
 
@@ -1738,6 +1786,17 @@ function getConfidenceBadge(confidence: ConfidenceLevel): string {
   return "⚠️"; // LOW also uses warning
 }
 
+function detectExportReadiness(company: BiznesinfoCompanySummary): boolean {
+  // Check for export-related signals in company data
+  const haystack = buildVendorCompanyHaystack(company);
+  const exportKeywords = ["экспорт", "вэд", "export", "внешнеэкономич", "международн", "foreign trade"];
+  const hasExportKeyword = exportKeywords.some((kw) => haystack.toLowerCase().includes(kw.toLowerCase()));
+  // Check website for .com domain (often indicates international focus)
+  const websites = company.websites || [];
+  const hasInternationalWebsite = websites.some((w) => w && /\.com$/i.test(w.trim()));
+  return hasExportKeyword || hasInternationalWebsite;
+}
+
 function formatVendorShortlistRows(candidates: BiznesinfoCompanySummary[], maxItems = 4): string[] {
   return (candidates || []).slice(0, maxItems).map((c, idx) => {
     const name = resolveCandidateDisplayName(c);
@@ -1750,8 +1809,10 @@ function formatVendorShortlistRows(candidates: BiznesinfoCompanySummary[], maxIt
     const confidence = calculateCompanyConfidence(c);
     const badge = getConfidenceBadge(confidence);
     const confidenceNote = confidence === "LOW" ? " [проверьте данные]" : "";
+    const exportReady = detectExportReadiness(c);
+    const exportBadge = exportReady ? " 📤" : "";
     const meta = [rubric, location, contact].filter(Boolean).join("; ");
-    return `${idx + 1}. ${badge} ${name} — ${path}${meta ? ` (${meta})` : ""}${confidenceNote}`;
+    return `${idx + 1}. ${badge}${exportBadge} ${name} — ${path}${meta ? ` (${meta})` : ""}${confidenceNote}`;
   });
 }
 
@@ -3133,14 +3194,22 @@ function sanitizeAssistantReplyLinks(text: string): string {
     return cleaned;
   };
 
+  const linkToken =
+    "(?:https?:\\/\\/[A-Za-z0-9\\-._~:/?#\\[\\]@!$&()*+,;=%]+|\\/company\\/[A-Za-z0-9%\\-._~]+|(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,}(?:\\/[A-Za-z0-9\\-._~:/?#\\[\\]@!$&()*+,;=%]*)?)";
+
+  const markdownLinkRe = new RegExp("\\[[^\\]]{1,180}\\]\\(\\s*(" + linkToken + ")\\s*\\)", "giu");
+  const angleLinkRe = new RegExp("<\\s*(" + linkToken + ")\\s*>", "giu");
+  const prefixedLinkRe = new RegExp("(?:[`\"'«»“”„‘’([{<])+\\s*(" + linkToken + ")", "giu");
+  const plainLinkRe = new RegExp(linkToken, "giu");
+
   let out = text;
-  out = out.replace(/\[[^\]]{1,160}\]\((https?:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&()*+,;=%]+)\)/giu, "$1");
-  out = out.replace(/<\s*(https?:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&()*+,;=%]+)\s*>/giu, "$1");
-  out = out.replace(/(?:[`"'«»“”„‘’([{<])+https?:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&()*+,;=%]+/giu, (match) => {
-    const normalized = stripTrailingNoiseFromUrl(match);
-    return normalized || match;
+  out = out.replace(markdownLinkRe, "$1");
+  out = out.replace(angleLinkRe, "$1");
+  out = out.replace(prefixedLinkRe, (_full, link: string) => {
+    const normalized = stripTrailingNoiseFromUrl(link);
+    return normalized || link;
   });
-  out = out.replace(/https?:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&()*+,;=%]+/giu, (match) => {
+  out = out.replace(plainLinkRe, (match) => {
     const normalized = stripTrailingNoiseFromUrl(match);
     return normalized || match;
   });
@@ -10345,6 +10414,7 @@ type SourcingDomainTag =
   | "tractor"
   | "dentistry"
   | "timber"
+  | "food_service"
   | null;
 
 function detectCoreCommodityTag(sourceText: string): CoreCommodityTag {
@@ -10377,6 +10447,10 @@ function detectSourcingDomainTag(sourceText: string): SourcingDomainTag {
   if (/(свекл|свёкл|буряк|бурак|beet|beetroot|корнеплод)/u.test(normalized)) return "beet";
   if (/(лук|репчат|onion)/u.test(normalized)) return "onion";
   if (/(молок|молоч|dairy|milk)/u.test(normalized)) return "milk";
+  // Food service / cafe / restaurant suppliers domain
+  if (/(кафе|ресторан|столов|общепит|кейтеринг|общественное питание|кухн|пекарн|кондитерск|food\s*service|cafe|restaurant|catering)/u.test(normalized)) {
+    return "food_service";
+  }
   return null;
 }
 
@@ -10408,6 +10482,12 @@ function lineConflictsWithSourcingDomain(line: string, domain: SourcingDomainTag
   }
   if (domain === "flour") {
     return /(автозапчаст|auto\s*parts|car\s*parts|асфальт|фасад|кафе|банкет|шиномонтаж|стомат|dental|лес|древес|пиломат|трактор|минитракт)/u.test(
+      normalized,
+    );
+  }
+  if (domain === "food_service") {
+    // Filter out completely unrelated businesses (auto, construction, etc.)
+    return /(автозапчаст|auto\s*parts|car\s*parts|автосервис|сто\b|шиномонтаж|строительн|ремонт\s+квартир|ремонт\s+офис|металлопрокат|подшип|цемент|кирпич|асфальт|стомат|dental|юридическ|регистрац\p{L}*\s+бизнес|森林|лесоматериал|пиломат|трактор|сельхозтехник)/u.test(
       normalized,
     );
   }
@@ -10843,7 +10923,7 @@ function countStrongVendorSearchTerms(terms: string[]): number {
 }
 
 function fallbackCommoditySearchTerms(tag: CoreCommodityTag): string[] {
-  if (tag === "footwear") return ["обувь", "производство обуви", "обувная фабрика", "shoe", "footwear"];
+  if (tag === "footwear") return ["обувь", "производство обуви", "обувная фабрика", "производитель обуви", "мужская обувь", "классическая обувь", "обувной цех", "shoe", "footwear", "shoe manufacturer", "footwear factory"];
   if (tag === "flour") return ["мука", "мукомольный", "мельница", "flour", "mill"];
   if (tag === "juicer") return ["соковыжималка", "соковыжималки", "juicer", "kitchen appliance"];
   if (tag === "tractor") return ["минитрактор", "трактор", "сельхозтехника", "tractor"];
@@ -11107,11 +11187,14 @@ function filterAndRankVendorCandidates(params: {
   const scored = scoped.map((c) => {
     const confidence = calculateCompanyConfidence(c);
     const confidenceBoost = confidence === "HIGH" ? 1.3 : confidence === "MEDIUM" ? 1.0 : 0.7;
+    const manufacturerSignal = detectManufacturerSignal(c);
+    const manufacturerBoost = manufacturerSignal > 0 ? 1.0 + manufacturerSignal * 0.3 : 1.0 + manufacturerSignal * 0.5; // Boost manufacturers, penalize retailers
     return {
       company: c,
       relevance: scoreVendorCandidateRelevance(c, termsForScoring),
       contacts: candidateContactCompletenessScore(c),
       confidenceBoost,
+      manufacturerBoost,
       haystack: buildVendorCompanyHaystack(c),
     };
   });
@@ -11198,6 +11281,8 @@ function filterAndRankVendorCandidates(params: {
     }
     if (b.relevance.strongMatches !== a.relevance.strongMatches) return b.relevance.strongMatches - a.relevance.strongMatches;
     if (b.contacts !== a.contacts) return b.contacts - a.contacts;
+    // Apply manufacturer boost: manufacturers get priority over retailers
+    if ((b.manufacturerBoost || 1) !== (a.manufacturerBoost || 1)) return (b.manufacturerBoost || 1) - (a.manufacturerBoost || 1);
     // Apply confidence boost: HIGH confidence companies get priority over LOW
     if ((b.confidenceBoost || 1) !== (a.confidenceBoost || 1)) return (b.confidenceBoost || 1) - (a.confidenceBoost || 1);
     return (a.company.name || "").localeCompare(b.company.name || "", "ru", { sensitivity: "base" });
@@ -11757,6 +11842,7 @@ function buildAssistantSystemPrompt(): string {
     "- In clarifying checklists use wording 'что продаете/покупаете'.",
     "- If user asks to export/unload company data, provide only legal-safe format (public directory cards only + privacy limitations).",
     "- For requests like 'collect N companies', provide first 3-5 concrete candidates immediately when available, then ask minimal clarifying questions.",
+    "- SHORTLIST COUNT RULE: When user explicitly requests N companies (e.g., '3-5 companies', 'найди 5 поставщиков'), you MUST return exactly N companies if any exist in the catalog. Never return fewer than requested without explicit explanation. If fewer than N exist, state 'Found only X confirmed companies' and list all found. Never use placeholder/placeholder profiles.",
     "- For ranking/checklist responses, prefer numbered items (1., 2., 3.).",
     "- In supplier-sourcing dialogs, never switch to company-listing instructions (/add-company, tariffs, moderation) unless user explicitly asks about adding own company.",
     "- If such company does not exist in portal cards, state this directly and avoid assumptions.",
