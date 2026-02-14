@@ -1,0 +1,113 @@
+Now I have all the evidence I need. Here is the advisory JSON:
+
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "The UV017 run failed entirely due to a 502 Bad Gateway from nginx before any checks could run. This is an infrastructure issue (missing proxy_read_timeout for the long AI request), not a prompt issue. The judge notes from a prior run also reveal a persistent context-loss bug in multi-turn shortlist flows. Two root causes need fixing: (1) nginx proxy timeout too low for the AI endpoint, and (2) the context-carry logic in looksLikeTopCompaniesRequestWithoutCriteria still falls through when the user's Turn 2 message is phrased as a shortlist request without explicit shortlist keywords.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix nginx 502 timeout on /api/ai/request",
+      "why": "The entire QA run scores 0% because nginx returns 502 before the upstream Next.js route responds. The default proxy_read_timeout is 60s; the AI route regularly takes 14s+ and can spike to 60s+ on cold LLM calls or multi-tool chains (website scan, internet search). Without fixing this, no scenario can be validated at all.",
+      "expectedImpact": "Eliminates 100% of hard-error 502 failures; all scenario turns become evaluable.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix Turn-2 context loss on shortlist requests without explicit shortlist keywords",
+      "why": "The minimax judge flagged 'complete context loss in turn 2 — asked for product/city despite having complete context (beet, 500kg, Minsk) from turn 1'. The UV017.T2 user message ('Сделай shortlist 3 релевантных поставщиков. Если точных совпадений нет — честно скажи и дай 3 рабочих альтернативы...') contains 'shortlist' but also contains 'рабочих альтернативы запроса' which may match the criteria-question branch before the shortlist bypass kicks in. The regex gate in looksLikeTopCompaniesRequestWithoutCriteria is bypassed correctly for explicit shortlist, but the buildVendorLookupContext may still reset shouldLookup=false for Turn 2 when it sees 'альтернативы' and no geo signal in the current message.",
+      "expectedImpact": "Fixes context continuity for UV017 and similar multi-turn shortlist-after-sourcing scenarios. Expected to raise usefulness from 1→4+ for this pattern.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add proxy_read_timeout / proxy_send_timeout for all AI-heavy endpoints",
+      "why": "Even after the basic timeout fix, website-scan and internet-search chains can take 30-90s. A blanket 120s timeout on the AI location block prevents intermittent 502s during heavy multi-tool turns.",
+      "expectedImpact": "Reduces intermittent 502 rate across all multi-turn scenarios to near zero.",
+      "validationScenarios": ["UV012", "UV013", "UV019", "UV022"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add QA-runner retry on 502 with exponential backoff",
+      "why": "Even with nginx timeout fixes, transient 502s (container restart, OOM kill) can poison an entire run. The QA runner already has busyRetry and rateLimitRetry logic but no 502-specific retry path.",
+      "expectedImpact": "Reduces false-negative QA runs from infra blips; improves signal-to-noise of pass rate metric.",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Add proxy_read_timeout 120s to nginx AI endpoint location",
+      "action": "In nginx/conf.d/default.conf, add a dedicated `location /api/ai/` block (or add directives to the existing `location /`) with `proxy_read_timeout 120s; proxy_connect_timeout 10s; proxy_send_timeout 120s;`. This prevents 502s on long AI calls.",
+      "implementationHint": "nginx/conf.d/default.conf — add `proxy_read_timeout 120s;` inside the `location /` block, or better yet create `location /api/ai/ { ... }` with these settings.",
+      "expectedImpact": "Eliminates 502 hard-errors; unblocks all scenario evaluation.",
+      "risk": "Low — only affects timeout thresholds; no functional change to app.",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Harden vendorLookupContext to carry forward product+geo from history on shortlist turns",
+      "action": "In the `buildVendorLookupContext` function (route.ts ~line 300-400), when the current message matches shortlist intent AND history contains a sourcing message with product+geo, force `shouldLookup=true`, `searchText` from history's product, and `city`/`region` from history's geo — even if the current message itself has no product/geo tokens. Currently the code only does this for `explicitShortlistRequest` inside `looksLikeTopCompaniesRequestWithoutCriteria` but the actual lookup context builder may still return `shouldLookup=false`.",
+      "implementationHint": "route.ts — find `buildVendorLookupContext` function. Add early-return path: if `isShortlistIntent(message) && getLastUserSourcingMessage(history)` → derive searchText/city/region from that history message and return `{shouldLookup:true, derivedFromHistory:true, ...}`.",
+      "expectedImpact": "Fixes UV017 Turn 2 context loss; expected to fix similar patterns in UV001.T3, UV004.T3, UV008.T3.",
+      "risk": "Medium — over-aggressive carry-forward could produce stale lookups if user changes topic. Mitigate by checking that no explicit topic-change markers exist in the current message.",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV001", "UV004", "UV008"]
+    },
+    {
+      "id": "R3",
+      "area": "qa",
+      "title": "Add 502/503 retry logic to QA runner",
+      "action": "In the QA runner's turn execution loop, treat HTTP 502/503 as retryable (similar to existing busyRetry logic). Add up to 2 retries with 3s/6s backoff before marking the turn as a hard error.",
+      "implementationHint": "app/qa/ai-request/ — find the turn execution function that handles `apiError`. Add a retry branch for status 502/503 before recording hardError.",
+      "expectedImpact": "Prevents transient infra blips from failing entire scenarios; improves QA signal reliability.",
+      "risk": "Low — worst case is slightly longer QA runs on genuine downtime.",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Strengthen anti-noise filter for educational institutions in commodity sourcing",
+      "action": "The UV017 scenario specifically checks that educational institutions (колледж, университет, институт, лицей, школа) are not returned as suppliers. The minimax judge noted Turn 1 was clean in a prior run. Ensure the post-retrieval filter in `filterNoisyCandidates` or equivalent explicitly excludes companies whose rubric/name matches educational-institution patterns when the query is commodity-sourcing.",
+      "implementationHint": "route.ts — find candidate filtering near `formatVendorShortlistRows`. Add exclusion regex: `/колледж|университет|институт|лицей|школа|академи/iu` on company name and rubric fields.",
+      "expectedImpact": "Ensures UV017.T1.C3 (excludes_all educational institutions) passes consistently.",
+      "risk": "Low — false positives (legitimate companies with 'институт' in name) are rare in commodity sourcing context.",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add explicit 'no-criteria-question' instruction when history contains full sourcing context",
+      "action": "In the system prompt builder, when history already contains product + city + volume, add a directive: 'Пользователь уже указал товар, объем и город в предыдущих сообщениях. НЕ СПРАШИВАЙ повторно эти параметры. Используй контекст из истории.' This prevents the LLM from generating a criteria-question even if the code path doesn't trigger the shortlist bypass.",
+      "implementationHint": "route.ts — in the system prompt assembly section (search for 'GUARDRAILS' or system message construction). Add conditional instruction when `vendorLookupContext.derivedFromHistory === true`.",
+      "expectedImpact": "Belt-and-suspenders fix for context loss. Even if the code path incorrectly asks for criteria, the prompt-level instruction prevents the LLM from doing so.",
+      "risk": "Low — instruction is conditional and only fires when history context is confirmed.",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV001", "UV005"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV017"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "UV017 all 3 turns complete without hard-error (no 502)",
+      "UV017 strict pass = true",
+      "UV017 average usefulness ≥ 3.5 across both judges",
+      "UV017.T1.C3 excludes_all educational institutions = pass",
+      "UV017.T2 shortlist or honest fallback with alternatives = pass",
+      "Overall pass rate across full regression suite ≥ 0.8",
+      "genericFallbackRate ≤ 0.35 for both judges",
+      "averageUserSatisfaction ≥ 0.72 for both judges"
+    ]
+  }
+}
+```

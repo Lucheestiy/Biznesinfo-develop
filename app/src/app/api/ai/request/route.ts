@@ -503,24 +503,59 @@ function looksLikeTopCompaniesRequestWithoutCriteria(
   const text = normalizeComparableText(message || "");
   if (!text) return false;
 
-  // CRITICAL: If user explicitly asks for shortlist/ranking from existing candidates,
+  // CRITICAL FIX for UV017 and multi-turn scenarios:
+  // If user explicitly asks for shortlist/ranking/top-N from existing candidates,
   // NEVER ask for criteria - just use existing candidates from history.
-  // This is the primary fix for UV017 and similar multi-turn scenarios.
-  const explicitShortlistRequest = /(shortlist|топ|рейтинг|ранжир|排名)/iu.test(text) && 
-    /(выбер|подбер|состав|сделай|формир|rank|select|list)/iu.test(text);
+  // This must be VERY aggressive to prevent context loss.
   
-  if (explicitShortlistRequest) {
-    // ROBUST FIX: If this is an explicit shortlist request AND we have ANY history from previous turns,
-    // do NOT ask for criteria. The user already gave context in previous messages.
-    // This is more aggressive but ensures UV017 and similar multi-turn scenarios work correctly.
-    const hasHistoryWithAnyContent = (options?.history?.length || 0) > 0;
-    const hasAnyCandidateContext = 
+  // Enhanced explicit shortlist patterns - more comprehensive to catch variations
+  const explicitShortlistPatterns = [
+    // English patterns
+    /\bshortlist\b/i,
+    /\btop\s*\d+/i,
+    /\branking\b/i,
+    /\brank\s*(the|by|list)?/i,
+    // Russian patterns
+    /\b(shortlist|топ|рейтинг|ранжир|排名)\b/iu,
+    // Numbers with top/criteria
+    /\d+\s*(лучш|лидер|фаворит)/iu,
+  ];
+  
+  const actionPatterns = [
+    // Russian action verbs
+    /\b(выбер|подбер|состав|сделай|формир|выбирай|подбирай|составь|сформируй|ранжируй)\b/iu,
+    /\b(дай|покажи|предлож|рекоменду|отобр)\b/iu,
+    // English
+    /\b(select|pick|choose|make|create|build|show|give|recommend)\b/i,
+  ];
+  
+  const hasExplicitShortlistPattern = explicitShortlistPatterns.some(p => p.test(text));
+  const hasActionPattern = actionPatterns.some(p => p.test(text));
+  
+  // Also check if message mentions "альтернативы" (alternatives) - this is a fallback request, not criteria request
+  const hasAlternativesMention = /\bальтернатив/i.test(text);
+  
+  if (hasExplicitShortlistPattern && hasActionPattern) {
+    // SUPER AGGRESSIVE FIX: If this is ANY kind of explicit shortlist/ranking request,
+    // DO NOT ask for criteria if there's ANY history at all.
+    // This is critical for UV017 where Turn 2 says "Сделай shortlist..." after Turn 1 search.
+    const hasAnyHistory = (options?.history?.length || 0) > 0;
+    const hasAnyCandidateInHistory = 
       (options?.vendorCandidates?.length || 0) > 0 ||
       (options?.history?.some((m) => m.role === "assistant" && /\/company\//i.test(m.content || "")) ?? false) ||
       Boolean(getLastUserSourcingMessage(options?.history || []));
     
-    if (hasHistoryWithAnyContent || hasAnyCandidateContext) {
-      // User is asking for shortlist AND we have context from previous turns - do NOT ask for criteria
+    // If there's ANY history or candidates, return FALSE (don't ask for criteria)
+    // This is the key fix for UV017 context loss
+    if (hasAnyHistory || hasAnyCandidateInHistory) {
+      // User is asking for shortlist/ranking AND we have context from previous turns - do NOT ask for criteria
+      // Instead, the system should do the shortlist from existing candidates
+      return false;
+    }
+    
+    // Even if no history, if it's explicit shortlist with alternatives mention,
+    // don't ask for criteria - just do the shortlist or honest fallback
+    if (hasAlternativesMention) {
       return false;
     }
   }

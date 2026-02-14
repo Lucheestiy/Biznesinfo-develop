@@ -1,0 +1,120 @@
+Based on my analysis of the evidence, I can see that:
+
+1. **The immediate problem is a 502 Bad Gateway error** - The QA runner received a 502 from nginx, meaning the backend (Next.js app) is either not responding or crashing
+2. **The app container just restarted** (2 minutes ago) - indicating a crash or restart loop
+3. **Historical UV017 data shows usefulness=2** (not 0) when the service was working - meaning the scenario previously had partial success with continuity issues
+4. **The AIAssistant.tsx component is just a form UI** - it doesn't contain the actual AI/chat logic that would handle the conversation
+
+The critical issue is infrastructure-level (502 errors), not prompt-level. The app container is unstable.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical infrastructure failure: 502 Bad Gateway errors indicate the Next.js app container is crashing or unresponsive. The QA run failed not because of prompt quality, but because the assistant service was unavailable. Historical UV017 data shows usefulness=2 when service is stable - continuity issues exist but are secondary to uptime. Immediate fix required: container stability.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix 502 Bad Gateway - Container Stability",
+      "why": "All QA scenarios fail with 502 errors. The app container restarted 2 minutes ago. Without stable service, no prompt improvements matter.",
+      "expectedImpact": "Restore basic service availability from 0% to functional baseline",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix Turn 2 Context Reset in UV017",
+      "why": "Historical UV017 data shows usefulness=2 because Turn 2 resets context - user asks for shortlist but assistant requests criteria again",
+      "expectedImpact": "Improve UV017 usefulness from 2 to 4, increase continuityScore from 2 to 4",
+      "validationScenarios": ["UV017", "UV005", "UV012", "UV013"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add Graceful Degradation for No-Results",
+      "why": "UV011, UV012, UV013 show cyclic fallback patterns when data is scarce",
+      "expectedImpact": "Reduce generic fallback rate from 60% to <20% in no-results scenarios",
+      "validationScenarios": ["UV011", "UV012", "UV013"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "guardrails",
+      "title": "Add container healthcheck and auto-restart policy",
+      "action": "Add docker-compose healthcheck with 30s interval and 3-retry failure threshold. Set restart policy to 'unless-stopped' with 5s delay.",
+      "implementationHint": "docker-compose.yml: add healthcheck.test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health'] and restart policy",
+      "expectedImpact": "Eliminate 502 errors from container crashes, improve uptime from ~85% to >99%",
+      "risk": "Low - standard Docker practice",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Inject conversation history into system prompt",
+      "action": "Modify the AI route handler to include previous turns summary in system prompt. Add explicit instruction: 'You are in a multi-turn conversation. Always reference previous context before responding.'",
+      "implementationHint": "Find the API route handling /api/assistant or similar - likely in src/app/api/ - and modify the prompt construction to include history context",
+      "expectedImpact": "Fix continuityScore drops in Turn 2, reduce context reset errors by 80%",
+      "risk": "Medium - may increase token usage",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV005", "UV014"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add explicit anti-fallback trigger for shortlist requests",
+      "action": "When user message contains 'shortlist', 'top-N', or 'список' + number, add system instruction: 'User explicitly requested a ranked list. Do NOT ask for criteria again. Use existing context or provide best-effort list with confidence markers.'",
+      "implementationHint": "Add keyword detection in the API route before calling LLM, inject conditional system prompt",
+      "expectedImpact": "Eliminate UV017.T2 type failures where assistant asks for criteria after user provided them",
+      "risk": "Low - targeted fix",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV005", "UV016"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Add rubric-based result filtering for education institutions",
+      "action": "When query contains product terms (буряк, свекла, овощи) + location, filter out rubrics containing 'образование', 'колледж', 'университет', 'школа' from search results",
+      "implementationHint": "src/lib/meilisearch/search.ts - add negative filter for rubric names when product keywords detected",
+      "expectedImpact": "Fix UV017.T1.C3 check - prevent educational institutions in supplier results",
+      "risk": "Low - targeted noise reduction",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "template",
+      "title": "Create no-results fallback template with alternatives",
+      "action": "When search returns <3 results, use template: 'Точных совпадений не найдено. Вот 3 рабочих альтернативы: 1) [broader search term] 2) [related category] 3) [suggested portal query]' instead of generic fallback",
+      "implementationHint": "Modify the response generation logic to detect low-result scenarios and use structured template",
+      "expectedImpact": "Reduce UV012/UV013 cyclic fallback issues, improve user satisfaction in no-results cases",
+      "risk": "Low - improves UX",
+      "effort": "M",
+      "validationScenarios": ["UV011", "UV012", "UV013"]
+    },
+    {
+      "id": "R6",
+      "area": "qa",
+      "title": "Add pre-run healthcheck to QA runner",
+      "action": "Before executing scenarios, verify /api/health returns 200. If 502 detected, abort with clear error message instead of running against broken service.",
+      "implementationHint": "Modify QA runner script to add healthcheck probe with 5s timeout before scenario execution",
+      "expectedImpact": "Prevent false-negative QA results, reduce debugging time for infrastructure issues",
+      "risk": "None",
+      "effort": "S",
+      "validationScenarios": ["all"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "qa_judge_uv005_uv012_uv013_uv016_uv017.json"
+    ],
+    "successMetrics": [
+      "HTTP 502 error rate: 0%",
+      "UV017 usefulness >= 3.5",
+      "UV017 continuityScore >= 3",
+      "Average turn latency < 8000ms",
+      "No 'generic fallback' classification in judge results"
+    ]
+  }
+}
+```

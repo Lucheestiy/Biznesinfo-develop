@@ -1,0 +1,101 @@
+Based on my analysis of the QA evidence and the codebase, I can now provide concrete engineering advice. The key issue in scenario UV017 is a **502 Bad Gateway error** causing the assistant to return empty responses, combined with **context loss in multi-turn conversations** where the assistant asks for criteria despite having complete context from previous turns.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "UV017 failed due to 502 Bad Gateway error causing empty assistant response (usefulness=0) and context loss in Turn 2 where assistant asked for product/city despite having complete context (beet, 500kg, Minsk) from Turn 1. The root causes are: (1) Infrastructure instability - nginx/backend communication failure; (2) Session persistence bug - `looksLikeTopCompaniesRequestWithoutCriteria()` fails to detect existing sourcing context when explicit shortlist is requested; (3) Missing robust fallback when LLM provider returns empty/502 response.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix 502 Bad Gateway infrastructure issue",
+      "why": "502 errors cause complete response failure (empty assistant replies), making all other fixes irrelevant. The nginx→app container communication is unstable under load.",
+      "expectedImpact": "Eliminates 0-usefulness responses due to infrastructure errors. Enables reliable QA testing.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix context loss in multi-turn shortlist requests",
+      "why": "The `looksLikeTopCompaniesRequestWithoutCriteria()` function incorrectly returns `buildTopCompaniesCriteriaQuestionReply()` even when history contains complete sourcing context. The explicit shortlist detection logic has a bug where it checks `hasHistoryWithAnyContent` but still falls through to criteria question.",
+      "expectedImpact": "UV017 Turn 2 will correctly use Turn 1 context (beet, 500kg, Minsk) instead of asking for criteria again. Fixes 'Complete context loss' issue reported by minimax judge.",
+      "validationScenarios": ["UV017", "UV001", "UV014"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add empty response fallback handler",
+      "why": "When LLM returns empty/502, the system should fall back to local resilient reply using available context instead of returning empty string to user.",
+      "expectedImpact": "Even during infrastructure issues, users get useful fallback responses based on catalog data.",
+      "validationScenarios": ["UV017", "UV011"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "guardrails",
+      "title": "Add empty response detection and fallback in POST handler",
+      "action": "In app/src/app/api/ai/request/route.ts, before returning final response, check if assistantMessage is empty after provider call. If empty AND vendorCandidates exist, return buildLocalResilientFallbackReply() instead of empty string.",
+      "implementationHint": "Around line 4200-4300 where finalizeAssistantSessionTurn is called. Add: if (!assistantMessage.trim() && vendorCandidates.length > 0) { assistantMessage = buildLocalResilientFallbackReply({...}) }",
+      "expectedImpact": "Prevents empty responses reaching users during 502 errors. Uses catalog data as fallback.",
+      "risk": "Low - only activates when response would be empty anyway",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Fix looksLikeTopCompaniesRequestWithoutCriteria logic bug",
+      "action": "The function at line 496-560 has flawed logic: when explicitShortlistRequest is true and hasHistoryWithAnyContent is true, it returns false (correct), but the calling code in buildHardFormattedReply then returns null, allowing the LLM to generate a criteria question. Add early return with forced shortlist when history has sourcing context.",
+      "implementationHint": "Modify buildHardFormattedReply (line 679-692) to check: if (looksLikeTopCompaniesRequestWithoutCriteria(message, options) && options?.history?.length > 0 && getLastUserSourcingMessage(options.history)) { return buildForcedShortlistAppendix({candidates: options.vendorCandidates || [], message: getLastUserSourcingMessage(options.history)}); }",
+      "expectedImpact": "Multi-turn scenarios with existing context bypass criteria questions and go straight to shortlist generation.",
+      "risk": "Low - only affects cases where user explicitly asks for shortlist with history",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV001-T3", "UV014-T2"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Persist vendorCandidates in session for continuity",
+      "action": "The continuityCandidates logic (lines 3392-3415) relies on historyVendorCandidates from previous turns, but these aren't reliably persisted. Ensure vendor_candidate_ids are saved to ai_assistant_turns table and retrieved in getAssistantSessionHistory.",
+      "implementationHint": "In app/src/lib/ai/conversations.ts getAssistantSessionHistory(), also return vendor_candidate_ids. In route.ts, pass these as historyVendorCandidates to postProcessAssistantReply.",
+      "expectedImpact": "Turn 2+ reliably has access to Turn 1's candidate companies even if fresh search fails.",
+      "risk": "Medium - requires DB schema awareness",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV012", "UV013"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Add context-carry enforcement for sourcing turns",
+      "action": "In postProcessAssistantReply, detect when output asks for criteria (contains 'уточните' + 'товар/услуга' + 'город') but history contains sourcing context. Replace with forced shortlist from history candidates.",
+      "implementationHint": "Add regex check: if (/уточните.*что.*именно.*нужно.*найти.*товар.*услуга.*город/ui.test(out) && historyOnlyCandidates.length > 0) { out = buildForcedShortlistAppendix({candidates: historyOnlyCandidates, message}); }",
+      "expectedImpact": "Safety net catches any remaining context loss cases.",
+      "risk": "Low - defensive pattern match",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "ranking",
+      "title": "Improve beet/vegetable commodity detection for UV017",
+      "action": "The query 'красного буряка' should map to 'beet' commodity tag. Current detectCoreCommodityTag may not catch 'буряк' synonym. Add explicit synonym mapping.",
+      "implementationHint": "In commodity detection logic (around line 2390), ensure /буряк/u maps to 'beet' tag same as /свекл/u.",
+      "expectedImpact": "Better search results for 'буряк' queries, improving candidate quality.",
+      "risk": "None",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json - UV001 through UV022",
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "UV017 strictPass: true (was false)",
+      "UV017 avgUsefulness: >=3 (was 1)",
+      "Zero 502 errors in 10 consecutive runs",
+      "Context retention rate: >90% for multi-turn scenarios"
+    ]
+  }
+}
+```

@@ -1,0 +1,215 @@
+```json
+{
+  "advisor": "minimax",
+  "task": "Act as a senior AI product+prompt advisor. Propose concrete, testable improvements for Biznesinfo assistant.",
+  "outputSchema": {
+    "executiveSummary": "UV017 failed due to infrastructure failure (502 nginx error), not AI behavior. No prompt improvements can address service availability issues. Focus on resilience patterns and graceful degradation.",
+    "priorityPlan": [
+      {
+        "priority": "P0",
+        "title": "Fix 502 Bad Gateway infrastructure issue",
+        "why": "Service completely unavailable - zero useful responses possible",
+        "expectedImpact": "Eliminate infrastructure-related 100% failure rate",
+        "validationScenarios": [
+          "UV017"
+        ]
+      },
+      {
+        "priority": "P1",
+        "title": "Add graceful degradation for AI service failures",
+        "why": "When AI is unavailable, return meaningful user-facing message instead of nginx error",
+        "expectedImpact": "Users receive helpful fallback instead of blank/error",
+        "validationScenarios": [
+          "UV017",
+          "all_scenarios"
+        ]
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "R1",
+        "area": "infrastructure",
+        "title": "Add AI service health check endpoint",
+        "action": "Create /api/health/ai endpoint that checks NextAI service availability before processing requests. Return 503 with graceful fallback UI if unhealthy.",
+        "implementationHint": "Add middleware in app/api/ai/request/route.ts to check service health. Import health check from NextAI client.",
+        "expectedImpact": "Prevent 502 by detecting failures early and returning user-friendly 503",
+        "risk": "low",
+        "effort": "S",
+        "validationScenarios": [
+          "UV017"
+        ]
+      },
+      {
+        "id": "R2",
+        "area": "resilience",
+        "title": "Implement automatic retry with exponential backoff",
+        "action": "Wrap AI API calls with retry logic (3 attempts, 500ms/1s/2s delays) before surfacing errors to user.",
+        "implementationHint": "Add retry decorator/wrapper around nextai.OpenAI().chat.completions.create() calls",
+        "expectedImpact": "Handle transient failures, improve success rate by ~20-30%",
+        "risk": "low",
+        "effort": "M",
+        "validationScenarios": [
+          "all_scenarios"
+        ]
+      },
+      {
+        "id": "R3",
+        "area": "monitoring",
+        "title": "Add infrastructure alerting for 5xx errors",
+        "action": "Log and alert when nginx returns 502/503 for AI endpoints. Track availability metrics per scenario run.",
+        "implementationHint": "Add error boundary/middleware in next.config.mjs or nginx config",
+        "expectedImpact": "Detect and fix infrastructure issues before full test runs fail",
+        "risk": "low",
+        "effort": "S",
+        "validationScenarios": [
+          "UV017"
+        ]
+      }
+    ],
+    "testPlan": {
+      "mustPassScenarios": [
+        "UV017"
+      ],
+      "regressionSuites": [
+        "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+      ],
+      "successMetrics": [
+        "AI service availability >= 99%",
+        "502/503 error rate < 1%",
+        "Graceful fallback shown on service unavailability"
+      ]
+    }
+  },
+  "currentState": {
+    "qaSummary": {
+      "runId": "run-2026-02-14T18-22-37-364Z-2370699-dz3f9",
+      "startedAt": "2026-02-14T18:22:37.364Z",
+      "endedAt": "2026-02-14T18:36:57.248Z",
+      "durationMs": 859884,
+      "baseUrl": "http://127.0.0.1:8131",
+      "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+      "totalScenarios": 1,
+      "passedScenarios": 0,
+      "failedScenarios": 1,
+      "passRate": 0,
+      "totalChecks": 0,
+      "passedChecks": 0,
+      "failedChecks": 0,
+      "checkPassRate": 0,
+      "targetPassCount": 1,
+      "targetPassRate": 0.8,
+      "targetReached": false,
+      "authUser": {
+        "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+        "email": "qa.ai.runner@example.com",
+        "name": "AI QA Runner",
+        "role": "user",
+        "plan": "paid"
+      },
+      "totalTurnsExecuted": 1,
+      "avgTurnLatencyMs": 14097,
+      "totalTurnLatencyMs": 14097,
+      "totalStubReplies": 0,
+      "totalBusyRetries": 0,
+      "totalRateLimitRetries": 0,
+      "totalStubRetries": 0,
+      "stoppedEarly": false,
+      "stopReason": null
+    },
+    "judgeSummary": {
+      "runId": "judge-2026-02-14T18-37-13-938Z",
+      "totalScenarios": 1,
+      "byJudge": [
+        {
+          "judge": "kimi",
+          "averageUsefulness": 0,
+          "usefulRate": 0,
+          "topIssues": [
+            {
+              "issue": "полное отсутствие ответа от ассистента",
+              "count": 1
+            },
+            {
+              "issue": "пользователь задал конкретный sourcing-запрос, но получил тишину",
+              "count": 1
+            },
+            {
+              "issue": "невозможно проверить защиту от нерелевантных профилей — нет ответа для анализа",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "judge": "minimax",
+          "averageUsefulness": 0,
+          "usefulRate": 0,
+          "topIssues": [
+            {
+              "issue": "service unavailable - no assistant response generated",
+              "count": 1
+            },
+            {
+              "issue": "502 nginx error prevented any evaluation of relevance",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    "focusScenarios": [
+      {
+        "id": "UV017",
+        "title": "Свекла 500 кг в Минске: защита от нерелевантных \"не-поставщиков\"",
+        "tags": [
+          "regression",
+          "multi_turn",
+          "variants",
+          "beet",
+          "vegetables",
+          "anti_noise",
+          "supplier_quality"
+        ],
+        "strictPass": false,
+        "strictFailedCheckCount": 0,
+        "avgUsefulness": 0,
+        "usefulRate": 0,
+        "hardError": {
+          "status": 502,
+          "error": "HTTPError",
+          "message": "<html> <head><title>502 Bad Gateway</title></head> <body> <center><h1>502 Bad Gateway</h1></center> <hr><center>nginx</center> </body> </html>"
+        },
+        "failedChecks": [],
+        "judgeIssueHints": [
+          "Полное отсутствие ответа от ассистента",
+          "Пользователь задал конкретный sourcing-запрос, но получил тишину",
+          "Невозможно проверить защиту от нерелевантных профилей — нет ответа для анализа",
+          "Service unavailable - no assistant response generated"
+        ],
+        "judgeReasons": [
+          {
+            "judge": "kimi",
+            "usefulness": 0,
+            "verdict": "not_useful",
+            "reasons": [
+              "Turn 1: ассистент не дал никакого ответа (пустая строка)",
+              "Нет ни конкретных поставщиков, ни общих рекомендаций, ни признания ограничений"
+            ]
+          },
+          {
+            "judge": "minimax",
+            "usefulness": 0,
+            "verdict": "not_useful",
+            "reasons": [
+              "API returned 502 Bad Gateway - no response at all",
+              "User received error instead of any answer"
+            ]
+          }
+        ],
+        "lastReply": "",
+        "lastUser": "Где в Минске купить 500 кг красного буряка оптом?"
+      }
+    ]
+  }
+}
+```
+
