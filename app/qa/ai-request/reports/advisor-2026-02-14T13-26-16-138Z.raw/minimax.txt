@@ -1,0 +1,115 @@
+{
+  "advisor": "minimax",
+  "executiveSummary": "The Biznesinfo assistant has three critical failure modes causing 86% pass rate but only 36% useful rate: (1) Context amnesia across turns where specific user constraints are ignored, (2) Generic fallback paralysis where the assistant asks users to repeat already-provided criteria instead of making sourcing decisions, and (3) Company identification failures where wrong entities are returned and hallucinated. Fix the context retention layer and add disambiguation guards for catalog navigation.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix context retention across conversation turns",
+      "why": "Multiple scenarios fail because assistant loses user-provided constraints between turns (UV006, UV017, UV022). Users must not repeat criteria they've already given.",
+      "expectedImpact": "Eliminate 'generic fallback after specific constraints' pattern - affects 6 of 12 failed judge evaluations",
+      "validationScenarios": ["UV006.T3", "UV017.T2", "UV022.T2"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add company entity grounding guardrails",
+      "why": "Assistant returns wrong companies (UV019: Del Media instead of Iris Inter Group, UV012: Playmoda underwear instead of shoe manufacturer) - complete hallucination of target entity",
+      "expectedImpact": "Prevent hallucinated company matches in 4+ scenarios",
+      "validationScenarios": ["UV019.T1", "UV020.T1", "UV021.T1", "UV012.T1"]
+    },
+    {
+      "priority": "P1",
+      "title": "Replace [проверьте данные] placeholders with real data or explicit 'no data'",
+      "why": "Turn 3 responses contain placeholder text that signals low effort and fails user expectations (UV002, UV014)",
+      "expectedImpact": "Improve perceived helpfulness from generic to concrete in shortlist scenarios",
+      "validationScenarios": ["UV002.T3", "UV014.T3"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce website verification commitment",
+      "why": "Assistant promises verification then deflects (UV012, UV013). Users explicitly request verification but receive templates instead of confirmed data",
+      "expectedImpact": "Eliminate 'verification promise without fulfillment' pattern",
+      "validationScenarios": ["UV012.T2", "UV013.T2"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add explicit constraint echo in system prompt",
+      "action": "Add to assistant system prompt: 'Before responding in Turn N, explicitly echo the constraints the user provided in Turns 1..N-1. Never ask for criteria the user has already specified.'",
+      "implementationHint": "app/src/prompts/assistant-system.md or similar - add constraint_carryover rule",
+      "expectedImpact": "Prevents amnesia pattern in UV006, UV017, UV022, UV003",
+      "risk": "Low - defensive behavior only",
+      "effort": "S",
+      "validationScenarios": ["UV006.T3", "UV017.T2"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Add entity confirmation gate before fallback",
+      "action": "Before generic catalog navigation fallback, require explicit entity confirmation: 'Before suggesting catalog categories, confirm: what exact company name did I find? If name mismatch, show top 3 candidates with names matching user's entity.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add entity_match_validation in fallback logic",
+      "expectedImpact": "Prevents wrong company hallucinations in UV019, UV020, UV021",
+      "risk": "Low - adds safety check",
+      "effort": "M",
+      "validationScenarios": ["UV019.T1", "UV020.T1"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Remove placeholder generation from shortlist template",
+      "action": "Replace shortlist template that generates [проверьте данные] with explicit 'Data unavailable in current catalog slice' plus actionable next step (e.g., 'Request data during call: price, MOQ, lead time')",
+      "implementationHint": "app/src/templates/supplier-shortlist.md - replace placeholder with unavailable_data block",
+      "expectedImpact": "Eliminates placeholder spam in UV002, UV014",
+      "risk": "Low - improves clarity",
+      "effort": "S",
+      "validationScenarios": ["UV002.T3", "UV014.T3"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Implement verification commitment tracking",
+      "action": "Track verification promises to user. If verification was promised but not completed, surface as explicit TODO in next turn: 'Verification incomplete - continue or acknowledge limitation?'",
+      "implementationHint": "AssistantClient.tsx - add verification_state tracking in conversation context",
+      "expectedImpact": "Prevents verification deferral in UV012, UV013",
+      "risk": "Medium - requires state tracking",
+      "effort": "M",
+      "validationScenarios": ["UV012.T2", "UV013.T2"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add rubric category vs product match validation",
+      "action": "When returning a company, include automatic relevance check: 'Company A returned from rubric X - does rubric X match user's product query? If no, flag as potential mismatch and ask user to confirm before presenting.'",
+      "implementationHint": "app/src/retrieval/company-matcher.ts - add category_product_alignment_check",
+      "expectedImpact": "Prevents Playmoda (underwear) returned for shoe query, Central House of Officers as shoe manufacturer",
+      "risk": "Low - defensive filter",
+      "effort": "M",
+      "validationScenarios": ["UV012.T1", "UV011.T3"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Add consumer-to-b2b explicit escalation guard",
+      "action": "When user asks consumer query (restaurants, dentistry), before B2B pivot, explicitly surface: 'This appears to be a personal question. Convert to B2B context? (yes/no)'",
+      "implementationHint": "app/src/intent/classifier.ts - add consumer_query_detection and b2b_escalation_gate",
+      "expectedImpact": "Prevents inappropriate B2B pivot in UV003 (restaurant → office suppliers)",
+      "risk": "Low - adds explicit confirmation",
+      "effort": "M",
+      "validationScenarios": ["UV003.T2"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV006", "UV017", "UV019", "UV020", "UV021", "UV012", "UV002", "UV014"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "Judge usefulRate >= 0.7 (current: 0.36)",
+      "Context amnesia failures <= 1 per run (current: 6+)",
+      "Generic fallback count <= 2 per run (current: 8+)",
+      "Wrong company identification count = 0 (current: 4+)",
+      "[проверьте данные] placeholder count = 0 (current: 3+)"
+    ]
+  }
+}

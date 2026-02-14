@@ -1,0 +1,104 @@
+Based on my analysis of the code and the QA scenario UV017, I can now provide concrete engineering advice. The issue is clear:
+
+**Root Cause Analysis for UV017:**
+1. **Turn 1**: User asks for "500 kg красного буряка оптом в Минске" - Assistant gives 4 relevant vegetable suppliers
+2. **Turn 2**: User asks for "shortlist 3 релевантных поставщиков" with explicit fallback instruction - Assistant responds with generic rubric question "Какие критерии учитывать при выборе..." completely ignoring the context
+
+The problem is in the `buildHardFormattedReply` function (line 575-581) which triggers `buildTopCompaniesCriteriaQuestionReply` when `looksLikeTopCompaniesRequestWithoutCriteria` matches. This function doesn't check if there's already sufficient context from previous turns.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "UV017 fails due to context reset in Turn 2: assistant triggers generic 'criteria question' fallback despite having complete context (beet/vegetables, 500kg, Minsk, 3 days) from Turn 1. The hard-formatted reply logic doesn't check history continuity before emitting rubric questions.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix context reset in buildTopCompaniesCriteriaQuestionReply",
+      "why": "Critical continuity failure: user provided full constraints in Turn 1 (product, volume, location, deadline), but Turn 2 response asks for criteria as if conversation just started. This destroys user trust.",
+      "expectedImpact": "Eliminates generic fallback on shortlist requests when history contains sourcing context. Improves usefulness score from 2 to 4+ for multi-turn sourcing flows.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add history-aware guard to looksLikeTopCompaniesRequestWithoutCriteria",
+      "why": "Current regex-only detection doesn't consider conversation state. A request for 'shortlist 3 suppliers' with empty criteria in current message should check if criteria exist in history.",
+      "expectedImpact": "Prevents false-positive criteria questions when user already provided constraints in previous turns.",
+      "validationScenarios": ["UV017", "UV001", "UV014"]
+    },
+    {
+      "priority": "P1",
+      "title": "Strengthen getLastUserSourcingMessage extraction for volume+deadline constraints",
+      "why": "Turn 1 contained '500 кг' and '3 дней' but these constraints weren't carried into Turn 2's shortlist logic.",
+      "expectedImpact": "Ensures numeric constraints (volume, deadline) propagate across turns for ranking/scoring.",
+      "validationScenarios": ["UV017", "UV006", "UV016"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add history context check in buildHardFormattedReply before emitting criteria question",
+      "action": "Modify buildHardFormattedReply (line ~575) to check if history contains sourcing context before returning buildTopCompaniesCriteriaQuestionReply. If getLastUserSourcingMessage(history) returns non-empty text, skip the hard-formatted criteria question and let normal flow handle it with context.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:575-581. Add condition: if (looksLikeTopCompaniesRequestWithoutCriteria(message) && !getLastUserSourcingMessage(history)) return buildTopCompaniesCriteriaQuestionReply();",
+      "expectedImpact": "Prevents context reset on shortlist requests when conversation already has product/location/deadline constraints.",
+      "risk": "Low - only affects edge case where user truly wants criteria rubric without any prior context.",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Extract and preserve volume/deadline constraints from history in ranking context",
+      "action": "Enhance extractTemplateFillHints or create extractConstraintHintsFromHistory to pull volume (\\d+\\s*(кг|тонн|шт)), deadline (\\d+\\s*дн(я|ей)), and location from history. Inject these into rankingSeedText when building ranking fallback.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1384-1435. Extend extractTemplateFillHints to scan history messages (not just latest) for qty/deadline/city patterns. Use in buildRankingFallbackAppendix at line ~671.",
+      "expectedImpact": "Shortlist ranking will respect volume/deadline constraints from previous turns even if not restated.",
+      "risk": "Low - additive enhancement to existing hint extraction.",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV006"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Add continuity validation in postProcessAssistantReply for ranking mode",
+      "action": "Add check: if mode.rankingRequested and history has sourcing context but reply lacks company links AND contains generic criteria question, override with rankingFallback using history context.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:3509-3660 rankingRequested block. Add detection for generic fallback pattern and force rankingFallbackWithCandidates when continuityCandidates exist.",
+      "expectedImpact": "Safety net catches any remaining context reset cases before response sent.",
+      "risk": "Low - only activates when ranking mode + history candidates + weak reply detected.",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV014"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Improve commodity tag detection for 'буряк/свекла' with color modifier",
+      "action": "Current detectCoreCommodityTag may not handle 'красный буряк' correctly. Add explicit pattern for 'красн\\p{L}*\\s*буряк' and 'буряк\\p{L}*' to map to beet commodity tag.",
+      "implementationHint": "app/src/lib/biznesinfo/keywords.ts or inline in route.ts detectCoreCommodityTag. Add case-insensitive regex for буряк variants.",
+      "expectedImpact": "Better commodity filtering for beet suppliers, reduces false positives from generic vegetable sellers.",
+      "risk": "Minimal - pattern addition to existing tagger.",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "template",
+      "title": "Ensure template mode activation for 'Subject/Body/WhatsApp' requests",
+      "action": "Turn 3 check UV017.T3.C2 expects template blocks. Verify looksLikeTemplateRequest correctly matches 'Сформируй сообщение поставщику в блоках Subject/Body/WhatsApp'.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:240-246. Test regex against 'блоках Subject/Body/WhatsApp' pattern - may need to add 'блоках' as template cue.",
+      "expectedImpact": "Ensures template formatting triggers correctly in Turn 3.",
+      "risk": "Low - regex extension.",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": ["scenarios.regressions.user-ideas-multistep-variants.json"],
+    "successMetrics": [
+      "UV017.T2.C2 strict check passes (shortlist or honest fallback with alternatives)",
+      "Usefulness score >= 4 for UV017 (currently 2)",
+      "No generic criteria questions when history contains sourcing context",
+      "Continuity: Turn 2 response references constraints from Turn 1 (500kg, Minsk, 3 days)"
+    ]
+  }
+}
+```

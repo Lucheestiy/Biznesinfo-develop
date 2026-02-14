@@ -1,0 +1,121 @@
+The following JSON evaluates the 5 provided scenarios based on the user satisfaction, continuity, and practical usefulness rubric.
+
+```json
+{
+  "judge": "minimax",
+  "ratings": [
+    {
+      "scenarioId": "UV006",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Critical context loss in Turn 3: Assistant asked for criteria (city/region) immediately after user provided specific constraints (dry, FSC, border delivery).",
+        "Failed to filter or synthesize the shortlist based on Turn 2 inputs."
+      ],
+      "criticalIssues": [
+        "Amnesia on user constraints in Turn 3",
+        "Generic fallback questions when specific data was already given"
+      ],
+      "strengths": [
+        "Good RFQ generation in Turn 4"
+      ],
+      "nextUserProbe": "Я же только что написал: сухая доска, FSC, граница. Зачем ты спрашиваешь снова?"
+    },
+    {
+      "scenarioId": "UV007",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.8,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Correctly identified that the initial search result was not a target customer.",
+        "Pivoted well to providing industrial segments when specific companies were missing.",
+        "Asked relevant qualifying questions in Turn 2."
+      ],
+      "criticalIssues": [
+        "Initial search for 'potential customers' yielded an irrelevant result."
+      ],
+      "strengths": [
+        "Honest handling of data limitations",
+        "Useful strategic advice on target segments"
+      ],
+      "nextUserProbe": "Давай попробуем найти конкретные контакты по сегменту 'Молочные производства'."
+    },
+    {
+      "scenarioId": "UV008",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Complete failure to find any actual tractor sellers in Belarus (missed MTZ, Smorgon, dealers).",
+        "Persisted in offering a 'spare parts' vendor as the only candidate for buying a tractor.",
+        "Comparison in Turn 4 was impossible due to lack of candidates."
+      ],
+      "criticalIssues": [
+        "Search quality is critically low for a core regional product",
+        "Useless shortlist containing only a parts supplier"
+      ],
+      "strengths": [
+        "Honest admission that it couldn't make a comparison"
+      ],
+      "nextUserProbe": "Это продавец запчастей, мне нужен трактор. Есть кто-то, кто продает технику?"
+    },
+    {
+      "scenarioId": "UV009",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.6,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Retrieval failed completely (returned a chemical supplier for dentistry).",
+        "However, excellent domain-specific advice and checklist in Turns 2-3 saved the interaction.",
+        "Fulfilled the user's fallback request ('if little data, give criteria') very well."
+      ],
+      "criticalIssues": [
+        "Hallucinated/irrelevant search result (Selvin) persisted in context"
+      ],
+      "strengths": [
+        "High-quality domain knowledge in the checklist (CBCT, rubber dam, microscope protocols)"
+      ],
+      "nextUserProbe": "Спасибо за чек-лист. А есть ли способ найти клиники через общий поиск?"
+    },
+    {
+      "scenarioId": "UV010",
+      "usefulness": 5,
+      "verdict": "useful",
+      "confidence": 0.95,
+      "userSatisfaction": 1.0,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Correctly identified the brand 'Savushkin Product'.",
+        "Provided relevant local alternatives (Minsk, Polotsk, Lida) as requested.",
+        "Clear and actionable verification steps."
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Accurate entity recognition",
+        "Good context regarding Belarusian dairy market"
+      ],
+      "nextUserProbe": "Спасибо, это то, что нужно."
+    }
+  ]
+}
+```
+

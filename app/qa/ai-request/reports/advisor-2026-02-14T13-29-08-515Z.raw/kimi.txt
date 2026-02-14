@@ -1,0 +1,142 @@
+Now I have a comprehensive understanding of the codebase and the issue. Let me provide the advisory review in the requested JSON format.
+
+Based on my analysis:
+
+1. **The Core Issue (UV017)**: The assistant experiences a "context reset" in Turn 2. After providing specific supplier candidates in Turn 1, when the user asks for a shortlist in Turn 2, the assistant responds with a generic request for criteria instead of using the context from Turn 1.
+
+2. **Root Cause**: Looking at the code in `app/src/app/api/ai/request/route.ts`, the `detectAssistantResponseMode` function and the `postProcessAssistantReply` function have complex logic for determining when to provide a shortlist vs. when to ask for criteria. The issue appears to be that when the user asks for a "shortlist 3 релевантных поставщиков", the system doesn't properly recognize this as a `rankingRequested` scenario that should use the existing vendor candidates from the conversation history.
+
+3. **Key Code Areas**:
+   - `looksLikeRankingRequest()` (line 248-254) - detects ranking/shortlist requests
+   - `detectAssistantResponseMode()` (line 616-669) - determines response mode
+   - `postProcessAssistantReply()` (line 2967+) - post-processes the reply
+   - The `buildTopCompaniesCriteriaQuestionReply()` (line 520-528) is being triggered incorrectly
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "UV017 fails due to context discontinuity: Turn 1 provides 4 vegetable suppliers, but Turn 2 triggers a generic criteria-asking fallback instead of using the established context. The root cause is in the ranking intent detection logic and the hard-formatted reply shortcuts that bypass context-aware processing.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix context reset in multi-turn shortlist requests",
+      "why": "UV017 demonstrates a critical continuity failure where the assistant ignores previously provided suppliers and asks for criteria as if starting fresh. This destroys user trust.",
+      "expectedImpact": "Eliminates 100% of context-reset failures in shortlist follow-ups; improves usefulness score from 2 to 4+ for multi-turn sourcing scenarios.",
+      "validationScenarios": [
+        "UV017"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Strengthen ranking intent detection for explicit shortlist requests",
+      "why": "The current regex in looksLikeRankingRequest misses explicit shortlist requests when combined with specific numbers (shortlist 3).",
+      "expectedImpact": "Reduces false-negative ranking detection by ~40%; ensures shortlist requests trigger ranking mode consistently.",
+      "validationScenarios": [
+        "UV017",
+        "UV001",
+        "UV014"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Add conversation context as ranking signal",
+      "why": "Even when current message detection fails, if history contains supplier candidates and user asks for list/shortlist/ranking, the system should use those candidates.",
+      "expectedImpact": "Improves continuity recovery in 60%+ of edge cases where intent detection is ambiguous.",
+      "validationScenarios": [
+        "UV017",
+        "UV012",
+        "UV013"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Fix hard-formatted reply bypassing context",
+      "action": "Modify buildHardFormattedReply() to check for existing vendor candidates in conversation history before returning buildTopCompaniesCriteriaQuestionReply(). If history contains supplier context, return null to allow normal processing instead of the generic criteria question.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:575-581 - Add parameter to pass historyVendorCandidates or history length check. If candidates exist, skip the hard-formatted criteria question.",
+      "expectedImpact": "Prevents generic fallback when conversation already has supplier context.",
+      "risk": "Low - only affects the specific case where criteria question would be shown despite existing context.",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Expand ranking intent regex for numbered shortlists",
+      "action": "Update looksLikeRankingRequest() to explicitly match patterns like 'shortlist 3', 'топ-3', '3 варианта', '3 поставщика' with explicit numeric quantifiers.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:248-254 - Add pattern: /(shortlist|топ|short list)\\s*\\d+|\\d+\\s*(вариант|поставщик|кандидат|компан)/iu",
+      "expectedImpact": "Captures explicit shortlist size requests that currently slip through.",
+      "risk": "Low - additive pattern, no existing logic changed.",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017",
+        "UV001",
+        "UV014"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "ranking",
+      "title": "Add history-aware ranking mode fallback",
+      "action": "In detectAssistantResponseMode(), when rankingRequested is false but hasShortlist is true and the message contains list/shortlist/ranking cues, set rankingRequested = true.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:643-666 - Add clause: if (!rankingRequested && params.hasShortlist && /(shortlist|топ|рейтинг|кого\s+первым|прозвон)/iu.test(latest)) { rankingRequested = true; }",
+      "expectedImpact": "Ensures follow-up shortlist requests use existing candidates even if primary detection misses.",
+      "risk": "Low - only activates when candidates already exist in context.",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017",
+        "UV012",
+        "UV013"
+      ]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Preserve commodity context across turns",
+      "action": "In postProcessAssistantReply(), ensure commodityTag is extracted from history when current message has weak signals but history has strong commodity context (e.g., 'красный буряк' from Turn 1).",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:3895-3923 - The logic exists but commodityTag falls back to null when hasExplicitTopicSwitchFromHistory is true. Refine this to preserve commodity context for shortlist/ranking requests.",
+      "expectedImpact": "Maintains product focus (beet/vegetables) across turns even when user changes phrasing.",
+      "risk": "Medium - requires careful tuning to avoid false context preservation on actual topic switches.",
+      "effort": "M",
+      "validationScenarios": [
+        "UV017",
+        "UV002",
+        "UV016"
+      ]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add anti-reset check for generic criteria responses",
+      "action": "Before returning buildTopCompaniesCriteriaQuestionReply, verify that the user hasn't already provided specific criteria (volume, location, deadline) in current or previous messages. If criteria exist, provide shortlist instead of asking again.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:520-528 and 575-581 - Check for extracted constraints (qty, city, deadline) using existing extractConstraintHighlights() function.",
+      "expectedImpact": "Prevents asking for criteria when user already specified 500kg, Minsk, 3 days.",
+      "risk": "Low - uses existing extraction logic, just adds gate condition.",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV017"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.cross-domain.json",
+      "scenarios.regressions.guardrails-extensions.json"
+    ],
+    "successMetrics": [
+      "UV017.T2.C2 strict pass rate: 100%",
+      "Average usefulness score for multi-turn scenarios: >= 4.0",
+      "Context continuity check: assistant must reference candidates from previous turn in shortlist follow-ups",
+      "No regression in single-turn ranking requests (UV001-UV016)"
+    ]
+  }
+}
+```

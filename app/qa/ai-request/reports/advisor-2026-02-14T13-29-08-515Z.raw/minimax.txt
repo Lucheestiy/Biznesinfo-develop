@@ -1,0 +1,105 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "UV017 failed due to complete context reset between Turn 1 (supplier search) and Turn 2 (shortlist request). The assistant asked for selection criteria as if conversation just started, destroying trust. Root cause: `looksLikeCandidateListFollowUp` detection + fallback logic doesn't properly handle continuity when fresh vendor candidates are insufficient. Fix: strengthen context preservation in fallback paths and auto-shortlist from history when user requests shortlist in multi-turn conversation.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix multi-turn shortlist continuity: use history candidates when fresh search returns insufficient results",
+      "why": "UV017.T2 failed because assistant asked for criteria again instead of using Turn 1 results. User explicitly requested shortlist, got generic rubric response. This destroys trust and is the highest-impact fix for multi-turn scenarios.",
+      "expectedImpact": "Fixes UV017, UV014, UV015, and similar multi-turn supplier scenarios where Turn N asks for shortlist/ranking after Turn N-1 provided candidates.",
+      "validationScenarios": ["UV017.T2", "UV014.T2", "UV015.T2", "UV016.T2"]
+    },
+    {
+      "priority": "P1",
+      "title": "Strengthen `looksLikeCandidateListFollowUp` to detect shortlist/ranking requests regardless of explicit keywords",
+      "why": "Current regex-based detection misses implicit shortlist requests like 'сделай shortlist' when context already has candidates. Detection should trigger more aggressively in sourcing continuation flows.",
+      "expectedImpact": "Prevents generic rubric fallback when user continues sourcing conversation with implicit follow-up intent.",
+      "validationScenarios": ["UV017.T2", "UV013.T2", "UV001.T3"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add explicit context-injection in fallback prompt when history has sourcing seed",
+      "why": "The LLM prompt doesn't sufficiently emphasize using conversation history. When fallback triggers, it should explicitly see 'Previous turn found X suppliers for Y request' to maintain continuity.",
+      "expectedImpact": "Reduces context resets by 40-60% in multi-turn sourcing conversations.",
+      "validationScenarios": ["UV017.T2", "UV013.T3", "UV014.T3"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Auto-shortlist from history when user requests shortlist in Turn N>1",
+      "action": "In `route.ts`, add logic: when `looksLikeCandidateListFollowUp` or explicit shortlist request detected AND `historySourcingSeed` exists AND fresh candidates < requested count → format existing candidates from Turn 1 as shortlist with /company/ links instead of fallback.",
+      "implementationHint": "File: `/home/mlweb/biznesinfo-develop.lucheestiy.com/app/src/app/api/ai/request/route.ts`, function: `handleAssistantRequest`. Add check after vendor lookup: if `followUpNeedsConcreteShortlist` && `historySourcingSeed` && `freshCandidates.length < 3` → call `formatVendorShortlistRows(historyCandidates)`.",
+      "expectedImpact": "UV017.T2 passes: shortlist appears instead of criteria request. Continuity preserved.",
+      "risk": "Low - only affects fallback scenarios, adds shortlist option not previously available",
+      "effort": "M",
+      "validationScenarios": ["UV017.T2"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Inject sourcing context into fallback prompt to prevent 'conversation reset' behavior",
+      "action": "Modify the fallback prompt builder to include: 'User previously requested suppliers for [commodity] in [city]. Previous turn found [X] candidates. Do not ask for criteria again—either shortlist from history or provide alternative queries.'",
+      "implementationHint": "File: `/home/mlweb/biznesinfo-develop.lucheestiy.com/app/src/app/api/ai/request/route.ts`, function: `buildGenericNoResultsCriteriaGuidance` or `buildRankingFallbackAppendix`. Add `historySourcingSeed` and `historyCandidateCount` parameters.",
+      "expectedImpact": "LLM maintains continuity awareness, reduces generic rubric responses by ~50%.",
+      "risk": "Low - improves context awareness, no behavioral changes to valid paths",
+      "effort": "S",
+      "validationScenarios": ["UV017.T2", "UV013.T3"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Enhance `looksLikeCandidateListFollowUp` detection for implicit shortlist requests",
+      "action": "Add patterns for: 'сделай shortlist', 'дали.*кандидат', 'первый.*из.*списка', 'выбранн.*поставщик' combined with sourcing history presence. Also add `history` parameter to function for context-aware detection.",
+      "implementationHint": "File: `/home/mlweb/biznesinfo-develop.lucheestiy.com/app/src/app/api/ai/request/route.ts`, function: `looksLikeCandidateListFollowUp`. Change signature to accept `history` array and check if any previous user message had vendor candidates.",
+      "expectedImpact": "Detection triggers correctly for UV017.T2 'Сделай shortlist 3 релевантных поставщиков'.",
+      "risk": "Low - more permissive detection, may trigger in edge cases but preferable to missing continuity",
+      "effort": "S",
+      "validationScenarios": ["UV017.T2"]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Add template-generation continuity: use Turn 1-2 candidates as supplier context for Turn 3 template",
+      "action": "When Turn N requests template ('сформируй сообщение поставщику') AND history has candidate shortlist → template should reference 'один из найденных поставщиков' or ask user to choose from previous shortlist instead of generic template.",
+      "implementationHint": "File: `/home/mlweb/biznesinfo-develop.lucheestiy.com/app/src/app/api/ai/request/route.ts`, function: `looksLikeTemplateRequest`. Add check: if `hasTemplateHistory` or `hasShortlistInHistory` → template should be personalized to context.",
+      "expectedImpact": "UV017.T3 and similar scenarios produce context-aware templates instead of generic ones.",
+      "risk": "Low - improves template relevance, no regressions expected",
+      "effort": "M",
+      "validationScenarios": ["UV017.T3", "UV001.T4", "UV016.T3"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Prevent generic criteria-asking fallback when user explicitly said 'don't ask for criteria'",
+      "action": "Add detection for 'don't ask again', 'без уточнений', 'без критериев' patterns. When user explicitly rejects criteria request, fallback must provide alternatives or shortlist from history—no criteria-asking allowed.",
+      "implementationHint": "File: `/home/mlweb/biznesinfo-develop.lucheestiy.com/app/src/app/api/ai/request/route.ts`, function: `buildHardFormattedReply` or `buildRankingFallbackAppendix`. Add: if message has `antiCriteriaRequestPattern` → skip criteria question fallback.",
+      "expectedImpact": "Respects user intent, prevents trust-destroying 'ask for criteria' responses.",
+      "risk": "Low - aligns behavior with explicit user instructions",
+      "effort": "S",
+      "validationScenarios": ["UV017.T2", "UV014.T3"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV017.T2",
+      "UV014.T2",
+      "UV015.T2",
+      "UV013.T2"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+      "app/qa/ai-request/scenarios.regressions.beet-anti-noise.json",
+      "app/qa/ai-request/scenarios.regressions.multi-turn-continuity.json"
+    ],
+    "successMetrics": [
+      "Multi-turn continuity pass rate > 80% (currently 0% for UV017)",
+      "UV017 usefulRate > 50% (currently 0%)",
+      "No 'criteria request' fallback after explicit shortlist request in multi-turn",
+      "Template generation includes context from previous turns when available"
+    ]
+  }
+}
+```

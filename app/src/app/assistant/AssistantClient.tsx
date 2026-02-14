@@ -237,7 +237,7 @@ export default function AssistantClient({
     role: "assistant",
     content:
       t("ai.chatIntro") ||
-      "Здравствуйте! Я ваш личный помощник Лориэн. Помогу сформулировать запрос поставщикам, находить нужные компании по заданным критериям, подбирать релевантные ключевые слова и писать уникальный текст.",
+      "Здравствуйте! Я ваш личный помощник Лориэн. Помогу сформулировать запрос поставщикам, находить нужные компании по заданным критериям и написать коммерческое предложение о сотрудничестве.",
   });
 
   const [messages, setMessages] = useState<AssistantMessage[]>(() => [buildIntroMessage()]);
@@ -1268,42 +1268,6 @@ export default function AssistantClient({
 		                        </div>
 		                      )}
 	                    </div>
-                    <div className="w-full sm:w-auto flex flex-wrap items-center gap-x-3 gap-y-2 sm:flex-shrink-0">
-                      {(companyContext || shortlistCompanyIds.length > 0) && (
-                        <Link
-                          href="/assistant"
-                          className="text-xs text-[#820251] hover:underline underline-offset-2 whitespace-nowrap"
-                        >
-                          Сбросить
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => void copyChatConversation()}
-                        disabled={messages.length === 0}
-                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline whitespace-nowrap"
-                      >
-                        {copied?.id === chatCopyMarkerId
-                          ? (t("ai.copied") || "Скопировано!")
-                          : (t("ai.copyChat") || "Скопировать чат")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={resetChat}
-                        disabled={sending}
-                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline whitespace-nowrap"
-                      >
-                        {t("ai.newChat") || "Новый чат"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void resetPromptCounter()}
-                        disabled={sending || quotaResetting}
-                        className="text-xs text-gray-600 hover:text-[#820251] hover:underline underline-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline whitespace-nowrap"
-                      >
-                        {quotaResetting ? "Сброс..." : "Сбросить счётчик (тест)"}
-                      </button>
-                    </div>
                   </div>
                   <div
                     ref={scrollRef}
@@ -1611,8 +1575,8 @@ export default function AssistantClient({
                           void send();
                         }}
                         placeholder={t("ai.placeholder") || "Опишите, что вам нужно найти или заказать..."}
-                        rows={2}
-                        className="flex-1 resize-none rounded-xl border border-gray-300 px-3 sm:px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a0006d]/30"
+                        rows={3}
+                        className="flex-1 min-h-[96px] max-h-[260px] resize-y overflow-y-auto rounded-xl border border-gray-300 px-3 sm:px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a0006d]/30"
                         disabled={sending}
                       />
                       <button

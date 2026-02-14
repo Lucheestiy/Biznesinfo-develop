@@ -1,0 +1,146 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "QA показывает 86% pass rate по strict-checks, но критический провал по usefulness (средний 2.3/5). Главная проблема — «context amnesia» в multi-turn диалогах: ассистент теряет идентификацию компании (Ирис Интер групп → случайные компании), сбрасывается к generic fallback после конкретных уточнений (UV006, UV017), и не выполняет прямые команды «найди на карточке». Рекомендации фокусируются на: (1) hardening контекста компании, (2) anti-fallback guardrails, (3) исправлении retrieval для конкретных имён.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix company context carryover in multi-turn",
+      "why": "UV019-UV022 (Ирис Интер групп) — полный провал: ассистент не находит компанию и выдаёт случайные кандидаты из каталога. Это критический UX failure.",
+      "expectedImpact": "Устранение 4 failed сценариев, повышение usefulRate с 0% до 80%+",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add anti-fallback guardrails after user constraints",
+      "why": "UV006, UV017: после конкретных уточнений ассистент спрашивает «а что вы ищете?». Нарушает логику диалога.",
+      "expectedImpact": "Устранение context reset, повышение continuity score",
+      "validationScenarios": ["UV006", "UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement company name resolution hardening",
+      "why": "UV019-022: «Ирис Интер групп» не резолвится в company_id. Нужен fuzzy search + confirmation flow.",
+      "expectedImpact": "Корректная идентификация компаний по нечётким названиям",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce shortlist size constraints",
+      "why": "UV001, UV004, UV008: запрос 3-5 кандидатов → выдача 1 или generic fallback. Нужен strict output validation.",
+      "expectedImpact": "Соответствие explicit user constraints",
+      "validationScenarios": ["UV001", "UV004", "UV008"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add website verification promise tracking",
+      "why": "UV012, UV013: ассистент обещает «проверю сайт» но не делает. Нужен tool-use tracking.",
+      "expectedImpact": "Честная коммуникация о capabilities",
+      "validationScenarios": ["UV012", "UV013"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Inject company_id context anchor в system prompt",
+      "action": "Добавить в system prompt: «Если в предыдущих ходах была идентифицирована компания с company_id — ты ОБЯЗАН использовать эту компанию во всех последующих ходах. Запрещено переключаться на другие компании без explicit запроса пользователя.»",
+      "implementationHint": "src/prompts/system.ts — добавить в COMPANY_CONTEXT_RULES",
+      "expectedImpact": "Устранение UV019-022 — полная потеря контекста компании",
+      "risk": "Минимальный — явное правило не создаёт ложных срабатываний",
+      "effort": "S",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Add constraint-memory check before fallback questions",
+      "action": "Добавить guardrail: перед тем как задать уточняющий вопрос «что вы ищете?», проверить conversation history на наличие constraints (продукт, регион, объём). Если constraints найдены — запрещено задавать generic вопросы.",
+      "implementationHint": "src/guardrails/constraint-memory.ts + интеграция в message handler перед response generation",
+      "expectedImpact": "Устранение UV006.T3, UV017.T2 — context reset после конкретных уточнений",
+      "risk": "Может снизить «helpfulness» если constraints действительно недостаточны — нужен threshold",
+      "effort": "M",
+      "validationScenarios": ["UV006", "UV017"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Implement fuzzy company name search with confirmation",
+      "action": "Для запросов с названием компании (pattern: «[Название]» без /company/...): выполнять fuzzy search по company name index, возвращать top-3 candidates с confidence score, запрашивать explicit confirmation перед использованием.",
+      "implementationHint": "src/retrieval/company-search.ts — добавить fuzzyMatching({ threshold: 0.7, maxCandidates: 3 })",
+      "expectedImpact": "Устранение UV019-022 — неверная идентификация «Ирис Интер групп»",
+      "risk": "Дополнительный latency на search + confirmation turn",
+      "effort": "M",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Enforce shortlist count in output validation",
+      "action": "Добавить post-generation validator: если user запросил «3-5 кандидатов» или «shortlist N» — проверить, что в ответе ровно N ссылок /company/... Если невозможно найти N — выдать честный fallback «Нашёл только X, вот они: ...» вместо generic advice.",
+      "implementationHint": "src/validators/shortlist-validator.ts — regex count /company/ links, сравнить с requested count",
+      "expectedImpact": "Устранение UV001, UV004, UV008 — невыполнение explicit constraints",
+      "risk": "Минимальный — strict compliance с user request",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV008"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add anti-link-gate instruction for website lookups",
+      "action": "В system prompt добавить: «Если пользователь просит найти информацию на сайте компании — ты должен сам найти company card, извлечь website URL, и выполнить lookup. Запрещено просить пользователя 'пришлите ссылку'.»",
+      "implementationHint": "src/prompts/system.ts — раздел WEBSITE_LOOKUP_RULES",
+      "expectedImpact": "Устранение UV022.T1, UV019.T1 — отказ от поиска с просьбой «пришлите ссылку»",
+      "risk": "Минимальный — соответствует ожиданиям пользователя",
+      "effort": "S",
+      "validationScenarios": ["UV019", "UV022"]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Fix placeholder leakage in shortlist responses",
+      "action": "Запретить использование placeholder'ов типа «[проверьте данные]» в финальных ответах. Если данных нет — явно написать «Данные о [X] отсутствуют в карточке».",
+      "implementationHint": "src/templates/shortlist.ts — post-process: replace /\\[.*проверьте.*\\]/gi с флагом на review",
+      "expectedImpact": "Устранение UV002.T3, UV014.T3 — placeholder'ы вместо данных",
+      "risk": "Минимальный — улучшение UX",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV014"]
+    },
+    {
+      "id": "R7",
+      "area": "retrieval",
+      "title": "Improve category filtering for B2B vs consumer",
+      "action": "Добавить category classifier: если запрос содержит consumer-паттерны («где поесть», «вкусно», «поблизости») — приоритизировать B2B reframe или честный fallback вместо случайных B2B результатов.",
+      "implementationHint": "src/retrieval/query-rewriter.ts — добавить intent classifier (consumer|b2b|ambiguous)",
+      "expectedImpact": "Устранение UV003.T2 — нерелевантные B2B результаты на consumer запрос",
+      "risk": "Может переусложнить — нужен A/B",
+      "effort": "M",
+      "validationScenarios": ["UV003"]
+    },
+    {
+      "id": "R8",
+      "area": "ranking",
+      "title": "Add relevance scoring threshold for search results",
+      "action": "Ввести минимальный relevance score (например, 0.6) для включения результата в shortlist. Если ни один результат не проходит threshold — выдавать «no results» fallback вместо нерелевантных компаний.",
+      "implementationHint": "src/ranking/relevance-filter.ts — интеграция с search pipeline",
+      "expectedImpact": "Устранение UV011.T3 — Центральный Дом офицеров как «производитель обуви»",
+      "risk": "Может снизить recall — нужен tuning threshold",
+      "effort": "M",
+      "validationScenarios": ["UV011"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV019", "UV020", "UV021", "UV022", "UV006", "UV017"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "qa_judge_results.json"
+    ],
+    "successMetrics": [
+      "usefulRate >= 0.8 (текущий 0.5)",
+      "strictPassRate >= 0.95 (текущий 0.86)",
+      "zero context-loss incidents in UV019-022",
+      "zero generic-fallback-after-constraints in UV006/017"
+    ]
+  }
+}
+```
