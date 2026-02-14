@@ -5723,9 +5723,30 @@ function postProcessAssistantReply(params: {
       }
     } else if (noConcreteCandidatesAvailable) {
       if (websiteResearchIntent && continuityCandidates.length > 0) {
+        // CRITICAL FIX: Filter continuity candidates by commodity tag to maintain relevance
+        // Without this, Turn 2/3 returns irrelevant companies (specodejda, hoztorgary, arenda)
+        const websiteRecoveryCommodityTag = finalSafetyCommodityTag || 
+          detectCoreCommodityTag(
+            oneLine([
+              params.vendorLookupContext?.searchText || "",
+              getLastUserSourcingMessage(params.history || []) || "",
+              params.message || "",
+            ].filter(Boolean).join(" "))
+          );
+        
+        // Filter candidates by commodity if tag is detected, otherwise use all candidates
+        const commodityFilteredCandidates = websiteRecoveryCommodityTag
+          ? continuityCandidates.filter((c) => candidateMatchesCoreCommodity(c, websiteRecoveryCommodityTag))
+          : continuityCandidates;
+        
+        // Fall back to filtered candidates or original if no filter match
+        const websiteRecoveryCandidates = commodityFilteredCandidates.length > 0 
+          ? commodityFilteredCandidates 
+          : continuityCandidates;
+        
         const websiteRecoveryRows = formatVendorShortlistRows(
-          continuityCandidates,
-          Math.min(3, Math.max(1, continuityCandidates.length)),
+          websiteRecoveryCandidates,
+          Math.min(3, Math.max(1, websiteRecoveryCandidates.length)),
         );
         if (websiteRecoveryRows.length > 0) {
           out = [
