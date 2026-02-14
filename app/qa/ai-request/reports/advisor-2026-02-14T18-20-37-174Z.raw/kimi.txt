@@ -1,0 +1,122 @@
+Based on my analysis of the QA results and codebase, I can now provide concrete engineering advice. The key issues identified are:
+
+1. **UV001 (Footwear manufacturers)**: Generic fallback on turn 3 - instead of concrete manufacturers, gives abstract "shortlist" with 1 questionable company
+2. **UV003 (Consumer→B2B reframing)**: Turn 3 has irrelevant company recommendations (car dealer, fishing shop, plumbing)
+3. **UV002 (Flour factories)**: Turn 3 shortlist too short and formal, missing export readiness details
+
+The core problems appear to be:
+- Insufficient company data in search results for niche queries
+- Ranking algorithm not properly prioritizing manufacturers vs retailers
+- Template fallback being too generic when concrete data is missing
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "QA reveals 3 critical failure patterns: (1) Generic shortlist fallback on UV001 - only 1 questionable company returned instead of 3-5 concrete manufacturers; (2) Nonsensical company injection on UV003 - car dealer/fishing shop appearing in cafe equipment context; (3) Incomplete export readiness assessment on UV002. Root causes: search ranking doesn't sufficiently boost manufacturers over retailers, company confidence scoring allows low-quality matches, and the ranking fallback in buildRankingFallbackAppendix generates placeholder profiles instead of using actual search results. Fix priority: P0 for manufacturer detection, P1 for context-aware filtering, P2 for shortlist enrichment.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix manufacturer vs retailer ranking in footwear queries",
+      "why": "UV001 shows 0% useful rate - the most critical user journey (finding manufacturers) fails completely. The system returns 'ПЛЭЙ МОДА ООО' with disclaimer 'possibly not a manufacturer' instead of actual manufacturers.",
+      "expectedImpact": "Increase UV001 usefulness from 0% to >60%, reduce generic fallback rate by 40%",
+      "validationScenarios": ["UV001"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add context-aware noise filtering for B2B pivots",
+      "why": "UV003 turn 3 injected completely irrelevant companies (Автоцентр, Рыболов, Сантехника) into cafe equipment context. The ranking algorithm is not filtering by semantic relevance to the conversation topic.",
+      "expectedImpact": "Eliminate nonsensical recommendations, improve UV003 usefulness from 50% to >80%",
+      "validationScenarios": ["UV003"]
+    },
+    {
+      "priority": "P2",
+      "title": "Enrich shortlist with export readiness signals",
+      "why": "UV002 turn 3 shortlist lacks explicit export readiness per factory as requested. The buildRankingFallbackAppendix function doesn't extract/present export-specific signals from company data.",
+      "expectedImpact": "Increase UV002 usefulness from current levels, add structured export indicators to shortlist format",
+      "validationScenarios": ["UV002"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "ranking",
+      "title": "Boost manufacturer signals in company scoring",
+      "action": "In buildRankingFallbackAppendix (line ~782), add manufacturer-specific scoring: check company name for 'производство', 'завод', 'фабрика' and boost score by 0.3; penalize names containing 'магазин', 'торговля', 'розница' by 0.2. Also check description/about fields for manufacturing keywords.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: filterAndRankVendorCandidates function around line 800, add manufacturer intent detection using detectCoreCommodityTag and boost matching candidates",
+      "expectedImpact": "Prioritize actual manufacturers over retailers in footwear/flour queries",
+      "risk": "May over-boost if company names are misleading; mitigate by capping boost at 0.3",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV002"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Add conversation context filtering to vendor candidates",
+      "action": "In detectAssistantResponseMode and buildRankingFallbackAppendix, pass conversation topic (extracted from history) and filter candidates by semantic relevance. If topic is 'cafe/food supplies', exclude companies with rubrics containing 'авто', 'рыбалка', 'сантехника'.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: add topic extraction from history using keyword matching, then filter commodityScopedRows by topic relevance before ranking",
+      "expectedImpact": "Prevent UV003-style irrelevant company injection",
+      "risk": "Over-filtering may reduce recall; use soft filtering (deprioritize vs exclude)",
+      "effort": "M",
+      "validationScenarios": ["UV003"]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Add export readiness checklist to shortlist format",
+      "action": "Modify formatVendorShortlistRows (line ~1741) to include export indicators when export intent detected: add '✓' badge if description contains 'экспорт', 'ВЭД', 'export', or if company has website with .com domain. Add explicit 'Экспортная готовность' column to shortlist output.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: formatVendorShortlistRows function, add export signal detection and conditional badge rendering in output format",
+      "expectedImpact": "UV002-style export queries get explicit readiness indicators per company",
+      "risk": "False positives if companies mention export casually; verify with website data when available",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV005", "UV016"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Strengthen shortlist count enforcement in system prompt",
+      "action": "In the system prompt construction (around line 2400+), add explicit instruction: 'When user requests N companies in shortlist, you MUST return exactly N companies if any exist in catalog. Never return fewer than requested without explicit explanation. If fewer than N exist, state 'Found only X confirmed companies' and list all found.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: buildAssistantSystemPrompt function, add shortlist count enforcement rule to prompt instructions",
+      "expectedImpact": "UV001 '3-5' request won't get 1-company fallback; system will search more aggressively",
+      "risk": "May increase hallucination if model invents companies; mitigate by requiring /company/ links",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV014"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Expand search synonyms for niche manufacturing",
+      "action": "In suggestSourcingSynonyms (app/src/lib/biznesinfo/keywords.ts), add footwear-specific expansions: 'обувь' → ['обувная фабрика', 'производство обуви', 'обувное производство', 'швейное производство обуви']. Add similar for flour: 'мука' → ['мукомольный завод', 'производство муки', 'мельница'].",
+      "implementationHint": "app/src/lib/biznesinfo/keywords.ts: expand B2B_SYNONYMS or add commodity-specific synonym maps",
+      "expectedImpact": "Better recall for UV001 footwear manufacturers, UV002 flour mills",
+      "risk": "Minimal - synonym expansion is low-risk",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV002"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Add anti-noise filter for educational institutions",
+      "action": "In UV017-style queries (vegetables/food sourcing), add explicit filter to exclude companies with rubrics matching 'колледж', 'университет', 'институт', 'лицей', 'школа'. This is already in checks but not in retrieval logic.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: in filterAndRankVendorCandidates, add education rubric exclusion when commodity tag is 'beet', 'vegetables', 'food'",
+      "expectedImpact": "Prevent educational institutions appearing as suppliers in food queries",
+      "risk": "None - educational institutions should never be food suppliers in this context",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV001", "UV002", "UV003"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "qa_judge_uv001_005.json"
+    ],
+    "successMetrics": [
+      "UV001 usefulness >= 3.0 (was 2.0)",
+      "UV003 usefulness >= 3.5 (was 2.5)",
+      "UV002 usefulness >= 4.0 (was 3.5)",
+      "Zero nonsensical company recommendations in all scenarios",
+      "Shortlist count matches requested count in >= 90% of cases"
+    ]
+  }
+}
+```

@@ -1,0 +1,82 @@
+{
+  "advisor": "minimax",
+  "executiveSummary": "Analysis of UV001, UV003, UV002 reveals two critical failure patterns: (1) retrieval/recommendation engine generating nonsensical results (UV003 car dealer, fishing shop for cafe supplies) indicating broken relevance scoring or constraint propagation; (2) shortlist aggregation logic failing to honor explicit user constraints (UV001 received 1 instead of 3-5, UV002 received 2 instead of 3). Both failures occur in Turn 3 when system attempts to synthesize multi-turn context into actionable output. Priority fix: validate candidate filtering pipeline before aggregation to ensure candidates meet all stated constraints from prior turns.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix candidate constraint propagation in multi-turn shortlist generation",
+      "why": "UV001 and UV003 both fail at Turn 3 synthesis despite valid Turn 1-2 candidates, indicating constraint loss during aggregation. UV001: user explicitly requested 3-5 in shortlist, got 1. UV003: user asked for cafe suppliers, got automotive/plumbing. This is a systematic breakdown in constraint tracking.",
+      "expectedImpact": "Eliminate generic fallback and placeholder shortlists; ensure Turn 3 output respects all prior constraints.",
+      "validationScenarios": ["UV001", "UV003"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add relevance validation before candidate recommendation",
+      "why": "UV003 retrieved completely irrelevant companies (car dealer, fishing shop, plumbing) for a cafe supplies query. This indicates the retrieval/re-ranking pipeline lacks domain constraint enforcement. A simple keyword/domain filter would catch this before candidate exposure.",
+      "expectedImpact": "Reduce nonsensical recommendations; improve candidate relevance scoring accuracy.",
+      "validationScenarios": ["UV003"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Implement constraint pass-through validation before shortlist generation",
+      "action": "Before constructing the shortlist array in buildHardFormattedReply, verify that: (a) candidate count >= user-specified minimum; (b) each candidate passes ALL prior turn constraints (location, product type, export readiness, etc.); (c) if candidates fail validation, emit specific 'missing_constraint' flag instead of placeholder. Modify the aggregation layer to preserve constraints from turns 1-2 into Turn 3 shortlist construction.",
+      "implementationHint": "Locate the shortlist construction logic in app/src/app/api/ai/request/route.ts, specifically around 'shortlist' or 'candidates' aggregation. Add a pre-validation step that checks each candidate against a constraints registry populated from conversation history. If constraint mismatch rate > 20%, trigger fallback to clarification instead of placeholder output.",
+      "expectedImpact": "Prevents '1 of 3-5' failures and enforces user constraints through final output",
+      "risk": "Low - defensive validation, reduces incorrect output",
+      "effort": "M",
+      "validationScenarios": ["UV001"]
+    },
+    {
+      "id": "R2",
+      "area": "ranking",
+      "title": "Add domain relevance filter for B2B candidate queries",
+      "action": "Implement a lightweight domain classifier that verifies candidate company categories match the query intent before ranking. For queries involving 'cafe', 'supplies', 'food', filter out candidates whose primary category is unrelated (e.g., automotive, fishing, plumbing unless explicitly requested). Can use existing catalog taxonomy for fast reject.",
+      "implementationHint": "In the candidate retrieval pipeline, after initial fetch but before ranking, add domain_match = candidate.category_tags ∩ query_intent_tags non-empty check. Reject or downrank candidates with zero intersection.",
+      "expectedImpact": "Eliminates absurd recommendations like car dealers for cafe supplies",
+      "risk": "Low - adds filtering, cannot make things worse",
+      "effort": "S",
+      "validationScenarios": ["UV003"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add explicit Turn 3 minimum count enforcement in system prompt",
+      "action": "Add to the Turn 3-4 system prompt: 'When user requests N candidates, you MUST output exactly N valid candidates with complete data. If insufficient valid candidates exist, explicitly state 'Found X of Y requested candidates' and ask for constraint relaxation. Never output placeholder data or truncated lists.'",
+      "implementationHint": "Update app/src/app/api/ai/request/route.ts system prompt section for Turn 3-4 handling, specifically the shortlist construction instructions.",
+      "expectedImpact": "Creates a hard constraint in LLM behavior to honor count requirements",
+      "risk": "Low - prompt-only change",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV002"]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Generate context-aware templates using actual found candidates",
+      "action": "Turn 4 message templates should reference SPECIFIC companies found in Turns 1-3, not generic placeholders. Modify template generation to accept a 'found_companies' parameter and interpolate real company names, products, and verified attributes into Subject/Body templates.",
+      "implementationHint": "In the message template generation function, pass the actual candidate list and extract company_name, product_focus, location for template interpolation. Avoid generic '[Название компании]' when real data exists.",
+      "expectedImpact": "Turn 4 templates become useful instead of generic",
+      "risk": "Low - improves template quality",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV003"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV001: shortlist must contain 3-5 verified footwear manufacturers in Minsk",
+      "UV003: candidate recommendations must be relevant to cafe/supplies domain",
+      "UV002: shortlist must contain exactly 3 flour factories with export readiness data"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "Average usefulness score >= 3.5 across multi-turn scenarios",
+      "Useful rate >= 0.8 (80% of scenarios rated 'useful' by both judges)",
+      "Zero 'generic fallback' or 'placeholder data' occurrences in Turn 3 shortlists",
+      "Zero domain-irrelevant candidate recommendations"
+    ]
+  }
+}
