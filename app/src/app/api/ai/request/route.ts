@@ -535,19 +535,17 @@ function looksLikeTopCompaniesRequestWithoutCriteria(
   // Also check if message mentions "альтернативы" (alternatives) - this is a fallback request, not criteria request
   const hasAlternativesMention = /\bальтернатив/i.test(text);
   
+  // ROBUST FIX: If this is ANY kind of explicit shortlist/ranking request
+  // AND there's ANY prior conversation history (from any previous turn),
+  // ALWAYS return FALSE - do NOT ask for criteria.
+  // This is critical for UV017 where Turn 2 says "Сделай shortlist..." after Turn 1 search.
+  // The presence of ANY history means we already have context from previous turns.
+  const hasAnyHistory = (options?.history?.length || 0) > 0;
+  
   if (hasExplicitShortlistPattern && hasActionPattern) {
-    // SUPER AGGRESSIVE FIX: If this is ANY kind of explicit shortlist/ranking request,
-    // DO NOT ask for criteria if there's ANY history at all.
-    // This is critical for UV017 where Turn 2 says "Сделай shortlist..." after Turn 1 search.
-    const hasAnyHistory = (options?.history?.length || 0) > 0;
-    const hasAnyCandidateInHistory = 
-      (options?.vendorCandidates?.length || 0) > 0 ||
-      (options?.history?.some((m) => m.role === "assistant" && /\/company\//i.test(m.content || "")) ?? false) ||
-      Boolean(getLastUserSourcingMessage(options?.history || []));
-    
-    // If there's ANY history or candidates, return FALSE (don't ask for criteria)
-    // This is the key fix for UV017 context loss
-    if (hasAnyHistory || hasAnyCandidateInHistory) {
+    // If we have ANY history at all from previous turns, don't ask for criteria
+    // Just proceed with the shortlist request using existing context
+    if (hasAnyHistory) {
       // User is asking for shortlist/ranking AND we have context from previous turns - do NOT ask for criteria
       // Instead, the system should do the shortlist from existing candidates
       return false;
@@ -557,6 +555,19 @@ function looksLikeTopCompaniesRequestWithoutCriteria(
     // don't ask for criteria - just do the shortlist or honest fallback
     if (hasAlternativesMention) {
       return false;
+    }
+  }
+  
+  // SECONDARY CHECK: Even for non-explicit-shortlist requests,
+  // if there's ANY history and user is asking for selection/ranking,
+  // don't ask for criteria - use existing context
+  if (hasAnyHistory) {
+    const isSelectionRequest = 
+      /(выбер|подбер|состав|сделай|формир|выбирай|подбирай|составь|сформируй|ранжируй|shortlist|топ|рейтинг)/iu.test(text) &&
+      /(поставщик|компа|организац|производител|подрядчик)/iu.test(text);
+    
+    if (isSelectionRequest) {
+      return false; // Don't ask for criteria - use existing context from history
     }
   }
 
