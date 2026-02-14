@@ -11989,6 +11989,20 @@ function buildAssistantSystemPrompt(): string {
     "- In normal text (not templates), do not use raw placeholders in braces.",
     "- Do not add trailing quotes/backticks/punctuation to links.",
     "- In capability phrasing, refer to the interactive portal biznesinfo.by instead of 'catalog'.",
+    "",
+    "ENTITY TRACKING:",
+    "- When a user has established a specific company name in conversation (e.g., by searching for it or referring to it), maintain that entity as the active subject for all subsequent turns until the user explicitly switches.",
+    "- Never substitute a different company name for the established entity.",
+    "- If you cannot find information about that specific company, say so using the EXACT name the user provided — do not suggest a different company as a replacement.",
+    "",
+    "CRITERIA PERSISTENCE:",
+    "- Accumulate ALL user-specified criteria across turns (quality parameters, certifications, constraints, geographic filters).",
+    "- On every turn that produces a company list or shortlist, re-apply ALL accumulated criteria.",
+    "- If a criterion cannot be verified from catalog data, mark it as '[не подтверждено в карточке — уточните у поставщика]' but do NOT silently drop it.",
+    "",
+    "SPARSE DATA RESPONSE:",
+    "- When results are fewer than requested, NEVER give generic advice like 'расширьте поиск'.",
+    "- Instead respond with: '1. ЧТО НАШЛОСЬ: [N confirmed candidates]. 2. ЧЕГО НЕ ХВАТАЕТ: [specific gap vs user request]. 3. КОНКРЕТНЫЙ СЛЕДУЮЩИЙ ШАГ: [one actionable step]. 4. СОХРАНЁННЫЕ КРИТЕРИИ: [list criteria from all turns].'",
   ].join("\n");
 }
 

@@ -441,6 +441,76 @@ function normalizeLogoUrl(raw: string): string {
   return url;
 }
 
+// Anti-noise filter: blocklist of incompatible rubric keywords for supplier searches
+const ANTI_NOISE_BLOCKLIST = [
+  "поликлиника",
+  "больница",
+  "госпиталь",
+  "клиника",
+  "медицинский центр",
+  "стоматологическая поликлиника",
+  "диспансер",
+  "больница",
+  "военкомат",
+  "военная часть",
+  "военно-патриотический",
+  "военно-спортивный",
+  "дворец культуры",
+  "дом культуры",
+  "клуб",
+  "библиотека",
+  "школа",
+  "гимназия",
+  "лицей",
+  "колледж",
+  "университет",
+  "институт",
+  "учебный центр",
+  "образовательный центр",
+  "курсы",
+  "спортивная школа",
+  "стадион",
+  "бассейн",
+  "спортзал",
+  "общежитие",
+  "гостиница",
+  "отель",
+  "хостел",
+  "турбаза",
+  "дом отдыха",
+  "санаторий",
+  "детский лагерь",
+  "дом творчества",
+  "дом детского творчества",
+  "центр творчества",
+  "бытовая химия",
+  "производство бытовой химии",
+];
+
+function isRubricBlockedByIntent(rubricText: string | null, intentKeywords: string[]): boolean {
+  if (!rubricText) return false;
+  const rubricLower = rubricText.toLowerCase();
+  // Check if rubric contains blocklist terms AND intent is supplier/manufacturer
+  const isSupplierIntent = intentKeywords.some(
+    (k) =>
+      k.includes("произв") ||
+      k.includes("поставщ") ||
+      k.includes("завод") ||
+      k.includes("изготовитель") ||
+      k.includes("manufacturer") ||
+      k.includes("supplier") ||
+      k.includes("прода") ||
+      k.includes("купить") ||
+      k.includes("оптом")
+  );
+  if (!isSupplierIntent) return false;
+  // Block if rubric contains blocklist terms
+  for (const blocked of ANTI_NOISE_BLOCKLIST) {
+    if (rubricLower.includes(blocked)) return true;
+  }
+  return false;
+}
+
 function computeLogoRank(summary: BiznesinfoCompanySummary | undefined): number {
   if (!summary) return 0;
   if (normalizeLogoUrl(summary.logo_url || "")) return 2;
@@ -1161,6 +1231,10 @@ export async function biznesinfoSearch(params: {
     const companyTokens = store.companyKeywordsById.get(id) || [];
 
     const pushMatch = () => {
+      // Anti-noise filter: skip companies with incompatible rubrics for supplier searches
+      const rubricText = summary?.primary_rubric_name || null;
+      const intentKeywords = [...(q ? [q] : []), ...(params.service || "").split(/[\s,]+/)];
+      if (isRubricBlockedByIntent(rubricText, intentKeywords)) return;
       const logoRank = computeLogoRank(summary);
       const name = summary?.name || id;
       const nameNorm = safeLower(name).replace(/ё/gu, "е");
