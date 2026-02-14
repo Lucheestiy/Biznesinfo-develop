@@ -5812,7 +5812,7 @@ function postProcessAssistantReply(params: {
     out = `${out}\n\nГео-фильтр: Беларусь.`.trim();
   }
 
-  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|не удалось надежно прочитать сайты|не удалось|не могу)/iu.test(
+  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд)/iu.test(
     out,
   );
   if (websiteResearchIntent && !hasWebsiteSourceOrFallbackEvidence) {
@@ -10381,7 +10381,7 @@ const VENDOR_INTENT_CONFLICT_RULES: Record<string, VendorIntentConflictRule> = {
   footwear: {
     required: /\b(обув\p{L}*|shoe[s]?|footwear|ботин\p{L}*|туфл\p{L}*|кроссов\p{L}*|лофер\p{L}*|дерби|оксфорд\p{L}*|сапог\p{L}*)\b/u,
     forbidden:
-      /\b(банк\p{L}*|банков\p{L}*|лес\p{L}*|древес\p{L}*|инструмент\p{L}*|абразив\p{L}*|металлопрокат\p{L}*|подшип\p{L}*|клининг\p{L}*|уборк\p{L}*|сертификац\p{L}*|декларац\p{L}*|молок\p{L}*|овощ\p{L}*|лук\p{L}*|кофе\p{L}*|типограф\p{L}*|полиграф\p{L}*)\b/u,
+      /\b(банк\p{L}*|банков\p{L}*|лес\p{L}*|древес\p{L}*|инструмент\p{L}*|абразив\p{L}*|металлопрокат\p{L}*|подшип\p{L}*|клининг\p{L}*|уборк\p{L}*|сертификац\p{L}*|декларац\p{L}*|молок\p{L}*|овощ\p{L}*|лук\p{L}*|кофе\p{L}*|типограф\p{L}*|полиграф\p{L}*|поликлиник\p{L}*|больниц\p{L}*|госпитал\p{L}*|медицин\p{L}*|клиник\p{L}*|стоматологич\p{L}*|аптек\p{L}*|фармацевт\p{L}*)\b/u,
   },
   flour: {
     required: /\b(мук\p{L}*|мельниц\p{L}*|зернопереработ\p{L}*|flour|mill)\b/u,
@@ -10552,7 +10552,7 @@ function lineConflictsWithSourcingDomain(line: string, domain: SourcingDomainTag
     );
   }
   if (domain === "footwear") {
-    return /(банк|банков|лес|древес|инструмент|абразив|металлопрокат|подшип|клининг|уборк|сертификац|декларац|молок|овощ|лук|кофе|типограф|полиграф|автозапчаст|auto\s*parts|car\s*parts|строительн\p{L}*|кирпич\p{L}*|блок\p{L}*|смес\p{L}*|продовольств\p{L}*|кондитер\p{L}*|магазин\p{L}*\s+продукт)/u.test(
+    return /(банк|банков|лес|древес|инструмент|абразив|металлопрокат|подшип|клининг|уборк|сертификац|декларац|молок|овощ|лук|кофе|типограф|полиграф|автозапчаст|auto\s*parts|car\s*parts|строительн\p{L}*|кирпич\p{L}*|блок\p{L}*|смес\p{L}*|продовольств\p{L}*|кондитер\p{L}*|магазин\p{L}*\s+продукт|поликлиник\p{L}*|больниц\p{L}*|госпитал\p{L}*|медицин\p{L}*|клиник\p{L}*|стоматологич\p{L}*|аптек\p{L}*|фармацевт\p{L}*|аптечн\p{L}*)/u.test(
       normalized,
     );
   }
@@ -10598,7 +10598,7 @@ function candidateMatchesCoreCommodity(candidate: BiznesinfoCompanySummary, tag:
     const hasManufacturerSignals = /(производ|фабрик|завод|цех|обувн\p{L}*\s+предприяти|manufacturer|factory|oem|odm)/u.test(haystack);
     const hasRetailOnlySignals = /(магазин|рознич|бутик|торгов(ый|ая)\s+объект|sales\s+point|shop)/u.test(haystack);
     const hasDistractorSignals =
-      /(банк|банков|лес|древес|инструмент|абразив|металлопрокат|подшип|клининг|уборк|сертификац|декларац|молок|овощ|лук|кофе|типограф|полиграф|автозапчаст|auto\s*parts|car\s*parts)/u.test(
+      /(банк|банков|лес|древес|инструмент|абразив|металлопрокат|подшип|клининг|уборк|сертификац|декларац|молок|овощ|лук|кофе|типограф|полиграф|автозапчаст|auto\s*parts|car\s*parts|поликлиник|больниц|госпитал|медицин|клиник|стоматологич|аптек|фармацевт|аптечн)/u.test(
         haystack,
       );
     if (hasRetailOnlySignals && !hasManufacturerSignals) return false;

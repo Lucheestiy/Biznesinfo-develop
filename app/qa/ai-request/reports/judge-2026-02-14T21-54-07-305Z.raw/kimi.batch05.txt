@@ -1,0 +1,75 @@
+Now I have a good understanding of the expected JSON format. Let me analyze the two scenarios (UV021 and UV022) and produce the QA judge evaluation.
+
+Based on my analysis of the scenarios:
+
+**UV021 Analysis:**
+- Turn 1: Good - provided 20 relevant tags for the company
+- Turn 2: Good - provided UTM structure for Google Ads and Yandex Direct
+- Turn 3: **CRITICAL FAILURE** - Assistant suddenly talks about "Деловые Медиа ООО" instead of "Ирис Интер Групп" - complete loss of context
+- Turn 4: **CRITICAL FAILURE** - Assistant claims "Не вижу в текущем контексте карточку «Ирис Интер групп»" despite the company being discussed for 3 turns, then starts listing random other companies (18 УП, etc.)
+
+This is a severe continuity failure - the assistant completely lost track of which company was being discussed.
+
+**UV022 Analysis:**
+- Turn 1: Good - found the company card with link
+- Turn 2: **CRITICAL FAILURE** - Despite having the company card with website from Turn 1, assistant says "нет подтверждённой выгрузки новостей" and offers to check the site, but then instead of doing so, it outputs random data about other companies (Министерство сельского хозяйства, etc.)
+
+The assistant had the website from the card but failed to use it and instead gave irrelevant data about other organizations.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV021",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turns 1-2: Good responses with relevant tags and UTM structure",
+        "Turn 3: Complete context loss - assistant suddenly talks about 'Деловые Медиа ООО' instead of 'Ирис Интер Групп'",
+        "Turn 4: Assistant claims company not in context despite 3 turns of discussion, then lists random unrelated companies"
+      ],
+      "criticalIssues": [
+        "Severe continuity failure: assistant completely forgot which company was being discussed",
+        "Turn 3 response is about entirely different company (Деловые Медиа ООО)",
+        "Turn 4 contradicts itself by claiming no context while company was explicitly named in all prior turns",
+        "Assistant hallucinated unrelated companies (18 УП, Министерство сельского хозяйства) instead of staying on topic"
+      ],
+      "strengths": [
+        "Turns 1-2 provided relevant actionable content before context was lost"
+      ],
+      "nextUserProbe": "Почему ты переключился на другую компанию? Я спрашивал про Ирис Интер Групп!"
+    },
+    {
+      "scenarioId": "UV022",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Correctly found company card with direct link to biznesinfo.by",
+        "Turn 2: Failed to use known website from card, instead gave irrelevant data about random organizations"
+      ],
+      "criticalIssues": [
+        "Assistant had company website from Turn 1 but claimed inability to get news without risk of error",
+        "Instead of checking the company's website, assistant output random unrelated companies (Министерство сельского хозяйства)",
+        "Failed to fulfill explicit user request to find latest news from the website",
+        "Assistant offered to check site but then immediately provided irrelevant data instead"
+      ],
+      "strengths": [
+        "Turn 1 correctly identified company and provided direct link",
+        "Assistant was honest about not having news data rather than hallucinating"
+      ],
+      "nextUserProbe": "У тебя же есть ссылка на их сайт из карточки - почему не проверил?"
+    }
+  ]
+}
+```
