@@ -503,6 +503,25 @@ function looksLikeTopCompaniesRequestWithoutCriteria(
   const text = normalizeComparableText(message || "");
   if (!text) return false;
 
+  // CRITICAL: If user explicitly asks for shortlist/ranking from existing candidates,
+  // NEVER ask for criteria - just use existing candidates from history.
+  // This is the primary fix for UV017 and similar multi-turn scenarios.
+  const explicitShortlistRequest = /(shortlist|топ|рейтинг|ранжир|排名)/iu.test(text) && 
+    /(выбер|подбер|состав|сделай|формир|rank|select|list)/iu.test(text);
+  
+  if (explicitShortlistRequest) {
+    // If this is an explicit shortlist request, check if we have ANY candidates in history
+    const hasAnyCandidateContext = 
+      (options?.vendorCandidates?.length || 0) > 0 ||
+      (options?.history?.some((m) => m.role === "assistant" && /\/company\//i.test(m.content || "")) ?? false) ||
+      Boolean(getLastUserSourcingMessage(options?.history || []));
+    
+    if (hasAnyCandidateContext) {
+      // User is asking for shortlist AND we have context - do NOT ask for criteria
+      return false;
+    }
+  }
+
   // If there are already vendor candidates from history, don't ask for criteria again
   // Just rank/prioritize the existing candidates
   const hasExistingCandidates =
@@ -544,6 +563,36 @@ function buildTopCompaniesCriteriaQuestionReply(): string {
     "Напишите, что именно нужно найти:",
     "- товар/услуга",
     "- город или регион",
+  ].join("\n");
+}
+
+function looksLikeGirlsPreferenceLifestyleQuestion(message: string): boolean {
+  const text = normalizeComparableText(message || "");
+  if (!text) return false;
+
+  const asksAboutGirlsOrWomen = /(девушк\p{L}*|женщин\p{L}*|жене|любим\p{L}*)/u.test(text);
+  const asksPreferenceOrGift =
+    /(что\s+люб\p{L}*|что\s+нрав\p{L}*|что\s+подар\p{L}*|иде\p{L}*\s+подар|куда\s+сход)/u.test(text);
+
+  return asksAboutGirlsOrWomen && asksPreferenceOrGift;
+}
+
+function buildGirlsPreferenceLifestyleReply(): string {
+  return [
+    "Можно смотреть шире и выбирать по формату впечатления или покупки.",
+    "Варианты, что предложить девушке:",
+    "1. Цветы.",
+    "2. Косметика и уход.",
+    "3. Ужин/свидание в ресторане.",
+    "4. Путешествие или мини-поездка.",
+    "5. Красивое белье.",
+    "6. Билеты на концерт/мероприятие.",
+    "7. Украшения.",
+    "8. Авто (если речь о крупной покупке).",
+    "9. Недвижимость/дом (если обсуждается долгосрочный подарок/план).",
+    "",
+    "Что из этого вам сейчас интересно в первую очередь?",
+    "Если хотите подбор по порталу, пришлите ссылки на карточки клиентов Biznesinfo, которые этим занимаются, и я помогу выбрать лучший вариант.",
   ].join("\n");
 }
 
@@ -633,6 +682,7 @@ function buildHardFormattedReply(
 ): string | null {
   if (looksLikeWhyOnlyOneCompanyQuestion(message)) return buildWhyOnlyOneCompanyReply();
   if (looksLikeTopCompaniesRequestWithoutCriteria(message, options)) return buildTopCompaniesCriteriaQuestionReply();
+  if (looksLikeGirlsPreferenceLifestyleQuestion(message)) return buildGirlsPreferenceLifestyleReply();
   if (looksLikePortalOnlyScopeQuestion(message)) return buildPortalOnlyScopeReply();
   if (looksLikeGreetingOrCapabilitiesRequest(message)) return buildGreetingCapabilitiesReply();
   return null;
