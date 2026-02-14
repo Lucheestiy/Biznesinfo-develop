@@ -3246,6 +3246,8 @@ function sanitizeAssistantReplyLinks(text: string): string {
   const markdownLinkRe = new RegExp("\\[[^\\]]{1,180}\\]\\(\\s*(" + linkToken + ")\\s*\\)", "giu");
   const angleLinkRe = new RegExp("<\\s*(" + linkToken + ")\\s*>", "giu");
   const prefixedLinkRe = new RegExp("(?:[`\"'«»“”„‘’(\\[{<])+\\s*(" + linkToken + ")", "giu");
+  const leadingCommaBeforeLinkRe = new RegExp("(^|\\n)\\s*,\\s*(" + linkToken + ")", "giu");
+  const inlineCommaBeforeLinkRe = new RegExp("(\\S)\\s*,\\s*(" + linkToken + ")", "giu");
   const plainLinkRe = new RegExp(linkToken + "[`\"'«»“”„‘’.,;:!?\\]\\)\\}]*", "giu");
 
   let out = text;
@@ -3254,6 +3256,14 @@ function sanitizeAssistantReplyLinks(text: string): string {
   out = out.replace(prefixedLinkRe, (_full, link: string) => {
     const normalized = stripTrailingNoiseFromUrl(link);
     return normalized || link;
+  });
+  out = out.replace(leadingCommaBeforeLinkRe, (_full, startOrNl: string, link: string) => {
+    const normalized = stripTrailingNoiseFromUrl(link);
+    return `${startOrNl}${normalized || link}`;
+  });
+  out = out.replace(inlineCommaBeforeLinkRe, (_full, before: string, link: string) => {
+    const normalized = stripTrailingNoiseFromUrl(link);
+    return `${before} ${normalized || link}`;
   });
   out = out.replace(plainLinkRe, (match) => {
     const normalized = stripTrailingNoiseFromUrl(match);
@@ -13129,7 +13139,7 @@ export async function POST(request: Request) {
       });
     }
 
-    if (!canceled && replyText) {
+    if (replyText) {
       replyText = sanitizeAssistantReplyLinks(replyText);
     }
 
@@ -13424,10 +13434,11 @@ export async function POST(request: Request) {
                 providerError: { name: "StreamFailed", message: msg },
               }) || fallbackStubText
             );
+        const sanitizedFailedLocalReply = failedLocalReply ? sanitizeAssistantReplyLinks(failedLocalReply) : "";
         const failedIsStub = canceled ? false : /\(stub\)/iu.test(failedLocalReply);
 
         const payloadToStore = buildPayloadToStore({
-          replyText: failedLocalReply,
+          replyText: sanitizedFailedLocalReply,
           isStub: failedIsStub,
           localFallbackUsed: canceled ? false : !failedIsStub,
           providerMeta: canceled ? { provider } : { provider: "stub" },
@@ -13479,7 +13490,7 @@ export async function POST(request: Request) {
               sessionId: assistantSession?.id || null,
               userId: user.id,
               turnId: pendingTurn.id,
-              assistantMessage: failedLocalReply,
+              assistantMessage: sanitizedFailedLocalReply,
               responseMeta: failedResponseMeta,
             });
             persistedTurn = finalized ? pendingTurn : null;
@@ -13491,7 +13502,7 @@ export async function POST(request: Request) {
               userId: user.id,
               requestId,
               userMessage: message,
-              assistantMessage: failedLocalReply,
+              assistantMessage: sanitizedFailedLocalReply,
               rankingSeedText,
               vendorCandidateIds: turnVendorCandidateIds,
               vendorCandidateSlugs: turnVendorCandidateSlugs,
@@ -13519,7 +13530,7 @@ export async function POST(request: Request) {
             turnIndex: persistedTurn?.turnIndex ?? null,
             canceled,
             reply: {
-              text: failedLocalReply,
+              text: sanitizedFailedLocalReply,
               isStub: failedIsStub,
               localFallbackUsed: canceled ? false : !failedIsStub,
               provider: canceled ? provider : "stub",
