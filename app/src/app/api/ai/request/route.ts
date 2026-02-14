@@ -12176,6 +12176,78 @@ export async function POST(request: Request) {
   const websiteResearchIntent =
     isWebsiteScanEnabled() &&
     (looksLikeWebsiteResearchIntent(message) || looksLikeWebsiteResearchFollowUpIntent(message, history));
+
+  // Determine continuity commodity tag for website research bootstrap
+  const websiteContinuitySource = oneLine(
+    [
+      message,
+      vendorLookupContext?.searchText || "",
+      getLastUserSourcingMessage(history) || "",
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+  const websiteContinuityCommodityTag = detectCoreCommodityTag(websiteContinuitySource);
+
+  // Search for additional vendor candidates when website research needs more candidates
+  const needsMoreWebsiteCandidates =
+    websiteResearchIntent &&
+    vendorCandidates.length > 0 &&
+    vendorCandidates.length < ASSISTANT_VENDOR_CANDIDATES_MAX &&
+    (looksLikeWebsiteResearchFollowUpIntent(message, history) || /глубже|дополнительн|больше|ещё|других|еще/i.test(message));
+
+  if (needsMoreWebsiteCandidates) {
+    try {
+      const websiteExpandSeed = oneLine([
+        message,
+        vendorLookupContext?.searchText || "",
+        getLastUserSourcingMessage(history) || "",
+      ].filter(Boolean).join(" "));
+
+      const websiteExpandGeo = detectGeoHints(websiteExpandSeed);
+      const expandCommodityTerms = websiteContinuityCommodityTag
+        ? fallbackCommoditySearchTerms(websiteContinuityCommodityTag)
+        : [];
+      const websiteExpandText = oneLine(
+        [websiteExpandSeed, ...expandCommodityTerms.slice(0, 3)].filter(Boolean).join(" "),
+      );
+
+      if (websiteExpandText) {
+        const expandCandidates = await fetchVendorCandidates({
+          text: websiteExpandText,
+          region: websiteExpandGeo.region || null,
+          city: websiteExpandGeo.city || null,
+          hintTerms: vendorHintTerms,
+          allowBroadGeoFallback: true,
+        });
+
+        if (expandCandidates.length > 0) {
+          // Filter by commodity tag if available
+          let filteredExpandCandidates = expandCandidates;
+          if (websiteContinuityCommodityTag) {
+            filteredExpandCandidates = expandCandidates.filter((c) =>
+              candidateMatchesCoreCommodity(c, websiteContinuityCommodityTag),
+            );
+          }
+
+          // Add new candidates, avoiding duplicates with existing ones
+          const existingIds = new Set(vendorCandidates.map((c) => c.id));
+          const newCandidates = filteredExpandCandidates.filter((c) => !existingIds.has(c.id));
+
+          if (newCandidates.length > 0) {
+            vendorCandidates = dedupeVendorCandidates([
+              ...vendorCandidates,
+              ...newCandidates.slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX - vendorCandidates.length),
+            ]).slice(0, ASSISTANT_VENDOR_CANDIDATES_MAX);
+            vendorCandidatesBlock = buildVendorCandidatesBlock(vendorCandidates);
+          }
+        }
+      }
+    } catch {
+      // ignore bootstrap errors; continue with existing candidates
+    }
+  }
+
   if (websiteResearchIntent && vendorCandidates.length === 0 && !companyResp && shortlistResps.length === 0) {
     try {
       const websiteSeed = oneLine([message, getLastUserSourcingMessage(history) || ""].filter(Boolean).join(" "));
