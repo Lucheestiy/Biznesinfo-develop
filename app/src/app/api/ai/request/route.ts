@@ -508,7 +508,12 @@ function looksLikeTopCompaniesRequestWithoutCriteria(
   const hasExistingCandidates =
     (options?.vendorCandidates?.length || 0) > 0 ||
     (options?.history?.some((m) => m.role === "assistant" && /\/company\//i.test(m.content || "")) ?? false);
-  if (hasExistingCandidates) {
+  
+  // Also check if there's sourcing context in history - if user previously asked for suppliers,
+  // don't ask for criteria again in follow-up turns
+  const hasSourcingHistory = Boolean(getLastUserSourcingMessage(options?.history || []));
+  
+  if (hasExistingCandidates || hasSourcingHistory) {
     return false;
   }
 
