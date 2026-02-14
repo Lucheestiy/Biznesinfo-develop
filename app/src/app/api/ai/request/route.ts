@@ -12211,11 +12211,13 @@ export async function POST(request: Request) {
   const websiteContinuityCommodityTag = detectCoreCommodityTag(websiteContinuitySource);
 
   // Search for additional vendor candidates when website research needs more candidates
+  // Expand candidates when user asks for more after website research (even without explicit website cues)
+  const websiteFollowUpIntent = looksLikeWebsiteResearchFollowUpIntent(message, history);
   const needsMoreWebsiteCandidates =
-    websiteResearchIntent &&
+    (websiteResearchIntent || websiteFollowUpIntent) &&
     vendorCandidates.length > 0 &&
     vendorCandidates.length < ASSISTANT_VENDOR_CANDIDATES_MAX &&
-    (looksLikeWebsiteResearchFollowUpIntent(message, history) || /глубже|дополнительн|больше|ещё|других|еще/i.test(message));
+    (websiteFollowUpIntent || /глубже|дополнительн|больше|ещё|других|еще/i.test(message));
 
   if (needsMoreWebsiteCandidates) {
     try {
