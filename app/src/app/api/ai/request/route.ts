@@ -6118,6 +6118,26 @@ function postProcessAssistantReply(params: {
           return out;
         }
       }
+
+      // NEW FIX: If websiteResearchIntent is true but no continuityCandidates,
+      // try to use vendorCandidates from the current lookup for website verification
+      if (websiteResearchIntent && continuityCandidates.length === 0 && params.vendorCandidates && params.vendorCandidates.length > 0) {
+        const websiteFallbackCandidates = params.vendorCandidates.slice(0, 3);
+        const websiteFallbackRows = formatVendorShortlistRows(
+          websiteFallbackCandidates,
+          Math.min(3, Math.max(1, websiteFallbackCandidates.length)),
+        );
+        if (websiteFallbackRows.length > 0) {
+          out = [
+            "Для live-проверки даю shortlist из карточек каталога (профиль нужно подтвердить по сайту):",
+            ...websiteFallbackRows,
+            "Статус проверки: пока не подтверждено по сайту.",
+            "Следующий шаг: проверяю разделы Контакты/О компании/Продукция и отмечаю по каждому кандидату «подтверждено/не подтверждено».",
+          ].join("\n");
+          return out;
+        }
+      }
+
       const focusSummary = normalizeFocusSummaryText(
         summarizeSourcingFocus(
           oneLine([params.vendorLookupContext?.searchText || "", params.vendorLookupContext?.sourceMessage || "", params.message || ""].filter(Boolean).join(" ")),
