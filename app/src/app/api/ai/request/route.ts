@@ -910,11 +910,79 @@ function buildComparisonSelectionFallback(params: {
   return lines.join("\n");
 }
 
+// Common B2B search term variations for Belarusian/Russian business queries
+const B2B_SEARCH_VARIATIONS: Record<string, string[]> = {
+  "производитель": ["производство", "завод", "изготовитель", "фабрика", "manufacturer"],
+  "поставщик": ["поставка", "дистрибьютор", "оптом", "supplier", "vendor"],
+  "опт": ["оптом", "оптовый", "крупный опт", "wholesale"],
+  "магазин": ["торговля", "розница", "торговая точка", "магазин", "shop"],
+  "услуга": ["услуги", "сервис", "работа", "service"],
+  "ремонт": ["ремонт", "восстановление", "обслуживание", "repair"],
+  "строительство": ["строительство", "стройка", "ремонт", "construction"],
+  "транспорт": ["перевозка", "доставка", "логистика", "transport", "delivery"],
+  "продукт": ["продукция", "товар", "изделие", "product"],
+  "продукты": ["продукты питания", "еда", "food"],
+  "оборудование": ["оборудование", "техника", "аппарат", "equipment"],
+  "материал": ["материалы", "сырье", "materials"],
+};
+
+// Extract search intent keywords from user query for fallback suggestions
+function extractSearchIntentKeywords(message: string): string[] {
+  const normalized = normalizeComparableText(message || "");
+  const keywords: string[] = [];
+
+  for (const [base, variations] of Object.entries(B2B_SEARCH_VARIATIONS)) {
+    if (normalized.includes(base) || variations.some((v) => normalized.includes(v))) {
+      keywords.push(base);
+    }
+  }
+
+  return [...new Set(keywords)];
+}
+
+// Generate specific alternative search suggestions based on user query
+function generateAlternativeSearchSuggestions(message: string): string | null {
+  const keywords = extractSearchIntentKeywords(message);
+  if (keywords.length === 0) return null;
+
+  const suggestions: string[] = [];
+  const normalized = normalizeComparableText(message || "");
+
+  // Add variations based on extracted keywords
+  for (const keyword of keywords) {
+    const variations = B2B_SEARCH_VARIATIONS[keyword] || [];
+    if (variations.length > 0 && !normalized.includes(variations[0])) {
+      suggestions.push(`"${variations[0]}"`);
+    }
+  }
+
+  // Add common broadening terms if not present
+  if (!normalized.includes("опт") && !normalized.includes("оптом")) {
+    suggestions.push("оптом");
+  }
+  if (!normalized.includes("поставщик") && !normalized.includes("дистрибьютор")) {
+    suggestions.push("поставщик");
+  }
+
+  if (suggestions.length === 0) return null;
+
+  // Limit to 3 suggestions
+  return suggestions.slice(0, 3).join(", ");
+}
+
 function buildGenericNoResultsCriteriaGuidance(params: {
   focusSummary?: string;
+  userMessage?: string;
 }): string[] {
   const focus = normalizeFocusSummaryText(params.focusSummary || "");
   const lines: string[] = [];
+
+  // Try to add specific alternative search suggestions first
+  const altSearch = params.userMessage ? generateAlternativeSearchSuggestions(params.userMessage) : null;
+  if (altSearch) {
+    lines.push(`Попробуйте изменить запрос: ${altSearch}`);
+  }
+
   lines.push(
     `Чтобы выбрать релевантного исполнителя${focus ? ` по запросу «${focus}»` : ""}, используйте минимум 4 критерия:`,
   );
@@ -5871,6 +5939,7 @@ function postProcessAssistantReply(params: {
         noConcreteLines.push(
           ...buildGenericNoResultsCriteriaGuidance({
             focusSummary: focusSummary || undefined,
+            userMessage: params.message || undefined,
           }),
         );
       } else if (footwearContext && /(мужск|классич)/u.test(noConcreteNormalized)) {
