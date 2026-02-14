@@ -112,12 +112,16 @@ Recently completed:
 72. ✅ Add analytics-tagging safety fallback in post-processing to prevent drift into supplier/rubric shortlist mode.
 73. ✅ Add regression scenario `UV021` in `scenarios.regressions.user-ideas-multistep-variants.json` for “found → then not found / asked link” inconsistency.
 74. ✅ Keep on-site QA scenario navigator (`/scenarios`) aligned with active regression packs for fast manual review.
-75. ✅ Add regression scenario `UV022` for “explicit company search → latest site news” without redundant URL request.
+75. ✅ Add regression scenario `UV022` for "explicit company search → latest site news" without redundant URL request.
+76. ✅ Add entity-tracking instruction: maintain specific company as active subject across turns.
+77. ✅ Add criteria persistence: accumulate all user criteria across turns and re-apply.
+78. ✅ Add sparse-data response template: structured fallback instead of generic advice.
+79. ✅ Add rubric-based anti-noise filter: block hospitals/schools from supplier search results.
 
 Next:
 
-1. Run always-run dual cycle on user-ideas (`qa:cycle:user-ideas:always:dual`) and inspect judge/advisor output for residual link-gate and context-loss failures.
-2. Add a strict QA gate for “redundant link request” patterns in user-ideas cycle outputs.
+1. Run QA cycle again to verify improvements (entity-tracking, criteria persistence, sparse-data, anti-noise).
+2. Add strict QA gate for "redundant link request" patterns.
 
 ## Constraints
 
