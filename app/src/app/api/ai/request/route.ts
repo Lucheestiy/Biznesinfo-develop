@@ -2322,7 +2322,9 @@ function sanitizeUnfilledPlaceholdersInNonTemplateReply(text: string): string {
   let out = String(text || "");
   if (!out.trim()) return out;
 
-  const replacements: Array<[RegExp, string]> = [
+  // Step 1: Apply specific replacements with immediate deduplication after each
+  // This prevents cascading "уточняется до уточняется" bug
+  const specificReplacements: Array<[RegExp, string]> = [
     [/\{qty\}/giu, "объем"],
     [/\{(?:об[ъь]ем|количеств[оа])\}/giu, "объем"],
     [/\{city\}/giu, "город"],
@@ -2333,14 +2335,23 @@ function sanitizeUnfilledPlaceholdersInNonTemplateReply(text: string): string {
     [/\{доставка\/самовывоз\}/giu, "доставка/самовывоз"],
     [/\{deadline\}/giu, "срок поставки"],
     [/\{(?:дата|срок(?:\s+поставки)?)\}/giu, "срок поставки"],
-    [/\{(?:жирность|тара|адрес|контакт|телефон\/e-mail|сертификаты\/ветдокументы)\}/giu, "уточняется"],
   ];
 
-  for (const [re, value] of replacements) out = out.replace(re, value);
+  for (const [re, value] of specificReplacements) {
+    out = out.replace(re, value);
+    // Immediate deduplication after each replacement to prevent "уточняется до уточняется"
+    out = out.replace(/(?:уточняется[ \t,;:]*){2,}/giu, "уточняется");
+    out = out.replace(/уточняется\s+(?:до|по|и|или)\s+уточняется/giu, "уточняется");
+  }
+
+  // Step 2: Replace remaining placeholders with "уточняется" and deduplicate
   out = out.replace(/\{[^{}]{1,48}\}/gu, "уточняется");
   out = out.replace(/(?:уточняется[ \t,;:]*){2,}/giu, "уточняется");
   out = out.replace(/уточняется\s+(?:до|по|и|или)\s+уточняется/giu, "уточняется");
+
+  // Step 3: Handle ТЗ duplicates
   out = out.replace(/(?:по[ \t]+вашему[ \t]+тз[ \t,;:]*){2,}/giu, "по вашему ТЗ");
+
   return out;
 }
 
@@ -11072,18 +11083,20 @@ async function fetchVendorCandidates(params: {
   const extracted = extractVendorSearchTerms(searchText);
   const detectedCommodityTag = detectCoreCommodityTag(searchText) || detectCoreCommodityTag(oneLine(hintTerms.join(" ")));
   const commoditySeedTerms = detectedCommodityTag ? fallbackCommoditySearchTerms(detectedCommodityTag) : [];
+  // Prioritize commodity-specific terms over generic extracted terms to avoid "производители" overriding "обувь" search
   const termCandidates = expandVendorSearchTermCandidates([
+    ...commoditySeedTerms, // commodity terms first - they are more specific
     ...extracted,
     ...synonymTerms,
     ...reverseBuyerTerms,
-    ...commoditySeedTerms,
   ]);
   const hintTermCandidates = expandVendorSearchTermCandidates(hintTerms);
   const termSignal = countStrongVendorSearchTerms(termCandidates);
   const hintSignal = countStrongVendorSearchTerms(hintTermCandidates);
   const preferHintTerms = hintSignal > termSignal || (termSignal === 0 && hintSignal > 0);
   const orderedTerms = preferHintTerms ? [...hintTermCandidates, ...termCandidates] : [...termCandidates, ...hintTermCandidates];
-  const searchTerms = uniqNonEmpty([...orderedTerms, ...commoditySeedTerms]).slice(0, 16);
+  // Prioritize commodity-specific terms by placing them FIRST in searchTerms to avoid generic terms like "производители" overriding them
+  const searchTerms = uniqNonEmpty([...commoditySeedTerms, ...orderedTerms]).slice(0, 16);
   const lookupIntentAnchors = detectVendorIntentAnchors(searchTerms);
   const pooledCandidateSlugs = new Set<string>();
   const pooledInstitutionalDistractorSlugs = new Set<string>();
