@@ -1,0 +1,127 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S006",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3 completely breaks continuity: user asks for shortlist with risk analysis, assistant returns 1 irrelevant construction company instead of ventilation suppliers",
+        "Assistant hallucinates ranking with completely wrong companies (cafe, road construction, bathhouse) for industrial ventilation request",
+        "After user gives concrete location constraint (Kazimirovka), assistant fails to maintain context and produces garbage output"
+      ],
+      "criticalIssues": [
+        "Complete hallucination in final turn - returns cafe, road construction company, and bathhouse instead of ventilation suppliers",
+        "Generic fallback to template advice about 'quality certificates' instead of concrete supplier analysis",
+        "Zero actionable intelligence about actual ventilation contractors in Kazimirovka"
+      ],
+      "strengths": [
+        "Turns 1-2 correctly identified no relevant suppliers and offered expansion options"
+      ],
+      "nextUserProbe": "Почему вы дали мне кафе и баню вместо вентиляции? Это какая-то ошибка?"
+    },
+    {
+      "scenarioId": "S007",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3 completely fails: instead of ranking 3 suppliers with pre-test checklist, assistant gives generic priority rubric (A/B/C) with no actual companies",
+        "Assistant ignores user's explicit request for concrete ranking after location clarification (Bilevo)",
+        "No continuity from previous turns - drops to abstract 'criteria' instead of using found candidates"
+      ],
+      "criticalIssues": [
+        "Generic fallback to abstract ranking criteria instead of concrete supplier comparison",
+        "No actual company names or contacts in final response despite user asking for top-3 ranking",
+        "Complete failure to address 'what to check before test batch' with specific packaging-relevant points"
+      ],
+      "strengths": [
+        "Turn 2 correctly acknowledged location constraint and offered geographic expansion"
+      ],
+      "nextUserProbe": "Где конкретные компании? Я же просил рейтинг 3 поставщиков, а не абстрактные критерии"
+    },
+    {
+      "scenarioId": "S008",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3 is catastrophic: ranks cafe, road construction company, and bathhouse for stainless steel sheet request",
+        "Complete loss of context - assistant forgets original request about AISI 304 steel entirely",
+        "No meaningful continuity across any turn - each response is disconnected from the conversation flow"
+      ],
+      "criticalIssues": [
+        "Total hallucination: returned pizza cafe, road construction trust, and bath complex for metal supply request",
+        "Assistant appears to search for 'Шабаны' literally and returns any company with that word in name, ignoring original steel context",
+        "Zero relevance to user's actual need - would cause immediate user abandonment"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы что, прикалываетесь? При чем тут пиццерия к нержавеющему листу???"
+    },
+    {
+      "scenarioId": "S009",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3 returns accounting company (Трифт) for welding works request - completely wrong category",
+        "Assistant fails to maintain B2B welding context after location clarification (Devyatovka)",
+        "Generic contract advice is template filler, not specific to welding/subcontracting risks"
+      ],
+      "criticalIssues": [
+        "Hallucinated supplier: returned accounting firm instead of welding contractor",
+        "No actual welding companies in shortlist despite user explicitly requesting top-3",
+        "Contract advice is generic copy-paste, not tailored to welding-specific risks (certifications, weld quality, NDT testing)"
+      ],
+      "strengths": [
+        "Turn 1 correctly identified no relevant suppliers in initial list",
+        "Turn 2 maintained context and offered specific search keywords"
+      ],
+      "nextUserProbe": "Вы мне бухгалтерскую фирму дали вместо сварщиков. Как так вышло?"
+    },
+    {
+      "scenarioId": "S010",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 3 completely breaks: assistant asks user 'what criteria to consider' after user already gave specific request (ranking + color proof questions)",
+        "Assistant loses all context from previous turns with 5 concrete printing companies",
+        "Response treats conversation as fresh start - major continuity failure"
+      ],
+      "criticalIssues": [
+        "Complete context reset in Turn 3 - assistant forgets entire conversation history",
+        "Instead of ranking the 5 companies mentioned in Turns 1-2, asks user to specify criteria again",
+        "No color proof guidance provided despite explicit user request"
+      ],
+      "strengths": [
+        "Turn 1 provided 5 relevant printing companies with contacts and profiles",
+        "Turn 2 correctly acknowledged Malinovka location constraint and offered to help verify addresses"
+      ],
+      "nextUserProbe": "Мы уже 3 сообщения обсуждаем типографии, почему вы спрашиваете что мне нужно найти?"
+    }
+  ]
+}
+```

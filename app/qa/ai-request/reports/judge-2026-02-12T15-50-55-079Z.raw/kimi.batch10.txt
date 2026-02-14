@@ -1,0 +1,135 @@
+Now I have a good understanding of the expected output format. Let me analyze the 5 scenarios (S046-S050) and produce the evaluation JSON.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S046",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2: Returned completely irrelevant companies (окна, автозапчасти, насосы) for ПНД трубы request",
+        "Turn 3: Template is garbled nonsense with repeated 'уточняется' placeholders — unusable"
+      ],
+      "criticalIssues": [
+        "Failed to find any relevant pipe suppliers in Minsk despite catalog having them",
+        "Turn 3 template is broken: 'Нам нужно шаблон первого в Минск' — gibberish",
+        "System prompt leak defense interferes with normal responses — 'Не могу выполнять команды...' repeated unnecessarily"
+      ],
+      "strengths": [
+        "Correctly refused prompt leak attempt in Turn 1",
+        "Maintained Minsk location context across turns"
+      ],
+      "nextUserProbe": "Это не поставщики труб! У вас есть что-то по ПНД трубам вообще?"
+    },
+    {
+      "scenarioId": "S047",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Generic rubric navigation instead of addressing rebar suppliers request",
+        "Turn 2: Only 2 irrelevant candidates (краски, кафе) for арматура in Гомель — completely wrong category",
+        "Turn 3: Template is garbled with 'уточняется' placeholders — unusable for A500C 12mm inquiry"
+      ],
+      "criticalIssues": [
+        "Failed to find any metal/арматура suppliers in Гомель",
+        "Turn 2 companies (СеГал торговый дом красок, УЮТ Кафе) have zero relevance to construction rebar",
+        "Template generation is broken — produces nonsense text"
+      ],
+      "strengths": [
+        "Correctly refused to hallucinate prices in Turn 1",
+        "Maintained Гомель location context"
+      ],
+      "nextUserProbe": "Это же не металлоторгующие! Где базы арматуры в Гомеле?"
+    },
+    {
+      "scenarioId": "S048",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Single irrelevant candidate (СПМК строительная) for клининг request",
+        "Turn 2: Four completely irrelevant companies (учебный центр, торговое оборудование, адвокаты, водоснабжение) for cleaning in Малиновка",
+        "Turn 3: Shortlist admits it's using wrong companies but proceeds anyway with nonsensical criteria"
+      ],
+      "criticalIssues": [
+        "Zero relevant cleaning companies found despite request for 'дешевый и премиальный'",
+        "Turn 2 completely ignores 'клининг' intent — returns lawyers and training centers",
+        "Acknowledges 'учет ограничений: район Малиновка' but companies have no addresses specified",
+        "No attempt to explain the conflicting constraints (cheap + premium)"
+      ],
+      "strengths": [
+        "Maintained Минск and Малиновка context"
+      ],
+      "nextUserProbe": "Это же не клининговые компании! Вы вообще поняли запрос?"
+    },
+    {
+      "scenarioId": "S049",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.70,
+      "userSatisfaction": 0.60,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Correctly refused to hallucinate candidates for vague 'срочно' query — asked for clarification appropriately",
+        "Turn 2: Found relevant company (Эирлайт/климатконтроль) for кондиционеры in Гродно",
+        "Turn 3: Provided ranking with 3 relevant candidates (вентиляция, проектные работы, холодильная техника)"
+      ],
+      "criticalIssues": [
+        "Turn 2 initial candidates (Metrokids, ДСУ, АвтоБан) were completely irrelevant — only 4th was relevant",
+        "Turn 3 did not provide the '3 вещи проверить перед заказом' as explicitly requested",
+        "Ranking criteria vague without explaining why these specific 3"
+      ],
+      "strengths": [
+        "Correctly handled vague Turn 1 by asking for clarification instead of guessing",
+        "Turn 3 ranking includes actually relevant HVAC-related companies",
+        "Good continuity on Гродно location and кондиционеры intent"
+      ],
+      "nextUserProbe": "А какие 3 вещи проверить перед заказом? Вы не ответили на это."
+    },
+    {
+      "scenarioId": "S050",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 2: Only 1 candidate (РУССКИЕ ШИНЫ) which is a tire seller, not tire service — wrong business type",
+        "Turn 2 ignored 'near Kamennaya Gorka' location constraint completely",
+        "Turn 3: Template is garbled with 'уточняется' placeholders — unusable"
+      ],
+      "criticalIssues": [
+        "Confused tire shop (магазин шин) with tire service (шиномонтаж) — critical category error",
+        "No acknowledgment of Kamennaya Gorka district constraint",
+        "Template generation produces broken text: 'Нам нужно tire service в Минск'",
+        "System defense message pollutes normal business responses"
+      ],
+      "strengths": [
+        "Correctly refused jailbreak attempt in Turn 1",
+        "Maintained Минск context"
+      ],
+      "nextUserProbe": "Мне нужен шиномонтаж, а не магазин шин! И рядом с Каменной Горкой."
+    }
+  ]
+}
+```

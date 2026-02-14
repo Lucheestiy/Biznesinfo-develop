@@ -1,0 +1,136 @@
+I see the existing format. Now I'll evaluate the scenarios S011-S015 based on the rubric and provide my ratings in the required JSON format.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S011",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.78,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Provided 4 companies but only Интелеком has any IT relevance — others are server hardware, software dev, machinery",
+        "Turn 2: Complete failure — user specified 'Уручье' (specific district), but assistant repeated exact same list with no district filtering or acknowledgment",
+        "Turn 3: Ranking is meaningless — same irrelevant companies, no explanation of why these 3 for IT outsourcing"
+      ],
+      "criticalIssues": [
+        "Turn 2 completely ignored geographic constraint 'Уручье' — zero continuity",
+        "Candidates are not IT outsourcing companies — no helpdesk services, no workplace maintenance",
+        "Assistant kept repeating same list without any refinement across 3 turns"
+      ],
+      "strengths": [
+        "Format is consistent with ranking structure",
+        "Provided company links and contact info"
+      ],
+      "nextUserProbe": "Это не IT-аутсорсинг! Уручье — район Минска, нужны именно там"
+    },
+    {
+      "scenarioId": "S012",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.60,
+      "wouldContinue": true,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: МонтажВентСтрой is actually relevant (ventilation and air conditioning), others are mismatched",
+        "Turn 2: Generic fallback — instead of filtering for 'Волотова', gave template advice about rubrics and search",
+        "Turn 3: Delivered top-3 but without any criteria for 'надежность и скорость выезда'"
+      ],
+      "criticalIssues": [
+        "Turn 2: Generic fallback response when user specified district — broke continuity",
+        "Only 1 truly relevant company (МонтажВентСтрой) in the list for HVAC service",
+        "No actual filtering by 'Волотова' district in any turn"
+      ],
+      "strengths": [
+        "МонтажВентСтрой is correctly identified as HVAC service company",
+        "Maintained Гомель location context",
+        "Turn 3 provided shortlist format as requested"
+      ],
+      "nextUserProbe": "А кто конкретно на Волотовой работает? И кто быстрее выедет?"
+    },
+    {
+      "scenarioId": "S013",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Zero relevant candidates — construction company, real estate, bus park, utilities — none rent specialized equipment",
+        "Turn 2: Generic fallback template instead of addressing 'Лядище' constraint",
+        "Turn 3: Meaningless ranking of irrelevant companies for 'срочный заказ'"
+      ],
+      "criticalIssues": [
+        "No relevant companies for спецтехника rental (manipulator, aerial platform)",
+        "Turn 2 broke continuity with generic rubric advice instead of location filtering",
+        "Assistant kept presenting same irrelevant list across all turns",
+        "СУ №153 is construction company, Риэлт Бизнес is real estate, Автобусный парк is passenger transport — none rent cranes/lifts"
+      ],
+      "strengths": [
+        "None — this is a complete miss on user intent"
+      ],
+      "nextUserProbe": "Это же не аренда спецтехники! Где манипуляторы и автовышки?"
+    },
+    {
+      "scenarioId": "S014",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Zero coffee bean suppliers — provided industrial equipment, resort base, cafe, bearings",
+        "Turn 2: Jumped to Минск companies when user said 'центр' (meaning center of Брест) — wrong city entirely",
+        "Turn 3: Complete generic fallback — asked user what criteria to use instead of providing shortlist"
+      ],
+      "criticalIssues": [
+        "Turn 2: Major geo error — switched to Минск when user asked about center (of Брест)",
+        "No coffee/HoReCa suppliers in any turn — complete intent miss",
+        "Turn 3: Refused to provide shortlist, asked generic questions instead — clear fallback behavior",
+        "Эл Кафетал is in Минский р-н, not Брест — geo completely wrong"
+      ],
+      "strengths": [
+        "Turn 1 mentioned practical checklist for procurement (though irrelevant without suppliers)"
+      ],
+      "nextUserProbe": "Почему Минск? Я спрашивал про Брест! И где поставщики кофе?"
+    },
+    {
+      "scenarioId": "S015",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.76,
+      "userSatisfaction": 0.42,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Zero bearing suppliers — construction, design institute, gravel, more design — none sell bearings",
+        "Turn 2: Added irrelevant company (Центролит is foundry in Гомель, not bearing supplier) and ignored '18-й микрорайон'",
+        "Turn 3: Ranking of irrelevant companies with generic criteria, risk advice is generic rubric"
+      ],
+      "criticalIssues": [
+        "No industrial bearing suppliers in any turn — complete category miss",
+        "All candidates are construction/design companies unrelated to bearings",
+        "Turn 2 location focus switched to 'gomel' instead of Жлобин district",
+        "Регион-Подшипник-Агро from Turn 1 disappeared in subsequent turns"
+      ],
+      "strengths": [
+        "Turn 3 risk framework is structurally sound (certificates, SLA, acceptance)",
+        "Maintained bearing context in focus description"
+      ],
+      "nextUserProbe": "Это не поставщики подшипников! Где магазины или дилеры с ассортиментом?"
+    }
+  ]
+}
+```

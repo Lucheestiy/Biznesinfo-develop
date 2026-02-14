@@ -1,0 +1,133 @@
+Based on my analysis of the provided scenarios S016-S020, here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S016",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Found 1 concrete supplier (Боголин ООО) with direct contacts and clear profile match",
+        "Turn 2: Correctly acknowledged Киселевичи as part of Бобруйск and maintained context",
+        "Turn 3: Honest about having only 1 candidate instead of making up companies, provided practical quality checklist"
+      ],
+      "criticalIssues": [
+        "Turn 3 ranking format is awkward — listing empty slots as 'Нет подтверждённого кандидата #2/3' wastes user time",
+        "Did not proactively suggest expanding search to nearby areas when user asked for 3 variants"
+      ],
+      "strengths": [
+        "Honest about data limitations — didn't hallucinate non-existent suppliers",
+        "Quality checklist for wood moisture/content is practical and actionable",
+        "Maintained continuity: паллеты/тара, Бобруйск/Киселевичи context throughout"
+      ],
+      "nextUserProbe": "А кто еще в Бобруйском районе делает паллеты? Расширь поиск"
+    },
+    {
+      "scenarioId": "S017",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.78,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Acknowledged limited catalog results honestly instead of forcing irrelevant matches",
+        "Turn 2: Correctly indicated no LED rental companies found on Немига specifically, gave search keywords",
+        "Turn 3: Provided 3 concrete web-sourced candidates with clear ranking rationale (reliability, speed)"
+      ],
+      "criticalIssues": [
+        "Turn 2 response was too generic — just gave search keywords without attempting to find actual companies",
+        "No continuity between Turn 2 (no candidates) and Turn 3 (suddenly has 3 candidates) — unclear data source switch"
+      ],
+      "strengths": [
+        "Turn 3 ranking is strong: specific URLs, clear criteria (монтаж/настройка included, оперативность)",
+        "Honest disclaimer about web-sourced data without full SLA verification",
+        "Final comparison criteria (монтаж time, backup equipment, reviews) are practical"
+      ],
+      "nextUserProbe": "А у кого есть опыт с моим размером экрана? Можно референсы?"
+    },
+    {
+      "scenarioId": "S018",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Honestly admitted no security system companies found in catalog, gave external links",
+        "Critical failure in Turns 2-3: Listed completely irrelevant companies (автохимия, гостиница, садовый инвентарь) as 'shortlist'"
+      ],
+      "criticalIssues": [
+        "Turn 2: After user clarified 'центр', assistant returned Автокомплекс галактика (auto chemicals) and СПОРТ Гостиница — completely unrelated to security systems",
+        "Turn 3: Repeated same irrelevant companies (Автокомплекс, Гостиница, АЛВИТАСЕРВИС) and added generic template text",
+        "Massive context loss: user asked for охранные системы, got автохимия and гостиницы",
+        "Template text garbled and irrelevant: 'Критерии отбора: релевантность профиля' — while listing completely non-relevant profiles"
+      ],
+      "strengths": [
+        "Turn 1 was honest about catalog limitations and provided external search links"
+      ],
+      "nextUserProbe": "Это же не охранные системы! Почему выдаешь автохимию?"
+    },
+    {
+      "scenarioId": "S019",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.78,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Provided 4 relevant VED legal service candidates with sources and clear specialization",
+        "Turn 2: Lost all VED context — switched to generic law firms (Алейников, Кунцевич) without VED expertise verification",
+        "Turn 3: Fell back to generic template with [⚠️ Рекомендуем уточнить] warnings instead of actual ranking"
+      ],
+      "criticalIssues": [
+        "Turn 2: Complete loss of VED specialization context — user asked for ВЭД/таможенные риски, got generic law firms",
+        "Turn 2 'Shortlist' format is broken — just company names without any VED relevance explanation",
+        "Turn 3: Generic fallback with catalog rubric listings instead of answering the actual question",
+        "No ranking logic provided despite explicit user request for 'логика ранжирования'"
+      ],
+      "strengths": [
+        "Turn 1 was excellent: 4 concrete VED specialists with URLs and clear focus areas"
+      ],
+      "nextUserProbe": "А где те компании по ВЭД из первого ответа? Почему поменял на обычных юристов?"
+    },
+    {
+      "scenarioId": "S020",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.80,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 3 concrete 3PL candidates with clear ecommerce fit explanations",
+        "Turn 2: Correctly acknowledged Колодищи location, maintained same 3 candidates with proximity context",
+        "Turn 3: Delivered proper top-3 ranking with clear rationale (3PL focus, infrastructure, operational fit)"
+      ],
+      "criticalIssues": [
+        "Turn 2: Did not actually filter or indicate which of the 3 is closest to Колодищи",
+        "No specific address or distance information for Колодищи proximity"
+      ],
+      "strengths": [
+        "Excellent continuity: maintained 3PL, warehouse+delivery, ecommerce context throughout",
+        "Turn 3 SLA checklist is comprehensive and actionable (cut-off times, picking accuracy, WMS integration)",
+        "Honest about data limitations when suggesting expansion to nearby areas"
+      ],
+      "nextUserProbe": "А кто из них ближе к Колодищам? Есть ли адреса складов?"
+    }
+  ]
+}
+```

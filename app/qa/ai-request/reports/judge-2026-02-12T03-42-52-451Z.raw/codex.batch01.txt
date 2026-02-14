@@ -1,0 +1,133 @@
+OpenAI Codex v0.99.0 (research preview)
+--------
+workdir: /home/mlweb/biznesinfo-develop.lucheestiy.com
+model: o3-mini
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: xhigh
+reasoning summaries: auto
+session id: 019c4ff1-cdef-7022-a34b-05d112ceb830
+--------
+user
+You are an external QA judge for Biznesinfo AI assistant.
+
+Return ONLY valid JSON. No markdown, no comments, no extra keys outside schema intent.
+
+{
+  "judge": "codex",
+  "task": "Rate usefulness as a real frustrated business user in realistic multi-turn sourcing conversations.",
+  "rubric": {
+    "scale": {
+      "0": "Бесполезно: не по запросу, ломает контекст, дает мусор.",
+      "1": "Почти бесполезно: очень слабая практическая ценность.",
+      "2": "Частично полезно: есть польза, но много критичных проблем.",
+      "3": "Рабочий минимум: можно использовать с правками.",
+      "4": "Полезно: хорошо помогает в задаче.",
+      "5": "Очень полезно: точный, практичный и надежный ответ."
+    },
+    "dimensions": [
+      "Relevance to user intent",
+      "Geo adherence and context continuity",
+      "Actionability and concrete next steps",
+      "Non-hallucination and honesty about limits",
+      "Formatting quality for requested mode (ranking/template/checklist)",
+      "Real-user trust: would a rushed buyer continue this dialog?",
+      "Penalty: generic fallback after user gives concrete constraints"
+    ],
+    "usefulThreshold": 3
+  },
+  "instructions": [
+    "Act as a real paying user and judge if this is actually helpful in practice.",
+    "Penalize wrong city, irrelevant supplier list, generic filler, refusal-only behavior.",
+    "Strongly penalize when assistant previously gave concrete candidates but later falls back to generic rubric advice after user clarification.",
+    "If user gives extra constraints (quality/spec/logistics), continuity is mandatory.",
+    "Do not use any external tools; evaluate only transcript content.",
+    "Return JSON only.",
+    "You MUST return top-level key `ratings` as an array.",
+    "ratings length MUST equal expectedScenarioIds length.",
+    "Every scenarioId in ratings MUST be from expectedScenarioIds and appear exactly once.",
+    "Do not return summary-only JSON. If uncertain, still output a conservative per-scenario rating with low confidence."
+  ],
+  "expectedScenarioIds": [
+    "S001",
+    "S002"
+  ],
+  "requiredJsonSchema": {
+    "judge": "codex",
+    "ratings": [
+      {
+        "scenarioId": "S001",
+        "usefulness": "integer 0..5",
+        "verdict": "useful|not_useful",
+        "confidence": "number 0..1",
+        "userSatisfaction": "number 0..1 (how satisfied real user would be)",
+        "wouldContinue": "boolean (would real user continue conversation?)",
+        "feltGenericFallback": "boolean (assistant dropped to generic advice instead of concrete progress)",
+        "continuityScore": "integer 0..5",
+        "reasons": [
+          "short reason 1",
+          "short reason 2"
+        ],
+        "criticalIssues": [
+          "optional issue"
+        ],
+        "strengths": [
+          "optional strength"
+        ],
+        "nextUserProbe": "optional short realistic follow-up message that user might type"
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "S001",
+      "title": "ПНД трубы: Минск -> Сухарево",
+      "personaGoal": "Закупщик стройкомпании, ищет поставщиков ПНД труб по Минску с уточнением по району.",
+      "passInStrictHarness": true,
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+          "assistant": "Понял. По текущим данным **в каталоге Biznesinfo подтверждён только 1 релевантный кандидат не найден** для ПНД труб в Минске (показанный ADT center — про масла/автотовары, не подходит). Что можно сделать сразу, чтобы быстро собрать рабочий шорт‑лист в Biznesinfo: 1. Ищите в рубриках: - **Металлы и металлообработка** - **Машиностроение и оборудование** - **Трубы и трубопроводная арматура - продажа и производство** - **Трубы и трубопроводная арматура: продажа и производство** 2. Ключевые запросы (по очереди): - **ПНД трубы** - **полиэтиленовые трубы** - **трубы ПЭ 100 / ПЭ 80** - **трубы для водоснабжения ПНД** - **ПНД трубы в наличии Минск** 3. Фильтры: - Город: **Минск** - Дополнительно в тексте запроса: **«доставка 2–3 дня», «со склада», «в наличии»** 4. Критерии отбора «на сейчас»: - есть телефон + email + сайт; - на сайте/карточке явно указаны ПНД трубы и диаметры; - прописаны сроки…"
+        },
+        {
+          "turn": 2,
+          "user": "Сухарево",
+          "assistant": "Shortlist по текущим данным каталога: 1. ADT center ООО — /company/biznesinfo-98383 (Автозапчасти и принадлежности; Минск, minsk; тел: (+375-17) 3603131) Подтвержденных карточек меньше, чем запрошено: найдено 1 из 2. Как добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке. Учет ограничений: срок отгрузки: до 3 дней, локация: Минск. Фокус: Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней. Сухарево. Учет ограничений: срок отгрузки: до 3 дней, локация: Минск. Только существующие рубрики портала (проверено по каталогу): 1. Металлы и металлообработка — /catalog/metally-metalloobrabotka 2. Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie 3. Трубы и трубопроводная арматура - продажа и производство / Металлы и металлообработка — /catalog/metally-metalloobrabotka/truby-i-truboprovodnaya…"
+        },
+        {
+          "turn": 3,
+          "user": "Сделай shortlist топ-3 самых надежных и коротко почему.",
+          "assistant": "Shortlist по текущим данным каталога: 1. Городские бани УП — /company/biznesinfo-24806 (Бани, сауны; Минск, minsk; тел: (+375-17) 3747871) 2. Управление вентиляции и сантехнических работ ОАО Стройтрест №1 — /company/uvsrtrest-1 (Вентиляция и кондиционирование воздуха; Минск, minsk; тел: +375 (17) 270 54 23) 3. Строительное управление № 16 ОАО Стройтрест № 1 — /company/su16trest1 (Строительство, строительные работы; Минск, minsk; тел: +375 (17) 260 36 30) Учет ограничений: локация: Минск. Фокус: Сухарево. Критерии отбора: релевантность профиля, надежность, риск срыва сроков, полнота контактов."
+        }
+      ]
+    },
+    {
+      "id": "S002",
+      "title": "Кабель ВВГнг: Гомель -> Советский район",
+      "personaGoal": "Снабженец электромонтажной фирмы, нужен быстрый подбор кабельных поставщиков.",
+      "passInStrictHarness": true,
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?",
+          "assistant": "В Гомеле по вашему запросу **реально релевантны в первую очередь эти поставщики из каталога**: 1. **БелСтройКомплект ООО** — /company/bel-stroykom Почему подходит: в карточке указана **оптовая торговля электротехнической и кабельной продукцией** (прямое совпадение с запросом на ВВГнг 3х2.5 оптом). Контакты: +375 (232) 56 24 10, BSK56@tut.by, http://b-s-k.by 2. **ДимСед ООО (РОЗЕТКИ ЗДЕСЬ)** — /company/rozetkizdes Почему подходит: в описании есть **кабель, провод** и электротехника; можно уточнять наличие именно **ВВГнг 3х2.5** и оптовые условия. Контакты: +375 (44) 744 07 44, info@rozetkizdes.by, http://rozetkizdes.by 3. **Гомелькабель СОАО** — /company/gomelcable Почему может подойти: профиль **«Кабели и провода»**, но в карточке акцент на отдельных типах продукции (обмоточные/неизолированные провода), поэтому нужно проверить именно ВВГнг 3х2.5. Контакты: +375 (232) 56 60 78, mail@gome…"
+        },
+        {
+          "turn": 2,
+          "user": "Советский район",
+          "assistant": "Отлично, тогда с учетом **Советского района (Гомель)** начните с этих компаний и уточните самовывоз/доставку именно по району: 1. **БелСтройКомплект ООО** — /company/bel-stroykom Почему №1: в карточке прямо указана **оптовая кабельная продукция**. Тел.: +375 (232) 56 24 10 | Email: BSK56@tut.by 2. **ДимСед ООО (РОЗЕТКИ ЗДЕСЬ)** — /company/rozetkizdes Почему подходит: есть **кабель/провод**, можно взять коммерческое предложение на ВВГнг 3х2.5. Тел.: +375 (44) 744 07 44 | Email: info@rozetkizdes.by 3. **Гомелькабель СОАО** — /company/gomelcable Почему в списке: профиль «кабели и провода», но нужно подтвердить именно марку **ВВГнг 3х2.5** и оптовые условия. Тел.: +375 (232) 56 60 78 | Email: mail@gomelcable.com Чтобы быстро сравнить, запросите у всех 3 сразу: - цена с НДС за 1 м/бухту, - минимальная оптовая партия, - наличие на складе сейчас, - срок поставки в Советский район, - производит…"
+        },
+        {
+          "turn": 3,
+          "user": "Дай топ-3 проверенных варианта и что уточнить по сертификатам.",
+          "assistant": "Топ-3 по вашему запросу **ВВГнг 3х2.5 оптом, Гомель (Советский район)**: 1. **БелСтройКомплект ООО** — /company/bel-stroykom Почему в топе: в карточке прямо указана **оптовая торговля кабельной продукцией** — лучшее совпадение с задачей «оптом». 2. **ДимСед ООО (РОЗЕТКИ ЗДЕСЬ)** — /company/rozetkizdes Почему в топе: в профиле есть **кабель/провод**; сайт подтверждает продажу электротоваров в Гомеле (source: http://rozetkizdes.by/). Подходит как поставщик со складским ассортиментом и быстрым закрытием заявки. 3. **Гомелькабель СОАО** — /company/gomelcable Почему в топе: профиль **«Кабели и провода»**, производственная компания. На сайте акцент на другие группы проводов, поэтому именно ВВГнг 3х2.5 нужно подтверждать отдельно (source: https://gomelcable.com/). Что обязательно уточнить **по сертификатам и документам** перед оплатой: 1. **Документ о соответствии на конкретную марку** Просите…"
+        }
+      ]
+    }
+  ]
+}
+mcp startup: no servers
+2026-02-12T03:42:52.938100Z ERROR codex_core::rollout::list: state db missing rollout path for thread 019c4f52-1ea3-77a2-844f-23ee145d794e
+ERROR: {"detail":"The 'o3-mini' model is not supported when using Codex with a ChatGPT account."}

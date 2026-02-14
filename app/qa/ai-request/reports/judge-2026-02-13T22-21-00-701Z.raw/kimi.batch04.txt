@@ -1,0 +1,138 @@
+Based on my analysis of the provided scenarios, here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV016",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Provided 5 relevant flour manufacturers with direct links, correctly identified export-oriented candidates",
+        "Turn 3: Delivered structured email template with 7 specific questions covering quality specs, pricing, export readiness, documentation",
+        "Failed to deliver top-4 ranking in Turn 2 — response was truncated/garbled with only 3 companies and no export readiness assessment"
+      ],
+      "criticalIssues": [
+        "Turn 2 completely failed to provide top-4 ranking or indicate export readiness probability as requested",
+        "Turn 2 response appears broken/truncated with placeholder text '[⚠️ Рекомендуем уточнить]' and no actual analysis",
+        "Turn 3 did not provide the requested '5 документов для первичной проверки' — only gave email template"
+      ],
+      "strengths": [
+        "Good initial candidate selection from relevant Belarusian flour mills",
+        "Email template is comprehensive and export-focused with specific quality parameters (protein, gluten, ash, moisture)",
+        "Maintained context (экспорт муки высшего сорта) across all turns"
+      ],
+      "nextUserProbe": "А где список документов для проверки? И кто из них реально экспортирует?"
+    },
+    {
+      "scenarioId": "UV017",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.78,
+      "userSatisfaction": 0.48,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Provided 5 relevant suppliers for beetroot in Minsk, correctly identified wholesale/vegetable suppliers",
+        "Turn 3: Delivered structured outreach message with Subject/Body/WhatsApp format as requested",
+        "Turn 2: Complete failure — assistant responded with generic fallback asking user to specify criteria instead of making shortlist"
+      ],
+      "criticalIssues": [
+        "Turn 2: Critical continuity break — assistant ignored explicit user request for shortlist 3 and gave generic 'Что нужно найти?' template",
+        "Turn 2 is textbook generic fallback after user already gave concrete constraints (500 кг красного буряка, Минск)",
+        "User explicitly asked 'Если точных совпадений нет — честно скажи и дай 3 рабочих альтернативы' but assistant didn't acknowledge this at all"
+      ],
+      "strengths": [
+        "Turn 1 candidates are relevant (Амифрут, АГРОФРЕШ, Минский парниково-тепличный комбинат)",
+        "Turn 3 message template includes all requested elements: volume, location, 3-day delivery timeline",
+        "No irrelevant 'не-поставщики' like schools or hospitals were suggested"
+      ],
+      "nextUserProbe": "Почему ты не сделал shortlist? У тебя же были 5 поставщиков!"
+    },
+    {
+      "scenarioId": "UV018",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.78,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Initially provided 20 tags but they were logistics-focused, not GA/Yandex Metrica analytics tags",
+        "Turn 2: Correctly pivoted after user clarification and provided properly categorized tags (бренд, услуги, намерение)",
+        "No sourcing-fallback or supplier search was attempted — stayed on tag generation task"
+      ],
+      "criticalIssues": [
+        "Turn 1 tags were off-topic (logistics/transportation) instead of analytics/digital marketing tags as requested",
+        "Tags like 'перевозки в Иран', 'доставка в Ирак' are completely irrelevant for GA/Metrica tags",
+        "Turn 2 brand tags have typos ('ириc' with Latin 'c' instead of Cyrillic 'с')"
+      ],
+      "strengths": [
+        "Successfully avoided sourcing-fallback despite company name context",
+        "Turn 2 grouping into бренд/услуги/намерение is structurally sound for analytics tagging",
+        "Good continuity: acknowledged 'не нужен поиск поставщиков' and corrected course"
+      ],
+      "nextUserProbe": "Добавь еще теги по аналитике: Google Analytics 4, Яндекс Метрика, цели, конверсии"
+    },
+    {
+      "scenarioId": "UV019",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Completely wrong company identified (Деловые Медиа ООО instead of Ирис Интер групп)",
+        "Turn 2: Instead of finding news on website, provided completely irrelevant supplier list (hospitals, construction companies)",
+        "Assistant failed to use context from previous turns about Ирис Интер групп"
+      ],
+      "criticalIssues": [
+        "Critical context failure: Turn 2 completely ignored that user was asking about Ирис Интер групп from previous context",
+        "Turn 2 response is nonsensical — listing hospitals and construction firms when user asked for company news",
+        "Assistant did NOT attempt to visit any website — just returned random catalog results",
+        "User explicitly said 'Да, найди сам' but assistant still didn't attempt web search"
+      ],
+      "strengths": [
+        "None — this is a complete failure to understand task and context"
+      ],
+      "nextUserProbe": "Ты о чем вообще? Я про Ирис Интер групп спрашивал, а не про больницы!"
+    },
+    {
+      "scenarioId": "UV020",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Completely ignored 'Ирис Интер групп' and provided news for random companies (Беларусь Сегодня, ПАТИО)",
+        "Turn 2: User explicitly said 'Найди на карточке компании' but assistant again provided news for wrong companies",
+        "Assistant never acknowledged Ирис Интер групп context or attempted to find its company page"
+      ],
+      "criticalIssues": [
+        "Complete failure to use context: 'Ирис Интер групп' was stated in Turn 1 but never referenced again",
+        "Turn 2 is identical broken response to Turn 1 — same wrong companies (Беларусь Сегодня, ПАТИО, 1-я городская детская поликлиника)",
+        "Assistant appears to have a bug where it returns random news instead of finding the requested company",
+        "No attempt to search for /company/iris-inter-group or similar slug",
+        "Response template 'Для live-проверки беру кандидатов из каталога' is completely inappropriate for specific company news request"
+      ],
+      "strengths": [
+        "None — complete failure across both turns"
+      ],
+      "nextUserProbe": "Почему ты не ищешь Ирис Интер групп? У тебя есть такая компания в каталоге?"
+    }
+  ]
+}
+```

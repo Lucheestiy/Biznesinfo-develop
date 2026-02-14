@@ -1,0 +1,126 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S011",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2: User specified 'Уручье' (specific district), assistant completely ignored this constraint and repeated the same generic Minsk list",
+        "All 4 suggested companies are irrelevant: server equipment, software development, machinery - none offer IT outsourcing/helpdesk services",
+        "Turn 3 ranking is meaningless when base candidates are wrong"
+      ],
+      "criticalIssues": [
+        "Complete geo-continuity failure: ignored district constraint",
+        "Wrong service category: returned server vendors instead of IT outsourcing providers",
+        "No actionable helpdesk/IT support contacts"
+      ],
+      "strengths": [
+        "Attempted ranking format as requested"
+      ],
+      "nextUserProbe": "Это не то, мне нужен IT-аутсорсинг в Уручье, а не серверные компании"
+    },
+    {
+      "scenarioId": "S012",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: User specified 'Волотова' (street/area), assistant fell back to generic rubric advice instead of filtering by location",
+        "Generic fallback is a critical violation after user gave concrete constraint",
+        "Turn 3 ranking includes irrelevant companies (security systems, construction) and only one HVAC-related"
+      ],
+      "criticalIssues": [
+        "Generic fallback on location constraint - major penalty per rubric",
+        "Zero geo-continuity: completely dropped the 'Волотова' constraint",
+        "Only 1 of 3 ranked companies actually does HVAC (МонтажВентСтрой)"
+      ],
+      "strengths": [
+        "Initial first-pass correctly identified one HVAC company"
+      ],
+      "nextUserProbe": "Почему вы игнорируете Волотова? Мне нужен сервис именно там"
+    },
+    {
+      "scenarioId": "S013",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: User specified 'Лядище' (specific location), assistant fell back to generic rubric advice template",
+        "Generic fallback after concrete constraint is a critical failure",
+        "Turn 3 ranking is absurd: includes real estate agency and bus park for crane/manipulator rental"
+      ],
+      "criticalIssues": [
+        "Generic fallback on location constraint - major penalty",
+        "Zero continuity: 'Лядище' completely ignored",
+        "Zero relevance: none of the companies rent specialized equipment (crane, manipulator, aerial platform)",
+        "Ranking real estate and bus companies for construction equipment is nonsense"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это вообще не то, мне нужна спецтехника в Лядище, а не автобусный парк"
+    },
+    {
+      "scenarioId": "S014",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2: User specified 'центр' (center), assistant switched to Minsk companies instead of Brest center",
+        "Location continuity broken: jumped from Brest to Minsk (different city entirely)",
+        "Turn 3: Assistant asked user for criteria instead of providing the requested shortlist with questions about roasting/logistics"
+      ],
+      "criticalIssues": [
+        "Wrong city after location constraint: Brest -> Minsk",
+        "Turn 3 is a refusal/generic fallback asking user to specify criteria they already gave",
+        "No coffee bean suppliers identified in Brest at all"
+      ],
+      "strengths": [
+        "Initial attempt at HoReCa context"
+      ],
+      "nextUserProbe": "Почему вы переключились на Минск? Мне нужно в Бресте, в центре города"
+    },
+    {
+      "scenarioId": "S015",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "All 3 turns: Zero relevant companies - returned construction, design institutes, gravel suppliers instead of bearing suppliers",
+        "Turn 2: '18-й микрорайон' ignored, even added irrelevant company from Gomel",
+        "Turn 3 ranking includes companies with zero bearing business; generic risk advice doesn't compensate for wrong candidates"
+      ],
+      "criticalIssues": [
+        "Complete category failure: no bearing suppliers found despite explicit request",
+        "Added non-local company (Центролит from Gomel) after user specified microdistrict constraint",
+        "Ranking is meaningless when candidates are completely wrong"
+      ],
+      "strengths": [
+        "Attempted to provide risk assessment framework in turn 3"
+      ],
+      "nextUserProbe": "Ни одна из этих компаний не продает подшипники, вы вообще проверяете профиль?"
+    }
+  ]
+}
+```

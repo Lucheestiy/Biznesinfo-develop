@@ -1,0 +1,256 @@
+```json
+{
+  "advisor": "minimax",
+  "task": "Act as a senior AI product+prompt advisor. Propose concrete, testable improvements for Biznesinfo assistant.",
+  "rules": [
+    "Focus on practical fixes that can be implemented in small safe PRs.",
+    "Prioritize improvements that reduce strict-check failures and low usefulness scores.",
+    "Do not suggest secrets, policy bypasses, or unsafe behavior.",
+    "Use only provided evidence.",
+    "Return JSON only."
+  ],
+  "outputSchema": {
+    "advisor": "minimax",
+    "executiveSummary": "string",
+    "priorityPlan": [
+      {
+        "priority": "P0|P1|P2",
+        "title": "string",
+        "why": "string",
+        "expectedImpact": "string",
+        "validationScenarios": [
+          "scenarioId"
+        ]
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "R1",
+        "area": "prompt|retrieval|geo|ranking|template|guardrails|ui|qa",
+        "title": "string",
+        "action": "specific change proposal",
+        "implementationHint": "file/function-level hint",
+        "expectedImpact": "string",
+        "risk": "string",
+        "effort": "S|M|L",
+        "validationScenarios": [
+          "scenarioId"
+        ]
+      }
+    ],
+    "testPlan": {
+      "mustPassScenarios": [
+        "scenarioId"
+      ],
+      "regressionSuites": [
+        "suite/file names"
+      ],
+      "successMetrics": [
+        "metric and threshold"
+      ]
+    }
+  },
+  "currentState": {
+    "qaSummary": {
+      "runId": "run-2026-02-13T22-22-35-873Z-151323-33ve0",
+      "totalScenarios": 2,
+      "passedScenarios": 2,
+      "failedScenarios": 0,
+      "passRate": 1,
+      "targetPassCount": 2,
+      "targetPassRate": 0.8,
+      "targetReached": true
+    },
+    "judgeSummary": {
+      "runId": "judge-2026-02-13T22-21-00-701Z",
+      "totalScenarios": 27,
+      "byJudge": [
+        {
+          "judge": "kimi",
+          "averageUsefulness": 2.259,
+          "usefulRate": 0.3704
+        },
+        {
+          "judge": "minimax",
+          "averageUsefulness": 2.259,
+          "usefulRate": 0.3333
+        }
+      ]
+    },
+    "focusScenarios": [
+      {
+        "id": "UV013",
+        "title": "Deep website-scan: внутренняя навигация сайта (контакты/о компании/продукция)",
+        "tags": ["regression", "multi_turn", "website_scan", "footwear", "minsk"],
+        "avgUsefulness": 1,
+        "usefulRate": 0,
+        "judgeIssueHints": [
+          "В turn 3 ассистент полностью сбросил контекст обуви и вернул госучреждение, спецодежду и хозтовары",
+          "Не выполнил запрос 'пройди по сайтам глубже' - отказался сразу",
+          "Полный провал контекста: игнорирует запрос про обувь и переключается на хозяйственные товары"
+        ],
+        "lastReply": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста: 1. \"Главное хозяйственное управление\" Управления делами Президента Республики Беларусь — /company/biznesinfo-48086 (Аренда, лизинг; Минск, minsk; тел: (+375-17) 2194925) 2. МЕГАспец ООО — /company/biznesinfo-86417 (Спецодежда; Минск, minsk; тел: (+375-17) 2671905) 3. КОТЕРС ООО — /company/biznesinfo-11818 (Хозяйственные товары и инвентарь; Минск, minsk; тел: (+375-17) 2132349)"
+      },
+      {
+        "id": "UV012",
+        "title": "Проверка по сайтам компаний: источник + контакты + честная пометка подтверждения",
+        "tags": ["regression", "multi_turn", "website_scan", "sources", "contacts", "footwear", "minsk"],
+        "avgUsefulness": 4,
+        "usefulRate": 1,
+        "judgeIssueHints": [
+          "В turn 2 ссылка на СТУДИЯ 58 появилась из ниоткуда - не было в turn 1",
+          "Мегатоп - это розничная сеть, ассистент мог отметить это сразу"
+        ],
+        "lastReply": "1. Мегатоп ОАО - /company/megatop | ❌ По доступному фрагменту сайта **не подтверждено прямо**, что компания именно производитель (есть признаки сети/ритейла). source: https://megatop.by/ | Контакты: +375 (17) 203 20 60, help@megatop.by 2. Фреско Стиль ЧП - /company/fresko | ⚠️ **Не подтверждено по сайту в текущих данных** (нет веб-сниппета для цитаты, нужна ручная проверка страницы). Контакты: +375 (29) 620 03 43, freskostile@gmail.com, http://fresko.by 3. Перфетто УП - /company/perfetto | ✅ Подтверждено как изгот…"
+      }
+    ]
+  }
+}
+```
+
+**Analysis of Current State:**
+
+The QA reveals a critical pattern: when users provide clarification (e.g., "только производители" - only manufacturers), the assistant completely loses context and returns completely unrelated companies. UV012 (usefulness 4) succeeded because it actually verified websites and honestly marked confirmation status. UV013 (usefulness 1) failed catastrophically because it ignored the footwear context and returned government/household/construction companies.
+
+The core issue is **topic preservation during clarification turns**. When user adds constraints, the assistant should narrow down previous results, not do a fresh search or return random companies.
+
+**Root Causes Identified:**
+
+1. **Clarification triggers fresh search instead of filtering**: When user says "только производители", assistant treats it as a new query rather than a filter on existing candidates
+2. **No explicit topic lock**: The prompt doesn't enforce keeping the original commodity/topic when user adds constraints
+3. **Verification is inconsistent**: UV012 verified, UV013 refused to verify ("не удалось получить данные автоматически")
+
+**Concrete Engineering Recommendations:**
+
+{
+  "advisor": "minimax",
+  "executiveSummary": "The assistant has a critical context-loss bug when users add constraints (e.g., 'only manufacturers'). UV013 shows catastrophic failure: after asking for footwear manufacturers with verification, turn 3 returns government/household/construction companies. The fix requires explicit topic locking and constraint application as filters, not fresh searches. UV012 succeeded because it actually verified and marked status honestly. Focus on: (1) lock original commodity when constraints added, (2) force verification behavior, (3) prevent fresh search on clarification turns.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Lock commodity/topic when user adds constraints",
+      "why": "UV013: user asked for footwear manufacturers, added 'verify on website', got household/construction companies. The assistant treated 'verify' as a fresh search instead of filtering the original footwear context.",
+      "expectedImpact": "Eliminate catastrophic context loss in multi-turn clarification scenarios; improve usefulness from 1 to 3+ for UV013",
+      "validationScenarios": ["UV013", "UV027", "UV023"]
+    },
+    {
+      "priority": "P0",
+      "title": "Force verification behavior instead of refusing",
+      "why": "UV013 turn 2: assistant said 'не удалось получить данные автоматически' (couldn't get data) and refused to verify. UV012 succeeded by actually trying to verify and marking status honestly (✅/⚠️/❌). Users need verification attempts, not excuses.",
+      "expectedImpact": "Consistent verification across scenarios; UV013 usefulness improvement from 1 to 3-4",
+      "validationScenarios": ["UV013", "UV012"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add topic consistency check before returning companies",
+      "why": "Current assistant returns companies from completely different categories (government, household goods, construction) when user is looking for footwear. Need post-processing check to verify response matches original topic.",
+      "expectedImpact": "Prevent category mismatch errors; reduce 'completely wrong companies' complaints by 80%",
+      "validationScenarios": ["UV013", "UV014", "UV011"]
+    },
+    {
+      "priority": "P1",
+      "title": "Preserve shortlist across turns when constraints added",
+      "why": "Pattern: user gets shortlist in turn 1, adds constraint in turn 2, assistant returns different companies in turn 3. Should filter original shortlist, not replace it.",
+      "expectedImpact": "Maintain continuity; improve multi-turn scenarios by 40%",
+      "validationScenarios": ["UV027", "UV023", "UV026"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add topic lock instruction for constraint turns",
+      "action": "When user adds constraints (e.g., 'только производители', 'проверь на сайте'), IMMEDIATELY after the user message, inject system instruction: 'ORIGINAL TOPIC: [detected commodity]. USER ADDED CONSTRAINT: [constraint]. Your response MUST either: (a) filter the original topic candidates by the new constraint, OR (b) honestly say no candidates match the constraint. DO NOT return companies from different categories.'",
+      "implementationHint": "Modify app/src/app/api/ai/request/route.ts - in the main handler, detect if message contains constraint keywords AND conversation has previous candidates. If so, append system instruction before LLM call.",
+      "expectedImpact": "Prevents UV013 catastrophic failure; enforces filtering instead of fresh search",
+      "risk": "May slightly increase token usage when constraints detected",
+      "effort": "S",
+      "validationScenarios": ["UV013", "UV027", "UV023"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Block 'couldn't verify' excuses and force verification attempt",
+      "action": "Add post-processing check: if message contains 'проверь', 'verify', 'посмотри на сайте' AND response contains patterns like 'не удалось получить данные', 'не могу проверить', 'автоматически не доступно' → BLOCK the response and retry with instruction: 'Attempt to verify. If verification fails, mark with ⚠️ and explain why, but do not refuse to try.'",
+      "implementationHint": "Add validation in route.ts after LLM response, similar to existing 'asksClarifyingQuestionsInsteadOfRanking' check. Return retry signal if pattern detected.",
+      "expectedImpact": "UV012 pattern applied consistently; eliminates refusal-to-verify failures",
+      "risk": "May produce low-quality verification if site is truly inaccessible",
+      "effort": "S",
+      "validationScenarios": ["UV013", "UV012", "UV022"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Implement shortlist preservation across clarification turns",
+      "action": "When previous turn returned candidates AND current message contains constraint keywords (only, additionally, also, проверь, уточни), PASS the previous candidates as 'continuityCandidates' to LLM with explicit instruction: 'These candidates were from turn [N]. Filter them by the new constraint. If none pass, say so. If new constraint disqualifies all, suggest alternatives. DO NOT return new companies from different categories.'",
+      "implementationHint": "Extend the 'continuityCandidates' logic in route.ts to handle constraint keywords the same way it handles ranking keywords. Currently only ranking/tracking keywords trigger this.",
+      "expectedImpact": "Fixes pattern where turn 1 returns X, turn 2 adds constraint, turn 3 returns Y (different category)",
+      "risk": "May require adjusting the list of keywords that trigger continuity mode",
+      "effort": "M",
+      "validationScenarios": ["UV027", "UV023", "UV026", "UV013"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Add topic-category mismatch detector",
+      "action": "After LLM generates response, run a check: extract all company slugs from response, look up their categories/rubrics from catalog data. Compare against detected commodity tag from original query. If mismatch probability > 70%, flag response and either: (a) warn LLM to reconsider, or (b) inject fallback with original candidates.",
+      "implementationHint": "Create new function 'detectTopicCategoryMismatch' that uses candidate metadata to check category alignment. Integrate into post-processing pipeline near 'detectSingleSupplierConfirmationInHistory'.",
+      "expectedImpact": "Prevents government/household companies appearing for footwear queries",
+      "risk": "May cause false positives if commodity detection is imprecise",
+      "effort": "M",
+      "validationScenarios": ["UV013", "UV014", "UV011"]
+    },
+    {
+      "id": "R5",
+      "area": "template",
+      "title": "Add verification status patterns to system prompt",
+      "action": "In system prompt, add explicit instruction: 'When verifying companies from catalog, use these status patterns: ✅ ПОДТВЕРЖДЕНО (confirmed by evidence), ⚠️ НЕ ПОДТВЕРЖДЕНО (no evidence found but not disproven), ❌ НЕ ЯВЛЯЕТСЯ (evidence shows different business type). Be honest about verification status. ⚠️ is acceptable and useful.'",
+      "implementationHint": "Update the system prompt section where verification behavior is defined (search for 'верификац' or 'проверк' patterns in route.ts)",
+      "expectedImpact": "Consistent verification marking (like UV012); clearer communication to users",
+      "risk": "None - clarifies existing expectations",
+      "effort": "S",
+      "validationScenarios": ["UV013", "UV012", "UV022"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Add 'no valid candidates' fallback pattern",
+      "action": "When constraint filters out all previous candidates, force response pattern: 'По уточнённым критериям [constraint] не найдено подходящих кандидатов из предыдущего списка. Рекомендации: [specific alternatives].' Block generic 'не удалось получить данные' responses.",
+      "implementationHint": "Extend 'buildHardFormattedReply' or create new fallback handler for constraint-only queries that exhaust candidates.",
+      "expectedImpact": "Honest communication when constraints eliminate all candidates; guides user productively",
+      "risk": "None - improves UX with clear feedback",
+      "effort": "S",
+      "validationScenarios": ["UV013", "UV011", "UV014"]
+    },
+    {
+      "id": "R7",
+      "area": "qa",
+      "title": "Add verification-specific test scenarios",
+      "action": "Create dedicated QA scenario type 'verification_turn' that specifically tests: (a) assistant attempts verification, (b) returns status (✅/⚠️/❌) for each company, (c) provides source citation for claims. Mark scenarios failed if assistant refuses to verify or gives up.",
+      "implementationHint": "Extend app/qa/ai-request/scenarios format to include 'verificationExpected' flag. Update runner to check for verification status patterns in response.",
+      "expectedImpact": "Regression prevention; ensures verification behavior persists",
+      "risk": "Maintenance overhead for new scenario type",
+      "effort": "M",
+      "validationScenarios": ["UV013", "UV012", "UV022"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV013",
+      "UV012",
+      "UV027",
+      "UV023"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.user-ideas.json"
+    ],
+    "successMetrics": [
+      "UV013 usefulness >= 3 (from current 1)",
+      "Multi-turn continuity pass rate >= 85%",
+      "Verification attempt rate >= 95% (no 'couldn't verify' refusals)",
+      "Topic-category mismatch rate <= 5%"
+    ]
+  }
+}
+

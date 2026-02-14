@@ -1,0 +1,129 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S016",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2: User clarifies location to 'Киселевичи', assistant completely ignores and gives generic rubric advice instead of finding suppliers in Киселевичи",
+        "Turn 3: Despite user asking for ranking by quality/wood moisture criteria, assistant returns only 1 relevant company (Бобруйский лесхоз) and 2 placeholders, no actual moisture/quality checklist"
+      ],
+      "criticalIssues": [
+        "Generic fallback after concrete location constraint given",
+        "Failed to adapt to geographic refinement",
+        "Incomplete ranking (only 1 real candidate)",
+        "Ignored specific quality criteria request"
+      ],
+      "strengths": [
+        "Initial turn found at least one relevant company (Боголин)"
+      ],
+      "nextUserProbe": "Почему вы не нашли компании в Киселевичи, а даете общие советы?"
+    },
+    {
+      "scenarioId": "S017",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Returns completely irrelevant company (МузТоргСервис in Гомель) for LED screen rental in Minsk",
+        "Turn 2: User specifies 'Немига' district, assistant responds with generic search instructions instead of concrete results",
+        "Turn 3: Ranking contains zero relevant companies (agricultural parts, souvenirs, lighting fixtures - none do LED screen rental)"
+      ],
+      "criticalIssues": [
+        "Zero relevance in all turns",
+        "Generic fallback on location clarification",
+        "Ranking is completely hallucinated/wrong category",
+        "No understanding of 'LED-экраны для ивентов' domain"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это вообще не то, мне нужны арендаторы LED-экранов, а не сувениры и запчасти"
+    },
+    {
+      "scenarioId": "S018",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Returns completely irrelevant companies (auto cosmetics, hotel, garden tools, household goods) - zero security system companies",
+        "Turn 2: User specifies 'центр' district, assistant repeats exact same irrelevant list without any change",
+        "Turn 3: Same irrelevant list presented as 'shortlist', no actual security system providers"
+      ],
+      "criticalIssues": [
+        "Complete category mismatch - no security companies found",
+        "No adaptation to location constraint",
+        "Same wrong results repeated 3 times",
+        "Wasted user time with auto cosmetics and hotels"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы вообще понимаете, что мне нужны охранные системы, а не гостиницы и автокосметика?"
+    },
+    {
+      "scenarioId": "S019",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.6,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provides relevant rubric categories for legal services, though no concrete companies yet",
+        "Turn 2: Successfully finds 4 legal companies in Minsk when user specifies 'Уручье' (though not filtered by district)",
+        "Turn 3: Provides clean top-3 ranking with transparent criteria"
+      ],
+      "criticalIssues": [
+        "No VED-specific expertise verification in company profiles",
+        "No actual Уручье district filtering - just general Minsk companies",
+        "Missing logic explanation for why these 3 specifically for VED"
+      ],
+      "strengths": [
+        "Found actual legal service companies",
+        "Maintained context across turns",
+        "Provided ranking with criteria"
+      ],
+      "nextUserProbe": "А у кого из них есть опыт именно по ВЭД и контрактам с Китаем?"
+    },
+    {
+      "scenarioId": "S020",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.7,
+      "userSatisfaction": 0.4,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Found some logistics companies, though first one is software development not 3PL",
+        "Turn 2: User specifies 'Колодищи', assistant gives generic search instructions instead of finding companies in that area",
+        "Turn 3: Returns same Minsk-wide list, no SLA checklist provided despite explicit request"
+      ],
+      "criticalIssues": [
+        "Generic fallback on location constraint",
+        "Ignored SLA checklist request",
+        "No geographic refinement to Колодищи",
+        "Mixed relevance (software company in logistics ranking)"
+      ],
+      "strengths": [
+        "Initial turn found at least one relevant 3PL company (ТУТ и ТАМ Логистикс)",
+        "Maintained English query comprehension"
+      ],
+      "nextUserProbe": "Где конкретно в Колодищах и что проверять в договоре?"
+    }
+  ]
+}
+```

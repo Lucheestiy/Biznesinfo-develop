@@ -1,0 +1,140 @@
+Based on my analysis of the scenarios provided in the prompt, here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S016",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.78,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Found 1 relevant supplier (Боголин ООО) with good profile match for pallets/wooden packaging in Бобруйск",
+        "Turn 2: Correctly acknowledged Киселевичи constraint but only had the same 1 candidate from Бобруйск",
+        "Turn 3: Honest about only having 1 confirmed supplier, provided practical quality checklist for wood moisture/content"
+      ],
+      "criticalIssues": [
+        "Failed to expand search to Бобруйский район or Могилёвская область as promised in Turn 2 when user asked for ranking",
+        "Ranking format is broken - listing 'No candidate #2/3' instead of actually expanding search radius",
+        "User gave concrete constraint (Киселевичи) but assistant didn't proactively suggest nearby alternatives"
+      ],
+      "strengths": [
+        "Honest about data limitations - only 1 confirmed supplier available",
+        "Turn 3 quality checklist for wood moisture/content is practical and actionable",
+        "Maintained context continuity across all three turns"
+      ],
+      "nextUserProbe": "А в Бобруйске или районе кто ещё есть? Дай сравнение хотя бы с соседними городами"
+    },
+    {
+      "scenarioId": "S017",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.80,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Limited catalog data - only found 1 irrelevant company from Гомель, honestly indicated shortage",
+        "Turn 2: Correctly acknowledged Немига constraint, offered practical search keywords for external search",
+        "Turn 3: Successfully pivoted to web sources, provided 3 concrete LED rental companies with clear ranking rationale"
+      ],
+      "criticalIssues": [
+        "Turn 1 found completely irrelevant company (МузТоргСервис from Гомель - radio electronics, not LED rental)",
+        "No verification that the 3 web sources in Turn 3 actually serve Немига area specifically"
+      ],
+      "strengths": [
+        "Excellent recovery in Turn 3 - provided actionable top-3 from web sources with clear ranking logic",
+        "Ranking criteria are relevant: speed of deployment, free mounting/dismounting, event focus",
+        "Honest about limitations of web-signal based ranking without full SLA verification",
+        "Maintained focus on LED rental for events throughout all turns"
+      ],
+      "nextUserProbe": "У кого из них есть опыт с indoor-мероприятиями в центре Минска? Нужен пиксельный шаг P2.5"
+    },
+    {
+      "scenarioId": "S018",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.92,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: No security system companies found in catalog, honestly indicated gap and provided external sources",
+        "Turn 2: After 'центр' constraint, provided 2 completely irrelevant companies (auto cosmetics and hotel)",
+        "Turn 3: Catastrophic failure - shortlist includes auto cosmetics, hotel, and garden tools - none related to security systems"
+      ],
+      "criticalIssues": [
+        "Turn 2 and Turn 3 are completely hallucinated - listing Автокомплекс галактика (auto cosmetics), СПОРТ Гостиница, АЛВИТАСЕРВИС (garden tools) as candidates for security systems",
+        "Assistant completely lost user intent after Turn 1 - user asked for охранные системы for магазинов, got irrelevant categories",
+        "No continuity: 'центр' constraint was ignored in terms of security system relevance",
+        "Generic template filler in Turn 3 ('Учет ограничений: локация: Пинск') shows broken response generation",
+        "Failed to provide any criteria for choosing security contractors - just repeated irrelevant shortlist"
+      ],
+      "strengths": [
+        "Turn 1 honestly indicated no security companies in catalog and provided external web sources"
+      ],
+      "nextUserProbe": "Это же не охранные системы! Вы вообще понимаете о чем речь?"
+    },
+    {
+      "scenarioId": "S019",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Found 4 relevant VED legal service providers in Минск with good sources",
+        "Turn 2: After 'Уручье' constraint, completely switched to different companies (Алейников и Партнеры, Адвокатское бюро) without VED focus",
+        "Turn 3: Failed to provide meaningful top-3 with ranking logic - only 2 generic law firms listed, no VED specialization mentioned"
+      ],
+      "criticalIssues": [
+        "Critical continuity break in Turn 2: dropped all 4 VED-specialized candidates from Turn 1 and switched to generic law firms",
+        "Turn 2 companies (Алейников и Партнеры, Кунцевич) have no demonstrated VED expertise in the response",
+        "Turn 3 is generic fallback - provided only 2 candidates with [⚠️ Рекомендуем уточнить] flags instead of 3",
+        "No ranking logic provided as requested - just generic category listings at the end",
+        "User gave concrete constraint (Уручье) but assistant abandoned the VED specialization context"
+      ],
+      "strengths": [
+        "Turn 1 provided 4 relevant VED legal service providers with sources",
+        "Turn 3 mentioned criteria (relevance, reliability, deadline risk) though not applied to actual candidates"
+      ],
+      "nextUserProbe": "А где те компании по ВЭД из первого ответа? Они что, не в Уручье?"
+    },
+    {
+      "scenarioId": "S020",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.86,
+      "userSatisfaction": 0.78,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Found 3 relevant 3PL providers in Минск with good profile matches for warehouse + delivery",
+        "Turn 2: Correctly acknowledged Колодищи constraint, maintained same 3 candidates and offered to filter by nearby areas",
+        "Turn 3: Delivered meaningful top-3 shortlist with clear ranking rationale and practical SLA checklist"
+      ],
+      "criticalIssues": [
+        "None of the 3 providers are confirmed to be specifically in/around Колодищи - all are generic Минск listings",
+        "No actual verification that ТУТ и ТАМ Логистикс or Белтаможсервис locations are convenient for Колодищи"
+      ],
+      "strengths": [
+        "Excellent continuity: maintained 3PL + e-commerce context across all turns",
+        "Turn 3 ranking logic is transparent and relevant (3PL comprehensiveness, infrastructure strength, operational focus)",
+        "SLA checklist in Turn 3 is highly actionable for e-commerce operations (cut-off times, picking accuracy, return handling)",
+        "Honest about limitation of not having Колодищи-specific data in Turn 2"
+      ],
+      "nextUserProbe": "А кто из них реально работает с e-commerce малых объемов? Нужна интеграция с моей CMS"
+    }
+  ]
+}
+```

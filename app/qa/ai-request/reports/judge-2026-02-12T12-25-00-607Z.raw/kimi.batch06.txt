@@ -1,0 +1,132 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S026",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Listed completely irrelevant companies (швейное производство, строительство) for металлообработка query",
+        "Turn 2: User explicitly asks for transparent rating, but gets same irrelevant companies (сантехника, швейное) with generic template",
+        "Turn 3: Complete fallback to empty response — just 'Работаю по данным каталога' with zero content"
+      ],
+      "criticalIssues": [
+        "Zero relevance: None of 6 companies mentioned across turns are metalworking companies",
+        "Assistant hallucinates that швейное производство and сантехника are relevant to металлообработка",
+        "Turn 3 is effectively a refusal — gives nothing when user asks about quality control and deadlines",
+        "Violates continuity: ignores user's progression from list → rating → quality criteria"
+      ],
+      "strengths": [
+        "At least provides company links and maintains location (Могилев) correctly"
+      ],
+      "nextUserProbe": "Это же не металлообработка! У вас вообще есть такие компании в каталоге?"
+    },
+    {
+      "scenarioId": "S027",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Only 1 of 3 companies (Кузмицкий) actually deals with фанера — others are мебельная фурнитура and мебель",
+        "Turn 2: User asks for ranking criteria explanation, gets identical copy-paste response with no actual criteria explained",
+        "Turn 3: Complete context break — lists бухгалтерские услуги, газоснабжение, общества/союзы for фанера query"
+      ],
+      "criticalIssues": [
+        "Turn 3 is catastrophic failure — completely unrelated companies (accounting, gas supply, associations) for plywood sourcing",
+        "Turn 2 ignores explicit user request to explain ranking criteria — just repeats same list",
+        "No attempt to explain why Версис (furniture hardware) and Грин Офис (furniture) are in plywood supplier ranking"
+      ],
+      "strengths": [
+        "Turn 1 at least includes 1 relevant supplier (Кузмицкий)",
+        "Turn 3 questions about deadlines/cost/contacts would be useful if applied to actual plywood suppliers"
+      ],
+      "nextUserProbe": "Почему вы мне предлагаете бухгалтеров, когда мне нужна фанера?"
+    },
+    {
+      "scenarioId": "S028",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: No actual companies found — gives generic priority framework (A/B/C) instead of concrete suppliers",
+        "Turn 2: User asks for transparent evaluation system, gets same generic priority framework with no actual system",
+        "Turn 3: Empty response — just 'Работаю по данным каталога' with zero content about documents/licenses"
+      ],
+      "criticalIssues": [
+        "No concrete companies provided in any turn — only generic rubric templates",
+        "Turn 3 complete failure to answer about fire safety documents/licenses",
+        "Generic fallback pattern: when no data, gives priority A/B/C framework instead of admitting limitations and suggesting alternatives"
+      ],
+      "strengths": [
+        "Honest about not having confirmed companies in catalog",
+        "Priority framework (A/B/C) could be useful if combined with actual candidates"
+      ],
+      "nextUserProbe": "А как мне реально найти таких подрядчиков в Витебске?"
+    },
+    {
+      "scenarioId": "S029",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Zero relevant companies — проектные работы, лифты, программное обеспечение for охрана объектов query",
+        "Turn 2: User asks for ranking with reliability criteria, gets same irrelevant companies (проектные работы) and 'reserve option' excuse",
+        "Turn 3: Same irrelevant companies repeated when user asks about contractor verification"
+      ],
+      "criticalIssues": [
+        "Complete irrelevance across all turns: architecture/design, elevators, software for security/_guarding query",
+        "No acknowledgment that listed companies are wrong category",
+        "Assistant appears to ignore 'охрана объектов' / 'ЧОП' intent entirely",
+        "No attempt to suggest search terms or alternatives for finding security companies"
+      ],
+      "strengths": [
+        "Maintains correct location (Брест) throughout"
+      ],
+      "nextUserProbe": "Это что за компании? Мне нужна охрана склада, а не проектирование!"
+    },
+    {
+      "scenarioId": "S030",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: No actual laboratories found — gives generic priority framework instead of concrete labs",
+        "Turn 2: User asks for transparent top-3, gets АЗС, санэпидстанция, автосервис — only санэпидстанция marginally related",
+        "Turn 3: Empty response — just 'Работаю по данным каталога' with zero content about sample requirements"
+      ],
+      "criticalIssues": [
+        "Turn 2: Only 1 of 3 (sanitary-epidemiological station) is somewhat relevant — АЗС and truck service are completely wrong",
+        "Turn 3 complete failure to answer about critical clarifications before sending samples",
+        "No honest admission that food testing labs aren't in catalog — keeps giving wrong categories"
+      ],
+      "strengths": [
+        "Turn 1 honestly states no confirmed lab cards found",
+        "Санэпидстанция in Turn 2 could potentially do some food analysis"
+      ],
+      "nextUserProbe": "Где найти реальные лаборатории для анализа пищевых продуктов?"
+    }
+  ]
+}
+```

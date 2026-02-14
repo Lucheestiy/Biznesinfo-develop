@@ -1,0 +1,169 @@
+Now I have the context. Let me evaluate the 5 scenarios (S006-S010) from the current request. These are different scenarios from the UV006-UV010 I just read.
+
+Let me analyze each scenario:
+
+**S006 - Промвентиляция: Могилев -> Казимировка**
+- Turn 1: Gives 1 company (Строительный трест №12) but admits it's not a specialized ventilation contractor
+- Turn 2: When user specifies "Казимировка", assistant gives generic search advice instead of concrete companies
+- Turn 3: User asks for top-3 shortlist with risks - assistant only has 1 company and gives generic advice about risks
+
+This is a clear generic fallback - the assistant had some concrete info but when user gave more specific constraints, it fell back to generic rubric advice.
+
+**S007 - Молочная упаковка: Витебск -> Билево**
+- Turn 1: No confirmed matches, gives generic advice
+- Turn 2: When user specifies "Билево", asks clarifying questions but no concrete companies
+- Turn 3: User asks for ranking of 3 suppliers - assistant gives generic prioritization methodology without actual companies
+
+Generic fallback - no concrete suppliers provided.
+
+**S008 - Нержавеющий лист: Минск -> Шабаны**
+- Turn 1: Admits no strong direct matches, gives search keywords
+- Turn 2: When user specifies "Шабаны", gives search advice but no concrete companies
+- Turn 3: User asks for top-3 by reliability - assistant lists companies like Шабаны АБЗ ДРСУ №43 and СМТ-8 which are construction companies, not metal suppliers
+
+Wrong companies - these are construction companies, not stainless steel sheet suppliers.
+
+**S009 - Сварочные работы: Гродно -> Девятовка**
+- Turn 1: Admits no confirmed welding cards, gives 1 company (Трифт) which is accounting/legal services
+- Turn 2: When user specifies "Девятовка", gives generic checklist
+- Turn 3: User asks for top-3 shortlist - assistant only has Трифт (accounting company!) and gives generic contract advice
+
+Completely wrong - Трифт is not a welding contractor at all.
+
+**S010 - Полиграфия: Минск -> Малиновка**
+- Turn 1: Good! Gives 4 concrete printing companies (Аврора Принт, СМЭЛТОК, Топпринт, Золотой Оттиск)
+- Turn 2: When user specifies "Малиновка", maintains context and gives 3 relevant companies
+- Turn 3: User asks for ranking top-3 and color proof questions - assistant responds with "Какие критерии учитывать..." - COMPLETELY loses context!
+
+This is a critical failure - the assistant had good concrete data but on turn 3 completely drops the conversation context.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S006",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Дает только 1 компанию, признавая что она не специализируется на вентиляции",
+        "Turn 2: Вместо конкретных компаний в Казимировке — только общие рекомендации по поиску",
+        "Turn 3: При запросе топ-3 дает 1 компанию и generic шаблон рисков без конкретики по подрядчикам"
+      ],
+      "criticalIssues": [
+        "Явный generic fallback после уточнения локации пользователем",
+        "Нет ни одного реального подрядчика по промвентиляции в Могилеве/Казимировке",
+        "В Turn 3 повторяет ту же строительную компанию, которая не по профилю"
+      ],
+      "strengths": [
+        "Честно признает ограниченность данных в каталоге",
+        "Не выдумывает несуществующие компании"
+      ],
+      "nextUserProbe": "Найдите конкретные компании по монтажу вентиляции в Могилевской области"
+    },
+    {
+      "scenarioId": "S007",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Нет подтвержденных карточек, только общие рекомендации по рубрикам",
+        "Turn 2: Вместо компаний в Билево — запрос на уточнение + общие ключи поиска",
+        "Turn 3: При запросе ranking топ-3 дает методологию приоритизации без реальных компаний"
+      ],
+      "criticalIssues": [
+        "Полный generic fallback — ни одной конкретной компании по упаковке",
+        "Пользователь 3 раза уточняет запрос, ассистент так и не дает actionable список",
+        "В Turn 3 вместо поставщиков — абстрактные 'Приоритет A/B/C'"
+      ],
+      "strengths": [
+        "Не выдумывает компании, честно о нехватке данных"
+      ],
+      "nextUserProbe": "Дайте реальных поставщиков упаковки для молочной продукции в Витебске"
+    },
+    {
+      "scenarioId": "S008",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.20,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Признает отсутствие прямых совпадений, дает ключи поиска",
+        "Turn 2: При уточнении Шабаны — снова только советы по поиску",
+        "Turn 3: В топ-3 включает строительные организации (Шабаны АБЗ, СМТ-8) вместо металлопоставщиков"
+      ],
+      "criticalIssues": [
+        "В Turn 3 выдает строительные компании как поставщиков нержавеющего листа — полная нерелевантность",
+        "Шабаны АБЗ ДРСУ — дорожно-строительное предприятие, не металлобаза",
+        "СМТ-8 — строительно-монтажный трест, не имеет отношения к нержавейке"
+      ],
+      "strengths": [
+        "Turn 1-2: Корректно признает ограниченность данных",
+        "Не выдумывает металлопоставщиков"
+      ],
+      "nextUserProbe": "Где купить лист AISI 304 в Минске?"
+    },
+    {
+      "scenarioId": "S009",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.10,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Единственная компания Трифт — бухгалтерские услуги, а не сварка",
+        "Turn 2: Generic чеклист без конкретных подрядчиков",
+        "Turn 3: В shortlist топ-3 снова только Трифт (бухгалтерия!) + generic советы по договору"
+      ],
+      "criticalIssues": [
+        "Критическая ошибка: Трифт ООО — бухгалтерские услуги и аудит, а не сварочные работы",
+        "Пользователь ищет сварщика B2B, ассистент 3 хода предлагает бухгалтерскую фирму",
+        "Полное несоответствие запросу на всех уровнях"
+      ],
+      "strengths": [
+        "Generic чеклист по договору технически корректен"
+      ],
+      "nextUserProbe": "Найдите сварщиков в Гродно с выездом на объект"
+    },
+    {
+      "scenarioId": "S010",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Отлично — 4 конкретные типографии с обоснованием",
+        "Turn 2: Хорошо — сохраняет контекст, фильтрует до 3 релевантных для Малиновки",
+        "Turn 3: Катастрофа — полная потеря контекста, вместо рейтинга просит уточнить критерии"
+      ],
+      "criticalIssues": [
+        "Критический сбой контекста в Turn 3: ассистент забыл о чем диалог",
+        "После 2 успешных ходов с конкретными компаниями — полный fallback",
+        "Пользователь просил рейтинг и вопросы по цветопробе, получил 'Какие критерии учитывать?'"
+      ],
+      "strengths": [
+        "Turn 1-2: Хорошая работа с конкретными компаниями из каталога",
+        "Правильная фильтрация по локации Малиновка"
+      ],
+      "nextUserProbe": "Вы уже дали мне 3 типографии — сделайте их рейтинг"
+    }
+  ]
+}
+```

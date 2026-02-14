@@ -1,0 +1,137 @@
+Based on my analysis of the 5 scenarios, here is the evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3 catastrophic failure: provided completely irrelevant companies (bath house, ventilation contractor, construction unit) instead of PND pipe suppliers",
+        "Turns 1-2: Honest about no confirmed suppliers, offered web suggestions and search expansion keys",
+        "Lost all context about PND pipes in final turn"
+      ],
+      "criticalIssues": [
+        "Turn 3 ranking: Городские бани (bath house), Управление вентиляции (ventilation), Строительное управление №16 — NONE sell PND pipes",
+        "Generic fallback to random Минск construction companies after failing to find concrete candidates",
+        "User gave specific constraints (ПНД трубы, Сухарево) but got completely unrelated companies"
+      ],
+      "strengths": [
+        "Turn 1: Honest admission of no relevant suppliers in catalog",
+        "Turn 1: Provided 5 web-sourced candidates with URLs for manual verification",
+        "Turn 2: Acknowledged Сухарево location constraint"
+      ],
+      "nextUserProbe": "Это же бани и стройка, а не трубы! Где ПНД?"
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Found 3 relevant cable suppliers with full contact details",
+        "Turn 2: Maintained context, acknowledged Советский район, gave practical advice on verifying location",
+        "Turn 3: Provided solid top-3 ranking with reasoning about specialization and reliability"
+      ],
+      "criticalIssues": [
+        "Turn 3: Missing explicit certificate questions as requested ('что уточнить по сертификатам' not fully answered)",
+        "No specific certificate guidance (Сертификат соответствия ТР ТС, протоколы испытаний)"
+      ],
+      "strengths": [
+        "Excellent continuity across all 3 turns",
+        "Гомелькабель СОАО correctly identified as #1 (direct manufacturer)",
+        "Practical call script suggestions in Turn 2",
+        "Honest about inability to confirm exact district in available data"
+      ],
+      "nextUserProbe": "А какие конкретно сертификаты запрашивать у них?"
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.80,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Turn 1: Found 3 relevant concrete suppliers with full details, offered to prepare outreach message",
+        "Turn 2: Perfect continuity — maintained all 3 candidates, acknowledged Южный район, gave practical call checklist",
+        "Turn 3: Solid reliability ranking with concrete reasoning about delivery risks"
+      ],
+      "criticalIssues": [
+        "Turn 3: Risk assessment for Мостоотряд №58 slightly questionable — they're a major infrastructure contractor with own concrete plants, likely more reliable than suggested"
+      ],
+      "strengths": [
+        "Excellent context maintenance across all turns",
+        "Practical actionable advice at each step",
+        "Good understanding of concrete delivery logistics (pump, timing, volume)",
+        "Современные Бетонные Технологии correctly ranked #1 (specialized concrete supplier with own mixers)"
+      ],
+      "nextUserProbe": "Уточни по Мостоотряду — у них же свои БРУ, почему риск повышенный?"
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Found 4+ relevant cleaning companies, highlighted those with contract/bank transfer capabilities",
+        "Turn 2: Maintained context, acknowledged Уручье, gave practical verification checklist",
+        "Turn 3: Clear top-3 ranking with solid selection criteria"
+      ],
+      "criticalIssues": [
+        "Turn 2: No attempt to filter by proximity to Уручье or suggest how to find cleaners specifically in that microdistrict",
+        "Selection criteria in Turn 3 somewhat generic"
+      ],
+      "strengths": [
+        "Good candidate pool with diverse options",
+        "Дабл Тайм correctly ranked #1 (explicitly mentions contracts and any payment form)",
+        "Practical call script for verifying Уручье coverage",
+        "Strong focus on B2B requirements (безнал, договор)"
+      ],
+      "nextUserProbe": "А кто из них ближе всего к Уручью? Есть ли у них там объекты?"
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.92,
+      "userSatisfaction": 0.10,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3: Catastrophic failure — provided completely irrelevant companies (sewing atelier, tunnel construction, fitness club) for tire service request",
+        "Turn 2: Already showed degradation — generic shortlist with warning icons instead of meaningful filtering",
+        "Complete loss of context about tire service and commercial vehicles"
+      ],
+      "criticalIssues": [
+        "Turn 3 ranking: Ателье Золотая строчка (sewing), Тоннельный отряд №1 (tunnel construction), Олимпик (fitness) — NONE are tire services",
+        "Turn 2 failed to maintain the 4 relevant candidates from Turn 1, replaced with generic entries",
+        "5 questions for first call are completely irrelevant to tire service (about project scale, SLA, escalation procedures)",
+        "Worst possible generic fallback — not even wrong-category companies, completely random businesses"
+      ],
+      "strengths": [
+        "Turn 1: Found 4 relevant tire service candidates with good details about commercial vehicle capabilities"
+      ],
+      "nextUserProbe": "Вы совсем с ума сошли? Это же ателье и фитнес, а не шиномонтаж!"
+    }
+  ]
+}
+```

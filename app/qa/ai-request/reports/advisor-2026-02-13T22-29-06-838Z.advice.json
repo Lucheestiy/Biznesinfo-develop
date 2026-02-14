@@ -1,0 +1,322 @@
+{
+  "runId": "advisor-2026-02-13T22-29-06-838Z",
+  "generatedAt": "2026-02-13T22:32:36.163Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceJudgeReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.usefulness.json",
+  "focusScenarios": [
+    {
+      "id": "UV013",
+      "title": "Deep website-scan: внутренняя навигация сайта (контакты/о компании/продукция)",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "website_scan",
+        "website_scan_deep",
+        "sources",
+        "contacts",
+        "minsk",
+        "footwear"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "В turn 3 ассистент полностью сбросил контекст обуви и вернул госучреждение, спецодежду и хозтовары",
+        "Не выполнил запрос 'пройди по сайтам глубже' - отказался сразу",
+        "Нет признаков попытки навигации по разделам сайтов",
+        "Полный провал контекста: игнорирует запрос про обувь и переключается на хозяйственные товары"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: только 1 кандидат, сразу отсылает к внешним источникам",
+            "Turn 2: generic fallback - 'не удалось получить данные автоматически'"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Обещает глубокую проверку, но не делает её — только общие советы",
+            "После конкретного запроса переключается на совершенно других кандидатов"
+          ]
+        }
+      ],
+      "lastReply": "По вашим уточнениям продолжаю по текущему shortlist без сброса контекста: 1. \"Главное хозяйственное управление\" Управления делами Президента Республики Беларусь — /company/biznesinfo-48086 (Аренда, лизинг; Минск, minsk; тел: (+375-17) 2194925) 2. МЕГАспец ООО — /company/biznesinfo-86417 (Спецодежда; Минск, minsk; тел: (+375-17) 2671905) 3. КОТЕРС ООО — /company/biznesinfo-11818 (Хозяйственные товары и инвентарь; Минск, minsk; тел: (+375-17) 2132349) Что уточнить у кандидатов сейчас: 1. Подтвердите срок выполнения…",
+      "lastUser": "Если на главной нет подтверждения, пометь это и предложи следующего кандидата для проверки."
+    },
+    {
+      "id": "UV012",
+      "title": "Проверка по сайтам компаний: источник + контакты + честная пометка подтверждения",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "website_scan",
+        "sources",
+        "contacts",
+        "footwear",
+        "minsk"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 4,
+      "usefulRate": 1,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "В turn 2 ссылка на СТУДИЯ 58 появилась из ниоткуда - не было в turn 1",
+        "Мегатоп - это розничная сеть, ассистент мог отметить это сразу",
+        "В Turn 2 немного путает Фреско — в карточке есть пошив обуви, но сайт не проверен"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: дал 3 конкретных кандидата с рубриками для проверки",
+            "Turn 2: реально проверил сайты, дал источники, честно отметил статус подтверждения"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Проверяет сайты и честно маркирует подтверждённых/неподтверждённых",
+            "Даёт источники и цитаты с сайтов компаний"
+          ]
+        }
+      ],
+      "lastReply": "1. Мегатоп ОАО - /company/megatop | ❌ По доступному фрагменту сайта **не подтверждено прямо**, что компания именно производитель (есть признаки сети/ритейла). source: https://megatop.by/ | Контакты: +375 (17) 203 20 60, help@megatop.by 2. Фреско Стиль ЧП - /company/fresko | ⚠️ **Не подтверждено по сайту в текущих данных** (нет веб-сниппета для цитаты, нужна ручная проверка страницы). Контакты: +375 (29) 620 03 43, freskostile@gmail.com, http://fresko.by 3. Перфетто УП - /company/perfetto | ✅ Подтверждено как изгот…",
+      "lastUser": "Если по сайту не подтверждается, так и отметь и предложи, кого проверить дальше."
+    }
+  ],
+  "advice": [
+    {
+      "advisor": "kimi",
+      "executiveSummary": "Critical multi-turn context loss in UV013 (footwear→household goods), garbled placeholder text ('уточняется до уточняется'), and failure to perform deep website scans. The assistant has 37% useful rate with primary failure mode being context reset after user refinements. Root cause: insufficient context anchoring in system prompt and missing commodity tag enforcement in continuity filtering.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Fix UV013 Critical Context Reset",
+          "why": "Turn 3 completely dropped footwear context and returned government agencies, workwear, household goods. This is a catastrophic failure of multi-turn continuity.",
+          "expectedImpact": "Eliminates 100% of context reset failures in multi-turn refinement scenarios. UV013 usefulness should jump from 1 to 4.",
+          "validationScenarios": [
+            "UV013",
+            "UV001",
+            "UV002",
+            "UV005"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Fix Template Text Garbling",
+          "why": "Multiple scenarios show garbled text like 'уточняется до уточняется' - placeholder replacement logic is broken when multiple placeholders appear consecutively.",
+          "expectedImpact": "Eliminates garbled output in template generation. Improves perceived quality across all template scenarios.",
+          "validationScenarios": [
+            "UV001.T4",
+            "UV004.T4",
+            "UV006.T4",
+            "D003"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Enforce Deep Website Navigation",
+          "why": "UV013.T2 explicitly requested 'пройди по сайтам глубже' but assistant refused immediately with generic advice instead of navigating to /contacts, /about, /products.",
+          "expectedImpact": "Enables actual website verification for sourcing scenarios. Critical for B2B trust.",
+          "validationScenarios": [
+            "UV013",
+            "UV012"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Strengthen Category Filtering in Continuity",
+          "why": "Assistant returns wrong-category companies (хозяйственные товары instead of обувь) when context is partially lost.",
+          "expectedImpact": "Prevents category drift in multi-turn conversations. Reduces irrelevant results by ~40%.",
+          "validationScenarios": [
+            "UV013",
+            "UV017",
+            "D009"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "prompt",
+          "title": "Add Context Anchoring to System Prompt",
+          "action": "Inject explicit context preservation instruction: 'CRITICAL: Maintain the EXACT product/service context from previous turns. If user asked for \"производители обуви\" in Turn 1, ALL subsequent turns must return footwear manufacturers only. Never switch to unrelated categories like household goods or government agencies.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - add to buildSystemPrompt() or prepend to user message in multi-turn scenarios",
+          "expectedImpact": "Prevents category switches like footwear→household goods in UV013",
+          "risk": "Low - additive instruction only",
+          "effort": "S",
+          "validationScenarios": [
+            "UV013",
+            "UV001",
+            "UV005"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "prompt",
+          "title": "Fix Placeholder Replacement Regex",
+          "action": "Replace sequential placeholder replacement with single-pass tokenization. Current regex /\\{[^}]+\\}/g causes overlapping matches. Use: text.replace(/\\{(\\w+)\\}/g, (match, key) => hints[key] || match) with pre-validation.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - sanitizeUnfilledPlaceholdersInNonTemplateReply() lines 2378-2407",
+          "expectedImpact": "Eliminates 'уточняется до уточняется' garbled text",
+          "risk": "Low - fixes clear bug",
+          "effort": "S",
+          "validationScenarios": [
+            "UV001.T4",
+            "D003",
+            "D009"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "retrieval",
+          "title": "Enforce Commodity Tag Lock in Continuity",
+          "action": "In refineConcreteShortlistCandidates(), when continuity mode is active (lockToHistoryCandidates=true), filter ALL results by the commodity tag detected in Turn 1. If footwear detected, only footwear companies allowed regardless of search drift.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - lines 2907-2999, add strict commodity filter at start of function when params.commodityTag is set",
+          "expectedImpact": "Prevents wrong-category companies in context carryover",
+          "risk": "Medium - may reduce recall in edge cases",
+          "effort": "M",
+          "validationScenarios": [
+            "UV013",
+            "UV017",
+            "D009"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "guardrails",
+          "title": "Add Website Deep Scan Trigger",
+          "action": "When user message contains 'глубже', 'контакты', 'о компании', 'продукция' + website intent, trigger actual page navigation instead of generic fallback. Implement 3-page crawl: /, /contacts, /about or /products.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - looksLikeWebsiteResearchIntent() and buildWebsiteResearchFallbackAppendix()",
+          "expectedImpact": "Enables actual website verification as requested in UV013",
+          "risk": "Medium - increases latency, add timeout handling",
+          "effort": "M",
+          "validationScenarios": [
+            "UV013.T2",
+            "UV012.T2"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "template",
+          "title": "Hardcode Template Block Validation",
+          "action": "Before returning template response, validate with regex: /Subject:.*\\n\\nBody:.*\\n\\nWhatsApp:/s. If missing, regenerate from template scaffold instead of returning partial.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - ensureTemplateBlocks() function lines 1041-1062",
+          "expectedImpact": "Guarantees complete Subject/Body/WhatsApp structure",
+          "risk": "Low - enforces existing contract",
+          "effort": "S",
+          "validationScenarios": [
+            "UV001.T4",
+            "UV004.T4",
+            "UV005.T4"
+          ]
+        },
+        {
+          "id": "R6",
+          "area": "ranking",
+          "title": "Add Per-Company Analysis Requirement",
+          "action": "In ranking mode, validate that response contains at least 2 company names with per-company reasoning. If only generic criteria ('Критерии: релевантность...') found, force rebuild with explicit per-company ranking.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts - lines 3966-3986, strengthen isGenericRubricWithLinks detection",
+          "expectedImpact": "Prevents generic rubric responses without actual rankings",
+          "risk": "Low - enforces quality standard",
+          "effort": "S",
+          "validationScenarios": [
+            "UV001.T3",
+            "UV002.T3",
+            "UV005.T3"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "UV013",
+          "UV012",
+          "UV001",
+          "D003",
+          "D009"
+        ],
+        "regressionSuites": [
+          "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+          "app/qa/ai-request/scenarios.regressions.ranking-followups.json"
+        ],
+        "successMetrics": [
+          "UV013 usefulness >= 3.5 (currently 1.0)",
+          "Template block compliance >= 95% (currently ~70%)",
+          "Context continuity violations = 0",
+          "Garbled placeholder text = 0",
+          "Overall usefulRate >= 0.70 (currently 0.37)"
+        ]
+      }
+    }
+  ],
+  "advisorWarnings": [
+    {
+      "advisor": "minimax",
+      "message": "advisor minimax returned zero valid recommendations"
+    }
+  ],
+  "consensus": {
+    "topAreas": [
+      {
+        "area": "prompt",
+        "count": 2
+      },
+      {
+        "area": "retrieval",
+        "count": 1
+      },
+      {
+        "area": "guardrails",
+        "count": 1
+      },
+      {
+        "area": "template",
+        "count": 1
+      },
+      {
+        "area": "ranking",
+        "count": 1
+      }
+    ],
+    "recurringTitles": [
+      {
+        "title": "add context anchoring to system prompt",
+        "count": 1
+      },
+      {
+        "title": "fix placeholder replacement regex",
+        "count": 1
+      },
+      {
+        "title": "enforce commodity tag lock in continuity",
+        "count": 1
+      },
+      {
+        "title": "add website deep scan trigger",
+        "count": 1
+      },
+      {
+        "title": "hardcode template block validation",
+        "count": 1
+      },
+      {
+        "title": "add per-company analysis requirement",
+        "count": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "advisor": "minimax",
+  "executiveSummary": "The main failure pattern is generic fallback responses when continuity candidates already exist in context. The function `buildHardFormattedReply` (line 644-649) triggers criteria-asking fallback WITHOUT checking if companies from previous turns exist. This causes 37% pass rate (target 80%). Fixing this single code path will address UV027, UV023, UV017, UV006 failures. Secondary issues: 502 empty responses, wrong company context, and template-for-analysis patterns.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix generic fallback when continuity candidates exist",
+      "why": "The function `buildHardFormattedReply` (line 644-649) triggers 'Какие критерии?' without checking if vendor candidates exist in conversation history. This causes 6 of 17 failed scenarios (UV027, UV023, UV017, UV006, UV024, UV025).",
+      "expectedImpact": "Increase pass rate from 37% to ~55% by preventing inappropriate fallback to criteria questions when companies are already available in context.",
+      "validationScenarios": ["UV027", "UV023", "UV017", "UV006"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix 502 empty responses for UV003 and UV026",
+      "why": "Two scenarios return completely empty responses due to nginx 502 errors. This is a complete failure mode - user gets no answer.",
+      "expectedImpact": "Increase pass rate by +7% (2/27 scenarios).",
+      "validationScenarios": ["UV003", "UV026"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix wrong company context (Ирис Интер групп → Деловые Медиа)",
+      "why": "UV021 and UV020 lose the original company context and work with wrong companies. This breaks multi-turn company-specific workflows.",
+      "expectedImpact": "Improve usefulness scores for company card lookup scenarios.",
+      "validationScenarios": ["UV021", "UV020"]
+    },
+    {
+      "priority": "P1",
+      "title": "Improve no-results handling for narrow queries",
+      "why": "UV011 returns irrelevant companies (Дом офицеров) instead of proper no-results message with alternatives.",
+      "expectedImpact": "Better user experience when no matches found.",
+      "validationScenarios": ["UV011"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add continuity check to buildHardFormattedReply",
+      "action": "Modify function `buildHardFormattedReply` (line 644) to accept `continuityCandidates` array as second parameter. Before returning `buildTopCompaniesCriteriaQuestionReply()`, check if candidates exist. If they do, return null to allow normal flow with available companies.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, function buildHardFormattedReply (line 644). Add second param `vendorCandidates?: BiznesinfoCompanySummary[]` and check `vendorCandidates?.length > 0` before falling back.",
+      "expectedImpact": "Fixes UV027 (context preservation), UV023 (location continuity), UV017 (specific criteria), UV006 (FSC constraints)",
+      "risk": "Low - defensive check, won't break existing flows",
+      "effort": "S",
+      "validationScenarios": ["UV027", "UV023", "UV017", "UV006"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Prevent empty response 502 errors",
+      "action": "Add timeout wrapper and graceful degradation for async operations that cause nginx 502. Ensure minimum response even on timeout.",
+      "implementationHint": "Check async handlers in route.ts that may cause upstream timeout. Add try-catch with fallback response for UV003/UV026 patterns (consumer queries like 'Где поесть').",
+      "expectedImpact": "Fixes complete failure modes for UV003, UV026",
+      "risk": "Medium - may affect latency",
+      "effort": "M",
+      "validationScenarios": ["UV003", "UV026"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Strengthen company context preservation in multi-turn",
+      "action": "Add explicit instruction in system prompt: 'CRITICAL: When user references a specific company from previous turns (e.g., \"Ирис Интер групп\"), you MUST continue working with that exact company, not switch to different companies.'",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, search for system prompt section around line 13700. Add rule after line 13742.",
+      "expectedImpact": "Fixes UV021, UV020 context switching failures",
+      "risk": "Low - adds clarity to existing behavior",
+      "effort": "S",
+      "validationScenarios": ["UV021", "UV020"]
+    },
+    {
+      "id": "R4",
+      "area": "template",
+      "title": "Remove template placeholders from shortlist fallback",
+      "action": "The shortlist fallback in `buildRankingFallbackAppendix` returns generic '[⛔ Проверьте перед контактом]' for ALL companies without differentiation. Add at least one concrete differentiator per company (e.g., location, rubric, years active).",
+      "implementationHint": "File: route.ts, function buildRankingFallbackAppendix around line 770. Modify loop to add at least one concrete fact per company before the warning.",
+      "expectedImpact": "Improves UV024, UV025 usefulness scores",
+      "risk": "Low",
+      "effort": "S",
+      "validationScenarios": ["UV024", "UV025"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Fix no-results handling for narrow queries",
+      "action": "When search returns 0 results AND query contains specific constraints (e.g., 'мужская классическая обувь'), return explicit 'No results for exact query' with alternative suggestions, NOT random irrelevant companies.",
+      "implementationHint": "File: route.ts, search for no-results handling. Ensure function that returns company candidates checks result count and applies stricter fallback when count=0 vs count>0.",
+      "expectedImpact": "Fixes UV011",
+      "risk": "Low",
+      "effort": "M",
+      "validationScenarios": ["UV011"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Add consumer query handling path",
+      "action": "UV003 fails because 'Где поблизости вкусно поесть?' (consumer query) has no B2B reframing path. Add explicit handling for consumer intents with B2B alternatives or clarification request.",
+      "implementationHint": "File: route.ts, detect consumer intents (restaurants, cafes, clinics without B2B context) and either reframe to B2B (e.g., 'для офиса') or ask for clarification.",
+      "expectedImpact": "Fixes UV003, improves consumer query handling",
+      "risk": "Low",
+      "effort": "M",
+      "validationScenarios": ["UV003"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV027",
+      "UV023",
+      "UV003",
+      "UV026",
+      "UV017",
+      "UV006",
+      "UV021",
+      "UV011"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "Pass rate from 37% to >=80% (targetPassRate)",
+      "Check pass rate from 91.7% to >=95%",
+      "Average usefulness from 2.22 (kimi) / 1.93 (minimax) to >=3.0",
+      "Zero empty/502 responses on multi-turn scenarios"
+    ]
+  }
+}
+

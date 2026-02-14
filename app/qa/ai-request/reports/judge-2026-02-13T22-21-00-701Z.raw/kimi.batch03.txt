@@ -1,0 +1,160 @@
+Looking at the scenarios in the prompt and comparing with the existing evaluation file, I need to evaluate the actual assistant responses in the prompt. The prompt shows different assistant responses than what was evaluated in the existing file. Let me analyze the actual turns provided in the prompt:
+
+**UV011**: 
+- Turn 1: Assistant honestly says no relevant manufacturers found, gives search queries
+- Turn 2: Assistant incorrectly returns "Прима Порта ООО" (doors/windows, not shoes) - this is bad
+- Turn 3: Assistant provides an expanded search query but then lists irrelevant companies (Центральный Дом офицеров - a cultural institution!)
+
+**UV012**:
+- Turn 1: Gives 3 candidates (Мегатоп, Фреско Стиль, Перфетто)
+- Turn 2: Actually checks websites! Gives sources and marks confirmation status correctly
+- Turn 3: Continues with proper marking and suggests next candidates
+
+**UV013**:
+- Turn 1: Only finds 1 candidate, gives external sources
+- Turn 2: Says "can't get data automatically" - fallback
+- Turn 3: Loses context completely - returns completely irrelevant companies (Главное хозяйственное управление, МЕГАспец, КОТЕРС)
+
+**UV014**:
+- Turn 1: Returns 4 companies (Завод Легмаш, Акулич, Суперокна, Рапинчук) - but these are NOT food packaging buyers!
+- Turn 2: Returns only 3 companies with wrong locations (brest instead of minsk), duplicates
+- Turn 3: Still duplicates, no concrete "who to call first", no 3 questions for first contact
+
+**UV015**:
+- Turn 1: Says no confirmed suppliers in catalog, but gives 4 external sources (Kerland, Agromart, Minitractor.by, Alltractors) with sources
+- Turn 2: Compares 4 criteria with actual data from websites
+- Turn 3: Very short portal query and minimal call script
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV011",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.4,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: честно сообщил об отсутствии результатов, дал рабочие поисковые запросы",
+        "Turn 2: выдал нерелевантную компанию (Прима Порта - двери/окна вместо обуви)",
+        "Turn 3: расширенный запрос полезен, но список компаний абсолютно нерелевантен (Дом офицеров)"
+      ],
+      "criticalIssues": [
+        "В turn 2 вместо признания отсутствия результатов выдана случайная компания из другой отрасли",
+        "В turn 3 после запроса расширенного запроса добавлен мусор - культурное учреждение вместо обувных производителей",
+        "Нет continuity: user просил производителей, получил двери, потом госучреждение"
+      ],
+      "strengths": [
+        "Не сгенерировал фейковых производителей кордованных туфель",
+        "Расширенный поисковый запрос в turn 3 содержит релевантные термины (bespoke, handwelted, shell cordovan)"
+      ],
+      "nextUserProbe": "Почему ты предложил компанию по дверям когда я искал обувь?"
+    },
+    {
+      "scenarioId": "UV012",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: дал 3 конкретных кандидата с рубриками для проверки",
+        "Turn 2: реально проверил сайты, дал источники, честно отметил статус подтверждения",
+        "Turn 3: продолжил с правильной маркировкой и предложил следующих кандидатов"
+      ],
+      "criticalIssues": [
+        "В turn 2 ссылка на СТУДИЯ 58 появилась из ниоткуда - не было в turn 1",
+        "Мегатоп - это розничная сеть, ассистент мог отметить это сразу"
+      ],
+      "strengths": [
+        "Проверил сайты и дал прямые цитаты подтверждения",
+        "Честно отметил 'не подтверждается' где не нашел данных",
+        "Дал контакты и источники для каждой компании"
+      ],
+      "nextUserProbe": "Проверь еще Фреско Стиль - там в карточке указан индпошив"
+    },
+    {
+      "scenarioId": "UV013",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: только 1 кандидат, сразу отсылает к внешним источникам",
+        "Turn 2: generic fallback - 'не удалось получить данные автоматически'",
+        "Turn 3: полная потеря контекста - выданы компании из совершенно других отраслей"
+      ],
+      "criticalIssues": [
+        "В turn 3 ассистент полностью сбросил контекст обуви и вернул госучреждение, спецодежду и хозтовары",
+        "Не выполнил запрос 'пройди по сайтам глубже' - отказался сразу",
+        "Нет признаков попытки навигации по разделам сайтов"
+      ],
+      "strengths": [
+        "В turn 1 дал ссылки на внешние каталоги производителей",
+        "Предложил чек-лист проверки производителя"
+      ],
+      "nextUserProbe": "Ты совсем потерял нить разговора - вернись к обувным производителям"
+    },
+    {
+      "scenarioId": "UV014",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: выданы компании не из целевого сегмента (Легмаш - металлургия, Суперокна - окна)",
+        "Turn 2: дубликаты компаний, неверные города (brest вместо minsk)",
+        "Turn 3: после 'без общих советов' продолжает давать нерелевантный список без конкретики"
+      ],
+      "criticalIssues": [
+        "Reverse-buyer запрос провален: ни одна компания не является потребителем пищевой тары",
+        "В turn 3 не дал 'кого первым прозвонить' и '3 вопроса для первого контакта' как просили",
+        "Дубликаты и ошибки в локациях (Суперокна в Минске, но marked as brest)"
+      ],
+      "strengths": [
+        "В turn 1 дал 4 названия компаний (хотя и нерелевантных)",
+        "В turn 2 признал что найдено меньше чем запрошено"
+      ],
+      "nextUserProbe": "Эти компании не из пищевой промышленности - дай производителей соусов или молочки"
+    },
+    {
+      "scenarioId": "UV015",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.7,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: честно сказал что в каталоге нет, но дал 4 внешних источника с прямыми ссылками",
+        "Turn 2: структурированное сравнение по 4 запрошенным критериям с реальными данными",
+        "Turn 3: дал запрос для портала и скрипт звонка, хотя и минималистичные"
+      ],
+      "criticalIssues": [
+        "Запрос для портала слишком короткий и generic",
+        "Скрипт звонка - всего одно предложение, нет структуры разговора",
+        "Не дал конкретных компаний из каталога Biznesinfo как просили"
+      ],
+      "strengths": [
+        "Сравнение в turn 2 содержит реальные цены и условия с указанием источников",
+        "Разделил продавцов на категории (официальные дилеры, мультибренд, регионалы)",
+        "Дал прямые ссылки на разделы минитракторов у каждого продавца"
+      ],
+      "nextUserProbe": "А есть ли в каталоге хотя бы дилеры сельхозтехники в Минской области?"
+    }
+  ]
+}
+```

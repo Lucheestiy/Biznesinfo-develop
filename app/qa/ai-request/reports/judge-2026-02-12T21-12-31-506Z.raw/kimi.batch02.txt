@@ -1,0 +1,137 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S006",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3 critical failure: provided completely irrelevant candidates (строительный трест) instead of ventilation suppliers",
+        "Turn 1-2: Honest about no relevant suppliers found, but offered search expansion keys",
+        "Turn 3: Generic risk advice instead of concrete supplier shortlist with timeline risks"
+      ],
+      "criticalIssues": [
+        "Turn 3 hallucinated ranking includes строительный трест — NONE are ventilation contractors",
+        "Complete loss of context: user asked for промышленная вентиляция in Казимировка, got random company",
+        "Generic fallback to rubric advice after failing to find concrete candidates — user gave specific constraints but got generic checklist"
+      ],
+      "strengths": [
+        "Turns 1-2: Honest admission of no relevant suppliers in catalog",
+        "Turn 1: Provided relevant search expansion keywords for industrial ventilation"
+      ],
+      "nextUserProbe": "Это же не вентиляция! Где реальные подрядчики по вентиляции?"
+    },
+    {
+      "scenarioId": "S007",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3: Complete generic fallback — provided abstract ranking criteria instead of actual 3 suppliers",
+        "Never provided any concrete dairy packaging suppliers throughout the conversation",
+        "Turn 1-2: Only offered category navigation and search expansion, no actual candidates"
+      ],
+      "criticalIssues": [
+        "Turn 3 response is useless rubric: 'Приоритет A: точное совпадение услуги' — user wanted actual companies, not priority definitions",
+        "Zero concrete suppliers provided for dairy packaging in Витебск/Билево across all 3 turns",
+        "Generic fallback after user gave concrete constraints (packaging + label printing, Билево) — continuity broken"
+      ],
+      "strengths": [
+        "Turn 1: Honest about no confirmed cards matching the query",
+        "Turn 2: Acknowledged Билево location constraint"
+      ],
+      "nextUserProbe": "А конкретные поставщики будут? Или только общие фразы?"
+    },
+    {
+      "scenarioId": "S008",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3: Catastrophic failure — ranked completely irrelevant companies (cafe, road construction, bath house) for stainless steel sheet request",
+        "Turn 1-2: Only 2 marginally relevant candidates (valve suppliers, not sheet metal)",
+        "Complete disconnect between user need (нержавеющий лист 304) and all responses"
+      ],
+      "criticalIssues": [
+        "Turn 3 ranking: 1) ПиццаСмайл (cafe), 2) СМТ-8 (road construction), 3) Банный комплекс Шабаны — NONE sell stainless steel sheets",
+        "Turn 1-2 candidates (БелПромАрм, Чистый Берег) are valve/pipeline companies, not metal sheet suppliers",
+        "No understanding of the actual request: AISI 304 stainless steel sheet, small wholesale",
+        "Generic fallback to irrelevant local businesses in Шабаны instead of admitting no relevant suppliers found"
+      ],
+      "strengths": [
+        "Turn 1: Provided contact details for the 2 candidates found",
+        "Turn 2: Acknowledged Шабаны location constraint"
+      ],
+      "nextUserProbe": "Вы вообще понимаете, что мне нужен металл, а не еда и бани?"
+    },
+    {
+      "scenarioId": "S009",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3: Provided completely irrelevant candidate (accounting firm Трифт) for welding works request",
+        "Never found any actual welding contractors in Гродно/Девятовка",
+        "Turn 1-2: Honest about no relevant suppliers, but only offered generic search advice"
+      ],
+      "criticalIssues": [
+        "Turn 3 shortlist: Трифт ООО — accounting/audit services, NOT welding — completely wrong category",
+        "Zero welding contractors found or suggested across all 3 turns",
+        "Generic contract advice instead of concrete supplier shortlist",
+        "User asked for B2B welding contractors by contract, got accounting firm in response"
+      ],
+      "strengths": [
+        "Turn 1: Correctly identified that Трифт is not a welding company",
+        "Turn 2: Acknowledged Девятовка location constraint",
+        "Turn 3 contract checklist is somewhat relevant for B2B contracting"
+      ],
+      "nextUserProbe": "Это бухгалтеры, а не сварщики! Где металлоконструкции?"
+    },
+    {
+      "scenarioId": "S010",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 3: Complete conversation reset — asked user for criteria instead of providing the requested top-3 ranking",
+        "Turn 1-2: Good initial list of 5 print shops, acknowledged Малиновка constraint",
+        "Lost all context and user request history in final turn"
+      ],
+      "criticalIssues": [
+        "Turn 3 critical failure: 'Какие критерии учитывать при выборе топа компаний? Напишите, что именно нужно найти' — user ALREADY specified: каталоги + буклеты, тираж 5000, Малиновка",
+        "Complete loss of conversation context — assistant forgot the entire discussion",
+        "User asked for ranking + color proof questions, got generic 'what are you looking for' response",
+        "This is a hard conversation reset, treating turn 3 as if it were turn 1"
+      ],
+      "strengths": [
+        "Turn 1: Provided 5 concrete print shops with contacts and profiles",
+        "Turn 2: Acknowledged Малиновка constraint and offered to prepare outreach message",
+        "Good initial candidate pool with diverse capabilities"
+      ],
+      "nextUserProbe": "Мы же уже 3 сообщения об этом говорим! Вы что, не помните?"
+    }
+  ]
+}
+```

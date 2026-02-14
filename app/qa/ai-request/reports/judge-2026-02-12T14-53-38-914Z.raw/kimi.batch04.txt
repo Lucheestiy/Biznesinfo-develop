@@ -1,0 +1,126 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S016",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2: User specified 'Киселевичи' (nearby location), assistant completely ignored this and gave generic rubric advice instead of filtering",
+        "Turn 3: Ranking includes 'Бобруйский лесхоз' (forest management) which is irrelevant to pallets/tara, and only 1 real candidate instead of 3",
+        "No actual companies from Киселевичи were found or mentioned"
+      ],
+      "criticalIssues": [
+        "Complete failure to handle location refinement from Бобруйск to Киселевичи",
+        "Generic fallback to 'search tips' instead of concrete supplier search",
+        "Ranking filled with irrelevant companies to pad the list"
+      ],
+      "strengths": [
+        "Turn 1 correctly identified one relevant company (Боголин ООО)"
+      ],
+      "nextUserProbe": "Почему вы не нашли компании в Киселевичах? Это 20 км от Бобруйска, там точно есть производители."
+    },
+    {
+      "scenarioId": "S017",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Only found 1 irrelevant company (МузТоргСервис in Гомель, not Минск) - completely wrong location",
+        "Turn 2: User specified 'Немига' (district in Минск), assistant ignored and gave generic search tips",
+        "Turn 3: Ranking is complete nonsense - ЯСМА (agricultural parts), Авилюкс (souvenirs), АЙТИН-ПРО (lighting fixtures) have zero relation to LED screen rental for events"
+      ],
+      "criticalIssues": [
+        "Zero relevant companies found in any turn",
+        "Complete disregard for location constraints (Немига district)",
+        "Ranking is pure hallucination - companies have no relation to the task",
+        "Generic fallback instead of concrete progress"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это вообще не то. Вы нашли компании которые не имеют отношения к LED-экранам. Есть ли у вас данные по event-технике?"
+    },
+    {
+      "scenarioId": "S018",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 0,
+      "reasons": [
+        "All 4 companies in Turn 1 are completely irrelevant: auto cosmetics, hotel, garden tools, household goods - none do security systems",
+        "Turn 2: User said 'центр' (center of Пинск), assistant just repeated the same 4 irrelevant companies",
+        "Turn 3: Same irrelevant companies presented as 'shortlist' with no actual security system providers"
+      ],
+      "criticalIssues": [
+        "Complete failure to find any security system companies in Пинск",
+        "Repeatedly presenting the same irrelevant companies across all turns",
+        "No acknowledgment that the search failed to find relevant providers"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Ни одна из этих компаний не занимается охранными системами. У вас есть данные по охранным компаниям в Пинске или нет?"
+    },
+    {
+      "scenarioId": "S019",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.6,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Gave generic rubric advice but correctly identified relevant categories",
+        "Turn 2: Successfully found 4 legal companies in Минск when user specified 'Уручье' (though didn't filter specifically for Уручье district)",
+        "Turn 3: Provided ranking with 3 legal companies and explained criteria"
+      ],
+      "criticalIssues": [
+        "No specific filtering for Уручье district in Turn 2-3",
+        "No verification that these companies actually specialize in ВЭД (foreign trade)"
+      ],
+      "strengths": [
+        "Found actual legal service companies relevant to the general request",
+        "Provided transparent ranking with criteria",
+        "Maintained continuity across turns"
+      ],
+      "nextUserProbe": "А кто из них специализируется именно на ВЭД и таможенных вопросах? И есть ли офис в Уручье?"
+    },
+    {
+      "scenarioId": "S020",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Found 2 relevant logistics companies (ТУТ и ТАМ, Белтаможсервис) but first one is software development, not 3PL",
+        "Turn 2: User specified 'Колодищи' (industrial area near Минск), assistant completely ignored and gave generic search tips",
+        "Turn 3: Ranking repeats same companies without SLA checklist as requested"
+      ],
+      "criticalIssues": [
+        "Ignored location refinement to Колодищи",
+        "Generic fallback instead of searching for companies in that area",
+        "Did not provide SLA checklist as explicitly requested",
+        "First company in ranking is software dev, not logistics"
+      ],
+      "strengths": [
+        "Turn 1 identified at least one truly relevant 3PL company (ТУТ и ТАМ Логистикс)"
+      ],
+      "nextUserProbe": "Вы проигнорировали Колодищи. Там есть логистические центры - почему не нашли? И где чек-лист по SLA?"
+    }
+  ]
+}
+```

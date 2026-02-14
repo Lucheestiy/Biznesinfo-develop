@@ -1,0 +1,155 @@
+I see the file doesn't exist yet. The user wants me to evaluate scenarios S026-S030 as a QA judge and output valid JSON. Let me analyze the scenarios and produce the evaluation.
+
+Based on my analysis of the 5 scenarios:
+
+**S026 - Металлообработка в Могилеве:**
+- Turn 1: Returns completely irrelevant companies (швейное производство, строительство, оборудование специальное) - NOT металлообработка
+- Turn 2: Same problem, even worse (сантехника, швейное производство)
+- Turn 3: Just "Работаю по данным каталога Biznesinfo" - no actual answer
+- Critical issues: Wrong industry entirely, no continuity
+
+**S027 - Поставщики фанеры в Минске:**
+- Turn 1: Only 1 relevant company (Кузмицкий - фанера), others are мебель/фурнитура
+- Turn 2: Same list, no explanation of criteria
+- Turn 3: Completely switches to unrelated companies (бухгалтерия, газоснабжение, ВКХ) - total context loss
+- Critical issues: Generic fallback, wrong companies in turn 3
+
+**S028 - Пожарная безопасность в Витебске:**
+- Turn 1: No companies found, gives generic template response
+- Turn 2: Same generic template, doesn't address "прозрачная система оценки"
+- Turn 3: Empty response
+- Critical issues: No data, generic fallback
+
+**S029 - Охрана объектов в Бресте:**
+- Turn 1: Completely wrong companies (проектные работы, лифты, ПО) - NOT охрана
+- Turn 2: Still wrong, adds "резервный вариант" with no actual company
+- Turn 3: Still returns same irrelevant companies
+- Critical issues: Wrong industry entirely
+
+**S030 - Лабораторные анализы для пищевки в Минске:**
+- Turn 1: No companies found, generic template
+- Turn 2: Returns irrelevant companies (АЗС, санэпидемстанция, автосервис) - only санэпидемстанция is somewhat related
+- Turn 3: Empty response
+- Critical issues: Poor relevance, empty final response
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S026",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Все 3 компании из других отраслей (швейное, строительство, сантехника) - ноль релевантности к металлообработке",
+        "На 3-м ходу пустой ответ вместо ответа про контроль качества"
+      ],
+      "criticalIssues": [
+        "Полное несоответствие отрасли",
+        "Отсутствие контекстной непрерывности",
+        "Пустой ответ на конкретный вопрос"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы вообще понимаете, что такое металлообработка? Это же не швейное производство!"
+    },
+    {
+      "scenarioId": "S027",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Только 1 из 3 компаний реально про фанеру, остальные - мебель и фурнитура",
+        "На 3-м ходу полный срыв контекста: вместо вопросов про сортность фанеры - список бухгалтерий и газовщиков"
+      ],
+      "criticalIssues": [
+        "Полная потеря контекста на turn 3",
+        "Generic fallback вместо конкретики по фанере",
+        "Не объяснены критерии рейтинга"
+      ],
+      "strengths": [
+        "Хотя бы одна релевантная компания в первых двух ходах"
+      ],
+      "nextUserProbe": "Почему вы переключились на бухгалтерские услуги, когда я спрашивал про фанеру?"
+    },
+    {
+      "scenarioId": "S028",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Нет ни одной компании по пожарной безопасности в Витебске",
+        "Дважды выдает один и тот же generic шаблон вместо ответа",
+        "На вопрос про документы и лицензии - пустой ответ"
+      ],
+      "criticalIssues": [
+        "Отсутствие данных в каталоге",
+        "Generic fallback без попытки найти смежные рубрики",
+        "Пустой ответ на конкретный вопрос про документы"
+      ],
+      "strengths": [
+        "Честно признает отсутствие данных"
+      ],
+      "nextUserProbe": "Может поищете хотя бы по смежным рубрикам - монтаж пожарных систем, противопожарное оборудование?"
+    },
+    {
+      "scenarioId": "S029",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 0,
+      "reasons": [
+        "Все компании из неправильной отрасли: проектные работы, лифты, ПО - ничего про охрану",
+        "Три хода подряд возвращает одни и те же нерелевантные компании",
+        "Вопрос про проверку подрядчика проигнорирован"
+      ],
+      "criticalIssues": [
+        "Полное несоответствие отрасли (охрана vs проектирование/лифты)",
+        "Никакой реакции на уточнения пользователя",
+        "Нет ответа на вопрос про проверку подрядчика"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это что за шутка? Где ЧОПы и охранные предприятия Бреста?"
+    },
+    {
+      "scenarioId": "S030",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Первые два хода - generic шаблон без компаний",
+        "В turn 2 выдает нерелевантный список (АЗС, автосервис) вместо пищевых лабораторий",
+        "На вопрос про уточнения перед отправкой образцов - пустой ответ"
+      ],
+      "criticalIssues": [
+        "Отсутствие релевантных компаний в каталоге",
+        "Плохая релевантность подобранных компаний",
+        "Пустой ответ на важный практический вопрос"
+      ],
+      "strengths": [
+        "Санэпидемстанция хоть как-то связана с анализами"
+      ],
+      "nextUserProbe": "Какие конкретно вопросы задать лаборатории перед отправкой проб?"
+    }
+  ]
+}
+```

@@ -1,0 +1,4935 @@
+{
+  "meta": {
+    "version": 1,
+    "generatedAt": "2026-02-13T14:52:00.000Z",
+    "endpoint": "/api/ai/request",
+    "localeHint": "mostly-ru-with-mixed-en",
+    "totalScenarios": 60,
+    "description": "Development-focused scenarios for multi-step supplier workflows"
+  },
+  "scenarios": [
+    {
+      "id": "D001",
+      "title": "Поставщик металлопроката: поиск + контакты",
+      "personaGoal": "Закупщик стройфирмы, ищет поставщика металлопроката и сразу хочет получить контакты для связи",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "contact_info"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков металлопроката",
+        "На втором ходе предоставить контактные данные (телефон, email)",
+        "На третьем ходе помочь составить первое письмо"
+      ],
+      "strictPassFail": [
+        "Каждй ход: не stub, содержательный ответ",
+        "Ход 2: должны быть реальные контакты или инструкция как получить",
+        "Ход 3: готовый текст для отправки"
+      ],
+      "turns": [
+        {
+          "user": "Ищу поставщика металлопроката в Минске, арматура 12мм",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D001.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "металл",
+                "арматур",
+                "поставщ"
+              ],
+              "description": "По теме",
+              "id": "D001.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Дай контакты этих поставщиков",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D001.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "тел",
+                "email",
+                "phone",
+                "контакт"
+              ],
+              "description": "Есть контакты",
+              "id": "D001.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Напиши первое письмо этому поставщику",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D001.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "письм",
+                "message",
+                "текст",
+                "здраст"
+              ],
+              "description": "Есть текст",
+              "id": "D001.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D002",
+      "title": "Упаковочные материалы: поиск + сравнение",
+      "personaGoal": "Менеджер по закупкам ищет упаковочные материалы и хочет сравнить 2-3 поставщиков",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "comparison"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков упаковки",
+        "Сравнить по ключевым параметрам",
+        "Дать рекомендацию кого выбрать"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: таблица или структурированное сравнение",
+        "Ход 3: конкретная рекомендация"
+      ],
+      "turns": [
+        {
+          "user": "Где купить картонные коробки оптом в Минске?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D002.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "коробк",
+                "картон",
+                "упаковк"
+              ],
+              "description": "По теме",
+              "id": "D002.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни этих поставщиков по ценам и срокам доставки",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D002.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "таблиц",
+                "цена",
+                "доставк"
+              ],
+              "description": "Есть сравнение",
+              "id": "D002.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Кого из них выбрать для долгосрочного сотрудничества?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D002.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "рекоменд",
+                "выбрать",
+                "лучш"
+              ],
+              "description": "Есть рекомендация",
+              "id": "D002.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D003",
+      "title": "Стройматериалы: поиск + чеклист проверки",
+      "personaGoal": "Застройщик ищет поставщика стройматериалов и хочет чеклист для проверки",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "checklist"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков",
+        "Создать чеклист для оценки",
+        "Применить чеклист к найденным"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: структурированный чеклист",
+        "Ход 3: применение чеклиста"
+      ],
+      "turns": [
+        {
+          "user": "Поставщики газобетона в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D003.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "газобетон",
+                "поставщ",
+                "строй"
+              ],
+              "description": "По теме",
+              "id": "D003.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь чеклист для проверки поставщика стройматериалов",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D003.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "чек-лист",
+                "провер",
+                "критер"
+              ],
+              "description": "Есть чеклист",
+              "id": "D003.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Примени этот чеклист к первым двум поставщикам",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D003.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "поставщик",
+                "оценк",
+                "провер"
+              ],
+              "description": "Применен чеклист",
+              "id": "D003.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D004",
+      "title": "Офисная мебель: поиск + презентация для шефа",
+      "personaGoal": "Офис-менеджер ищет мебель и готовит презентацию для руководства",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "presentation"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков мебели",
+        "Сделать сравнительную презентацию",
+        "Добавить рекомендацию"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: структурированная презентация",
+        "Ход 3: итоговая рекомендация"
+      ],
+      "turns": [
+        {
+          "user": "Где купить офисную мебель в Минске?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D004.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "мебель",
+                "офис",
+                "поставщ"
+              ],
+              "description": "По теме",
+              "id": "D004.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сделай сравнение для презентации руководству",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D004.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "таблиц",
+                "презентац"
+              ],
+              "description": "Есть сравнение",
+              "id": "D004.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика рекомендуешь и почему?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D004.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "рекоменд",
+                "выбрать",
+                "почему"
+              ],
+              "description": "Есть рекомендация",
+              "id": "D004.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D005",
+      "title": "Клининг: поиск + тендерная документация",
+      "personaGoal": "HR менеджер ищет клининговую компанию для офиса и готовит тендер",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "tender"
+      ],
+      "expectedBehavior": [
+        "Найти клининговые компании",
+        "Создать тендерную документацию",
+        "Добавить критерии оценки"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: структурированный тендер",
+        "Ход 3: критерии оценки"
+      ],
+      "turns": [
+        {
+          "user": "Клининговые компании для офиса 1000м2 в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D005.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "клининг",
+                "уборк",
+                "офис"
+              ],
+              "description": "По теме",
+              "id": "D005.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь тендерную документацию для них",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D005.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "тендер",
+                "документац",
+                "условия"
+              ],
+              "description": "Есть документация",
+              "id": "D005.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Добавь критерии оценки предложений",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D005.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "критер",
+                "оценк",
+                "вес"
+              ],
+              "description": "Есть критерии",
+              "id": "D005.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D006",
+      "title": "IT оборудование: поиск + бюджет",
+      "personaGoal": "IT директор закупает оборудование и готовит бюджет",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "budget"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков",
+        "Рассчитать бюджет",
+        "Сравнить с альтернативами"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: расчет бюджета",
+        "Ход 3: сравнение"
+      ],
+      "turns": [
+        {
+          "user": "Поставщики серверов и компьютеров в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D006.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сервер",
+                "компьютер",
+                "it"
+              ],
+              "description": "По теме",
+              "id": "D006.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Рассчитай бюджет на 10 компьютеров и 1 сервер",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D006.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "бюджет",
+                "цена",
+                "стоимост"
+              ],
+              "description": "Есть бюджет",
+              "id": "D006.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни с покупкой б/у оборудования",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D006.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "б/у",
+                "новое"
+              ],
+              "description": "Есть сравнение",
+              "id": "D006.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D007",
+      "title": "Продукты питания: поиск + договор",
+      "personaGoal": "Ресторан ищет поставщика продуктов и готовит договор",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "contract"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков",
+        "Создать чеклист для договора",
+        "Применить к供应商"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: чеклист договора",
+        "Ход 3: применение"
+      ],
+      "turns": [
+        {
+          "user": "Поставщики овощей и фруктов для ресторана в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D007.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "овощ",
+                "фрукт",
+                "поставщ"
+              ],
+              "description": "По теме",
+              "id": "D007.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь чеклист для проверки договора с поставщиком",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D007.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "договор",
+                "чек-лист",
+                "провер"
+              ],
+              "description": "Есть чеклист",
+              "id": "D007.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Примени этот чеклист к первому поставщику",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D007.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "поставщик",
+                "провер",
+                "договор"
+              ],
+              "description": "Применено",
+              "id": "D007.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D008",
+      "title": "Маркетплейсы: исследование + стратегия",
+      "personaGoal": "Предприниматель выходит на маркетплейсы и нуждается в стратегии",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "strategy"
+      ],
+      "expectedBehavior": [
+        "Исследовать маркетплейсы",
+        "Создать стратегию выхода",
+        "Рассчитать юнит-экономику"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: стратегия",
+        "Ход 3: расчеты"
+      ],
+      "turns": [
+        {
+          "user": "Какие маркетплейсы работают в Беларуси?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D008.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "маркетплейс",
+                "ozon",
+                "wildberr"
+              ],
+              "description": "По теме",
+              "id": "D008.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Создай стратегию выхода на маркетплейсы для товаров для дома",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D008.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стратег",
+                "выход",
+                "план"
+              ],
+              "description": "Есть стратегия",
+              "id": "D008.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Рассчитай юнит-экономику для старта",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D008.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "юнит",
+                "экономик",
+                "маржиналь"
+              ],
+              "description": "Есть расчет",
+              "id": "D008.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D009",
+      "title": "Логистика: поиск + маршрут",
+      "personaGoal": "Бизнесмен ищет логистическую компанию и оптимизирует доставку",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "logistics"
+      ],
+      "expectedBehavior": [
+        "Найти логистические компании",
+        "Построить маршрут",
+        "Оптимизировать стоимость"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: маршрут",
+        "Ход 3: оптимизация"
+      ],
+      "turns": [
+        {
+          "user": "Логистические компании для доставки по Беларуси",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D009.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "логистик",
+                "доставк",
+                "грузоперевоз"
+              ],
+              "description": "По теме",
+              "id": "D009.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Построй маршрут Минск-Гомель-Брест-Минск",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D009.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "маршрут",
+                "расстояни",
+                "км"
+              ],
+              "description": "Есть маршрут",
+              "id": "D009.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Как оптимизировать стоимость доставки?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D009.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "оптимиз",
+                "стоимост",
+                "дешевле"
+              ],
+              "description": "Есть рекомендации",
+              "id": "D009.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D010",
+      "title": "Промышленное оборудование: поиск + пусконаладка",
+      "personaGoal": "Инженер ищет промышленное оборудование и услуги пусконаладки",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "equipment"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков оборудования",
+        "Найти сервис для пусконаладки",
+        "Создать план внедрения"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: сервис найден",
+        "Ход 3: план"
+      ],
+      "turns": [
+        {
+          "user": "Поставщики промышленных станков в Беларуси",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D010.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "станок",
+                "промышлен",
+                "оборудов"
+              ],
+              "description": "По теме",
+              "id": "D010.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Кто делает пусконаладку этого оборудования?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D010.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "пусконаладк",
+                "сервис",
+                "монтаж"
+              ],
+              "description": "Есть сервис",
+              "id": "D010.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь план внедрения оборудования",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D010.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "план",
+                "внедрен",
+                "этап"
+              ],
+              "description": "Есть план",
+              "id": "D010.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D011",
+      "title": "Сырье для производства: полный цикл",
+      "personaGoal": "Производственник ищет сырье и выстраивает цепочку поставок",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "supply_chain"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков сырья",
+        "Сравнить условия",
+        "Построить цепочку"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: сравнение",
+        "Ход 3: цепочка"
+      ],
+      "turns": [
+        {
+          "user": "Поставщики древесины для мебельного производства",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D011.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "древесин",
+                "мебель",
+                "сырье"
+              ],
+              "description": "По теме",
+              "id": "D011.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия поставки и минимальные партии",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D011.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "партия",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D011.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Построй цепочку поставок от леса до готовой мебели",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D011.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "цепочка",
+                "поставок",
+                "этап"
+              ],
+              "description": "Есть цепочка",
+              "id": "D011.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D012",
+      "title": "Энергоаудит: поиск + смета",
+      "personaGoal": "Собственник здания ищет компанию для энергоаудита",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "audit"
+      ],
+      "expectedBehavior": [
+        "Найти аудиторов",
+        "Получить смету",
+        "Сравнить предложения"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: смета",
+        "Ход 3: сравнение"
+      ],
+      "turns": [
+        {
+          "user": "Компании по энергоаудиту в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D012.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "энергоаудит",
+                "аудит",
+                "энергоэффектив"
+              ],
+              "description": "По теме",
+              "id": "D012.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит энергоаудит офисного здания 5000м2?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D012.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "цена",
+                "смета"
+              ],
+              "description": "Есть цена",
+              "id": "D012.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни предложения этих компаний",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D012.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "предложен"
+              ],
+              "description": "Есть сравнение",
+              "id": "D012.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D013",
+      "title": "HR услуги: аутсорсинг + подбор",
+      "personaGoal": "HR директор ищет подрядчика для подбора персонала",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "hr"
+      ],
+      "expectedBehavior": [
+        "Найти HR агентства",
+        "Получить условия",
+        "Выбрать подрядчика"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: условия",
+        "Ход 3: выбор"
+      ],
+      "turns": [
+        {
+          "user": "HR агентства по подбору персонала в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D013.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "hr",
+                "подбор",
+                "персонал"
+              ],
+              "description": "По теме",
+              "id": "D013.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какие условия оплаты они предлагают?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D013.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "оплат",
+                "условия",
+                "стоимост"
+              ],
+              "description": "Есть условия",
+              "id": "D013.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Кого выберешь для подбора IT специалистов и почему?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D013.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд",
+                "it"
+              ],
+              "description": "Есть выбор",
+              "id": "D013.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D014",
+      "title": "Рекламное агентство: поиск + бриф",
+      "personaGoal": "Маркетинг директор ищет рекламное агентство",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "advertising"
+      ],
+      "expectedBehavior": [
+        "Найти агентства",
+        "Создать бриф",
+        "Получить коммерческое предложение"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: бриф",
+        "Ход 3: КП"
+      ],
+      "turns": [
+        {
+          "user": "Рекламные агентства полного цикла в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D014.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "реклам",
+                "агентств",
+                "маркетинг"
+              ],
+              "description": "По теме",
+              "id": "D014.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь бриф для рекламной кампании в интернете",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D014.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "бриф",
+                "вопрос",
+                "кампания"
+              ],
+              "description": "Есть бриф",
+              "id": "D014.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Отправь этот бриф этим агентствам и попроси КП",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D014.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "текст",
+                "письм",
+                "отправить"
+              ],
+              "description": "Есть текст",
+              "id": "D014.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D015",
+      "title": "Юридические услуги: поиск + проверка",
+      "personaGoal": "Бизнесмен ищет юридическую компанию для проверки контрагента",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "legal"
+      ],
+      "expectedBehavior": [
+        "Найти юридические компании",
+        "Заказать проверку",
+        "Получить отчет"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: услуга найдена",
+        "Ход 3: отчет"
+      ],
+      "turns": [
+        {
+          "user": "Юридические компании по проверке контрагентов в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D015.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "юридическ",
+                "проверк",
+                "контрагент"
+              ],
+              "description": "По теме",
+              "id": "D015.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Что входит в проверку контрагента и сколько стоит?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D015.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "входит",
+                "стоимост",
+                "услуги"
+              ],
+              "description": "Есть информация",
+              "id": "D015.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь список вопросов для проверки ООО",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D015.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "вопрос",
+                "проверк",
+                "список"
+              ],
+              "description": "Есть список",
+              "id": "D015.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D016",
+      "title": "Бухгалтерские услуги: аутсорсинг",
+      "personaGoal": "Предприниматель ищет бухгалтера на аутсорсе",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "accounting"
+      ],
+      "expectedBehavior": [
+        "Найти бухгалтера/компанию",
+        "Сравнить тарифы",
+        "Выбрать исполнителя"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: тарифы",
+        "Ход 3: выбор"
+      ],
+      "turns": [
+        {
+          "user": "Бухгалтер на аутсорсе для ИП в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D016.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "бухгалтер",
+                "аутсорс",
+                "ип"
+              ],
+              "description": "По теме",
+              "id": "D016.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни тарифы на бухгалтерское обслуживание",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D016.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "тариф",
+                "стоимост",
+                "услуги"
+              ],
+              "description": "Есть тарифы",
+              "id": "D016.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какой тариф выбрать для ИП с сотрудниками?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D016.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "рекоменд",
+                "выбрать",
+                "тариф"
+              ],
+              "description": "Есть рекомендация",
+              "id": "D016.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D017",
+      "title": "Охрана: поиск + договор",
+      "personaGoal": "Собственник бизнес-центра ищет охранную компанию",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "security"
+      ],
+      "expectedBehavior": [
+        "Найти охранные компании",
+        "Сравнить услуги",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: услуги",
+        "Ход 3: договор"
+      ],
+      "turns": [
+        {
+          "user": "Охранные компании в Минске для бизнес-центра",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D017.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "охран",
+                "безопасност",
+                "чоп"
+              ],
+              "description": "По теме",
+              "id": "D017.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какие услуги они предлагают и по какой цене?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D017.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "услуги",
+                "стоимост",
+                "охран"
+              ],
+              "description": "Есть услуги",
+              "id": "D017.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь текст договора с охранной компанией",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D017.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "договор",
+                "условия",
+                "текст"
+              ],
+              "description": "Есть текст",
+              "id": "D017.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D018",
+      "title": "Вентиляция: проектирование + монтаж",
+      "personaGoal": "Строительная компания ищет подрядчика по вентиляции",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "hvac"
+      ],
+      "expectedBehavior": [
+        "Найти подрядчиков",
+        "Получить проект",
+        "Сравнить сметы"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: проект",
+        "Ход 3: сметы"
+      ],
+      "turns": [
+        {
+          "user": "Компании по вентиляции и кондиционированию в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D018.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "вентиляц",
+                "кондицион",
+                "монтаж"
+              ],
+              "description": "По теме",
+              "id": "D018.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит проектирование вентиляции для офиса 500м2?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D018.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "проектирован",
+                "стоимост",
+                "смета"
+              ],
+              "description": "Есть цена",
+              "id": "D018.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни сметы от разных подрядчиков",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D018.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "смета",
+                "сравн",
+                "подрядчик"
+              ],
+              "description": "Есть сравнение",
+              "id": "D018.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D019",
+      "title": "Грузоперевозки: поиск + расчет",
+      "personaGoal": "Логист ищет перевозчика для доставки груза",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "shipping"
+      ],
+      "expectedBehavior": [
+        "Найти перевозчиков",
+        "Рассчитать стоимость",
+        "Выбрать лучшего"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: расчет",
+        "Ход 3: выбор"
+      ],
+      "turns": [
+        {
+          "user": "Грузоперевозчики по маршруту Минск-Москва",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D019.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "грузоперевозк",
+                "транспорт",
+                "доставка"
+              ],
+              "description": "По теме",
+              "id": "D019.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит доставка 5 тонн груза?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D019.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "цена",
+                "доставка"
+              ],
+              "description": "Есть цена",
+              "id": "D019.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Кого выбрать и почему?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D019.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд",
+                "перевозчик"
+              ],
+              "description": "Есть выбор",
+              "id": "D019.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D020",
+      "title": "Склад: аренда + логистика",
+      "personaGoal": "Предприниматель ищет склад для хранения товаров",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "warehouse"
+      ],
+      "expectedBehavior": [
+        "Найти склады",
+        "Сравнить условия",
+        "Выбрать склад"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: условия",
+        "Ход 3: выбор"
+      ],
+      "turns": [
+        {
+          "user": "Склады в аренду в Минске и области",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D020.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "склад",
+                "аренда",
+                "хранение"
+              ],
+              "description": "По теме",
+              "id": "D020.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия аренды складов 500-1000м2",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D020.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "аренда",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D020.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какой склад выбрать для продуктов питания?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D020.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд",
+                "склад"
+              ],
+              "description": "Есть выбор",
+              "id": "D020.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D021",
+      "title": "Программное обеспечение: поиск + внедрение",
+      "personaGoal": "Директор ищет CRM систему для компании",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "software"
+      ],
+      "expectedBehavior": [
+        "Найти CRM системы",
+        "Сравнить функции",
+        "Выбрать систему"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: сравнение",
+        "Ход 3: выбор"
+      ],
+      "turns": [
+        {
+          "user": "CRM системы для малого бизнеса в Беларуси",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D021.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "crm",
+                "программ",
+                "система"
+              ],
+              "description": "По теме",
+              "id": "D021.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни эти CRM по функционалу и стоимости",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D021.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "функционал",
+                "стоимост"
+              ],
+              "description": "Есть сравнение",
+              "id": "D021.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какую CRM выбрать для 20 человек и почему?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D021.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд",
+                "crm"
+              ],
+              "description": "Есть выбор",
+              "id": "D021.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D022",
+      "title": "Торговое оборудование: поиск + монтаж",
+      "personaGoal": "Владелец магазина ищет торговое оборудование",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "retail"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков",
+        "Спроектировать магазин",
+        "Смонтировать оборудование"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: проект",
+        "Ход 3: монтаж"
+      ],
+      "turns": [
+        {
+          "user": "Поставщики торгового оборудования в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D022.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "торгов",
+                "оборудов",
+                "витрина"
+              ],
+              "description": "По теме",
+              "id": "D022.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Спроектируй расстановку оборудования для продуктового магазина 100м2",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D022.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "проект",
+                "расстановк",
+                "схема"
+              ],
+              "description": "Есть проект",
+              "id": "D022.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Кто может смонтировать это оборудование?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D022.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "монтаж",
+                "установка",
+                "компания"
+              ],
+              "description": "Есть исполнитель",
+              "id": "D022.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D023",
+      "title": "Полиграфия: поиск + дизайн",
+      "personaGoal": "Маркетолог заказывает полиграфическую продукцию",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "printing"
+      ],
+      "expectedBehavior": [
+        "Найти типографию",
+        "Заказать дизайн",
+        "Напечатать тираж"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: дизайн",
+        "Ход 3: печать"
+      ],
+      "turns": [
+        {
+          "user": "Типографии в Минске для печати каталогов",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D023.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "типографи",
+                "печать",
+                "каталог"
+              ],
+              "description": "По теме",
+              "id": "D023.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Где заказать дизайн каталога?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D023.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "дизайн",
+                "студия",
+                "креатив"
+              ],
+              "description": "Есть дизайн",
+              "id": "D023.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит печать 1000 экземпляров каталога 32 страницы?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D023.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "цена",
+                "тираж"
+              ],
+              "description": "Есть цена",
+              "id": "D023.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D024",
+      "title": "Автотранспорт: лизинг + страховка",
+      "personaGoal": "Бизнесмен оформляет служебный автомобиль",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "auto"
+      ],
+      "expectedBehavior": [
+        "Найти автосалон",
+        "Оформить лизинг",
+        "Застраховать"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: лизинг",
+        "Ход 3: страховка"
+      ],
+      "turns": [
+        {
+          "user": "Автосалоны в Минске с корпоративными продажами",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D024.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "автосалон",
+                "корпоратив",
+                "автомобиль"
+              ],
+              "description": "По теме",
+              "id": "D024.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какие условия лизинга для юридических лиц?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D024.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "лизинг",
+                "условия",
+                "юридическ"
+              ],
+              "description": "Есть условия",
+              "id": "D024.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какую страховку выбрать для коммерческого авто?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D024.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "страховк",
+                "каско",
+                "осаго"
+              ],
+              "description": "Есть рекомендация",
+              "id": "D024.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D025",
+      "title": "Светооборудование: поиск + монтаж",
+      "personaGoal": "Строительная компания ищет светооборудование для объекта",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "lighting"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков",
+        "Выбрать оборудование",
+        "Смонтировать"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: выбор",
+        "Ход 3: монтаж"
+      ],
+      "turns": [
+        {
+          "user": "Поставщики светодиодного оборудования в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D025.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "светодиод",
+                "освещен",
+                "свет"
+              ],
+              "description": "По теме",
+              "id": "D025.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какое оборудование выбрать для освещения офиса 500м2?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D025.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "оборудов",
+                "освещен"
+              ],
+              "description": "Есть выбор",
+              "id": "D025.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Кто может смонтировать это оборудование?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D025.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "монтаж",
+                "установка",
+                "электрик"
+              ],
+              "description": "Есть исполнитель",
+              "id": "D025.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D026",
+      "title": "Сантехника: поиск + установка",
+      "personaGoal": "Управляющая компания заказывает сантехнические работы",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "plumbing"
+      ],
+      "expectedBehavior": [
+        "Найти сантехников",
+        "Получить смету",
+        "Провести работы"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: смета",
+        "Ход 3: работы"
+      ],
+      "turns": [
+        {
+          "user": "Сантехнические компании в Минске для офисных зданий",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D026.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сантехник",
+                "монтаж",
+                "труб"
+              ],
+              "description": "По теме",
+              "id": "D026.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит замена стояков в 10-этажном доме?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D026.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "смета",
+                "работа"
+              ],
+              "description": "Есть цена",
+              "id": "D026.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь техническое задание для этих работ",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D026.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "задание",
+                "техническ",
+                "условия"
+              ],
+              "description": "Есть ТЗ",
+              "id": "D026.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D027",
+      "title": "Клининг: поиск + договор",
+      "personaGoal": "Бизнес-центр ищет клининговую компанию",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "cleaning"
+      ],
+      "expectedBehavior": [
+        "Найти клининг",
+        "Сравнить услуги",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: сравнение",
+        "Ход 3: договор"
+      ],
+      "turns": [
+        {
+          "user": "Клининговые компании для бизнес-центров в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D027.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "клининг",
+                "уборка",
+                "офис"
+              ],
+              "description": "По теме",
+              "id": "D027.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни стоимость уборки 3000м2",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D027.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "стоимост",
+                "уборка"
+              ],
+              "description": "Есть сравнение",
+              "id": "D027.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь договор на клининговые услуги",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D027.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "договор",
+                "условия",
+                "текст"
+              ],
+              "description": "Есть договор",
+              "id": "D027.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D028",
+      "title": "Обучение персонала: поиск + программа",
+      "personaGoal": "HR ищет тренинговую компанию для обучения менеджеров",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "training"
+      ],
+      "expectedBehavior": [
+        "Найти тренинговые компании",
+        "Выбрать программу",
+        "Провести обучение"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: программа",
+        "Ход 3: обучение"
+      ],
+      "turns": [
+        {
+          "user": "Тренинговые компании для продавцов в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D028.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "тренинг",
+                "обучение",
+                "продажи"
+              ],
+              "description": "По теме",
+              "id": "D028.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какую программу выбрать для 10 человек?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D028.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "программа",
+                "курс",
+                "обучение"
+              ],
+              "description": "Есть программа",
+              "id": "D028.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит корпоративное обучение?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D028.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "цена",
+                "корпоратив"
+              ],
+              "description": "Есть цена",
+              "id": "D028.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D029",
+      "title": "ИТ аутсорсинг: поиск + договор",
+      "personaGoal": "Компания ищет ИТ подрядчика для поддержки",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "it_outsource"
+      ],
+      "expectedBehavior": [
+        "Найти ИТ компании",
+        "Сравнить тарифы",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: тарифы",
+        "Ход 3: договор"
+      ],
+      "turns": [
+        {
+          "user": "ИТ аутсорсинг компании в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D029.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "ит",
+                "аутсорсинг",
+                "поддержка"
+              ],
+              "description": "По теме",
+              "id": "D029.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни тарифы на абонентское обслуживание",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D029.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "тариф",
+                "абонент",
+                "стоимост"
+              ],
+              "description": "Есть тарифы",
+              "id": "D029.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Что включено в договор на ИТ обслуживание?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D029.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "договор",
+                "включено",
+                "услуги"
+              ],
+              "description": "Есть договор",
+              "id": "D029.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D030",
+      "title": "Веб-разработка: поиск + смета",
+      "personaGoal": "Предприниматель заказывает сайт для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "webdev"
+      ],
+      "expectedBehavior": [
+        "Найти веб-студию",
+        "Получить смету",
+        "Заказать сайт"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: смета",
+        "Ход 3: заказ"
+      ],
+      "turns": [
+        {
+          "user": "Веб-студии в Минске по разработке сайтов",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D030.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "веб",
+                "сайт",
+                "разработка"
+              ],
+              "description": "По теме",
+              "id": "D030.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит разработка интернет-магазина?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D030.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "смета",
+                "магазин"
+              ],
+              "description": "Есть цена",
+              "id": "D030.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь техническое задание для интернет-магазина",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D030.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "задание",
+                "техническ",
+                "тз"
+              ],
+              "description": "Есть ТЗ",
+              "id": "D030.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D031",
+      "title": "Пожарная сигнализация: поиск + проект",
+      "personaGoal": "Собственник здания заказывает пожарную сигнализацию",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "fire_safety"
+      ],
+      "expectedBehavior": [
+        "Найти подрядчиков",
+        "Спроектировать систему",
+        "Смонтировать"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: проект",
+        "Ход 3: монтаж"
+      ],
+      "turns": [
+        {
+          "user": "Компании по пожарной сигнализации в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D031.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "пожар",
+                "сигнализация",
+                "безопасность"
+              ],
+              "description": "По теме",
+              "id": "D031.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит проект пожарной сигнализации для офиса 1000м2?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D031.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "проект",
+                "стоимост",
+                "пожар"
+              ],
+              "description": "Есть цена",
+              "id": "D031.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Кто может смонтировать систему?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D031.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "монтаж",
+                "установка",
+                "компания"
+              ],
+              "description": "Есть исполнитель",
+              "id": "D031.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D032",
+      "title": "Видеонаблюдение: поиск + установка",
+      "personaGoal": "Собственник бизнес-центра устанавливает видеонаблюдение",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "security_camera"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков",
+        "Выбрать оборудование",
+        "Установить систему"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: выбор",
+        "Ход 3: установка"
+      ],
+      "turns": [
+        {
+          "user": "Компании по видеонаблюдению в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D032.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "видеонаблюд",
+                "камера",
+                "охран"
+              ],
+              "description": "По теме",
+              "id": "D032.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какое оборудование выбрать для офиса?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D032.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "оборудов",
+                "камера"
+              ],
+              "description": "Есть выбор",
+              "id": "D032.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит установка 10 камер?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D032.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "установка",
+                "монтаж"
+              ],
+              "description": "Есть цена",
+              "id": "D032.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D033",
+      "title": "Контекстная реклама: настройка + ведение",
+      "personaGoal": "Маркетолог заказывает настройку рекламы",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "advertising"
+      ],
+      "expectedBehavior": [
+        "Найти подрядчика",
+        "Настроить рекламу",
+        "Получить результаты"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: настройка",
+        "Ход 3: результаты"
+      ],
+      "turns": [
+        {
+          "user": "Специалисты по контекстной рекламе в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D033.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "контекстн",
+                "реклама",
+                "директ"
+              ],
+              "description": "По теме",
+              "id": "D033.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит настройка рекламы в Google Ads?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D033.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "настройка",
+                "реклама"
+              ],
+              "description": "Есть цена",
+              "id": "D033.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Как оценить эффективность рекламы?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D033.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "эффективност",
+                "метрики",
+                "анализ"
+              ],
+              "description": "Есть метрики",
+              "id": "D033.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D034",
+      "title": "SEO продвижение: поиск + стратегия",
+      "personaGoal": "Бизнес заказывает SEO продвижение сайта",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "seo"
+      ],
+      "expectedBehavior": [
+        "Найти SEO компанию",
+        "Разработать стратегию",
+        "Получить результаты"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: стратегия",
+        "Ход 3: результаты"
+      ],
+      "turns": [
+        {
+          "user": "SEO компании в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D034.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "seo",
+                "продвижен",
+                "оптимизац"
+              ],
+              "description": "По теме",
+              "id": "D034.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Создай стратегию SEO для интернет-магазина",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D034.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стратег",
+                "seo",
+                "продвижен"
+              ],
+              "description": "Есть стратегия",
+              "id": "D034.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит месячное продвижение?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D034.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "продвижен",
+                "месяц"
+              ],
+              "description": "Есть цена",
+              "id": "D034.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D035",
+      "title": "Стоматология: поиск + лечение",
+      "personaGoal": "Сотрудник ищет стоматологию для корпоративного обслуживания",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "medical"
+      ],
+      "expectedBehavior": [
+        "Найти стоматологию",
+        "Получить прайс",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: прайс",
+        "Ход 3: договор"
+      ],
+      "turns": [
+        {
+          "user": "Стоматологии в Минске с корпоративными ценами",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D035.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоматолог",
+                "зубы",
+                "лечение"
+              ],
+              "description": "По теме",
+              "id": "D035.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит корпоративное обслуживание?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D035.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "корпоратив",
+                "прайс"
+              ],
+              "description": "Есть цена",
+              "id": "D035.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь договор на корпоративное обслуживание",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D035.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "договор",
+                "условия",
+                "текст"
+              ],
+              "description": "Есть договор",
+              "id": "D035.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D036",
+      "title": "Экскурсии: корпоратив + логистика",
+      "personaGoal": "HR организует корпоративную экскурсию",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "events"
+      ],
+      "expectedBehavior": [
+        "Найти туркомпанию",
+        "Выбрать экскурсию",
+        "Организовать мероприятие"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: выбор",
+        "Ход 3: организация"
+      ],
+      "turns": [
+        {
+          "user": "Туркомпании для корпоративных экскурсий в Беларуси",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D036.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "тур",
+                "экскурс",
+                "корпоратив"
+              ],
+              "description": "По теме",
+              "id": "D036.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какие есть варианты для 50 человек?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D036.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "вариант",
+                "человек",
+                "программа"
+              ],
+              "description": "Есть варианты",
+              "id": "D036.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит полная организация?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D036.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "организация",
+                "цена"
+              ],
+              "description": "Есть цена",
+              "id": "D036.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D037",
+      "title": "Продукты питания: опт + доставка",
+      "personaGoal": "Кафе ищет поставщика продуктов",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "food"
+      ],
+      "expectedBehavior": [
+        "Найти поставщиков",
+        "Сравнить качество",
+        "Наладить доставку"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: качество",
+        "Ход 3: доставка"
+      ],
+      "turns": [
+        {
+          "user": "Поставщики продуктов для кафе в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D037.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "поставщик",
+                "продукт",
+                "кафе"
+              ],
+              "description": "По теме",
+              "id": "D037.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Как проверить качество продуктов?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D037.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "качество",
+                "провер",
+                "документ"
+              ],
+              "description": "Есть рекомендации",
+              "id": "D037.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Как организовать ежедневную доставку?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D037.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "доставка",
+                "организовать",
+                "график"
+              ],
+              "description": "Есть решение",
+              "id": "D037.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D038",
+      "title": "Тара и упаковка: поиск + производство",
+      "personaGoal": "Производственник ищет упаковку для своей продукции",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "packaging"
+      ],
+      "expectedBehavior": [
+        "Найти производителя",
+        "Заказать образцы",
+        "Наладить производство"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: образцы",
+        "Ход 3: производство"
+      ],
+      "turns": [
+        {
+          "user": "Производители упаковки в Беларуси",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D038.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "упаковк",
+                "производитель",
+                "тара"
+              ],
+              "description": "По теме",
+              "id": "D038.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Как заказать образцы упаковки?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D038.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "образец",
+                "заказать",
+                "тираж"
+              ],
+              "description": "Есть информация",
+              "id": "D038.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Минимальный тираж для производства?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D038.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "тираж",
+                "минимальн",
+                "производство"
+              ],
+              "description": "Есть ответ",
+              "id": "D038.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D039",
+      "title": "Брендинг: поиск + разработка",
+      "personaGoal": "Стартап заказывает разработку бренда",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "branding"
+      ],
+      "expectedBehavior": [
+        "Найти брендинговое агентство",
+        "Разработать бренд",
+        "Создать айдентику"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: разработка",
+        "Ход 3: айдентика"
+      ],
+      "turns": [
+        {
+          "user": "Брендинговые агентства в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D039.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "брендинг",
+                "агентство",
+                "дизайн"
+              ],
+              "description": "По теме",
+              "id": "D039.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит разработка логотипа и фирменного стиля?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D039.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "логотип",
+                "стиль"
+              ],
+              "description": "Есть цена",
+              "id": "D039.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Что входит в полный пакет брендинга?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D039.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "входит",
+                "пакет",
+                "услуги"
+              ],
+              "description": "Есть описание",
+              "id": "D039.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D040",
+      "title": "Мобильное приложение: разработка + запуск",
+      "personaGoal": "Стартап заказывает мобильное приложение",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "mobile_app"
+      ],
+      "expectedBehavior": [
+        "Найти разработчика",
+        "Создать ТЗ",
+        "Разработать приложение"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: ТЗ",
+        "Ход 3: разработка"
+      ],
+      "turns": [
+        {
+          "user": "Разработчики мобильных приложений в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D040.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "мобильн",
+                "приложение",
+                "разработка"
+              ],
+              "description": "По теме",
+              "id": "D040.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Составь техническое задание для мобильного приложения",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D040.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "тз",
+                "техническ",
+                "задание"
+              ],
+              "description": "Есть ТЗ",
+              "id": "D040.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сколько стоит разработка приложения для iOS и Android?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D040.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "стоимост",
+                "разработка",
+                "ios",
+                "android"
+              ],
+              "description": "Есть цена",
+              "id": "D040.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D041",
+      "title": "Аренда автомобиля: лизинг + страховка",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "auto"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу аренда автомобиля: лизинг + страховка в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D041.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "аренда"
+              ],
+              "description": "По теме",
+              "id": "D041.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D041.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D041.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D041.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D041.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D042",
+      "title": "Бутилированная вода: поставка + кулеры",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "water"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу бутилированная вода: поставка + кулеры в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D042.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "бутилированная"
+              ],
+              "description": "По теме",
+              "id": "D042.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D042.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D042.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D042.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D042.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D043",
+      "title": "Постельное белье: текстиль + пошив",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "textile"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу постельное белье: текстиль + пошив в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D043.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "постельное"
+              ],
+              "description": "По теме",
+              "id": "D043.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D043.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D043.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D043.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D043.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D044",
+      "title": "Канцтовары: опт + доставка",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "office"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу канцтовары: опт + доставка в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D044.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "канцтовары:"
+              ],
+              "description": "По теме",
+              "id": "D044.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D044.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D044.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D044.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D044.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D045",
+      "title": "Химчистка: услуги + договор",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "cleaning"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу химчистка: услуги + договор в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D045.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "химчистка:"
+              ],
+              "description": "По теме",
+              "id": "D045.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D045.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D045.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D045.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D045.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D046",
+      "title": "Фотостудия: аренда + оборудование",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "photo"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу фотостудия: аренда + оборудование в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D046.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "фотостудия:"
+              ],
+              "description": "По теме",
+              "id": "D046.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D046.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D046.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D046.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D046.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D047",
+      "title": "Конференц-зал: аренда + кейтеринг",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "events"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу конференц-зал: аренда + кейтеринг в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D047.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "конференц-зал:"
+              ],
+              "description": "По теме",
+              "id": "D047.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D047.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D047.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D047.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D047.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D048",
+      "title": "Транспортная компания: грузоперевозки + страхование",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "transport"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу транспортная компания: грузоперевозки + страхование в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D048.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "транспортная"
+              ],
+              "description": "По теме",
+              "id": "D048.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D048.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D048.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D048.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D048.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D049",
+      "title": "Системы безопасности: установка + мониторинг",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "security"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу системы безопасности: установка + мониторинг в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D049.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "системы"
+              ],
+              "description": "По теме",
+              "id": "D049.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D049.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D049.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D049.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D049.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D050",
+      "title": "Климатическое оборудование: продажа + монтаж",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "hvac"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу климатическое оборудование: продажа + монтаж в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D050.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "климатическое"
+              ],
+              "description": "По теме",
+              "id": "D050.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D050.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D050.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D050.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D050.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D051",
+      "title": "Металлоконструкции: производство + монтаж",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "metal"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу металлоконструкции: производство + монтаж в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D051.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "металлоконструкции:"
+              ],
+              "description": "По теме",
+              "id": "D051.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D051.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D051.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D051.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D051.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D052",
+      "title": "Пластиковые окна: производство + установка",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "windows"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу пластиковые окна: производство + установка в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D052.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "пластиковые"
+              ],
+              "description": "По теме",
+              "id": "D052.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D052.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D052.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D052.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D052.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D053",
+      "title": "Натяжные потолки: монтаж + гарантия",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "ceiling"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу натяжные потолки: монтаж + гарантия в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D053.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "натяжные"
+              ],
+              "description": "По теме",
+              "id": "D053.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D053.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D053.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D053.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D053.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D054",
+      "title": "Кровельные материалы: поставка + монтаж",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "roofing"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу кровельные материалы: поставка + монтаж в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D054.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "кровельные"
+              ],
+              "description": "По теме",
+              "id": "D054.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D054.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D054.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D054.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D054.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D055",
+      "title": "Системы автоматизации: проектирование + внедрение",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "automation"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу системы автоматизации: проектирование + внедрение в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D055.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "системы"
+              ],
+              "description": "По теме",
+              "id": "D055.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D055.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D055.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D055.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D055.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D056",
+      "title": "Компьютерные сети: монтаж + настройка",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "networks"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу компьютерные сети: монтаж + настройка в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D056.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "компьютерные"
+              ],
+              "description": "По теме",
+              "id": "D056.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D056.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D056.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D056.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D056.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D057",
+      "title": "Телефония: установка + обслуживание",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "telephony"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу телефония: установка + обслуживание в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D057.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "телефония:"
+              ],
+              "description": "По теме",
+              "id": "D057.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D057.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D057.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D057.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D057.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D058",
+      "title": "Ксерокопировальная техника: поставка + ремонт",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "equipment"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу ксерокопировальная техника: поставка + ремонт в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D058.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "ксерокопировальная"
+              ],
+              "description": "По теме",
+              "id": "D058.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D058.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D058.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D058.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D058.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D059",
+      "title": "Гостиничные услуги: размещение + трансфер",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "hospitality"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу гостиничные услуги: размещение + трансфер в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D059.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "гостиничные"
+              ],
+              "description": "По теме",
+              "id": "D059.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D059.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D059.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D059.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D059.T3.C2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D060",
+      "title": "Кейтеринг: организация + меню",
+      "personaGoal": "Закупщик ищет поставщика для бизнеса",
+      "tags": [
+        "development",
+        "sourcing",
+        "multi_turn",
+        "catering"
+      ],
+      "expectedBehavior": [
+        "Найти поставщика",
+        "Сравнить условия",
+        "Заключить договор"
+      ],
+      "strictPassFail": [
+        "Каждый ход: не stub",
+        "Ход 2: найдены варианты",
+        "Ход 3: решение"
+      ],
+      "turns": [
+        {
+          "user": "Ищу кейтеринг: организация + меню в Минске",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D060.T1.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "кейтеринг:"
+              ],
+              "description": "По теме",
+              "id": "D060.T1.C2"
+            }
+          ]
+        },
+        {
+          "user": "Сравни условия и цены",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D060.T2.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "сравн",
+                "цена",
+                "условия"
+              ],
+              "description": "Есть сравнение",
+              "id": "D060.T2.C2"
+            }
+          ]
+        },
+        {
+          "user": "Какого поставщика выбрать?",
+          "checks": [
+            {
+              "type": "not_stub",
+              "description": "Не stub",
+              "id": "D060.T3.C1"
+            },
+            {
+              "type": "includes_any",
+              "patterns": [
+                "выбрать",
+                "рекоменд"
+              ],
+              "description": "Есть выбор",
+              "id": "D060.T3.C2"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

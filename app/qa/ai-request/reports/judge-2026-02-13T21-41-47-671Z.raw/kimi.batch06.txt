@@ -1,0 +1,58 @@
+Based on my analysis of the scenarios provided, here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV026",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: Assistant returned completely empty response — no filtering, no acknowledgment, no continuation",
+        "User explicitly asked to filter to Frunzensky district and keep only 3 companies — got silence"
+      ],
+      "criticalIssues": [
+        "Empty response is a complete failure to maintain conversation continuity",
+        "No attempt to explain if district filtering is possible or suggest alternatives",
+        "User invested effort in turn 1 getting 5 companies, turn 2 destroys all progress"
+      ],
+      "strengths": [
+        "Turn 1 provided 5 concrete suppliers with direct links and contacts"
+      ],
+      "nextUserProbe": "Почему нет ответа? Ты отфильтруешь или нет?"
+    },
+    {
+      "scenarioId": "UV027",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.92,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3: After user asked for top-3 ranking with explanations, assistant completely dropped context",
+        "Assistant asked user to repeat basic info (товар/услуга, город) that was already provided in turns 1-2",
+        "This is classic generic fallback — refusing to work with established context"
+      ],
+      "criticalIssues": [
+        "Complete context loss: forgot ПНД трубы, Минск, Фрунзенский район from previous turns",
+        "Turn 2 established 3 specific candidates (ПластЛайн, БелРегионПласт, АнкирГрупп) — turn 3 ignores them",
+        "Assistant behavior mimics 'new conversation' template instead of continuing dialog",
+        "User gave concrete constraints and followed up — assistant penalized this with generic rubric request"
+      ],
+      "strengths": [
+        "Turn 1 provided 5 relevant suppliers with good detail",
+        "Turn 2 honestly indicated district confirmation not available in cards"
+      ],
+      "nextUserProbe": "Мы уже обсуждали ПНД трубы в Минске! Дай топ-3 из тех трёх что нашёл!"
+    }
+  ]
+}
+```

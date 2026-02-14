@@ -1,0 +1,123 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S011",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 1,
+      "reasons": [
+        "Assistant completely ignored 'Уручье' location constraint in turn 2 - repeated same Minsk list without filtering",
+        "Companies listed are irrelevant: server equipment vendors, not IT helpdesk/outsourcing providers",
+        "No actual ranking logic provided - just repeated same companies with generic criteria labels"
+      ],
+      "criticalIssues": [
+        "Wrong city: user specified Уручье district, assistant ignored it completely",
+        "Wrong supplier category: server hardware companies instead of IT support/outsourcing",
+        "No actionable next steps or contact recommendations"
+      ],
+      "strengths": [
+        "Structured response format with company links"
+      ],
+      "nextUserProbe": "Эти компании не про аутсорсинг. Есть ли в каталоге IT-хелпдеск в Минске, район Уручье?"
+    },
+    {
+      "scenarioId": "S012",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: Instead of filtering for Волотова district, assistant fell back to generic rubric advice about search strategies",
+        "Turn 3 ranking ignores 'надежности и скорости выезда' criteria - just lists same companies without evaluation",
+        "First company is security systems, second is construction - neither HVAC specialists"
+      ],
+      "criticalIssues": [
+        "Generic fallback after user gave concrete location constraint (Волотова)",
+        "Only 1 of 3 companies is actually HVAC-related (МонтажВентСтрой)",
+        "No evaluation of reliability or response speed as requested"
+      ],
+      "strengths": [
+        "Initial list included one relevant HVAC company"
+      ],
+      "nextUserProbe": "Вы не ответили про Волотова. Мне нужен подрядчик именно в этом районе."
+    },
+    {
+      "scenarioId": "S013",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: Generic rubric advice instead of addressing 'Лядище' location constraint",
+        "Listed companies completely irrelevant: construction, real estate, bus park - none rent specialized equipment",
+        "No actual evaluation for 'срочного заказа' criteria"
+      ],
+      "criticalIssues": [
+        "Zero relevant companies for crane/manipulator rental",
+        "Generic fallback instead of location-specific filtering",
+        "Real estate and bus companies cannot provide the requested equipment"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Эти компании не сдают спецтехнику. Есть ли аренда автовышек в Борисовском районе?"
+    },
+    {
+      "scenarioId": "S014",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2: Switched to Minsk companies when user asked about 'центр' in Brest - broke geo continuity",
+        "Turn 3: Complete fallback to generic 'how to search' instead of answering questions about roasting and logistics",
+        "Listed companies are cafes and industrial equipment, not coffee bean suppliers"
+      ],
+      "criticalIssues": [
+        "Wrong city in turn 2: switched from Brest to Minsk without clarification",
+        "Turn 3 is refusal disguised as help - asks user to specify criteria instead of answering",
+        "No coffee bean suppliers in any of the lists"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Почему вы переключились на Минск? Мне нужно в Бресте, район Центр."
+    },
+    {
+      "scenarioId": "S015",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "Zero bearing suppliers found - all companies are construction and design institutes",
+        "Turn 2 incorrectly changed location to 'gomel' instead of keeping Жлобин focus",
+        "Turn 3 ranking uses generic criteria labels without actual bearing supplier evaluation"
+      ],
+      "criticalIssues": [
+        "No bearing suppliers in the catalog results - false positive listings",
+        "Location drift to Gomel region in turn 2-3",
+        "Cannot evaluate 'риски контрафакта' for companies that don't sell bearings"
+      ],
+      "strengths": [
+        "Turn 3 included some relevant risk advice about quality certificates and SLAs"
+      ],
+      "nextUserProbe": "Ни одна из этих компаний не торгует подшипниками. Есть ли в каталоге поставщики промподшипников в Жлобине?"
+    }
+  ]
+}
+```

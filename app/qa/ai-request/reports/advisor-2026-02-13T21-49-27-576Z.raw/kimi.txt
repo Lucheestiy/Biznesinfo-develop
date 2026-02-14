@@ -1,0 +1,171 @@
+Based on my analysis of the QA data, scenario definitions, and codebase structure, I can now provide concrete engineering advice for the Biznesinfo AI assistant.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical multi-turn context preservation failures dominate the failure modes (63% of failures). The assistant repeatedly drops conversation context between turns, triggering generic fallback templates ('Какие критерии учитывать?', 'Напишите что нужно найти') instead of continuing the established workflow. Hard errors (502 Bad Gateway) in UV003 and UV026 indicate infrastructure instability. Primary fix: implement context persistence layer with company/location/rubric memory across turns.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix context persistence layer for multi-turn continuity",
+      "why": "17/27 scenarios failed, with context loss being the root cause in 12 cases. UV027, UV023, UV017 all show catastrophic context drops between turn 2→3.",
+      "expectedImpact": "Reduce failure rate from 63% to ~30%, improve avg usefulness from 2.0 to 3.5+",
+      "validationScenarios": ["UV027", "UV023", "UV017", "UV026", "UV021"]
+    },
+    {
+      "priority": "P0",
+      "title": "Resolve 502 Bad Gateway errors on consumer queries",
+      "why": "UV003 and UV026 show hard 502 errors - infrastructure/backend instability on specific query patterns",
+      "expectedImpact": "Eliminate hard failures, improve pass rate by 7.4%",
+      "validationScenarios": ["UV003", "UV026"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement anti-template guardrails for ranking requests",
+      "why": "UV024, UV025, UV027 fail on 'excludes_all' checks for abstract templates - assistant gives generic criteria instead of concrete rankings",
+      "expectedImpact": "Improve strict check pass rate, reduce 'not_useful' verdicts by ~25%",
+      "validationScenarios": ["UV024", "UV025", "UV008", "UV015"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add company context carryover for 'Ирис Интер групп' scenarios",
+      "why": "UV020, UV021 show severe company swap errors - wrong company referenced after context switch",
+      "expectedImpact": "Fix consistency failures in company-specific workflows",
+      "validationScenarios": ["UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P2",
+      "title": "Improve no-results fallback quality",
+      "why": "UV011 shows inappropriate fallback to random companies when no manufacturers found",
+      "expectedImpact": "Better user experience on edge queries, reduced hallucination risk",
+      "validationScenarios": ["UV011", "UV014", "UV007"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Inject conversation memory into system prompt",
+      "action": "Add explicit 'PREVIOUS_CONTEXT' section to system prompt containing: companies mentioned in last turn, active location filter, active rubric/category, user intent classification. Format: 'Previously discussed: [company list with IDs], Location: [district], Intent: [sourcing/comparison/rfq]'",
+      "implementationHint": "Modify prompt construction in app/src/lib/ai/requests.ts or upstream LLM service. Pass vendor_candidate_ids and ranking_seed_text from previous turn via requestMeta.",
+      "expectedImpact": "Prevents 'new conversation' template triggers, maintains continuity",
+      "risk": "May increase token usage by ~15%",
+      "effort": "M",
+      "validationScenarios": ["UV027", "UV023", "UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Cache and reuse previous search results within session",
+      "action": "Store last search results (company IDs, rubrics, locations) in ai_assistant_turns.response_meta and inject into next turn's context. If user asks for 'top-3 from these', use cached IDs instead of re-querying.",
+      "implementationHint": "Extend conversations.ts appendAssistantSessionTurn to persist vendor_candidate_ids. In route handler, check for previous turn's candidates when query implies filtering/ranking.",
+      "expectedImpact": "Eliminates company swap errors, enables proper ranking workflows",
+      "risk": "Stale data if companies updated between turns",
+      "effort": "S",
+      "validationScenarios": ["UV027", "UV026", "UV024", "UV025"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Block generic fallback patterns on constrained queries",
+      "action": "Add regex guardrails: if user message contains 'топ-3', 'рейтинг', 'сравни', 'почему именно эти' AND previous turn had companies/location → reject responses containing 'Какие критерии', 'Напишите что нужно найти', 'товар/услуга' patterns.",
+      "implementationHint": "Add post-processing filter in app/src/app/api/ai/request/route.ts or LLM response validator. Return 400/stub if pattern match detected.",
+      "expectedImpact": "Forces concrete analysis instead of template fallbacks",
+      "risk": "May block legitimate clarification requests",
+      "effort": "S",
+      "validationScenarios": ["UV023", "UV024", "UV025", "UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Add ranking instruction override for specific query patterns",
+      "action": "When query matches 'топ-N' or 'сравни' or 'почему именно эти', append system instruction: 'You MUST provide a numbered list with specific reasoning for each item. Use available data from previous turns. Do NOT ask for criteria.'",
+      "implementationHint": "Pattern match in request handler, conditionally append instruction to system prompt before LLM call.",
+      "expectedImpact": "Directs LLM to produce required output format",
+      "risk": "None - additive only",
+      "effort": "S",
+      "validationScenarios": ["UV024", "UV025", "UV008", "UV015"]
+    },
+    {
+      "id": "R5",
+      "area": "geo",
+      "title": "Persist location constraints across turns",
+      "action": "Store active_location (city, district) in session context. When user mentions district in turn 2, lock it for turn 3 unless explicitly changed. Include in prompt: 'Active location filter: [district] - maintain unless user changes.'",
+      "implementationHint": "Extend ai_assistant_sessions.context JSONB to include active_location. Update on each turn if location mentioned.",
+      "expectedImpact": "Fixes UV027 (Фрунзенский district dropped), UV023 (Сухарево dropped)",
+      "risk": "May over-constrain if user wants to expand search",
+      "effort": "M",
+      "validationScenarios": ["UV027", "UV023", "UV026"]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Create structured RFQ/template output parser",
+      "action": "For template requests (Subject/Body/WhatsApp), enforce structured output via function calling or JSON schema. Validate blocks present before returning to user.",
+      "implementationHint": "Use OpenAI/compatible function calling with strict schema for template outputs. Fallback to regex validation if function calling unavailable.",
+      "expectedImpact": "Ensures UV002.T4, UV006.T4, UV017.T3 template checks pass",
+      "risk": "May increase latency slightly",
+      "effort": "M",
+      "validationScenarios": ["UV002", "UV006", "UV017", "UV009"]
+    },
+    {
+      "id": "R7",
+      "area": "retrieval",
+      "title": "Implement company disambiguation memory",
+      "action": "When company name mentioned (e.g., 'Ирис Интер групп'), store company_id in session context. On 'Найди на карточке' commands, use stored ID instead of search.",
+      "implementationHint": "Add company_resolution table or extend session context with resolved_company_id. Update when company mentioned explicitly.",
+      "expectedImpact": "Fixes UV020, UV021 company swap errors",
+      "risk": "Wrong resolution if multiple companies with similar names",
+      "effort": "S",
+      "validationScenarios": ["UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R8",
+      "area": "guardrails",
+      "title": "Add no-results honesty enforcement",
+      "action": "When search returns 0 results, force response pattern: 'По запросу [X] в [location] не найдено подходящих компаний. Рекомендации: 1) [alternative query] 2) [broader category]'. Block random company injection.",
+      "implementationHint": "Post-process search results in API route. If empty, bypass LLM or force specific prompt template for no-results case.",
+      "expectedImpact": "Fixes UV011 inappropriate fallback to 'Дом офицеров'",
+      "risk": "May be overly restrictive",
+      "effort": "S",
+      "validationScenarios": ["UV011", "UV014", "UV007"]
+    },
+    {
+      "id": "R9",
+      "area": "ui",
+      "title": "Add session continuity indicator in UI",
+      "action": "Display 'Continuing conversation about: [topic/location]' indicator in assistant UI when session has previous turns. Helps users understand context is preserved.",
+      "implementationHint": "Modify AIAssistant.tsx to fetch session history on open, show context chips if previous turns exist.",
+      "expectedImpact": "Improves UX, reduces user confusion about context",
+      "risk": "None",
+      "effort": "S",
+      "validationScenarios": ["UV027", "UV023", "UV021"]
+    },
+    {
+      "id": "R10",
+      "area": "qa",
+      "title": "Add automated continuity regression tests",
+      "action": "Create test suite that specifically validates: 1) Company IDs persist across turns, 2) Location filters persist, 3) No template fallbacks on constrained queries.",
+      "implementationHint": "Extend existing QA runner with 'continuity' check type that compares entity IDs between turns.",
+      "expectedImpact": "Prevents regression on fixed issues",
+      "risk": "Maintenance overhead",
+      "effort": "M",
+      "validationScenarios": ["UV027", "UV023", "UV017", "UV021"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV027", "UV023", "UV017", "UV021", "UV026", "UV003"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "app/qa/ai-request/external-challenges/scenarios.normalized.json"
+    ],
+    "successMetrics": [
+      "Pass rate >= 80% (target from current 37%)",
+      "Average usefulness >= 3.5 (from current 2.0)",
+      "Zero hard errors (502s) per run",
+      "Context continuity check pass rate >= 90%",
+      "Template fallback rate <= 5%"
+    ]
+  }
+}
+```

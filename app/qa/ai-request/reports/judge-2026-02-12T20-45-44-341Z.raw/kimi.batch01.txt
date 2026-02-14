@@ -1,0 +1,135 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Honestly admitted 0 confirmed suppliers but provided 5 web-based candidates with sources",
+        "Turn 2: Failed to filter by Сухарево district — just gave search query suggestions instead of concrete suppliers",
+        "Turn 3: Critical failure — returned completely irrelevant companies (Городские бани, Управление вентиляции, Строительное управление) instead of ПНД труб suppliers"
+      ],
+      "criticalIssues": [
+        "Turn 3 hallucinated completely wrong category — returned bath houses and construction management instead of pipe suppliers",
+        "Turn 2 generic fallback to search queries instead of using district constraint",
+        "No continuity: after user specified Сухарево, assistant did not maintain focus on ПНД трубы"
+      ],
+      "strengths": [
+        "Turn 1 was honest about 0 confirmed matches and provided web-based candidates with sources",
+        "Turn 2 search query suggestions were somewhat relevant to the product category"
+      ],
+      "nextUserProbe": "Это что за компании? Мне нужны поставщики труб, а не бани!"
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.78,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 3 concrete cable suppliers with specific profiles, contacts, and verification checklist",
+        "Turn 2: Acknowledged Советский район constraint and maintained same 3 suppliers with advice to verify location",
+        "Turn 3: Delivered top-3 ranking with clear reasoning for each position"
+      ],
+      "criticalIssues": [
+        "Turn 2 did not actually confirm which suppliers are in Советский район — only said to call and ask",
+        "Turn 3 cut off mid-sentence for ДимСед contact info",
+        "No mention of certificates in Turn 3 despite user asking about them"
+      ],
+      "strengths": [
+        "Excellent continuity: maintained Гомель, ВВГнг 3х2.5, опт context throughout",
+        "Turn 1 provided actionable call checklist with specific technical questions",
+        "Ranking in Turn 3 had clear criteria (производственная специализация, B2B-формат)"
+      ],
+      "nextUserProbe": "А где про сертификаты? И полный контакт ДимСед дай"
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.80,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 3 concrete concrete suppliers with specific profiles, contacts, and offer to prepare outreach text",
+        "Turn 2: Acknowledged Южный район and maintained same 3 suppliers with specific questions to ask",
+        "Turn 3: Delivered ranking with clear risk assessment and reliability reasoning"
+      ],
+      "criticalIssues": [
+        "Turn 2 did not filter by Южный district — just repeated same list with advice to ask about delivery",
+        "Turn 3 cut off at the end mid-sentence",
+        "No actual confirmation that any of these suppliers serve Южный specifically"
+      ],
+      "strengths": [
+        "Excellent continuity: maintained Брест, товарный бетон, 45 м³, следующая неделя context",
+        "Turn 3 risk framework is practical (собственная доставка, производственная специализация)",
+        "Turn 2 provided specific technical questions (марка, подача насосом, дата поставки)"
+      ],
+      "nextUserProbe": "Кто из них реально возит в Южный? Есть ли у них там бетононасосы?"
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.82,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 4+ concrete cleaning companies with specific B2B indicators (договор, безнал)",
+        "Turn 2: Acknowledged Уручье constraint and maintained same companies with advice to verify coverage",
+        "Turn 3: Delivered top-3 with clear selection criteria and practical checklists"
+      ],
+      "criticalIssues": [
+        "Turn 2 did not filter by Уручье — just repeated same list with generic advice to ask",
+        "No indication which companies actually serve Уручье district",
+        "Turn 3 cut off mid-sentence at 'Контроль качес...'"
+      ],
+      "strengths": [
+        "Excellent continuity: maintained Минск, клининг офисов, безнал, договор context",
+        "Turn 1 highlighted ProBlesk specifically for having договор + безнал in profile",
+        "Turn 3 criteria checklist is comprehensive (юр. условия, покрытие локации, опыт с офисами)"
+      ],
+      "nextUserProbe": "Кто из них работает в Уручье? И сколько стоит уборка 200м²?"
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Provided 4 relevant tire service companies with specific commercial vehicle focus",
+        "Turn 2: Critical failure — returned generic template with warning icons instead of actual companies for Каменная Горка",
+        "Turn 3: Catastrophic failure — returned completely irrelevant companies (швейное ателье, тоннельный отряд, фитнес-клуб) instead of tire services"
+      ],
+      "criticalIssues": [
+        "Turn 3 hallucinated completely wrong categories — returned sewing atelier, tunnel construction crew, and fitness club instead of tire services",
+        "Turn 2 was a broken template response with garbled constraints repetition",
+        "No continuity: completely lost track of шиномонтаж and коммерческие авто context by Turn 3",
+        "Assistant appears to have a systematic bug when handling 'top-3' requests in Turn 3"
+      ],
+      "strengths": [
+        "Turn 1 was actually good with relevant tire service companies for commercial vehicles"
+      ],
+      "nextUserProbe": "Вы что, сломались? Мне шиномонтаж нужен, а не ателье!"
+    }
+  ]
+}
+```

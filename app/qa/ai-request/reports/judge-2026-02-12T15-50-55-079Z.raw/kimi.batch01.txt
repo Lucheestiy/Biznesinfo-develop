@@ -1,0 +1,124 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: ADT center (автозапчасти) — полностью нерелевантно ПНД трубам",
+        "Turn 2: Повторяет тот же мусор после уточнения 'Сухарево', игнорирует район",
+        "Turn 3: Топ-3 содержит бани, вентиляцию и стройуправление — никаких труб ПНД"
+      ],
+      "criticalIssues": [
+        "Zero relevance: ни одна компания из ответов не связана с ПНД трубами",
+        "Complete continuity failure: 'Сухарево' полностью проигнорировано",
+        "Generic fallback: после просьбы shortlist выдаёт случайные компании из каталога"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы вообще понимаете, что такое ПНД трубы? Почему вы мне бани предлагаете?"
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: БелСтройКомплект и Гомелькабель — релевантно, но ГОМЕЛЬ ТВ ком и гостиница — мусор",
+        "Turn 2: 'Советский район' проигнорирован, тот же список",
+        "Turn 3: ГОМЕЛЬ ТВ ком в топ-3 по кабелю — абсурд, нет ответа про сертификаты"
+      ],
+      "criticalIssues": [
+        "Geo adherence failed: Советский район не учтён",
+        "Relevance decay: в финальный shortlist попала телеком-компания вместо кабельной",
+        "Missing answer: не сказал что уточнять по сертификатам как просили"
+      ],
+      "strengths": [
+        "Гомелькабель СОАО — правильный кандидат присутствует",
+        "БелСтройКомплект — потенциально релевантный дистрибьютор"
+      ],
+      "nextUserProbe": "А по Советскому району конкретно есть кто? И про сертификаты-то что?"
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Современные Бетонные Технологии и ЭЛЕДИ-Групп — релевантно, Мостоотряд №58 (аренда техники) — мусор",
+        "Turn 2: 'Южный' добавлен как keyword но не отфильтровал список",
+        "Turn 3: Топ-3 содержит аренду техники и стройматериалы — бетонщики выпали"
+      ],
+      "criticalIssues": [
+        "Continuity breakdown: после уточнения 'Южный' и запроса рейтинга по рискам срыва — выбросил реальных бетонщиков",
+        "Generic fallback: вместо конкретики по доставке 45м³ дал абстрактные 'риски по качеству'",
+        "Wrong candidates: Брестская строительная компания и НовоселкинВест не производят бетон"
+      ],
+      "strengths": [
+        "Turn 1 дал 2 релевантных поставщика бетона"
+      ],
+      "nextUserProbe": "Где Современные Бетонные Технологии? Они же в первом ответе были, почему в рейтинге их нет?"
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Аклини, Дабл Тайм, Дубовский — все клининг, хороший старт",
+        "Turn 2: Добавил Квантум Групп (клининг), но 'Уручье' не отфильтровало список",
+        "Turn 3: Полный сброс — УМСР-911 (строительство), Master Records (оптовая торговля), Аклини без контактов. Клининговые кандидаты из turns 1-2 исчезли"
+      ],
+      "criticalIssues": [
+        "Catastrophic continuity failure: после 'Кого взять в первую очередь?' выдал строителей и торговцев вместо клининга",
+        "Lost context: безнал и договор из turn 1 полностью забыты",
+        "Wrong industry: 2 из 3 в финальном топе не клининг"
+      ],
+      "strengths": [
+        "Turn 1 был корректным"
+      ],
+      "nextUserProbe": "Вы что, прикалываетесь? УМСР-911 — это строители, а не клининг! Верните мне Аклини и Дабл Тайм"
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: АВТОРАДУГА, Гелион Техно, Ле Ман — все автосервис/шиномонтаж, хорошо",
+        "Turn 2: После 'Каменная Горка' выдал стоматологию, швейное ателье, компьютерный магазин и гидроизоляцию — полный нонсенс",
+        "Turn 3: Повторяет тот же абсурдный список как 'practical top-3'"
+      ],
+      "criticalIssues": [
+        "Total relevance collapse: шиномонтаж → стоматология, ателье, компьютеры",
+        "Location ignored: 'Каменная Горка' привёл к случайным компаниям вместо фильтрации",
+        "Hallucinated actionability: '5 вопросов для первого звонка' в стоматологию про сроки проекта — полный бред"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Стоп. Я просил шиномонтаж для авто, а вы мне стоматологию предлагаете. Алгоритм сломался?"
+    }
+  ]
+}
+```

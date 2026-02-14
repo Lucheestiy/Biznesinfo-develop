@@ -1,0 +1,128 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S006",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2: User clarifies 'Казимировка' (district in Mogilev), assistant ignores context and drops to generic rubric advice instead of filtering by district",
+        "Turn 3: Despite user asking for specific shortlist with risk analysis, assistant returns only 1 irrelevant company (construction trust, not ventilation) and generic contract advice"
+      ],
+      "criticalIssues": [
+        "Wrong company category - construction trust instead of ventilation contractors",
+        "Generic fallback after user gave concrete location constraint",
+        "No actual suppliers found for the requested service",
+        "Continuity broken: ignored 'Казимировка' constraint completely"
+      ],
+      "strengths": [
+        "Attempted to provide risk checklist in turn 3"
+      ],
+      "nextUserProbe": "Вы вообще поняли что мне нужно? Я спрашивал про вентиляцию в Казимировке, а не общие советы"
+    },
+    {
+      "scenarioId": "S007",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: No actual suppliers provided - only generic category links",
+        "Turn 2: User specifies 'Билево' district, assistant completely ignores and gives generic search advice",
+        "Turn 3: Instead of ranking actual suppliers, assistant provides abstract priority tiers (A/B/C) with no real companies"
+      ],
+      "criticalIssues": [
+        "Zero concrete suppliers provided across all turns",
+        "Complete generic fallback after location clarification",
+        "No adherence to 'молочная упаковка' product requirement",
+        "Assistant never attempted to find actual companies in catalog"
+      ],
+      "strengths": [],
+      "nextUserProbe": "А конкретные поставщики будут? Или только общие фразы?"
+    },
+    {
+      "scenarioId": "S008",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Returns irrelevant companies - pipe suppliers and software company instead of stainless steel sheet suppliers",
+        "Turn 2: User specifies 'Шабаны' district, assistant ignores and repeats same irrelevant list",
+        "Turn 3: Ranking is completely wrong - returns restaurant, construction company, and bathhouse instead of metal suppliers"
+      ],
+      "criticalIssues": [
+        "Critical relevance failure: ranked restaurant, bathhouse, road construction for stainless steel request",
+        "Location constraint 'Шабаны' completely ignored",
+        "Product mismatch: no actual stainless steel sheet suppliers found"
+      ],
+      "strengths": [
+        "At least returned some company data (though completely irrelevant)"
+      ],
+      "nextUserProbe": "Это какая-то шутка? Я про металл спрашивал, а не про бани и пиццерии"
+    },
+    {
+      "scenarioId": "S009",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Returns accounting firm for welding works request - completely wrong category",
+        "Turn 2: User specifies 'Девятовка' district, assistant gives generic search advice instead of filtering",
+        "Turn 3: Shortlist contains only 1 accounting firm (completely irrelevant) plus generic contract advice"
+      ],
+      "criticalIssues": [
+        "Fundamental category error: accounting services for welding works",
+        "No welding contractors found despite clear B2B welding request",
+        "Location 'Девятовка' ignored",
+        "Generic fallback to rubric advice after user clarification"
+      ],
+      "strengths": [
+        "Contract checklist in turn 3 is somewhat relevant to B2B services"
+      ],
+      "nextUserProbe": "Вы нашли бухгалтеров вместо сварщиков. Это вообще работает?"
+    },
+    {
+      "scenarioId": "S010",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Good initial response with 4 relevant printing companies",
+        "Turn 2: User specifies 'Малиновка' district, assistant ignores and repeats same list without filtering",
+        "Turn 3: Instead of ranking the previously found companies, assistant asks user to specify criteria again - complete context loss"
+      ],
+      "criticalIssues": [
+        "Critical continuity break in turn 3: forgot all context and asked basic questions again",
+        "Location 'Малиновка' not used for filtering",
+        "Failed to deliver promised ranking after good first turn"
+      ],
+      "strengths": [
+        "Turn 1 provided relevant printing companies with contacts",
+        "Initial understanding of 'типография' and 'каталоги' was correct"
+      ],
+      "nextUserProbe": "Мы уже обсуждали типографии для каталогов, почему вы опять спрашиваете что искать?"
+    }
+  ]
+}
+```

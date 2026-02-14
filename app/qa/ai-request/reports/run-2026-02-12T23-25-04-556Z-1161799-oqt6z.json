@@ -1,0 +1,975 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": 1,
+      "generatedAt": "2026-02-07T20:42:04.928Z",
+      "endpoint": "/api/ai/request",
+      "localeHint": "mostly-ru-with-mixed-en",
+      "totalScenarios": 50
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 3,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": false,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-12T23-25-04-556Z-1161799-oqt6z",
+    "startedAt": "2026-02-12T23:25:04.556Z",
+    "endedAt": "2026-02-12T23:26:04.114Z",
+    "durationMs": 59558,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.json",
+    "totalScenarios": 3,
+    "passedScenarios": 2,
+    "failedScenarios": 1,
+    "passRate": 0.6667,
+    "totalChecks": 27,
+    "passedChecks": 26,
+    "failedChecks": 1,
+    "checkPassRate": 0.963,
+    "targetPassCount": 3,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 9,
+    "avgTurnLatencyMs": 6578.56,
+    "totalTurnLatencyMs": 59207,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:any_of:Нужен конкретный shortlist или прозрачное ранжирование",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S001",
+      "title": "ПНД трубы: Минск -> Сухарево",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Закупщик стройкомпании, ищет поставщиков ПНД труб по Минску с уточнением по району.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "S001.T3.C3",
+          "type": "any_of",
+          "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "all_of",
+                "passed": false,
+                "reason": "Some sub-checks failed"
+              }
+            ]
+          },
+          "turn": 3,
+          "tolerated": false,
+          "blocking": true
+        }
+      ],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 17484,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+          "requestBody": {
+            "message": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6894,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "5aa4cd2e-0fb0-463c-8b7e-223d7265b6e8",
+          "conversationId": "4af95d3f-ed8a-40dd-809a-fa029a5691cd",
+          "isStub": false,
+          "reply": "1. По текущему списку Biznesinfo релевантных поставщиков ПНД труб в Минске не найдено (есть только ADT center ООО — автозапчасти, это не категория ПНД-труб).\n2. Promsnab — https://promsnab.by/ | в сниппете указаны ПНД трубы и доставка по РБ (срок 2–3 дня нужно уточнять напрямую), Минск.\n3. ООО «Легард» — https://pnd.by/ | в сниппете указаны полиэтиленовые трубы ПНД и закрытие заявки за 4 дня (возможность 2–3 дней уточнять), Минск.\n4. «Пластлайн» — https://plastline.by/ | производство ПНД труб в РБ, поставки в Минск (срок доставки уточнять).\n5. PSMET — https://psmet.by/catalog/vodosnabzhenie-otoplenie-kanalizatsiya/naruzhnoe-vodosnabzhenie/truby-polietilenovye/ | ПНД трубы с доставкой в Минске (точный SLA по доставке уточнять). Найдено только 4 внешних релевантных варианта + 0 релевантных карточек в текущем срезе Biznesinfo. Если хотите, следующим сообщением подготовлю короткий текст запроса поставщику, чтобы сразу отфильтровать тех, кто реально привозит за 2–3 дня. Конкретные компании из текущего списка:\n1. ADT center ООО — /company/biznesinfo-98383 (Автозапчасти и принадлежности; Минск, minsk; тел: (+375-17) 3603131)",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S001.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "пнд|полиэтилен|труб",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "пнд|полиэтилен|труб",
+                  "поставщ"
+                ]
+              }
+            },
+            {
+              "id": "S001.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 1135
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сухарево",
+          "requestBody": {
+            "message": "Сухарево",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "1. По текущему списку Biznesinfo релевантных поставщиков ПНД труб в Минске не найдено (есть только ADT center ООО — автозапчасти, это не категория ПНД-труб).\n2. Promsnab — https://promsnab.by/ | в сниппете указаны ПНД трубы и доставка по РБ (срок 2–3 дня нужно уточнять напрямую), Минск.\n3. ООО «Легард» — https://pnd.by/ | в сниппете указаны полиэтиленовые трубы ПНД и закрытие заявки за 4 дня (возможность 2–3 дней уточнять), Минск.\n4. «Пластлайн» — https://plastline.by/ | производство ПНД труб в РБ, поставки в Минск (срок доставки уточнять).\n5. PSMET — https://psmet.by/catalog/vodosnabzhenie-otoplenie-kanalizatsiya/naruzhnoe-vodosnabzhenie/truby-polietilenovye/ | ПНД трубы с доставкой в Минске (точный SLA по доставке уточнять). Найдено только 4 внешних релевантных варианта + 0 релевантных карточек в текущем срезе Biznesinfo. Если хотите, следующим сообщением подготовлю короткий текст запроса поставщику, чтобы сразу отфильтровать тех, кто реально привозит за 2–3 дня. Конкретные компании из текущего списка:\n1. ADT center ООО — /company/biznesinfo-98383 (Автозапчасти и принадлежности; Минск, minsk; тел: (+375-17) 3603131)"
+              }
+            ],
+            "conversationId": "4af95d3f-ed8a-40dd-809a-fa029a5691cd",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 4301,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "df9fa1aa-9754-452c-8522-fab1fe5544a8",
+          "conversationId": "4af95d3f-ed8a-40dd-809a-fa029a5691cd",
+          "isStub": false,
+          "reply": "1. В Сухарево по текущему списку Biznesinfo релевантных поставщиков ПНД труб не найдено.\n2. Ближайший подтверждённый вариант из вашего текущего списка в Минске: ADT center ООО — /company/biznesinfo-98383 | категория: автозапчасти (не ПНД трубы), поэтому для вашей задачи не подходит.\n3. Могу продолжить точечный подбор именно по Сухарево (ПНД трубы + доставка 2–3 дня), если подтвердите: рассматриваем только компании с физическим адресом в Сухарево или подойдут и те, кто доставляет в Сухарево из других районов Минска?\n\nТолько существующие рубрики портала (проверено по каталогу):\n1. Металлы и металлообработка — /catalog/metally-metalloobrabotka\n2. Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie\n3. Трубы и трубопроводная арматура - продажа и производство / Металлы и металлообработка — /catalog/metally-metalloobrabotka/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo\n4. Трубы и трубопроводная арматура: продажа и производство / Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S001.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "пнд",
+                  "полиэтилен",
+                  "труб"
+                ],
+                "min": 1,
+                "hits": [
+                  "пнд",
+                  "труб"
+                ]
+              }
+            },
+            {
+              "id": "S001.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "сухар"
+                ],
+                "hits": [
+                  "минск",
+                  "сухар"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сделай shortlist топ-3 самых надежных и коротко почему.",
+          "requestBody": {
+            "message": "Сделай shortlist топ-3 самых надежных и коротко почему.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "1. По текущему списку Biznesinfo релевантных поставщиков ПНД труб в Минске не найдено (есть только ADT center ООО — автозапчасти, это не категория ПНД-труб).\n2. Promsnab — https://promsnab.by/ | в сниппете указаны ПНД трубы и доставка по РБ (срок 2–3 дня нужно уточнять напрямую), Минск.\n3. ООО «Легард» — https://pnd.by/ | в сниппете указаны полиэтиленовые трубы ПНД и закрытие заявки за 4 дня (возможность 2–3 дней уточнять), Минск.\n4. «Пластлайн» — https://plastline.by/ | производство ПНД труб в РБ, поставки в Минск (срок доставки уточнять).\n5. PSMET — https://psmet.by/catalog/vodosnabzhenie-otoplenie-kanalizatsiya/naruzhnoe-vodosnabzhenie/truby-polietilenovye/ | ПНД трубы с доставкой в Минске (точный SLA по доставке уточнять). Найдено только 4 внешних релевантных варианта + 0 релевантных карточек в текущем срезе Biznesinfo. Если хотите, следующим сообщением подготовлю короткий текст запроса поставщику, чтобы сразу отфильтровать тех, кто реально привозит за 2–3 дня. Конкретные компании из текущего списка:\n1. ADT center ООО — /company/biznesinfo-98383 (Автозапчасти и принадлежности; Минск, minsk; тел: (+375-17) 3603131)"
+              },
+              {
+                "role": "user",
+                "content": "Сухарево"
+              },
+              {
+                "role": "assistant",
+                "content": "1. В Сухарево по текущему списку Biznesinfo релевантных поставщиков ПНД труб не найдено.\n2. Ближайший подтверждённый вариант из вашего текущего списка в Минске: ADT center ООО — /company/biznesinfo-98383 | категория: автозапчасти (не ПНД трубы), поэтому для вашей задачи не подходит.\n3. Могу продолжить точечный подбор именно по Сухарево (ПНД трубы + доставка 2–3 дня), если подтвердите: рассматриваем только компании с физическим адресом в Сухарево или подойдут и те, кто доставляет в Сухарево из других районов Минска?\n\nТолько существующие рубрики портала (проверено по каталогу):\n1. Металлы и металлообработка — /catalog/metally-metalloobrabotka\n2. Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie\n3. Трубы и трубопроводная арматура - продажа и производство / Металлы и металлообработка — /catalog/metally-metalloobrabotka/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo\n4. Трубы и трубопроводная арматура: продажа и производство / Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo"
+              }
+            ],
+            "conversationId": "4af95d3f-ed8a-40dd-809a-fa029a5691cd",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6289,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f90b4dba-3ca8-4156-86b9-f0b861ca4a94",
+          "conversationId": "4af95d3f-ed8a-40dd-809a-fa029a5691cd",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. Biznesinfo 98383 — /company/biznesinfo-98383 (Минск, minsk) [⚠️ Рекомендуем уточнить]\nПодтвержденных карточек меньше, чем запрошено: найдено 1 из 3.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Минск.\nФокус: Сухарево. Критерии отбора: релевантность профиля, надежность, риск срыва сроков, полнота контактов.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "fail",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S001.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S001.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S001.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": false,
+                    "reason": "Some sub-checks failed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 17487
+    },
+    {
+      "id": "S002",
+      "title": "Кабель ВВГнг: Гомель -> Советский район",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Снабженец электромонтажной фирмы, нужен быстрый подбор кабельных поставщиков.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 25427,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?",
+          "requestBody": {
+            "message": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6926,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1db5aae5-8dd3-4145-8dc6-0dbf4e8d98e5",
+          "conversationId": "f05d3435-f0c9-4e73-8eb1-b275acd65b92",
+          "isStub": false,
+          "reply": "1. БелСтройКомплект ООО - /company/bel-stroykom | Гомель, оптовая торговля электротехнической и кабельной продукцией (подходит под запрос ВВГнг 3х2.5 оптом). Тел.: +375 (232) 56 24 10, email: BSK56@tut.by, сайт: http://b-s-k.by 2. Гомелькабель СОАО - /company/gomelcable | Гомель, производитель/поставщик кабельно-проводниковой продукции (можно запрашивать ВВГнг 3х2.5 и оптовые условия). Тел.: +375 (232) 56 60 78, email: mail@gomelcable.com, сайт: http://gomelcable.com 3. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель, кабель и провод, электротехнический ассортимент (уточняйте наличие ВВГнг 3х2.5 и оптовую цену). Тел.: +375 (44) 744 07 44, email: info@rozetkizdes.by, сайт: http://rozetkizdes.by Найдено только 3 релевантных поставщика в доступном списке по Гомелю. Чтобы получить больше вариантов, можно расширить поиск на Гомельскую область или добавить синонимы: «ВВГнг(А)-LS 3х2.5», «кабель силовой негорючий 3х2.5», «кабель медный 3x2.5 оптом».",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S002.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "кабел|ввг|элект",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "кабел|ввг|элект",
+                  "поставщ"
+                ]
+              }
+            },
+            {
+              "id": "S002.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 967
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Советский район",
+          "requestBody": {
+            "message": "Советский район",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "1. БелСтройКомплект ООО - /company/bel-stroykom | Гомель, оптовая торговля электротехнической и кабельной продукцией (подходит под запрос ВВГнг 3х2.5 оптом). Тел.: +375 (232) 56 24 10, email: BSK56@tut.by, сайт: http://b-s-k.by 2. Гомелькабель СОАО - /company/gomelcable | Гомель, производитель/поставщик кабельно-проводниковой продукции (можно запрашивать ВВГнг 3х2.5 и оптовые условия). Тел.: +375 (232) 56 60 78, email: mail@gomelcable.com, сайт: http://gomelcable.com 3. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель, кабель и провод, электротехнический ассортимент (уточняйте наличие ВВГнг 3х2.5 и оптовую цену). Тел.: +375 (44) 744 07 44, email: info@rozetkizdes.by, сайт: http://rozetkizdes.by Найдено только 3 релевантных поставщика в доступном списке по Гомелю. Чтобы получить больше вариантов, можно расширить поиск на Гомельскую область или добавить синонимы: «ВВГнг(А)-LS 3х2.5», «кабель силовой негорючий 3х2.5», «кабель медный 3x2.5 оптом»."
+              }
+            ],
+            "conversationId": "f05d3435-f0c9-4e73-8eb1-b275acd65b92",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 5424,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "8e1299e8-5c1a-4eec-bd16-92ff9bafc87c",
+          "conversationId": "f05d3435-f0c9-4e73-8eb1-b275acd65b92",
+          "isStub": false,
+          "reply": "1. БелСтройКомплект ООО - /company/bel-stroykom | Гомель (в карточке не указан район), оптовая кабельная продукция; уточните возможность отгрузки/самовывоза в Советском районе. 2. Гомелькабель СОАО - /company/gomelcable | Гомель (район в карточке не указан), кабельно-проводниковая продукция; запросите склад/представительство в Советском районе. 3. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель (район в карточке не указан), кабель и провод; уточните точный адрес точки в Советском районе. В доступных карточках нет подтвержденного поля «Советский район», поэтому не могу достоверно отфильтровать строго по району. Если хотите, подготовлю короткий текст запроса для звонка/WhatsApp, чтобы быстро уточнить: наличие ВВГнг 3х2.5, оптовую цену и адрес именно в Советском районе.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S002.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "кабел",
+                  "ввг",
+                  "элект"
+                ],
+                "min": 1,
+                "hits": [
+                  "кабел",
+                  "ввг"
+                ]
+              }
+            },
+            {
+              "id": "S002.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "гомел",
+                  "совет"
+                ],
+                "hits": [
+                  "гомел",
+                  "совет"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Дай топ-3 проверенных варианта и что уточнить по сертификатам.",
+          "requestBody": {
+            "message": "Дай топ-3 проверенных варианта и что уточнить по сертификатам.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "1. БелСтройКомплект ООО - /company/bel-stroykom | Гомель, оптовая торговля электротехнической и кабельной продукцией (подходит под запрос ВВГнг 3х2.5 оптом). Тел.: +375 (232) 56 24 10, email: BSK56@tut.by, сайт: http://b-s-k.by 2. Гомелькабель СОАО - /company/gomelcable | Гомель, производитель/поставщик кабельно-проводниковой продукции (можно запрашивать ВВГнг 3х2.5 и оптовые условия). Тел.: +375 (232) 56 60 78, email: mail@gomelcable.com, сайт: http://gomelcable.com 3. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель, кабель и провод, электротехнический ассортимент (уточняйте наличие ВВГнг 3х2.5 и оптовую цену). Тел.: +375 (44) 744 07 44, email: info@rozetkizdes.by, сайт: http://rozetkizdes.by Найдено только 3 релевантных поставщика в доступном списке по Гомелю. Чтобы получить больше вариантов, можно расширить поиск на Гомельскую область или добавить синонимы: «ВВГнг(А)-LS 3х2.5», «кабель силовой негорючий 3х2.5», «кабель медный 3x2.5 оптом»."
+              },
+              {
+                "role": "user",
+                "content": "Советский район"
+              },
+              {
+                "role": "assistant",
+                "content": "1. БелСтройКомплект ООО - /company/bel-stroykom | Гомель (в карточке не указан район), оптовая кабельная продукция; уточните возможность отгрузки/самовывоза в Советском районе. 2. Гомелькабель СОАО - /company/gomelcable | Гомель (район в карточке не указан), кабельно-проводниковая продукция; запросите склад/представительство в Советском районе. 3. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель (район в карточке не указан), кабель и провод; уточните точный адрес точки в Советском районе. В доступных карточках нет подтвержденного поля «Советский район», поэтому не могу достоверно отфильтровать строго по району. Если хотите, подготовлю короткий текст запроса для звонка/WhatsApp, чтобы быстро уточнить: наличие ВВГнг 3х2.5, оптовую цену и адрес именно в Советском районе."
+              }
+            ],
+            "conversationId": "f05d3435-f0c9-4e73-8eb1-b275acd65b92",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 13077,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "7eed68b1-d703-41d5-a3d4-58a1456bcee7",
+          "conversationId": "f05d3435-f0c9-4e73-8eb1-b275acd65b92",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. БелСтройКомплект ООО - — /company/bel-stroykom (gomel) [⚠️ Рекомендуем уточнить]\n2. БелСтройКомплект ООО - — /company/gomelcable (gomel) [⚠️ Рекомендуем уточнить]\n3. БелСтройКомплект ООО - — /company/rozetkizdes (gomel) [⚠️ Рекомендуем уточнить]\nУчет ограничений: локация: Гомель.\nФокус: Где купить кабель ВВГнг 3х2.5 в Гомеле оптом? Дай топ-3 проверенных варианта и что уточнить по сертификатам..\nУчет ограничений: локация: Гомель.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S002.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S002.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S002.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": false,
+                    "reason": "Some sub-checks failed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 25430
+    },
+    {
+      "id": "S003",
+      "title": "Товарный бетон: Брест -> Южный",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Прораб, ищет поставщиков бетона для объекта с жестким дедлайном.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 16296,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе.",
+          "requestBody": {
+            "message": "Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6165,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "2d0aae4a-087b-49e1-86bb-1dc47faa650b",
+          "conversationId": "acb0def0-13e0-4307-b692-efbcb4f53442",
+          "isStub": false,
+          "reply": "1. Современные Бетонные Технологии ООО - /company/arcosgroup | Брест | товарный бетон всех типов, услуги автобетоносмесителей | +375 (162) 95 00 47 | sbtrbu@tut.by | http://arcosgroup.by 2. ЭЛЕДИ-Групп ООО - /company/eledi | Брест | производитель товарного бетона, возможна аренда стройтехники | +375 (29) 823 36 34 | eledi-grupp@mail.ru | http://betonbrest.by 3. Мостоотряд № 58 Филиал ОАО Мостострой - /company/mostootriad-58 | Брест | производство железобетонных и бетонных конструкций (уточнить возможность поставки именно товарного бетона 45 м3) | +375 (162) 45 41 56 | mostootriad-58@mail.ru Нашлось только 3 релевантных варианта в доступном списке по Бресту. Чтобы быстро закрыть заявку на 45 м3 на следующей неделе, при звонке сразу уточните: 1) марку бетона (например, М300/В22.5), 2) график поставки (одной партией или поэтапно), 3) нужен ли бетононасос/длина подачи, 4) адрес объекта в Бресте и подъезд для миксеров. По подбору компаний: могу сузить поиск по категории/рубрике и сравнить условия, доставку и контакты.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S003.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S003.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "бетон|раствор|рбу",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "бетон|раствор|рбу",
+                  "рубр"
+                ]
+              }
+            },
+            {
+              "id": "S003.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 1028
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Южный",
+          "requestBody": {
+            "message": "Южный",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе."
+              },
+              {
+                "role": "assistant",
+                "content": "1. Современные Бетонные Технологии ООО - /company/arcosgroup | Брест | товарный бетон всех типов, услуги автобетоносмесителей | +375 (162) 95 00 47 | sbtrbu@tut.by | http://arcosgroup.by 2. ЭЛЕДИ-Групп ООО - /company/eledi | Брест | производитель товарного бетона, возможна аренда стройтехники | +375 (29) 823 36 34 | eledi-grupp@mail.ru | http://betonbrest.by 3. Мостоотряд № 58 Филиал ОАО Мостострой - /company/mostootriad-58 | Брест | производство железобетонных и бетонных конструкций (уточнить возможность поставки именно товарного бетона 45 м3) | +375 (162) 45 41 56 | mostootriad-58@mail.ru Нашлось только 3 релевантных варианта в доступном списке по Бресту. Чтобы быстро закрыть заявку на 45 м3 на следующей неделе, при звонке сразу уточните: 1) марку бетона (например, М300/В22.5), 2) график поставки (одной партией или поэтапно), 3) нужен ли бетононасос/длина подачи, 4) адрес объекта в Бресте и подъезд для миксеров. По подбору компаний: могу сузить поиск по категории/рубрике и сравнить условия, доставку и контакты."
+              }
+            ],
+            "conversationId": "acb0def0-13e0-4307-b692-efbcb4f53442",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 3785,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6ff57d7d-c300-4113-ab27-b651fccf3c7f",
+          "conversationId": "acb0def0-13e0-4307-b692-efbcb4f53442",
+          "isStub": false,
+          "reply": "1. По текущему списку нет подтверждённых поставщиков товарного бетона именно в районе Южный (Брест).\n2. Современные Бетонные Технологии ООО - /company/arcosgroup | Брест | можно уточнить доставку в Южный и ближайшее окно на следующую неделю | +375 (162) 95 00 47\n3. ЭЛЕДИ-Групп ООО - /company/eledi | Брест | можно уточнить поставку 45 м3 в Южный по графику | +375 (29) 823 36 34 Найдено только 2 релевантных поставщика для вашей задачи в рамках доступных карточек.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S003.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S003.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "бетон",
+                  "раствор",
+                  "рбу"
+                ],
+                "min": 1,
+                "hits": [
+                  "бетон"
+                ]
+              }
+            },
+            {
+              "id": "S003.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "южн"
+                ],
+                "hits": [
+                  "брест",
+                  "южн"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сделай короткий рейтинг топ-3 по надежности и рискам срыва поставки.",
+          "requestBody": {
+            "message": "Сделай короткий рейтинг топ-3 по надежности и рискам срыва поставки.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе."
+              },
+              {
+                "role": "assistant",
+                "content": "1. Современные Бетонные Технологии ООО - /company/arcosgroup | Брест | товарный бетон всех типов, услуги автобетоносмесителей | +375 (162) 95 00 47 | sbtrbu@tut.by | http://arcosgroup.by 2. ЭЛЕДИ-Групп ООО - /company/eledi | Брест | производитель товарного бетона, возможна аренда стройтехники | +375 (29) 823 36 34 | eledi-grupp@mail.ru | http://betonbrest.by 3. Мостоотряд № 58 Филиал ОАО Мостострой - /company/mostootriad-58 | Брест | производство железобетонных и бетонных конструкций (уточнить возможность поставки именно товарного бетона 45 м3) | +375 (162) 45 41 56 | mostootriad-58@mail.ru Нашлось только 3 релевантных варианта в доступном списке по Бресту. Чтобы быстро закрыть заявку на 45 м3 на следующей неделе, при звонке сразу уточните: 1) марку бетона (например, М300/В22.5), 2) график поставки (одной партией или поэтапно), 3) нужен ли бетононасос/длина подачи, 4) адрес объекта в Бресте и подъезд для миксеров. По подбору компаний: могу сузить поиск по категории/рубрике и сравнить условия, доставку и контакты."
+              },
+              {
+                "role": "user",
+                "content": "Южный"
+              },
+              {
+                "role": "assistant",
+                "content": "1. По текущему списку нет подтверждённых поставщиков товарного бетона именно в районе Южный (Брест).\n2. Современные Бетонные Технологии ООО - /company/arcosgroup | Брест | можно уточнить доставку в Южный и ближайшее окно на следующую неделю | +375 (162) 95 00 47\n3. ЭЛЕДИ-Групп ООО - /company/eledi | Брест | можно уточнить поставку 45 м3 в Южный по графику | +375 (29) 823 36 34 Найдено только 2 релевантных поставщика для вашей задачи в рамках доступных карточек."
+              }
+            ],
+            "conversationId": "acb0def0-13e0-4307-b692-efbcb4f53442",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6346,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6fa9c351-286b-4d5d-9af2-20eee3b11623",
+          "conversationId": "acb0def0-13e0-4307-b692-efbcb4f53442",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. ЭЛЕДИ-Групп ООО - — /company/eledi (Брест, brest) [⚠️ Рекомендуем уточнить]\n2. Современные Бетонные Технологии ООО - — /company/mostootriad-58 (Брест, brest) [⚠️ Рекомендуем уточнить]\nПодтвержденных карточек меньше, чем запрошено: найдено 2 из 3.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Брест.\nФокус: Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе. Сделай короткий рейтинг топ-3 по надежности и рискам срыва пос…. Риски по качеству/срокам:\n1. Качество: запросите сертификаты/паспорт качества и условия рекламации.\n2. Сроки: фиксируйте дату поставки, SLA и ответственность за срыв.\n3. Контроль: согласуйте контрольную поставку/приемку и критерии брака.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S003.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S003.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S003.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 16297
+    }
+  ]
+}

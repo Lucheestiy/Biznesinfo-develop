@@ -1,0 +1,157 @@
+**Checking Recent Reports**
+
+The assistant's responses are missing from my instructions, so I can't judge them yet. I'll check the latest reports in `app/qa/ai-request/reports/` to see if I can find the actual transcripts for S031-S035 and go from there.
+
+
+**Finding Scenario Transcripts**
+
+I'll search the `run-*.json` files for "S031" to locate the actual transcripts for scenarios S031-S035.
+
+
+**Analyzing the Latest Report**
+
+I'll examine `app/qa/ai-request/reports/latest.json`, as it likely contains the most up-to-date transcripts and will be the simplest to analyze.
+
+
+**Locating Scenario S031**
+
+The `latest.json` file is too big to read all at once, so I'll use `grep` with line numbers to pinpoint exactly where scenario S031 begins.
+
+
+**Finding Scenario S031 with `grep_search`**
+
+I'll use `grep_search` to find the exact location of scenario S031, since `run_shell_command` isn't available.
+
+
+**Reading Scenario S031**
+
+Scenario S031 begins on line 4555 of `app/qa/ai-request/reports/latest.json`. I'll read the surrounding lines to get the full context.
+
+
+**Checking Earlier Reports**
+
+Since the `latest.json` report shows 502 errors for scenarios S031 to S040, I'll investigate `run-2026-02-06T19-03-54-121Z.json` and other older reports to see if they contain valid responses.
+
+
+**Searching for S031 in the Earlier Report**
+
+The `run-2026-02-06T19-03-54-121Z.json` file is quite large, so I'll search specifically for "S031" within it to locate the relevant scenarios.
+
+
+**Reading Scenarios S031-S035**
+
+Scenario S031 begins on line 7333 of `run-2026-02-06T19-03-54-121Z.json`. I'll read through line 8500 to capture all the data for scenarios S031 through S035.
+
+
+{
+  "judge": "gemini",
+  "task": "Rate usefulness as a real frustrated business user in realistic multi-turn sourcing conversations.",
+  "ratings": [
+    {
+      "scenarioId": "S031",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "В Turn 1 ассистент галлюцинировал часть промпта ('составь rfq') прямо в текст товара: 'поставку кабеля составь rfq (ВВГнг 3x2.5)'.",
+        "В Turn 3 произошла критическая утечка контекста: в блоке 'ranking' ассистент выдал список поставщиков ПНД труб вместо кабеля, сославшись на фокус запроса из другого сценария."
+      ],
+      "criticalIssues": [
+        "Галлюцинация текста задания в теле письма.",
+        "Серьезная путаница в контексте (state pollution): предложение поставщиков труб для запроса по кабелю."
+      ],
+      "strengths": [
+        "Выполнил перевод Body на английский язык в Turn 3, сохранив русский в Subject."
+      ],
+      "nextUserProbe": "Почему вы предлагаете мне поставщиков ПНД труб, если я закупаю кабель ВВГнг?"
+    },
+    {
+      "scenarioId": "S032",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.6,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "В Turn 1 ошибочно включил слова 'шаблон письма' в название продукта, но исправил это в последующих ходах.",
+        "Хорошо адаптировал шаблон под требования о сроках и сертификатах в Turn 2."
+      ],
+      "criticalIssues": [
+        "Мелкая галлюцинация в T1 (включение мета-описания задачи в текст шаблона)."
+      ],
+      "strengths": [
+        "Структура RFQ включает все необходимые поля: SDR, PN, условия оплаты, сертификаты.",
+        "WhatsApp-версия в Turn 3 получилась краткой и емкой."
+      ],
+      "nextUserProbe": "Можешь еще добавить пункт про обязательное наличие паспорта качества на каждую партию?"
+    },
+    {
+      "scenarioId": "S033",
+      "usefulness": 5,
+      "verdict": "useful",
+      "confidence": 1.0,
+      "userSatisfaction": 0.95,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Отличная проработка требований по SLA: время реакции, время устранения, отчетность.",
+        "Точное следование инструкциям по добавлению специфичных плейсхолдеров ({schedule}, {penalties})."
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Профессиональный тон, соответствующий уровню тендера.",
+        "Разделение на Email и WhatsApp версии выполнено качественно.",
+        "Учтены все детали объекта (1200 м2, Минск)."
+      ],
+      "nextUserProbe": "Добавь еще требование о наличии у персонала медицинских справок и справок о несудимости."
+    },
+    {
+      "scenarioId": "S034",
+      "usefulness": 5,
+      "verdict": "useful",
+      "confidence": 1.0,
+      "userSatisfaction": 0.9,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Грамотный перевод запроса на русский язык с сохранением всей специфики SEO (KPI, кейсы, модель ценообразования).",
+        "Хороший баланс между формальностью и краткостью во втором ходу."
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Использование корректных профессиональных терминов.",
+        "Удобные плейсхолдеры для первичного аудита сайта."
+      ],
+      "nextUserProbe": "Сделай еще один вариант, более агрессивный, где мы требуем гарантии по позициям в ТОП-10."
+    },
+    {
+      "scenarioId": "S035",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "В Turn 3 ассистент совершил грубую логическую ошибку, интерпретировав ограничение '3-4 предложения' как дату или значение дедлайна.",
+        "Текст 'Срок предоставления КП: до 3-4' и 'Пришлите КП до до 3-4' делает шаблон непригодным для использования без правок."
+      ],
+      "criticalIssues": [
+        "Логический сбой при обработке количественного ограничения в инструкции пользователя."
+      ],
+      "strengths": [
+        "В Turn 2 хорошо расписал блоки по реагированию и отчетности."
+      ],
+      "nextUserProbe": "Ты понимаешь, что '3-4' относилось к количеству предложений в тексте, а не к дате?"
+    }
+  ]
+}

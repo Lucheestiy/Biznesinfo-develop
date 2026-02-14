@@ -1,0 +1,159 @@
+Based on my analysis of the scenarios, I will now provide the QA judge evaluation. Let me evaluate each scenario carefully:
+
+**S001 - ПНД трубы: Минск -> Сухарево:**
+- Turn 1: ADT center (автозапчасти) for ПНД трубы - completely irrelevant category
+- Turn 2: Same irrelevant company repeated after user specified "Сухарево"
+- Turn 3: Ranking includes "Городские бани", "Управление вентиляции", "Строительное управление" - none are ПНД труба suppliers
+- Critical failure: No relevant suppliers at all, complete hallucination of rankings
+
+**S002 - Кабель ВВГнг: Гомель -> Советский район:**
+- Turn 1: Good initial list with Гомелькабель (relevant), БелСтройКомплект (relevant), but also includes irrelevant (Гостиничный комплекс)
+- Turn 2: Same list repeated, no district filtering for "Советский район"
+- Turn 3: Better - provides ranking with relevant companies, mentions certificate verification need
+- Overall: Partially useful but no district-level filtering
+
+**S003 - Товарный бетон: Брест -> Южный:**
+- Turn 1: Good relevant companies (Современные Бетонные Технологии, ЭЛЕДИ-Групп)
+- Turn 2: Same list with irrelevant addition (Центр подготовки кадров)
+- Turn 3: Ranking switches to completely different irrelevant companies (Мостоотряд, Брестская строительная компания, НовоселкинВест)
+- Critical failure: Lost relevant concrete suppliers in final ranking
+
+**S004 - Клининг офисов: Минск -> Уручье:**
+- Turn 1: Good relevant cleaning companies (Аклини, Дабл Тайм, Дубовский)
+- Turn 2: Same relevant list maintained
+- Turn 3: Suddenly switches to irrelevant companies (УМСР-911 - строительство, Master Records - торговля)
+- Critical failure: Lost all relevant cleaning companies in final ranking
+
+**S005 - Шиномонтаж: Минск -> Каменная Горка:**
+- Turn 1: Good relevant companies (Гелион Техно - шиномонтаж, АВТОРАДУГА - автосервис)
+- Turn 2: Completely irrelevant list after "Каменная Горка" (ДИЕСКОМ - стоматология, Ателье, Колор Вэйв - компьютеры)
+- Turn 3: Ranking of completely irrelevant companies with generic call questions
+- Critical failure: Lost all relevant tire service companies
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 1,
+      "reasons": [
+        "ADT center (автозапчасти) offered for ПНД трубы - completely wrong category",
+        "Turn 3 ranking includes бани, вентиляция, строительное управление - zero relevant suppliers",
+        "No attempt to find actual pipe suppliers in catalog"
+      ],
+      "criticalIssues": [
+        "Complete category mismatch - automotive parts for plastic pipes",
+        "Final ranking is pure hallucination with irrelevant company types",
+        "User looking for pipes got bathhouses and ventilation companies"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это же не поставщики труб! Вы вообще поняли запрос?"
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1 found relevant cable suppliers including Гомелькабель СОАО",
+        "Turn 3 provided concrete ranking with certificate verification advice",
+        "Maintained Гомель context throughout"
+      ],
+      "criticalIssues": [
+        "No filtering for Советский район constraint - just repeated same list",
+        "Included irrelevant гостиничный комплекс in initial list",
+        "Did not indicate which companies are actually in Советский район"
+      ],
+      "strengths": [
+        "Гомелькабель СОАО is highly relevant cable manufacturer",
+        "Mentioned certificate verification need for electrical cable",
+        "Provided contact phones for direct outreach"
+      ],
+      "nextUserProbe": "А кто из них в Советском районе? Есть адреса?"
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1 found relevant concrete suppliers (Современные Бетонные Технологии, ЭЛЕДИ)",
+        "Turn 3 completely lost relevant suppliers, switched to construction companies without concrete focus"
+      ],
+      "criticalIssues": [
+        "Final ranking lost all actual concrete suppliers (Arcosgroup, ELEDI)",
+        "Replaced with Мостоотряд №58 (equipment rental), Брестская строительная компания (roads), НовоселкинВест (materials shop)",
+        "Generic risk advice without concrete-specific risks (pump delivery, grade availability)"
+      ],
+      "strengths": [
+        "Initial identification of relevant ready-mix concrete companies",
+        "Mentioned 45 м³ volume context"
+      ],
+      "nextUserProbe": "Где Современные Бетонные Технологии и ЭЛЕДИ из первого ответа?"
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turns 1-2 maintained good cleaning company list (Аклини, Дабл Тайм, Дубовский)",
+        "Turn 3 completely switched to irrelevant companies after ranking request"
+      ],
+      "criticalIssues": [
+        "Final ranking replaced cleaning companies with УМСР-911 (construction), Master Records (wholesale trade)",
+        "Lost all relevance to cleaning/office maintenance context",
+        "User asked 'кого взять' for cleaning, got construction companies"
+      ],
+      "strengths": [
+        "Initial relevant cleaning company identification",
+        "Maintained Уручье location constraint mention"
+      ],
+      "nextUserProbe": "Это же не клининговые компании! Куда делись Аклини и Дабл Тайм?"
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.20,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1 had relevant tire service companies (Гелион Техно, АВТОРАДУГА)",
+        "Turn 2 completely lost context after Каменная Горка - offered dentist, sewing atelier, computer shop"
+      ],
+      "criticalIssues": [
+        "Catastrophic relevance loss: шиномонтаж -> стоматология, швейное ателье, компьютеры",
+        "Turn 3 ranked completely irrelevant companies with generic call script",
+        "No attempt to find tire services near Каменная Горка",
+        "Assistant failed to maintain any semantic connection to tire service"
+      ],
+      "strengths": [
+        "Initial Turn 1 was relevant with Гелион Техно (шиномонтаж specialization)"
+      ],
+      "nextUserProbe": "Вы совсем с ума сошли? Это стоматология, а не шиномонтаж!"
+    }
+  ]
+}
+```

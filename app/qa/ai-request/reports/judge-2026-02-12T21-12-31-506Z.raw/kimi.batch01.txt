@@ -1,0 +1,139 @@
+Based on my analysis of the 5 scenarios (S001-S005), here is the QA evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3 catastrophic failure: provided completely irrelevant candidates (city baths, ventilation company, construction management) for PND pipes request",
+        "Turn 1-2: Honest about no confirmed suppliers, provided web search leads with relevant companies",
+        "Complete loss of context continuity from turns 1-2 to turn 3"
+      ],
+      "criticalIssues": [
+        "Turn 3 ranking: Городские бани (sauna), Управление вентиляции (ventilation), Строительное управление №16 — NONE sell PND pipes",
+        "Generic fallback to random construction companies instead of plumbing/pipe suppliers",
+        "User gave concrete constraints (PND pipes, Minsk, Sukharevo) but got irrelevant local businesses"
+      ],
+      "strengths": [
+        "Turn 1: Honest admission of no confirmed suppliers in catalog",
+        "Turn 1: Provided 5 relevant web search leads for PND pipe suppliers",
+        "Turn 2: Acknowledged Sukharevo location constraint"
+      ],
+      "nextUserProbe": "Это же бани и вентиляция, а не трубы! Вы вообще слушаете?"
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Found 3 relevant cable suppliers in Gomel with full contact details",
+        "Turn 2: Maintained context, acknowledged Sovetsky district constraint, provided actionable call script",
+        "Turn 3: Delivered proper top-3 ranking with reasoning and certificate verification questions"
+      ],
+      "criticalIssues": [
+        "Could not confirm exact district location for suppliers (Sovetsky district)",
+        "No specific certification details provided in turn 3, only generic questions to ask"
+      ],
+      "strengths": [
+        "Turn 1: Excellent concrete supplier list with contacts, websites, and specific cable category focus",
+        "Turn 2: Smart approach - acknowledged district filter and provided practical verification script",
+        "Turn 3: Proper ranking format with clear reasoning for each supplier's position",
+        "Maintained conversation continuity across all 3 turns"
+      ],
+      "nextUserProbe": "У кого из них склад ближе всего к Советскому району?"
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.80,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Turn 1: Found 3 relevant concrete suppliers in Brest with full details",
+        "Turn 2: Maintained context perfectly, acknowledged Yuzhny district, offered outreach message",
+        "Turn 3: Delivered excellent risk-based ranking with concrete delivery risk assessment"
+      ],
+      "criticalIssues": [
+        "Could not confirm exact district coverage for Yuzhny",
+        "No specific pricing information available"
+      ],
+      "strengths": [
+        "Turn 1: Strong initial list with concrete specialization details and contacts",
+        "Turn 2: Proactive offer to prepare mass outreach message for RFQ",
+        "Turn 3: Excellent risk analysis format - reliability score + delivery risk for each supplier",
+        "Turn 3: Included practical checklist for 45m3 volume and timeline constraints",
+        "Perfect continuity maintained throughout conversation"
+      ],
+      "nextUserProbe": "Кто из них может привезти в понедельник утром?"
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Found 4+ relevant cleaning companies with contract/bank transfer indicators",
+        "Turn 2: Maintained context, acknowledged Uruchye location, provided verification script",
+        "Turn 3: Delivered proper top-3 with clear selection criteria and B2B checklist"
+      ],
+      "criticalIssues": [
+        "Could not confirm exact Uruchye coverage for any supplier",
+        "No specific pricing or service package details"
+      ],
+      "strengths": [
+        "Turn 1: Good filtering for B2B requirements (contract + bank transfer)",
+        "Turn 2: Smart verification approach for district coverage",
+        "Turn 3: Practical selection criteria checklist for office cleaning contracts",
+        "Maintained conversation flow and context throughout"
+      ],
+      "nextUserProbe": "Какие у них расценки за квадратный метр?"
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.92,
+      "userSatisfaction": 0.10,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: Lost all context - provided only company IDs with warnings instead of tire service info",
+        "Turn 3: Catastrophic failure - ranked completely irrelevant companies (sewing atelier, tunnel construction, fitness club) for tire service request",
+        "Complete conversation breakdown - no understanding of user need"
+      ],
+      "criticalIssues": [
+        "Turn 3 ranking: Ателье Золотая строчка (sewing), Тоннельный отряд №1 (construction), Олимпик ФК (fitness) — NONE provide tire service",
+        "Turn 2: Generic fallback with just IDs and 'recommend to verify' warnings, no actual tire service details",
+        "Complete loss of context: user asked for tire service for commercial vehicles in Kamennaya Gorka, got random businesses",
+        "Turn 3 included irrelevant '5 questions for first call' about project timelines and contracts - not applicable to tire service"
+      ],
+      "strengths": [
+        "Turn 1: Initially provided 4 relevant tire service companies with good details"
+      ],
+      "nextUserProbe": "Вы совсем с ума сошли? Мне шиномонтаж нужен, а не ателье!"
+    }
+  ]
+}
+```

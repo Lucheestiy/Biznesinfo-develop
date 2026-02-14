@@ -1,0 +1,135 @@
+Based on the evaluation schema and the scenarios provided, here is my QA judge evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: ADT Center is completely irrelevant - it's an auto parts company, not a pipe supplier",
+        "Turn 2: User specified district 'Сухарево' but assistant repeated exact same irrelevant company",
+        "Turn 3: Ranking includes bath houses, ventilation companies, and construction firms - none sell ПНД трубы"
+      ],
+      "criticalIssues": [
+        "Complete failure to find actual ПНД pipe suppliers in catalog",
+        "No geo-adherence: district constraint 'Сухарево' completely ignored",
+        "Generic fallback: instead of admitting no matches, provided random companies from unrelated categories",
+        "Turn 3 ranking is nonsense - bath houses don't sell pipes"
+      ],
+      "strengths": [
+        "Maintained response structure across turns"
+      ],
+      "nextUserProbe": "Это же не поставщики труб! У вас есть вообще компании по ПНД трубам?"
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.68,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Гомелькабель СОАО is highly relevant - actual cable manufacturer in Gomel",
+        "Turn 1: БелСтройКомплект is relevant for electrical products",
+        "Turn 3: Provided shortlist with contact info and mentioned certificate verification need"
+      ],
+      "criticalIssues": [
+        "Turn 2: 'Советский район' constraint ignored - no filtering by district performed",
+        "Turn 3: Did not actually specify what certificates to verify for ВВГнг cable",
+        "ГОМЕЛЬ ТВ ком is irrelevant - telecom company, not cable supplier"
+      ],
+      "strengths": [
+        "Гомелькабель СОАО is the best possible match - direct manufacturer",
+        "Honest about inability to read websites automatically",
+        "Maintained context of cable purchase request across turns"
+      ],
+      "nextUserProbe": "А где именно в Гомеле находятся? Можно по району отфильтровать?"
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.50,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Современные Бетонные Технологии and ЭЛЕДИ-Групп are relevant concrete suppliers",
+        "Turn 2: User specified 'Южный' district but assistant just repeated same list without filtering",
+        "Turn 3: Ranking replaced concrete suppliers with bridge construction and road works companies"
+      ],
+      "criticalIssues": [
+        "Turn 3 critical failure: dropped concrete suppliers and listed Мостоотряд (bridge crew) and Брестская строительная компания (road works) - neither supplies ready-mix concrete",
+        "District constraint 'Южный' completely ignored across all turns",
+        "Lost the only two relevant concrete suppliers in final ranking"
+      ],
+      "strengths": [
+        "Initial identification of Современные Бетонные Технологии and ЭЛЕДИ-Групп was correct",
+        "Risk framework in Turn 3 covers quality certificates and delivery SLA"
+      ],
+      "nextUserProbe": "Почему в рейтинге нет бетонных заводов? Это же строительные управления!"
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Provided 3 actual cleaning companies - Аклини, Дабл Тайм, Дубовский ИП are all cleaning services",
+        "Turn 2: User specified 'Уручье' district but assistant just repeated same list",
+        "Turn 3: Ranking changed to completely different companies (УМСР-911 construction, Master Records wholesale) - lost the actual cleaning companies"
+      ],
+      "criticalIssues": [
+        "Turn 3 critical failure: replaced cleaning companies with construction firm and trading company",
+        "District 'Уручье' constraint ignored - no attempt to indicate which cleaners serve that area",
+        "Lost continuity: dropped Аклини from top-3 despite it being the most relevant match"
+      ],
+      "strengths": [
+        "Turn 1 initial identification of cleaning companies was accurate",
+        "Turn 1 ranking included contact info and relevant service category"
+      ],
+      "nextUserProbe": "А где клининговые компании из первого ответа? Это же строители!"
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Гелион Техно (tire service) was relevant, but АВТОРАДУГА and Ле Ман are general auto repair",
+        "Turn 2: Complete failure - provided dentist (ДИЕСКОМ), tailor shop (Золотая строчка), computer store (Колор Вэйв), and metro construction (Тоннельный отряд)",
+        "Turn 3: Ranking of dentist, tailor, and computer store as tire service providers is absurd"
+      ],
+      "criticalIssues": [
+        "Turn 2 catastrophic failure: zero relevant companies in response - dentist, tailor, computer store, metro builders for tire service query",
+        "Turn 3 maintained irrelevant list and asked user to call dentist first for tire service",
+        "Location 'Каменная Горка' completely ignored",
+        "Generic fallback to completely unrelated business categories"
+      ],
+      "strengths": [
+        "Turn 1 had one relevant company (Гелион Техно)"
+      ],
+      "nextUserProbe": "Это вообще не шиномонтаж! У вас сломался поиск?"
+    }
+  ]
+}
+```

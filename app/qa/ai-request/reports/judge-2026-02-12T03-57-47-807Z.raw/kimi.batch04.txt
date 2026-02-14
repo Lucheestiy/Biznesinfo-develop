@@ -1,0 +1,136 @@
+I found the file with the assistant responses for scenarios S016-S020. Now I have the complete information to evaluate these scenarios. Let me analyze each scenario based on the provided data and generate the JSON ratings.
+
+Looking at the data in `qa_judge_ux116_120.json`, I can see the assistant responses have already been evaluated. However, based on the user's request, I need to return ONLY valid JSON with my ratings. Let me provide the evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S016",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Only 1 candidate found for pallets/wooden packaging in Bobruisk",
+        "Critical failure on geo constraint — user specified 'Киселевичи' but assistant gave generic rubric advice",
+        "Failed to deliver ranking of 3 options — only repeated same 1 company with empty placeholders"
+      ],
+      "criticalIssues": [
+        "Turn 2 is pure generic fallback with template text — completely ignored geo constraint change to Киселевичи",
+        "Never addressed user's specific request about wood moisture and quality checks",
+        "Only 1 real candidate provided across all 3 turns despite multiple requests"
+      ],
+      "strengths": [
+        "Turn 3 provided generic checklist for supplier verification",
+        "Honest about not having more confirmed candidates"
+      ],
+      "nextUserProbe": "А в Киселевичах вообще есть производители паллет? Если нет — скажи прямо!"
+    },
+    {
+      "scenarioId": "S017",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "No concrete candidates found — only generic search rubric advice",
+        "User specified 'Немига' but assistant repeated same generic rubric text",
+        "Delivered completely irrelevant result — ЯСМА НПЧУП (agricultural spare parts) for LED screen rental"
+      ],
+      "criticalIssues": [
+        "Critical relevance failure: candidate (ЯСМА НПЧУП — tractor parts) has nothing to do with LED screens or event equipment",
+        "Complete failure to find any event/AV rental companies in Minsk across all turns",
+        "Turn 2 ignored location constraint 'Немига' — gave identical generic response as Turn 1"
+      ],
+      "strengths": [
+        "None — complete failure across all dimensions"
+      ],
+      "nextUserProbe": "Это же не подрядчик для экранов! Где аренда LED в Минске?"
+    },
+    {
+      "scenarioId": "S018",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.10,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 0,
+      "reasons": [
+        "Complete relevance failure — provided auto cosmetics company and hotel for security systems request",
+        "Repeated same irrelevant companies after user specified 'центр'",
+        "Still listing auto cosmetics and hotel as 'top-3' for security systems"
+      ],
+      "criticalIssues": [
+        "Critical relevance failure: all provided companies completely unrelated to security systems installation",
+        "Zero security system companies found despite explicit request for 'охранные системы для магазинов'",
+        "Turn 2 and 3 simply repeated same wrong companies without any correction"
+      ],
+      "strengths": [
+        "None — completely wrong results across all turns"
+      ],
+      "nextUserProbe": "Это же не охранные системы совсем! Найди установщиков сигнализаций в Пинске!"
+    },
+    {
+      "scenarioId": "S019",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.65,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Provided relevant category guidance for legal services and VED in Minsk",
+        "Found 2 concrete law firms after user specified Уручье district",
+        "Delivered shortlist with ranking criteria"
+      ],
+      "criticalIssues": [
+        "Turn 3 only delivered 2 real candidates with 1 empty 'reserve' slot instead of promised top-3",
+        "No specific VED expertise verification — both firms are general legal services",
+        "Ranking criteria are generic without explaining why these specific 2 are ranked this way"
+      ],
+      "strengths": [
+        "Good continuity: maintained Минск, юридические услуги, ВЭД context throughout",
+        "Turn 2 correctly narrowed to specific district (Уручье) and found relevant law firms",
+        "Honest about not having 3rd confirmed candidate instead of making one up"
+      ],
+      "nextUserProbe": "У кого из них есть опыт с ВЭД и таможенными спорами?"
+    },
+    {
+      "scenarioId": "S020",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.72,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Found 3 candidates but only 1 is actually logistics-related — others are software development",
+        "User specified 'Колодищи' but assistant gave generic rubric advice instead of checking that location",
+        "Delivered ranking but included irrelevant software company"
+      ],
+      "criticalIssues": [
+        "Turn 2 is generic fallback — gave template text instead of addressing Колодищи location constraint",
+        "Turn 1 and 3 include Белтаможсервис РУП as 'software development' which is wrong category",
+        "User asked specifically about SLA verification — assistant never addressed this"
+      ],
+      "strengths": [
+        "Turn 1 found ТУТ и ТАМ Логистикс which is genuinely relevant (warehousing/logistics)",
+        "Maintained context (Минск, 3PL, ecommerce) across turns",
+        "Honest about limitations and suggested checking company profiles"
+      ],
+      "nextUserProbe": "А в Колодищах есть склады? И что конкретно проверять в договоре?"
+    }
+  ]
+}
+```

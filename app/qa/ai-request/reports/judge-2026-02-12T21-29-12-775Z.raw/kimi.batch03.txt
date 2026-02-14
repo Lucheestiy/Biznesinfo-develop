@@ -1,0 +1,141 @@
+Based on my analysis of the provided scenarios, here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S011",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Only 1 candidate found, but it's a software development company (ГСБеларусь), not IT-outsourcing/helpdesk provider",
+        "Turn 2: After user specified 'Уручье', assistant admitted no candidates in that area but failed to suggest concrete next steps",
+        "Turn 3: Critical failure - instead of providing top-3 shortlist, assistant gave garbled template response with irrelevant ranking logic"
+      ],
+      "criticalIssues": [
+        "Turn 3 completely broke format - provided nonsensical 'Shortlist' with only 1 relevant company and garbled template text",
+        "Assistant failed to maintain continuity: user asked for 'short list top-3' with 'прозрачная логика' but got generic template filler",
+        "The single candidate (Амперсант/ГСБеларусь) is a software vendor, not IT-outsourcing company - wrong category entirely",
+        "No actionable advice on how to actually find IT-outsourcing providers in Уручье"
+      ],
+      "strengths": [
+        "Turn 1 honestly indicated limited matches (only 1 candidate)",
+        "Turn 2 correctly acknowledged inability to confirm Уручье location"
+      ],
+      "nextUserProbe": "Это же не аутсорсеры! Где найти реальных подрядчиков по IT-поддержке в Минске?"
+    },
+    {
+      "scenarioId": "S012",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.82,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 4 concrete HVAC service companies in Гомель with specific profiles and contact details",
+        "Turn 2: Acknowledged 'Волотова' constraint and gave practical advice on verifying service coverage",
+        "Turn 3: Delivered meaningful top-3 ranking with clear rationale based on service specialization and speed"
+      ],
+      "criticalIssues": [
+        "Turn 2 did not actually filter by Волотова location - just advised to ask during calls",
+        "No concrete data on actual response times or service reliability for these companies"
+      ],
+      "strengths": [
+        "Excellent continuity: maintained Гомель, сервис кондиционеров, офисное здание context throughout",
+        "Turn 3 ranking criteria are transparent and logical (specialization in repair/service vs just installation)",
+        "Provided actionable call checklist in Turn 3 for verifying reliability and speed",
+        "Honest about limitations of location filtering in Turn 2"
+      ],
+      "nextUserProbe": "Кто из них реально быстрее выезжает? Есть ли у них SLA?"
+    },
+    {
+      "scenarioId": "S013",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.20,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Only 1 candidate found (СУ №153), which is a construction company - not specialized equipment rental",
+        "Turn 2: After 'Лядище' constraint, simply repeated the same single candidate without narrowing",
+        "Turn 3: Complete failure - shortlist included construction company, real estate agency, and bus park - none offer манипулятор/автовышка rental"
+      ],
+      "criticalIssues": [
+        "Turn 3 is catastrophic: provided 3 completely irrelevant companies (СУ №153 construction, Риэлт Бизнес real estate, Автобусный парк №3) - none rent манипуляторы or автовышки",
+        "Assistant hallucinated that these companies are relevant to спецтехника rental when they clearly are not",
+        "No continuity: user specified манипулятор + автовышка twice, but Turn 3 ignored this completely",
+        "Generic template text in Turn 3 ('Учет ограничений: срочные сроки') is meaningless filler",
+        "Failed to provide any actionable path to finding actual equipment rental companies"
+      ],
+      "strengths": [
+        "Turn 1 honestly indicated limited matches in catalog"
+      ],
+      "nextUserProbe": "Это же не аренда спецтехники! Где найти реальных подрядчиков с манипулятором?"
+    },
+    {
+      "scenarioId": "S014",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: No coffee bean suppliers found in catalog; only offered external web sources requiring verification",
+        "Turn 2: After 'центр' constraint, still no relevant suppliers; offered to search outside Брест",
+        "Turn 3: Complete breakdown - assistant asked user to specify criteria instead of providing shortlist"
+      ],
+      "criticalIssues": [
+        "Turn 3 is a total failure: instead of providing shortlist of 3 suppliers with questions about roasting/logistics, assistant asked 'Какие критерии учитывать?' - completely ignoring user request",
+        "Assistant lost all context: user already specified coffee beans, HoReCa, Брест, центр, regular delivery",
+        "No continuity: after 2 turns of acknowledging no catalog matches, Turn 3 regressed to generic category navigation",
+        "User explicitly asked for 'shortlist 3 и какие вопросы задать' but got 'Напишите, что именно нужно найти'",
+        "This is refusal-only behavior disguised as a question"
+      ],
+      "strengths": [
+        "Turn 1 honestly indicated no coffee bean suppliers in catalog",
+        "Turn 2 correctly acknowledged no suppliers in центр Бреста"
+      ],
+      "nextUserProbe": "Я же уже сказал что нужно! Дай хоть каких-то поставщиков с доставкой в Брест"
+    },
+    {
+      "scenarioId": "S015",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: No bearing suppliers found in Жлобин; only construction companies in catalog",
+        "Turn 2: After '18-й микрорайон' constraint, correctly admitted 0 relevant suppliers but only offered generic search advice",
+        "Turn 3: Failed to provide meaningful top-3 - only 1 irrelevant construction company listed with garbled template text"
+      ],
+      "criticalIssues": [
+        "Turn 3 shortlist is useless: only 1 candidate (Жлобинская ПМК №71 - construction company) with [⚠️ Рекомендуем уточнить] flag",
+        "The candidate is completely wrong category - construction, not bearings",
+        "Generic template filler ('Фокус: Сделай top-3 с критериями надежности') shows assistant didn't actually process the request",
+        "Risk advice at end ('запросите сертификаты') is generic and not specific to bearing counterfeiting risks",
+        "No actionable path to finding actual bearing suppliers in Жлобин or nearby"
+      ],
+      "strengths": [
+        "Turn 1 and Turn 2 honestly indicated no bearing suppliers in catalog",
+        "Provided external web sources in Turn 1 for independent search"
+      ],
+      "nextUserProbe": "А где реальные поставщики подшипников? В Гомеле или Рогачеве есть?"
+    }
+  ]
+}
+```

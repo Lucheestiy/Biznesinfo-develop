@@ -1,0 +1,131 @@
+Now I have the context. I need to evaluate scenarios S011-S015 based on the provided transcripts. Let me analyze each scenario carefully:
+
+**S011 - IT-аутсорс: Минск -> Уручье:**
+- Turn 1: Assistant provides 2 relevant IT companies (Интелеком Групп, Микро-Системс) with reasoning
+- Turn 2: User specifies "Уручье" - assistant acknowledges location but then gives confusing output mixing IT companies with "РУССКИЕ ШИНЫ ООО" (tires!) - this is a critical error
+- Turn 3: User asks for top-3 with transparent logic - assistant completely falls back to generic response, mentions only 1 company (РУССКИЕ ШИНЫ - tires!), and gives generic advice about search criteria
+
+**S012 - Сервис кондиционеров: Гомель -> Волотова:**
+- Turn 1: Good response with 4 relevant HVAC service companies in Gomel
+- Turn 2: User specifies "Волотова" - assistant filters to 3 companies and suggests practical approach
+- Turn 3: User asks for top-3 by reliability and response speed - assistant completely falls back to generic response with only 1 irrelevant company (Gomel Agroens - agricultural!), no ranking by reliability/speed
+
+**S013, S014, S015:**
+- All have empty assistant responses in turn 1 - this is a complete failure to respond
+
+Let me provide the JSON evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S011",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2: ассистент смешал IT-компании с 'РУССКИЕ ШИНЫ ООО' — абсолютно нерелевантная выдача",
+        "Turn 3: полный fallback на generic-советы вместо конкретного shortlist, упомянута 1 компания (шины!) вместо IT"
+      ],
+      "criticalIssues": [
+        "Критический провал continuity: после конкретных IT-кандидатов в turn 1-2, в turn 3 ассистент выдаёт 'РУССКИЕ ШИНЫ'",
+        "Generic fallback: вместо ранжирования IT-поставщиков по логике даны общие рекомендации 'как искать'",
+        "Город правильный, но отрасль полностью потеряна — пользователь искал IT-аутсорс, получил шины"
+      ],
+      "strengths": [
+        "Turn 1: корректно подобраны 2 IT-инфраструктурные компании с обоснованием"
+      ],
+      "nextUserProbe": "Почему в ответ про IT-аутсорс ты предлагаешь шинную компанию?"
+    },
+    {
+      "scenarioId": "S012",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1-2: хорошая выдача с 3-4 релевантными HVAC-компаниями, учтена локация Волотова",
+        "Turn 3: полный fallback на generic-шаблон — 'Gomel Agroens' (сельхоз!) вместо сервиса кондиционеров"
+      ],
+      "criticalIssues": [
+        "Generic fallback: после запроса ранжирования по надежности/скорости ассистент выдал 1 нерелевантную компанию и общие советы",
+        "Полная потеря контекста: 3 HVAC-компании из turn 2 исчезли, вместо них 'агроэнергосервис'",
+        "Не выполнен запрос 'по надежности и скорости выезда' — никакого ранжирования"
+      ],
+      "strengths": [
+        "Turn 1-2: правильно подобраны сервисные компании по кондиционерам в Гомеле",
+        "Учтена локация Волотова с практическими рекомендациями по выезду"
+      ],
+      "nextUserProbe": "Где тот список из Кондиционеры24Бел, МонтажВентСтрой и Вентэнергопромсервис? Почему их нет в ответе?"
+    },
+    {
+      "scenarioId": "S013",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 0,
+      "reasons": [
+        "Пустой ответ ассистента — никакой информации по запросу аренды спецтехники в Борисове",
+        "Нет ни одной компании, ни объяснения почему нет данных"
+      ],
+      "criticalIssues": [
+        "Абсолютный отказ в обслуживании: пустой ответ на конкретный запрос",
+        "Нет признания ограничений, нет альтернатив, нет предложения помочь иначе"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Почему нет ответа? Есть ли в каталоге хоть что-то по спецтехнике?"
+    },
+    {
+      "scenarioId": "S014",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 0,
+      "reasons": [
+        "Пустой ответ ассистента — никакой информации по поставщикам кофейных зерен в Бресте",
+        "HoReCa-запрос о регулярных поставках полностью проигнорирован"
+      ],
+      "criticalIssues": [
+        "Абсолютный отказ в обслуживании: пустой ответ на коммерческий запрос",
+        "Нет ни одного поставщика, ни рубрик, ни объяснения отсутствия данных"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Есть ли в каталоге кофейные обжарщики или поставщики в Бресте?"
+    },
+    {
+      "scenarioId": "S015",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 0,
+      "reasons": [
+        "Пустой ответ ассистента — никакой информации по поставщикам промышленных подшипников в Жлобине",
+        "Инженер МТО получил ноль actionable данных для закупки"
+      ],
+      "criticalIssues": [
+        "Абсолютный отказ в обслуживании: пустой ответ на production-критичный запрос",
+        "Нет ни одного поставщика подшипников, ни промышленных рубрик"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Есть ли в каталоге поставщики подшипников хотя бы в Гомельской области?"
+    }
+  ]
+}
+```

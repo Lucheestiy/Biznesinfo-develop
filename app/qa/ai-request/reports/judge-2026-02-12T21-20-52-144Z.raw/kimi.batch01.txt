@@ -1,0 +1,137 @@
+Based on my analysis of the QA judge request and the reference file format, I'll now evaluate the 5 scenarios (S001-S005) and provide the ratings in the required JSON format.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3 critical failure: provided completely irrelevant candidates (bath house, ventilation company, construction management) instead of PND pipe suppliers",
+        "Turn 1-2: Honest about no relevant suppliers in catalog, offered web suggestions but no concrete verified candidates",
+        "Complete disconnect in Turn 3 — ranking includes companies with zero relation to PND pipes"
+      ],
+      "criticalIssues": [
+        "Turn 3 ranking: Городские бани (bath house), Управление вентиляции (ventilation), Строительное управление №16 — NONE sell PND pipes",
+        "Generic fallback after user gave concrete constraints (Sukharyovo district)",
+        "Lost all context about PND pipes, turned into random construction company listing",
+        "User asked for top-3 reliable PND pipe suppliers, got bath house and ventilation company"
+      ],
+      "strengths": [
+        "Turn 1: Honest admission of no confirmed PND pipe suppliers in catalog",
+        "Turn 1: Provided web-based suggestions as orientation points with sources"
+      ],
+      "nextUserProbe": "Это же баня и вентиляция! Где ПНД трубы?"
+    },
+    {
+      "scenarioId": "S002",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Found 3 relevant cable suppliers in Gomel with full contact details",
+        "Turn 2: Acknowledged Sovetsky district constraint and advised how to verify location",
+        "Turn 3: Provided top-3 ranking with reasoning and certificate verification questions"
+      ],
+      "criticalIssues": [
+        "Turn 2: Could not confirm exact district location for suppliers — only city-level data available",
+        "Certificate questions in Turn 3 are somewhat generic, not specific to VVGng cable standards"
+      ],
+      "strengths": [
+        "Turn 1: Excellent initial list with BelStroyKomplekt, Gomelkabel, DimSed — all relevant cable/electrical suppliers",
+        "Turn 3: Good top-3 ranking with clear rationale for each position",
+        "Maintained continuity across all turns — cable topic preserved",
+        "Provided actionable next steps (what to ask about certificates)"
+      ],
+      "nextUserProbe": "У Гомелькабеля есть сертификат соответствия ТР ТС 004/2011?"
+    },
+    {
+      "scenarioId": "S003",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.80,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Turn 1: Found 3 relevant concrete suppliers in Brest with full details",
+        "Turn 2: Maintained context for Yuzhny district and 45m³ volume requirement",
+        "Turn 3: Excellent reliability ranking with specific risk assessments for each supplier"
+      ],
+      "criticalIssues": [
+        "Could not confirm exact district coverage for all suppliers — city-level only in database"
+      ],
+      "strengths": [
+        "Turn 1: Found Sovremennye Betonnye Tekhnologii, ELEDI-Grupp, Mostootryad #58 — all concrete-related",
+        "Turn 3: Outstanding risk analysis — low/medium/high risk ratings with clear reasoning",
+        "Perfect continuity: concrete → Brest → Yuzhny → 45m³ → reliability ranking maintained throughout",
+        "Offered to prepare outreach message text in Turn 1 and Turn 2"
+      ],
+      "nextUserProbe": "Какой минимальный объем для доставки миксером в Южный?"
+    },
+    {
+      "scenarioId": "S004",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Found 4+ relevant office cleaning companies with contract/bank transfer indicators",
+        "Turn 2: Acknowledged Uruchye constraint and provided same list with verification advice",
+        "Turn 3: Clear top-3 ranking with selection criteria checklist"
+      ],
+      "criticalIssues": [
+        "Could not confirm exact Uruchye coverage — only city-level data available",
+        "Turn 3 criteria checklist slightly generic but still relevant for B2B cleaning selection"
+      ],
+      "strengths": [
+        "Turn 1: Excellent initial list — Double Time (ProBlesk) explicitly mentions contracts and any payment form including bank transfer",
+        "Turn 3: Good top-3 ranking with clear rationale for each position",
+        "Maintained context across all turns: office cleaning → Minsk → Uruchye → contract/bank transfer",
+        "Selection criteria in Turn 3 are practical and actionable for office manager"
+      ],
+      "nextUserProbe": "У кого есть опыт с офисами 500+ м² в Уручье?"
+    },
+    {
+      "scenarioId": "S005",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.92,
+      "userSatisfaction": 0.10,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: Complete conversation failure — provided only company names with 'recommend to verify' warnings, lost all context",
+        "Turn 3: Catastrophic failure — ranked completely irrelevant companies (sewing atelier, tunnel construction, fitness club) for tire service request",
+        "Zero relevance to tire service or commercial vehicles in Turns 2-3"
+      ],
+      "criticalIssues": [
+        "Turn 3 ranking: Ателье Золотая строчка (sewing atelier), Тоннельный отряд №1 (tunnel construction), Олимпик (fitness club) — NONE are tire services",
+        "Turn 2: Generic fallback with no useful information — just company names and 'verify' warnings",
+        "Complete loss of context: user asked for tire service for commercial vehicles in Kamennaya Gorka, got sewing atelier and fitness club",
+        "No understanding of the actual request across Turns 2-3"
+      ],
+      "strengths": [
+        "Turn 1: Good initial list with MPD-TechService, Legion Motors, Avtoraduga, Mir Shin Plus — all relevant to tire service/commercial vehicles"
+      ],
+      "nextUserProbe": "Вы что, совсем с ума сошли? Это же ателье и фитнес-клуб!"
+    }
+  ]
+}
+```

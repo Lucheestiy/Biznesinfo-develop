@@ -1,0 +1,150 @@
+I need to evaluate 5 scenarios (S011-S015) and return a JSON response with ratings. Let me analyze each scenario carefully.
+
+Based on my analysis of the transcripts:
+
+**S011 - IT-аутсорс: Минск -> Уручье:**
+- Turn 1: Found 1 candidate (АМПЕРСАНТ ООО), acknowledged limitations
+- Turn 2: User specified "Уручье", assistant acknowledged but still only has 1 candidate without confirmed address in Уручье
+- Turn 3: User asks for top-3 shortlist with transparent logic, but assistant returns a broken response with only 1 company (Gsbelarus - different name!) and generic filler about "Как добрать кандидатов без выдумывания"
+
+**S012 - Сервис кондиционеров: Гомель -> Волотова:**
+- Turn 1: Found 4 relevant companies with good details
+- Turn 2: User specified "Волотова", assistant provided practical approach (call to confirm coverage)
+- Turn 3: User asks for top-3 by reliability and response speed, assistant provides ranked list with reasoning
+
+**S013 - Аренда спецтехники: Борисов -> Лядище:**
+- Turn 1: Found 1 candidate, acknowledged limitations
+- Turn 2: User specified "Лядище", assistant acknowledged but still only has 1 candidate
+- Turn 3: User asks for top-3 shortlist for urgent order, but assistant returns irrelevant companies (Риэлт Бизнес - real estate, Автобусный парк - passenger transport) that don't match the request for манипулятор + автовышка
+
+**S014 - Кофейные зерна HoReCa: Брест -> Центр:**
+- Turn 1: No relevant suppliers found, suggested web sources
+- Turn 2: User specified "центр", assistant acknowledged but still no suppliers
+- Turn 3: User asks for shortlist 3 + questions about roasting and logistics, but assistant responds with generic "Какие критерии учитывать..." - complete fallback
+
+**S015 - Промподшипники: Жлобин -> 18-й микрорайон:**
+- Turn 1: No relevant suppliers found, suggested external sources
+- Turn 2: User specified "18-й микрорайон", acknowledged no results
+- Turn 3: User asks for top-3 with reliability criteria and counterfeit risks, assistant returns 1 construction company (not bearings!) with generic filler
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S011",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 3: assistant changed company name from АМПЕРСАНТ ООО to Gsbelarus without explanation",
+        "Failed to deliver top-3 shortlist as requested, only 1 candidate exists",
+        "Generic filler 'Как добрать кандидатов без выдумывания' instead of concrete progress"
+      ],
+      "criticalIssues": [
+        "Inconsistent company naming between turns",
+        "Generic fallback instead of providing actionable shortlist logic",
+        "Did not address user's request for transparent selection logic"
+      ],
+      "strengths": [
+        "Turns 1-2: honest about limited data availability"
+      ],
+      "nextUserProbe": "Почему вы поменяли название компании и не дали логику отбора?"
+    },
+    {
+      "scenarioId": "S012",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.8,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: provided 4 relevant companies with full contact details",
+        "Turn 2: practical approach for geo refinement (call to confirm coverage)",
+        "Turn 3: delivered ranked top-3 with clear reasoning for each position"
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Good continuity across all turns",
+        "Practical ranking with justification",
+        "Honest about limitations (no exact geo filter available)"
+      ],
+      "nextUserProbe": "Можете сделать шаблон запроса для отправки этим трем компаниям?"
+    },
+    {
+      "scenarioId": "S013",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3: included completely irrelevant companies (real estate, bus park) in 'top-3 for special equipment rental'",
+        "Failed to maintain context - user asked for манипулятор + автовышка",
+        "Response is effectively garbage for the user's actual need"
+      ],
+      "criticalIssues": [
+        "Critical context loss: returned real estate and bus companies for equipment rental request",
+        "No meaningful attempt to address the actual user need",
+        "Wasted user's time with completely irrelevant suggestions"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это вообще не то, что я просил. У вас есть хоть кто-то с манипулятором?"
+    },
+    {
+      "scenarioId": "S014",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3: complete generic fallback - 'Какие критерии учитывать...'",
+        "Ignored specific request for shortlist and questions about roasting/logistics",
+        "Assistant essentially gave up and asked user to clarify again"
+      ],
+      "criticalIssues": [
+        "Complete refusal to engage with user's specific request",
+        "Generic 'help me help you' response after 2 turns of context building",
+        "No attempt to provide value or alternative solutions"
+      ],
+      "strengths": [
+        "Turns 1-2: suggested external web sources when no data available"
+      ],
+      "nextUserProbe": "Я же уже дважды сказал что мне нужно - почему вы спрашиваете снова?"
+    },
+    {
+      "scenarioId": "S015",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3: returned construction company (ПМК №71) for bearings request",
+        "Generic filler about 'Как добрать кандидатов' instead of addressing specific criteria",
+        "Did not provide any meaningful ranking or counterfeit risk analysis"
+      ],
+      "criticalIssues": [
+        "Complete category mismatch: construction company for industrial bearings",
+        "Failed to address specific request for reliability criteria and counterfeit risks",
+        "Generic response template instead of actual analysis"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы предлагаете строительную фирму для подшипников? Это шутка?"
+    }
+  ]
+}
+```

@@ -2888,6 +2888,30 @@ function postProcessAssistantReply(params: {
     }
   }
 
+  // Anti-link-gate: if user asks for link/site but we already have companies in context,
+  // don't ask for the link again - use known companies from history.
+  const linkGateCandidates = params.historyVendorCandidates && params.historyVendorCandidates.length > 0
+    ? params.historyVendorCandidates.slice(0, 3)
+    : [];
+  const linkGateRequested = linkGateCandidates.length > 0 && (
+    /^(дай|покажи|пришли|скинь|send|show|give)\s+(ссылку|сайт|link|url|адрес|контакт)/iu.test(params.message || "") ||
+    /(на\s+сайте|из\s+карточки|проверь\s+сайт|посмотри\s+сайт)\b/iu.test(params.message || "") ||
+    /(карточк\p{L}*|сайт\p{L}*)\s+(эт\p{L}*|это|этой|данн\p{L}*)/iu.test(params.message || "")
+  );
+  const linkGateAsksForNewLink = linkGateRequested && /(пришли|дай|покажи)\s+(мне\s+)?(ссылку|сайт|url)/iu.test(out) && !/\/company\/[a-z0-9-]+/iu.test(out);
+
+  if (linkGateRequested && linkGateAsksForNewLink && linkGateCandidates.length > 0) {
+    const recoveryLines = ["Использую компании из контекста диалога:"];
+    for (let i = 0; i < linkGateCandidates.length; i++) {
+      const c = linkGateCandidates[i];
+      const path = c.id ? `/company/${companySlugForUrl(c.id)}` : "";
+      const name = c.name || c.id || `Компания ${i + 1}`;
+      recoveryLines.push(`${i + 1}. ${name}${path ? ` — ${path}` : ""}`);
+    }
+    recoveryLines.push("\nПроверьте актуальность информации на карточках компаний.");
+    return recoveryLines.join("\n");
+  }
+
   const messageNegatedExcludeTerms = extractExplicitNegatedExcludeTerms(params.message || "");
   const activeExcludeTerms = uniqNonEmpty(
     [...(params.vendorLookupContext?.excludeTerms || []), ...messageNegatedExcludeTerms].flatMap((t) => tokenizeComparable(t)),

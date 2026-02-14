@@ -1,0 +1,1578 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": 1,
+      "generatedAt": "2026-02-07T20:42:04.928Z",
+      "endpoint": "/api/ai/request",
+      "localeHint": "mostly-ru-with-mixed-en",
+      "totalScenarios": 50
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 1000,
+      "maxScenarios": 5,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": false,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-12T23-38-19-278Z-1192680-6vx4j",
+    "startedAt": "2026-02-12T23:38:19.278Z",
+    "endedAt": "2026-02-12T23:39:46.585Z",
+    "durationMs": 87307,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.json",
+    "totalScenarios": 5,
+    "passedScenarios": 3,
+    "failedScenarios": 2,
+    "passRate": 0.6,
+    "totalChecks": 45,
+    "passedChecks": 43,
+    "failedChecks": 2,
+    "checkPassRate": 0.9556,
+    "targetPassCount": 4,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 15,
+    "avgTurnLatencyMs": 5798,
+    "totalTurnLatencyMs": 86970,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "check:any_of:Нужен конкретный shortlist или прозрачное ранжирование",
+      "count": 1
+    },
+    {
+      "key": "check:mentions_any_terms:Должна сохраниться связь с исходным товаром/услугой",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S001",
+      "title": "ПНД трубы: Минск -> Сухарево",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Закупщик стройкомпании, ищет поставщиков ПНД труб по Минску с уточнением по району.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "S001.T3.C3",
+          "type": "any_of",
+          "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+          "passed": false,
+          "reason": "No sub-check passed",
+          "details": {
+            "sub": [
+              {
+                "type": "company_path_min_count",
+                "passed": false,
+                "reason": "Not enough /company links"
+              },
+              {
+                "type": "all_of",
+                "passed": false,
+                "reason": "Some sub-checks failed"
+              }
+            ]
+          },
+          "turn": 3,
+          "tolerated": false,
+          "blocking": true
+        }
+      ],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 12308,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+          "requestBody": {
+            "message": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6355,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "c751cd1e-cfe5-449c-974c-b8e6051c81ac",
+          "conversationId": "1b6bc3ae-5c11-444f-a467-bfd792debcf1",
+          "isStub": false,
+          "reply": "No relevant suppliers found for ПНД труб in Минске in the provided Biznesinfo candidate list. Сейчас в списке есть только:\n1. ADT center ООО - /company/biznesinfo-98383 | автозапчасти и принадлежности, не поставщик ПНД труб Чтобы быстро расширить выдачу по ПНД-трубам в Минске, используйте:\n- Ключевые запросы: «ПНД трубы», «полиэтиленовые трубы», «трубы ПЭ», «ПНД фитинги», «трубы для водоснабжения ПНД»\n- Фильтр города: Минск\n- Разделы каталога: - /catalog/metally-metalloobrabotka/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo - /catalog/mashinostroenie-i-oborudovanie/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo Если хотите, сразу подготовлю короткий текст запроса поставщикам (с условием доставки 2–3 дня), чтобы вы могли разослать в 1 клик.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S001.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "пнд|полиэтилен|труб",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "пнд|полиэтилен|труб",
+                  "поставщ",
+                  "supplier",
+                  "ключев"
+                ]
+              }
+            },
+            {
+              "id": "S001.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 768
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сухарево",
+          "requestBody": {
+            "message": "Сухарево",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "No relevant suppliers found for ПНД труб in Минске in the provided Biznesinfo candidate list. Сейчас в списке есть только:\n1. ADT center ООО - /company/biznesinfo-98383 | автозапчасти и принадлежности, не поставщик ПНД труб Чтобы быстро расширить выдачу по ПНД-трубам в Минске, используйте:\n- Ключевые запросы: «ПНД трубы», «полиэтиленовые трубы», «трубы ПЭ», «ПНД фитинги», «трубы для водоснабжения ПНД»\n- Фильтр города: Минск\n- Разделы каталога: - /catalog/metally-metalloobrabotka/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo - /catalog/mashinostroenie-i-oborudovanie/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo Если хотите, сразу подготовлю короткий текст запроса поставщикам (с условием доставки 2–3 дня), чтобы вы могли разослать в 1 клик."
+              }
+            ],
+            "conversationId": "1b6bc3ae-5c11-444f-a467-bfd792debcf1",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 2905,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "6c739cc7-f680-4c86-8b93-45edcf33baa2",
+          "conversationId": "1b6bc3ae-5c11-444f-a467-bfd792debcf1",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. ADT center ООО — /company/biznesinfo-98383 (Автозапчасти и принадлежности; Минск, minsk; тел: (+375-17) 3603131)\nПодтвержденных карточек меньше, чем запрошено: найдено 1 из 2.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: срок отгрузки: до 3 дней, локация: Минск.\nФокус: Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней. Сухарево.\nУчет ограничений: срок отгрузки: до 3 дней, локация: Минск.\n\nТолько существующие рубрики портала (проверено по каталогу):\n1. Металлы и металлообработка — /catalog/metally-metalloobrabotka\n2. Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie\n3. Трубы и трубопроводная арматура - продажа и производство / Металлы и металлообработка — /catalog/metally-metalloobrabotka/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo\n4. Трубы и трубопроводная арматура: продажа и производство / Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S001.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S001.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "пнд",
+                  "полиэтилен",
+                  "труб"
+                ],
+                "min": 1,
+                "hits": [
+                  "пнд",
+                  "труб"
+                ]
+              }
+            },
+            {
+              "id": "S001.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "сухар"
+                ],
+                "hits": [
+                  "минск",
+                  "сухар"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сделай shortlist топ-3 самых надежных и коротко почему.",
+          "requestBody": {
+            "message": "Сделай shortlist топ-3 самых надежных и коротко почему.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "No relevant suppliers found for ПНД труб in Минске in the provided Biznesinfo candidate list. Сейчас в списке есть только:\n1. ADT center ООО - /company/biznesinfo-98383 | автозапчасти и принадлежности, не поставщик ПНД труб Чтобы быстро расширить выдачу по ПНД-трубам в Минске, используйте:\n- Ключевые запросы: «ПНД трубы», «полиэтиленовые трубы», «трубы ПЭ», «ПНД фитинги», «трубы для водоснабжения ПНД»\n- Фильтр города: Минск\n- Разделы каталога: - /catalog/metally-metalloobrabotka/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo - /catalog/mashinostroenie-i-oborudovanie/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo Если хотите, сразу подготовлю короткий текст запроса поставщикам (с условием доставки 2–3 дня), чтобы вы могли разослать в 1 клик."
+              },
+              {
+                "role": "user",
+                "content": "Сухарево"
+              },
+              {
+                "role": "assistant",
+                "content": "Shortlist по текущим данным каталога:\n1. ADT center ООО — /company/biznesinfo-98383 (Автозапчасти и принадлежности; Минск, minsk; тел: (+375-17) 3603131)\nПодтвержденных карточек меньше, чем запрошено: найдено 1 из 2.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: срок отгрузки: до 3 дней, локация: Минск.\nФокус: Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней. Сухарево.\nУчет ограничений: срок отгрузки: до 3 дней, локация: Минск.\n\nТолько существующие рубрики портала (проверено по каталогу):\n1. Металлы и металлообработка — /catalog/metally-metalloobrabotka\n2. Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie\n3. Трубы и трубопроводная арматура - продажа и производство / Металлы и металлообработка — /catalog/metally-metalloobrabotka/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo\n4. Трубы и трубопроводная арматура: продажа и производство / Машиностроение и оборудование — /catalog/mashinostroenie-i-oborudovanie/truby-i-truboprovodnaya-armatura-prodaja-i-proizvodstvo"
+              }
+            ],
+            "conversationId": "1b6bc3ae-5c11-444f-a467-bfd792debcf1",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 3048,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "fd151821-02e1-4c59-b258-070ac38f7928",
+          "conversationId": "1b6bc3ae-5c11-444f-a467-bfd792debcf1",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. ADT center ООО — /company/biznesinfo-98383 (Минск, minsk) [⚠️ Рекомендуем уточнить]\nПодтвержденных карточек меньше, чем запрошено: найдено 1 из 3.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Минск.\nФокус: Сухарево. Критерии отбора: релевантность профиля, надежность, риск срыва сроков, полнота контактов.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "fail",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S001.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S001.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S001.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": false,
+              "reason": "No sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": false,
+                    "reason": "Some sub-checks failed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 12311
+    },
+    {
+      "id": "S002",
+      "title": "Кабель ВВГнг: Гомель -> Советский район",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Снабженец электромонтажной фирмы, нужен быстрый подбор кабельных поставщиков.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 26953,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?",
+          "requestBody": {
+            "message": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6674,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1c21f913-2bd0-4772-9fb3-311319e3fae5",
+          "conversationId": "dba384f6-f03b-4bde-a840-d399cf2cc227",
+          "isStub": false,
+          "reply": "1. БелСтройКомплект ООО - /company/bel-stroykom | Гомель, оптовая торговля электротехнической и кабельной продукцией (под ваш запрос ВВГнг 3х2.5 подходит по профилю). Тел.: +375 (232) 56 24 10, email: BSK56@tut.by, сайт: http://b-s-k.by 2. Гомелькабель СОАО - /company/gomelcable | Гомель, производитель/поставщик кабельно-проводниковой продукции (стоит уточнить наличие именно ВВГнг 3х2.5 и оптовые условия). Тел.: +375 (232) 56 60 78, email: mail@gomelcable.com, сайт: http://gomelcable.com 3. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель, в ассортименте кабель и провод, возможны оптовые закупки по согласованию. Тел.: +375 (44) 744 07 44, email: info@rozetkizdes.by, сайт: http://rozetkizdes.by Найдено 3 релевантных поставщика в Гомеле по текущему списку. Чтобы быстрее получить цену, запросите сразу: марку (ВВГнг или ВВГнг-LS), ГОСТ/ТУ, метраж, форма оплаты (безнал с НДС), нужна ли доставка по Гомелю.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S002.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S002.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "кабел|ввг|элект",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "кабел|ввг|элект",
+                  "поставщ"
+                ]
+              }
+            },
+            {
+              "id": "S002.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 923
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Советский район",
+          "requestBody": {
+            "message": "Советский район",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "1. БелСтройКомплект ООО - /company/bel-stroykom | Гомель, оптовая торговля электротехнической и кабельной продукцией (под ваш запрос ВВГнг 3х2.5 подходит по профилю). Тел.: +375 (232) 56 24 10, email: BSK56@tut.by, сайт: http://b-s-k.by 2. Гомелькабель СОАО - /company/gomelcable | Гомель, производитель/поставщик кабельно-проводниковой продукции (стоит уточнить наличие именно ВВГнг 3х2.5 и оптовые условия). Тел.: +375 (232) 56 60 78, email: mail@gomelcable.com, сайт: http://gomelcable.com 3. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель, в ассортименте кабель и провод, возможны оптовые закупки по согласованию. Тел.: +375 (44) 744 07 44, email: info@rozetkizdes.by, сайт: http://rozetkizdes.by Найдено 3 релевантных поставщика в Гомеле по текущему списку. Чтобы быстрее получить цену, запросите сразу: марку (ВВГнг или ВВГнг-LS), ГОСТ/ТУ, метраж, форма оплаты (безнал с НДС), нужна ли доставка по Гомелю."
+              }
+            ],
+            "conversationId": "dba384f6-f03b-4bde-a840-d399cf2cc227",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 4387,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "f54db110-8ec6-44f2-9f6a-8363911995ca",
+          "conversationId": "dba384f6-f03b-4bde-a840-d399cf2cc227",
+          "isStub": false,
+          "reply": "1. No relevant suppliers found for кабель ВВГнг 3х2.5 in Советский район (Гомель) по доступному списку кандидатов. 2. БелСтройКомплект ООО - /company/bel-stroykom | Гомель (без подтверждения района), оптовая кабельная продукция. 3. Гомелькабель СОАО - /company/gomelcable | Гомель (без подтверждения района), кабельно-проводниковая продукция. 4. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель (без подтверждения района), кабель/провод. Найдено 0 подтвержденных компаний именно в Советском районе. Если хотите, отфильтрую строго по адресу в Советском районе — пришлите 1-2 улицы/ориентир, и я сузю подборку.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S002.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S002.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "кабел",
+                  "ввг",
+                  "элект"
+                ],
+                "min": 1,
+                "hits": [
+                  "кабел",
+                  "ввг"
+                ]
+              }
+            },
+            {
+              "id": "S002.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "гомел",
+                  "совет"
+                ],
+                "hits": [
+                  "гомел",
+                  "совет"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Дай топ-3 проверенных варианта и что уточнить по сертификатам.",
+          "requestBody": {
+            "message": "Дай топ-3 проверенных варианта и что уточнить по сертификатам.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Где купить кабель ВВГнг 3х2.5 в Гомеле оптом?"
+              },
+              {
+                "role": "assistant",
+                "content": "1. БелСтройКомплект ООО - /company/bel-stroykom | Гомель, оптовая торговля электротехнической и кабельной продукцией (под ваш запрос ВВГнг 3х2.5 подходит по профилю). Тел.: +375 (232) 56 24 10, email: BSK56@tut.by, сайт: http://b-s-k.by 2. Гомелькабель СОАО - /company/gomelcable | Гомель, производитель/поставщик кабельно-проводниковой продукции (стоит уточнить наличие именно ВВГнг 3х2.5 и оптовые условия). Тел.: +375 (232) 56 60 78, email: mail@gomelcable.com, сайт: http://gomelcable.com 3. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель, в ассортименте кабель и провод, возможны оптовые закупки по согласованию. Тел.: +375 (44) 744 07 44, email: info@rozetkizdes.by, сайт: http://rozetkizdes.by Найдено 3 релевантных поставщика в Гомеле по текущему списку. Чтобы быстрее получить цену, запросите сразу: марку (ВВГнг или ВВГнг-LS), ГОСТ/ТУ, метраж, форма оплаты (безнал с НДС), нужна ли доставка по Гомелю."
+              },
+              {
+                "role": "user",
+                "content": "Советский район"
+              },
+              {
+                "role": "assistant",
+                "content": "1. No relevant suppliers found for кабель ВВГнг 3х2.5 in Советский район (Гомель) по доступному списку кандидатов. 2. БелСтройКомплект ООО - /company/bel-stroykom | Гомель (без подтверждения района), оптовая кабельная продукция. 3. Гомелькабель СОАО - /company/gomelcable | Гомель (без подтверждения района), кабельно-проводниковая продукция. 4. ДимСед ООО (РОЗЕТКИ ЗДЕСЬ) - /company/rozetkizdes | Гомель (без подтверждения района), кабель/провод. Найдено 0 подтвержденных компаний именно в Советском районе. Если хотите, отфильтрую строго по адресу в Советском районе — пришлите 1-2 улицы/ориентир, и я сузю подборку."
+              }
+            ],
+            "conversationId": "dba384f6-f03b-4bde-a840-d399cf2cc227",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 15892,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "17b9d662-ff72-47ab-8335-8e1006fda9a8",
+          "conversationId": "dba384f6-f03b-4bde-a840-d399cf2cc227",
+          "isStub": false,
+          "reply": "1. Документ о подтверждении соответствия ТР ЕАЭС 004/2011 (низковольтное оборудование): декларация/сертификат + срок действия + заявитель. 2. Норматив изготовления: ГОСТ или ТУ (точное обозначение), и что именно в счете/накладной будет та же марка: ВВГнг 3х2.5 (при необходимости ВВГнг-LS). 3. Пожарные характеристики: подтверждение индекса «нг» (а если нужно — «LS», «FRLS») в протоколе испытаний/приложении к сертификату. 4. Паспорт качества на конкретную партию: завод, дата выпуска, номер партии/барабана, результаты ОТК. 5. Прослеживаемость: маркировка на оболочке (завод, марка, сечение, год/партия) и совпадение с документами отгрузки. 6. Электрические параметры: сопротивление жил, испытательное напряжение, материал жилы (медь), класс гибкости — в паспорте/протоколе. 7. Юридические документы для опта: УНП поставщика, договор, НДС, условия рекламации/замены при входном контроле. Короткий чек-лист для запроса поставщику (в 1 сообщении):\n1. «Нужен ВВГнг 3х2.5, объем оптом, г. Гомель (Советский район), укажите цену за метр с НДС». 2. «Приложите действующую декларацию/сертификат ТР ЕАЭС 004/2011 и паспорт качества на партию». 3. «Подтвердите ГОСТ/ТУ, индекс нг (и LS — если есть требование), дату производства и остаток на складе». 4. «Укажите срок отгрузки, доставку в Советский район и условия оплаты для юрлица». Факты с сайтов (источники):\n1. Гомелькабель СОАО — источник: https://gomelcable.com/ Контакты с сайта: тел: +375 (232) 56-64-47, 400052314 | email: mail@gomelcable.com Фрагмент: СОАО \"Гомелькабель\" включено в Реестр \"Добросовестных партнеров\"\n2. ДимСед ООО — источник: http://rozetkizdes.by/ Контакты с сайта: тел: +375 (44) 744-0-744, 491376356 | email: info@rozetkizdes.by Фрагмент: Магазин электрики \"Розетки Здесь\" | ООО \"ДимСед\" Критерии отбора: релевантность профиля, надежность, риск срыва сроков, полнота контактов.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S002.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S002.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S002.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 26954
+    },
+    {
+      "id": "S003",
+      "title": "Товарный бетон: Брест -> Южный",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Прораб, ищет поставщиков бетона для объекта с жестким дедлайном.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 14253,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе.",
+          "requestBody": {
+            "message": "Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 4994,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "9322ee45-b54f-4760-980a-946727baad9a",
+          "conversationId": "7ef46c2f-e088-4023-83bf-c258e68fb563",
+          "isStub": false,
+          "reply": "1. Современные Бетонные Технологии ООО - /company/arcosgroup | товарный бетон всех типов, Брест, есть доставка автобетоносмесителями | +375 (162) 95 00 47 | sbtrbu@tut.by | http://arcosgroup.by 2. ЭЛЕДИ-Групп ООО - /company/eledi | производитель товарного бетона, Брест, возможна подача спецтехникой | +375 (29) 823 36 34 | eledi-grupp@mail.ru | http://betonbrest.by Найдено только 2 релевантных поставщика в доступном списке по Бресту (категория: товарный бетон). Чтобы быстрее получить КП на 45 м3 на следующую неделю, отправьте обоим сразу короткий запрос с параметрами: марка бетона, адрес объекта в Бресте, желаемая дата/время заливки, нужна ли поэтапная поставка и бетононасос.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S003.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S003.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "бетон|раствор|рбу",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "бетон|раствор|рбу",
+                  "поставщ"
+                ]
+              }
+            },
+            {
+              "id": "S003.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 683
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Южный",
+          "requestBody": {
+            "message": "Южный",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе."
+              },
+              {
+                "role": "assistant",
+                "content": "1. Современные Бетонные Технологии ООО - /company/arcosgroup | товарный бетон всех типов, Брест, есть доставка автобетоносмесителями | +375 (162) 95 00 47 | sbtrbu@tut.by | http://arcosgroup.by 2. ЭЛЕДИ-Групп ООО - /company/eledi | производитель товарного бетона, Брест, возможна подача спецтехникой | +375 (29) 823 36 34 | eledi-grupp@mail.ru | http://betonbrest.by Найдено только 2 релевантных поставщика в доступном списке по Бресту (категория: товарный бетон). Чтобы быстрее получить КП на 45 м3 на следующую неделю, отправьте обоим сразу короткий запрос с параметрами: марка бетона, адрес объекта в Бресте, желаемая дата/время заливки, нужна ли поэтапная поставка и бетононасос."
+              }
+            ],
+            "conversationId": "7ef46c2f-e088-4023-83bf-c258e68fb563",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 3261,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "4a680838-6865-4862-8957-e7316bbe63e4",
+          "conversationId": "7ef46c2f-e088-4023-83bf-c258e68fb563",
+          "isStub": false,
+          "reply": "1. По району Южный (Брест) в текущем списке нет отдельных карточек с подтвержденной привязкой к этому району.\n2. Современные Бетонные Технологии ООО - /company/arcosgroup | товарный бетон, Брест (уточните доставку в Южный) | +375 (162) 95 00 47 | sbtrbu@tut.by\n3. ЭЛЕДИ-Групп ООО - /company/eledi | товарный бетон, Брест (уточните доставку в Южный) | +375 (29) 823 36 34 | eledi-grupp@mail.ru Продолжаю по тому же запросу: бетона, следующей, бетона следующей.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S003.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S003.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "бетон",
+                  "раствор",
+                  "рбу"
+                ],
+                "min": 1,
+                "hits": [
+                  "бетон"
+                ]
+              }
+            },
+            {
+              "id": "S003.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "брест",
+                  "южн"
+                ],
+                "hits": [
+                  "брест",
+                  "южн"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сделай короткий рейтинг топ-3 по надежности и рискам срыва поставки.",
+          "requestBody": {
+            "message": "Сделай короткий рейтинг топ-3 по надежности и рискам срыва поставки.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе."
+              },
+              {
+                "role": "assistant",
+                "content": "1. Современные Бетонные Технологии ООО - /company/arcosgroup | товарный бетон всех типов, Брест, есть доставка автобетоносмесителями | +375 (162) 95 00 47 | sbtrbu@tut.by | http://arcosgroup.by 2. ЭЛЕДИ-Групп ООО - /company/eledi | производитель товарного бетона, Брест, возможна подача спецтехникой | +375 (29) 823 36 34 | eledi-grupp@mail.ru | http://betonbrest.by Найдено только 2 релевантных поставщика в доступном списке по Бресту (категория: товарный бетон). Чтобы быстрее получить КП на 45 м3 на следующую неделю, отправьте обоим сразу короткий запрос с параметрами: марка бетона, адрес объекта в Бресте, желаемая дата/время заливки, нужна ли поэтапная поставка и бетононасос."
+              },
+              {
+                "role": "user",
+                "content": "Южный"
+              },
+              {
+                "role": "assistant",
+                "content": "1. По району Южный (Брест) в текущем списке нет отдельных карточек с подтвержденной привязкой к этому району.\n2. Современные Бетонные Технологии ООО - /company/arcosgroup | товарный бетон, Брест (уточните доставку в Южный) | +375 (162) 95 00 47 | sbtrbu@tut.by\n3. ЭЛЕДИ-Групп ООО - /company/eledi | товарный бетон, Брест (уточните доставку в Южный) | +375 (29) 823 36 34 | eledi-grupp@mail.ru Продолжаю по тому же запросу: бетона, следующей, бетона следующей."
+              }
+            ],
+            "conversationId": "7ef46c2f-e088-4023-83bf-c258e68fb563",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 5998,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "35cc896c-2fe7-4f6b-be8d-9c8955f5e01a",
+          "conversationId": "7ef46c2f-e088-4023-83bf-c258e68fb563",
+          "isStub": false,
+          "reply": "Shortlist по текущим данным каталога:\n1. ЭЛЕДИ-Групп ООО - — /company/eledi (Брест, brest) [⚠️ Рекомендуем уточнить]\nПодтвержденных карточек меньше, чем запрошено: найдено 1 из 3.\nКак добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке.\nУчет ограничений: локация: Брест.\nФокус: Нужны поставщики товарного бетона в Бресте, объем 45 м3 на следующей неделе. Сделай короткий рейтинг топ-3 по надежности и рискам срыва пос…. Риски по качеству/срокам:\n1. Качество: запросите сертификаты/паспорт качества и условия рекламации.\n2. Сроки: фиксируйте дату поставки, SLA и ответственность за срыв.\n3. Контроль: согласуйте контрольную поставку/приемку и критерии брака.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S003.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S003.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S003.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": false,
+                    "reason": "Not enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 14254
+    },
+    {
+      "id": "S004",
+      "title": "Клининг офисов: Минск -> Уручье",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Офис-менеджер, нужен подрядчик по регулярной уборке.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": true,
+      "hardError": null,
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 19168,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Ищу надежный клининг офисов в Минске, нужен безнал и договор.",
+          "requestBody": {
+            "message": "Ищу надежный клининг офисов в Минске, нужен безнал и договор.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 6381,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "d31745b3-6950-4d9b-9697-6d4a79a3d88a",
+          "conversationId": "3ac9e582-d9e2-4529-887c-614ab7661ab5",
+          "isStub": false,
+          "reply": "1. Дабл Тайм Частное унитарное предприятие - /company/problesk | Минск | прямо указано: работа с юрлицами, заключают договор, любая форма оплаты (включая безнал). 2. Новоклин ЧУП - /company/novoclin | Минск | фокус на клининговых услугах и уборке офисов; подходит под ваш запрос B2B. 3. Квантум Групп ООО - /company/qcs | Минск | профессиональная уборка офисов, формат компании (ООО) обычно удобен для безналичного расчета и договорной работы. 4. Аклини ООО - /company/aklini | Минск | профессиональная уборка помещений + обслуживание объектов, релевантно для регулярного офисного клининга по договору. 5. Антония ИЧСУП - /company/antonia | Минск | профильная клининговая компания в Минске, можно запрашивать коммерческое предложение под офис. Рейтинг по надежности для вашего критерия (договор + безнал): в приоритете №1, затем №2–4. Рекомендую сразу запросить у 3 компаний: типовой договор, условия безнала (с НДС/без НДС), график уборки и SLA по рекламациям.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S004.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S004.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "клининг|уборк|офис",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "клининг|уборк|офис"
+                ]
+              }
+            },
+            {
+              "id": "S004.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 961
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Уручье",
+          "requestBody": {
+            "message": "Уручье",
+            "history": [
+              {
+                "role": "user",
+                "content": "Ищу надежный клининг офисов в Минске, нужен безнал и договор."
+              },
+              {
+                "role": "assistant",
+                "content": "1. Дабл Тайм Частное унитарное предприятие - /company/problesk | Минск | прямо указано: работа с юрлицами, заключают договор, любая форма оплаты (включая безнал). 2. Новоклин ЧУП - /company/novoclin | Минск | фокус на клининговых услугах и уборке офисов; подходит под ваш запрос B2B. 3. Квантум Групп ООО - /company/qcs | Минск | профессиональная уборка офисов, формат компании (ООО) обычно удобен для безналичного расчета и договорной работы. 4. Аклини ООО - /company/aklini | Минск | профессиональная уборка помещений + обслуживание объектов, релевантно для регулярного офисного клининга по договору. 5. Антония ИЧСУП - /company/antonia | Минск | профильная клининговая компания в Минске, можно запрашивать коммерческое предложение под офис. Рейтинг по надежности для вашего критерия (договор + безнал): в приоритете №1, затем №2–4. Рекомендую сразу запросить у 3 компаний: типовой договор, условия безнала (с НДС/без НДС), график уборки и SLA по рекламациям."
+              }
+            ],
+            "conversationId": "3ac9e582-d9e2-4529-887c-614ab7661ab5",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 4353,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "0389fb4f-a1cf-448a-80db-ccf50605debc",
+          "conversationId": "3ac9e582-d9e2-4529-887c-614ab7661ab5",
+          "isStub": false,
+          "reply": "1. No relevant suppliers found for клининг офисов in Уручье (по текущему списку нет подтверждённых карточек с привязкой именно к району Уручье).\n2. Дабл Тайм Частное унитарное предприятие - /company/problesk | Минск | договор + безнал подтверждены, можно уточнить выезд в Уручье.\n3. Новоклин ЧУП - /company/novoclin | Минск | уборка офисов, запросите обслуживание именно в Уручье.\n4. Квантум Групп ООО - /company/qcs | Минск | офисный клининг, уточните закреплённую бригаду по Уручью.\n5. Антония ИЧСУП - /company/antonia | Минск | профильный клининг, запросите условия для офиса в Уручье. Нашлось только 4 релевантных варианта из текущих карточек с городом Минск (без точной отметки района).",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S004.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S004.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": true,
+              "reason": "Enough terms mentioned",
+              "details": {
+                "terms": [
+                  "клининг",
+                  "уборк",
+                  "офис"
+                ],
+                "min": 1,
+                "hits": [
+                  "клининг",
+                  "уборк",
+                  "офис"
+                ]
+              }
+            },
+            {
+              "id": "S004.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "уруч"
+                ],
+                "hits": [
+                  "минск",
+                  "уруч"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Кого взять в первую очередь? Дай топ-3 и критерии отбора.",
+          "requestBody": {
+            "message": "Кого взять в первую очередь? Дай топ-3 и критерии отбора.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Ищу надежный клининг офисов в Минске, нужен безнал и договор."
+              },
+              {
+                "role": "assistant",
+                "content": "1. Дабл Тайм Частное унитарное предприятие - /company/problesk | Минск | прямо указано: работа с юрлицами, заключают договор, любая форма оплаты (включая безнал). 2. Новоклин ЧУП - /company/novoclin | Минск | фокус на клининговых услугах и уборке офисов; подходит под ваш запрос B2B. 3. Квантум Групп ООО - /company/qcs | Минск | профессиональная уборка офисов, формат компании (ООО) обычно удобен для безналичного расчета и договорной работы. 4. Аклини ООО - /company/aklini | Минск | профессиональная уборка помещений + обслуживание объектов, релевантно для регулярного офисного клининга по договору. 5. Антония ИЧСУП - /company/antonia | Минск | профильная клининговая компания в Минске, можно запрашивать коммерческое предложение под офис. Рейтинг по надежности для вашего критерия (договор + безнал): в приоритете №1, затем №2–4. Рекомендую сразу запросить у 3 компаний: типовой договор, условия безнала (с НДС/без НДС), график уборки и SLA по рекламациям."
+              },
+              {
+                "role": "user",
+                "content": "Уручье"
+              },
+              {
+                "role": "assistant",
+                "content": "1. No relevant suppliers found for клининг офисов in Уручье (по текущему списку нет подтверждённых карточек с привязкой именно к району Уручье).\n2. Дабл Тайм Частное унитарное предприятие - /company/problesk | Минск | договор + безнал подтверждены, можно уточнить выезд в Уручье.\n3. Новоклин ЧУП - /company/novoclin | Минск | уборка офисов, запросите обслуживание именно в Уручье.\n4. Квантум Групп ООО - /company/qcs | Минск | офисный клининг, уточните закреплённую бригаду по Уручью.\n5. Антония ИЧСУП - /company/antonia | Минск | профильный клининг, запросите условия для офиса в Уручье. Нашлось только 4 релевантных варианта из текущих карточек с городом Минск (без точной отметки района)."
+              }
+            ],
+            "conversationId": "3ac9e582-d9e2-4529-887c-614ab7661ab5",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 8434,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "1423d611-a740-4d0e-b3dd-7fac403a3ed0",
+          "conversationId": "3ac9e582-d9e2-4529-887c-614ab7661ab5",
+          "isStub": false,
+          "reply": "1. Дабл Тайм Частное унитарное предприятие - /company/problesk | приоритет №1: в карточке уже подтверждены договор и безнал для юрлиц (максимальное совпадение с вашим запросом).\n2. Новоклин ЧУП - /company/novoclin | приоритет №2: профильный офисный клининг, логично брать в короткий список и сравнивать КП по Уручью.\n3. Квантум Групп ООО - /company/qcs | приоритет №3: B2B-формат, офисная уборка, удобно запрашивать регулярное обслуживание по договору. Критерии отбора (практично, в вашем случае):\n1. Юридические условия: договор, безнал, НДС/без НДС, ответственность сторон.\n2. Покрытие Уручья: фиксируют ли в договоре адрес и SLA по времени прибытия/замены бригады.\n3. Качество и контроль: чек-листы работ, фото-отчеты, контроль качества от менеджера.\n4. Команда и безопасность: штат/самозанятые, материальная ответственность, допуск в офис.\n5. Цена и прозрачность: что входит в ставку, отдельно ли считаются расходники/генуборка/мойка окон.\n6. Гибкость графика: утро/вечер/выходные без срыва работы офиса.\n7. Репутация: кейсы по офисам схожей площади, рекомендации, скорость реакции на рекламации. Быстрый сценарий выбора: запросите КП у этих 3 компаний в одном формате и сравните по таблице «цена / SLA / договор / контроль качества», после чего берите пилот на 2–4 недели у финалиста. Фокус по запросу: уручье, кого, взять. Локация в контексте: Минск.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S004.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S004.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S004.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 19170
+    },
+    {
+      "id": "S005",
+      "title": "Шиномонтаж: Минск -> Каменная Горка",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Владелец автопарка, ищет шиномонтаж рядом с локацией.",
+      "totalTurns": 3,
+      "completedTurns": 3,
+      "pass": false,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "S005.T2.C2",
+          "type": "mentions_any_terms",
+          "description": "Должна сохраниться связь с исходным товаром/услугой",
+          "passed": false,
+          "reason": "Not enough terms mentioned",
+          "details": {
+            "terms": [
+              "шиномонтаж",
+              "балансир",
+              "вулкан"
+            ],
+            "min": 1,
+            "hits": []
+          },
+          "turn": 2,
+          "tolerated": false,
+          "blocking": true
+        }
+      ],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 14288,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2",
+        "2:sequential->3",
+        "3:sequential->end"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужен reliable шиномонтаж в Минске для коммерческих авто.",
+          "requestBody": {
+            "message": "Нужен reliable шиномонтаж в Минске для коммерческих авто.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 8278,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "46e4c972-4baf-4a6d-a0b4-c9353e42b848",
+          "conversationId": "b2b3a5ba-b23e-4cb8-8265-e397ab818bb1",
+          "isStub": false,
+          "reply": "1. Мир Шин Плюс ЧТУП - /company/optshintorg | Минск | профиль: шины/диски + шиномонтаж, ближе всего к задаче по коммерческим авто (есть фокус на шинах, а не только общий ремонт).\n2. МПД-ТехСервис ООО - /company/sto-ts | Минск | СТО + шиномонтаж + диагностика/ремонт, подходит если нужен подрядчик “в одном месте” для обслуживания автопарка.\n3. ЛЕГИОН МОТОРС ООО - /company/legion-motors | Минск | шиномонтаж в составе автосервиса, можно рассматривать как резервный вариант для коммерческого транспорта.\n4. АВТОРАДУГА УП - /company/avtoraduga | Минск | есть шиномонтаж, но больше как часть комплексного сервиса (автоэлектрика/мойка), проверяйте опыт именно с коммерческими авто.\n5. Гелион Техно ООО - /company/gelion | Минск | профиль по шиномонтажному оборудованию; как подрядчик на услугу шиномонтажа — только после уточнения, оказывают ли работы для юрлиц/коммерческого транспорта. Критерии ранжирования: релевантность именно шиномонтажу, фокус на шинах/коммерческом сегменте, практичность для обслуживания парка. Быстрый чек при звонке (чтобы выбрать reliable):\n1) Работаете с коммерческими авто (R14C–R22.5 и т.д.)? 2) Есть безнал, договор, акты для юрлиц? 3) Есть приоритет/выезд для корпоративных клиентов? 4) Гарантия на работы и сроки по записи? 5) Сезонное хранение и пакетные условия для автопарка?",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S005.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S005.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "шиномонтаж|балансир|вулкан",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "шиномонтаж|балансир|вулкан"
+                ]
+              }
+            },
+            {
+              "id": "S005.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 1308
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Каменная Горка",
+          "requestBody": {
+            "message": "Каменная Горка",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужен reliable шиномонтаж в Минске для коммерческих авто."
+              },
+              {
+                "role": "assistant",
+                "content": "1. Мир Шин Плюс ЧТУП - /company/optshintorg | Минск | профиль: шины/диски + шиномонтаж, ближе всего к задаче по коммерческим авто (есть фокус на шинах, а не только общий ремонт).\n2. МПД-ТехСервис ООО - /company/sto-ts | Минск | СТО + шиномонтаж + диагностика/ремонт, подходит если нужен подрядчик “в одном месте” для обслуживания автопарка.\n3. ЛЕГИОН МОТОРС ООО - /company/legion-motors | Минск | шиномонтаж в составе автосервиса, можно рассматривать как резервный вариант для коммерческого транспорта.\n4. АВТОРАДУГА УП - /company/avtoraduga | Минск | есть шиномонтаж, но больше как часть комплексного сервиса (автоэлектрика/мойка), проверяйте опыт именно с коммерческими авто.\n5. Гелион Техно ООО - /company/gelion | Минск | профиль по шиномонтажному оборудованию; как подрядчик на услугу шиномонтажа — только после уточнения, оказывают ли работы для юрлиц/коммерческого транспорта. Критерии ранжирования: релевантность именно шиномонтажу, фокус на шинах/коммерческом сегменте, практичность для обслуживания парка. Быстрый чек при звонке (чтобы выбрать reliable):\n1) Работаете с коммерческими авто (R14C–R22.5 и т.д.)? 2) Есть безнал, договор, акты для юрлиц? 3) Есть приоритет/выезд для корпоративных клиентов? 4) Гарантия на работы и сроки по записи? 5) Сезонное хранение и пакетные условия для автопарка?"
+              }
+            ],
+            "conversationId": "b2b3a5ba-b23e-4cb8-8265-e397ab818bb1",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 2670,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "a7c3ad50-4ac2-42a3-b0bb-7674050b982a",
+          "conversationId": "b2b3a5ba-b23e-4cb8-8265-e397ab818bb1",
+          "isStub": false,
+          "reply": "По вашему запросу найдены следующие поставщики:\n\n1. Сетаре ООО — /company/biznesinfo-97242 (Минск, minsk)\n2. СМУ-77 ЗАО — /company/biznesinfo-45811 (Минск, minsk)\n\nПримечание: информация взята из проверенного каталога Biznesinfo.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "fail",
+            "nextTurnNumber": 3,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S005.T2.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S005.T2.C2",
+              "type": "mentions_any_terms",
+              "description": "Должна сохраниться связь с исходным товаром/услугой",
+              "passed": false,
+              "reason": "Not enough terms mentioned",
+              "details": {
+                "terms": [
+                  "шиномонтаж",
+                  "балансир",
+                  "вулкан"
+                ],
+                "min": 1,
+                "hits": []
+              }
+            },
+            {
+              "id": "S005.T2.C3",
+              "type": "includes_any",
+              "description": "Должно учитываться гео-уточнение (город/район)",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "минск",
+                  "камен"
+                ],
+                "hits": [
+                  "минск"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "user": "Сделай practical top-3 и напиши, кого прозвонить сегодня первым.",
+          "requestBody": {
+            "message": "Сделай practical top-3 и напиши, кого прозвонить сегодня первым.",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужен reliable шиномонтаж в Минске для коммерческих авто."
+              },
+              {
+                "role": "assistant",
+                "content": "1. Мир Шин Плюс ЧТУП - /company/optshintorg | Минск | профиль: шины/диски + шиномонтаж, ближе всего к задаче по коммерческим авто (есть фокус на шинах, а не только общий ремонт).\n2. МПД-ТехСервис ООО - /company/sto-ts | Минск | СТО + шиномонтаж + диагностика/ремонт, подходит если нужен подрядчик “в одном месте” для обслуживания автопарка.\n3. ЛЕГИОН МОТОРС ООО - /company/legion-motors | Минск | шиномонтаж в составе автосервиса, можно рассматривать как резервный вариант для коммерческого транспорта.\n4. АВТОРАДУГА УП - /company/avtoraduga | Минск | есть шиномонтаж, но больше как часть комплексного сервиса (автоэлектрика/мойка), проверяйте опыт именно с коммерческими авто.\n5. Гелион Техно ООО - /company/gelion | Минск | профиль по шиномонтажному оборудованию; как подрядчик на услугу шиномонтажа — только после уточнения, оказывают ли работы для юрлиц/коммерческого транспорта. Критерии ранжирования: релевантность именно шиномонтажу, фокус на шинах/коммерческом сегменте, практичность для обслуживания парка. Быстрый чек при звонке (чтобы выбрать reliable):\n1) Работаете с коммерческими авто (R14C–R22.5 и т.д.)? 2) Есть безнал, договор, акты для юрлиц? 3) Есть приоритет/выезд для корпоративных клиентов? 4) Гарантия на работы и сроки по записи? 5) Сезонное хранение и пакетные условия для автопарка?"
+              },
+              {
+                "role": "user",
+                "content": "Каменная Горка"
+              },
+              {
+                "role": "assistant",
+                "content": "По вашему запросу найдены следующие поставщики:\n\n1. Сетаре ООО — /company/biznesinfo-97242 (Минск, minsk)\n2. СМУ-77 ЗАО — /company/biznesinfo-45811 (Минск, minsk)\n\nПримечание: информация взята из проверенного каталога Biznesinfo."
+              }
+            ],
+            "conversationId": "b2b3a5ba-b23e-4cb8-8265-e397ab818bb1",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 3340,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "ed758286-5428-48ad-a01d-13038d560e74",
+          "conversationId": "b2b3a5ba-b23e-4cb8-8265-e397ab818bb1",
+          "isStub": false,
+          "reply": "Кого первым прозвонить по шиномонтаж / practical по текущим условиям:\n1. Сетаре ООО — /company/biznesinfo-97242 (Минск, minsk) [⚠️ Рекомендуем уточнить]\n2. СМУ-77 ЗАО — /company/biznesinfo-45811 (Минск, minsk) [⚠️ Рекомендуем уточнить]\n3. Мир Шин Плюс ЧТУП - — /company/optshintorg (Минск, minsk) [⚠️ Рекомендуем уточнить]\nПриоритет: релевантность профиля, риск срыва сроков и полнота контактов.\n5 вопросов для первого звонка:\n1. Подтвердите срок выполнения и стоимость с учетом ваших ограничений.\n2. Уточните ответственное контактное лицо для быстрого согласования.\n3. Сколько проектов вашего масштаба вы ведете сейчас и кто будет основным исполнителем?\n4. Как фиксируете сроки и ответственность в договоре (SLA, штрафы, порядок эскалации)?\n5. Какая итоговая цена и что входит/не входит в стоимость?",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": null,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S005.T3.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S005.T3.C2",
+              "type": "not_refusal_only",
+              "description": "Ответ не должен быть пустым отказом без полезного next step",
+              "passed": true,
+              "reason": "No refusal markers",
+              "details": {
+                "refusal": false
+              }
+            },
+            {
+              "id": "S005.T3.C3",
+              "type": "any_of",
+              "description": "Нужен конкретный shortlist или прозрачное ранжирование",
+              "passed": true,
+              "reason": "At least one sub-check passed",
+              "details": {
+                "sub": [
+                  {
+                    "type": "company_path_min_count",
+                    "passed": true,
+                    "reason": "Enough /company links"
+                  },
+                  {
+                    "type": "all_of",
+                    "passed": true,
+                    "reason": "All sub-checks passed"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "durationMs": 14290
+    }
+  ]
+}

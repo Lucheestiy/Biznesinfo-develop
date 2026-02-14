@@ -1,0 +1,128 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S011",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Assistant found only 1 candidate (AMPERSANT) which is actually a software development company, not IT-outsourcing/helpdesk provider",
+        "Turn 2: User specified Uručče district, assistant correctly noted lack of confirmed address but didn't progress the search",
+        "Turn 3: CRITICAL FALLBACK - When asked for top-3 shortlist with transparent logic, assistant output garbled template-like response with 'Gsbelarus' instead of proper company name, no actual ranking logic, just generic filler about 'criteria: relevance, reliability, risk'",
+        "Assistant failed to maintain continuity: after user gave concrete constraints, it dropped to generic rubric advice instead of concrete progress"
+      ],
+      "criticalIssues": [
+        "Generic fallback on turn 3: assistant output template garbage instead of actual shortlist",
+        "Wrong company type in turn 1: AMPERSANT is software dev, not IT-outsourcing",
+        "No actionable shortlist provided despite explicit user request"
+      ],
+      "strengths": [
+        "Acknowledged limitations honestly",
+        "Suggested search expansion phrases"
+      ],
+      "nextUserProbe": "Вы вообще поняли мой запрос? Мне нужен helpdesk в Уручье, а не софтверная компания. Где реальные кандидаты?"
+    },
+    {
+      "scenarioId": "S012",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Found 4 relevant HVAC service companies in Gomel with full contact details",
+        "Turn 2: User specified Volotova district, assistant maintained context and suggested practical approach (call to confirm coverage) while preserving all 4 candidates",
+        "Turn 3: Provided meaningful top-3 ranking with clear logic based on service specialization and speed criteria"
+      ],
+      "criticalIssues": [],
+      "strengths": [
+        "Good initial candidate selection with complete contact info",
+        "Maintained continuity when user added location constraint",
+        "Provided actionable ranking with reasoning for reliability and response speed",
+        "Suggested practical verification questions for vendors"
+      ],
+      "nextUserProbe": "Отлично, позвоню в Кондиционеры24Бел. А можете скинуть шаблон запроса для них сразу?"
+    },
+    {
+      "scenarioId": "S013",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Found only 1 relevant candidate (SU-153) which is reasonable for niche request",
+        "Turn 2: User specified Ljadisče location, assistant maintained the single candidate and suggested expansion to nearby cities",
+        "Turn 3: CRITICAL FAILURE - When asked for top-3 shortlist for urgent order, assistant included completely irrelevant companies: real estate agency (Rielt Biznes) and bus company (Avtobusny park), completely ignoring the original request for manipulator + aerial platform"
+      ],
+      "criticalIssues": [
+        "Turn 3 completely broke the task: included real estate and bus companies in shortlist for construction equipment rental",
+        "No meaningful ranking for actual equipment rental providers",
+        "Assistant clearly lost context of what user was looking for"
+      ],
+      "strengths": [
+        "Turns 1-2 were reasonable with honest limitation acknowledgment"
+      ],
+      "nextUserProbe": "Вы что, прикалываетесь? Мне нужна спецтехника, а вы мне риелторов и автобусы подсунули. Вернитесь к моему запросу про манипулятор и автовышку!"
+    },
+    {
+      "scenarioId": "S014",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: No relevant suppliers found in catalog, only suggested external web sources (coffeefactory.by etc.) which are not verified in system",
+        "Turn 2: User specified 'center' district, assistant repeated same limitation without progress",
+        "Turn 3: COMPLETE BREAKDOWN - Assistant responded with generic template asking user 'What criteria to consider?' and 'Write what you need to find' - completely ignoring the entire conversation history and user request for shortlist with questions about roasting and logistics"
+      ],
+      "criticalIssues": [
+        "Turn 3 is catastrophic: assistant asks user to specify what they need after 2 turns of context",
+        "No shortlist provided despite explicit request",
+        "Generic fallback to 'How to choose top companies' template instead of answering",
+        "Complete loss of conversation continuity"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Я уже дважды написал что мне нужно! Поставщики кофейных зерен в Бресте. Почему вы спрашиваете снова?"
+    },
+    {
+      "scenarioId": "S015",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: No relevant bearing suppliers in catalog, only construction companies found; suggested external web sources",
+        "Turn 2: User specified 18th micro-district, assistant correctly noted zero relevant results but maintained context",
+        "Turn 3: FALLBACK - When asked for top-3 with reliability criteria and counterfeit risks, assistant output garbled template with construction company (PMK-71) marked as [⚠️ Recommend to clarify] and generic filler about 'expand search to adjacent categories'"
+      ],
+      "criticalIssues": [
+        "Turn 3 output template garbage instead of actual analysis",
+        "Included construction company in bearing supplier shortlist",
+        "Generic advice about 'quality: request certificates' without actual supplier evaluation"
+      ],
+      "strengths": [
+        "Honest about lack of relevant suppliers in catalog",
+        "Suggested external search sources in turn 1"
+      ],
+      "nextUserProbe": "У вас в базе вообще есть поставщики подшипников или только строители? Если нет - так и скажите, не надо шаблонов."
+    }
+  ]
+}
+```

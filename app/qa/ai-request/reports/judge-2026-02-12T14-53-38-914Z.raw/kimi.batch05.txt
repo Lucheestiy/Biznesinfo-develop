@@ -1,0 +1,137 @@
+Now I have a good understanding of the expected JSON format. Let me analyze each scenario (S021-S025) and provide ratings based on the rubric.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "S021",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Refused to provide concrete candidates, gave generic template advice instead of answering the request",
+        "Turn 2: Completely hallucinated — returned dental clinics (стоматологические поликлиники) instead of СТО (автосервис)",
+        "Turn 3: Empty response with only 'Работаю по данным каталога Biznesinfo'"
+      ],
+      "criticalIssues": [
+        "Critical geo/category mismatch: user asked for СТО (auto service stations) in Brest, got dental clinics",
+        "Turn 2 ranking is completely irrelevant to user intent — dental vs automotive is a massive error",
+        "No actual СТО candidates provided across all three turns",
+        "Turn 3 is essentially a non-response — user asked for 5 phone questions, got empty boilerplate"
+      ],
+      "strengths": [
+        "Turn 1 was honest about not having confirmed cards, though should have offered concrete candidates anyway"
+      ],
+      "nextUserProbe": "Почему вы мне стоматологии показываете? Мне нужны автосервисы!"
+    },
+    {
+      "scenarioId": "S022",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Provided 3 candidates but only 1 (Аларих) is actually tire service; others are general auto service",
+        "Turn 2: Generic risk framework without actual pros/cons of the specific companies",
+        "Turn 3: Empty response with only 'Работаю по данным каталога Biznesinfo'"
+      ],
+      "criticalIssues": [
+        "Turn 2 promised 'плюсы/риски' but delivered generic template about certificates and SLA — not specific to listed companies",
+        "Turn 3 completely failed — user asked for pre-arrival checklist, got empty boilerplate",
+        "Only 1 out of 3 candidates in Turn 1 is actually tire service (шиномонтаж), others are general auto repair",
+        "No concrete differentiators between companies provided"
+      ],
+      "strengths": [
+        "Turn 1 at least provided some candidates in correct city (Minsk)",
+        "Аларих ООО is correctly categorized as tire service"
+      ],
+      "nextUserProbe": "А какие реальные отзывы на эти шиномонтажи? И где чеклист?"
+    },
+    {
+      "scenarioId": "S023",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.70,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Only 1 actual candidate found (Чистая энергия), with 'reserve option' being generic advice",
+        "Turn 2: Repeated same single candidate without answering 'why them' question substantively",
+        "Turn 3: Empty response with only 'Работаю по данным каталога Biznesinfo'"
+      ],
+      "criticalIssues": [
+        "Turn 3 complete failure — user asked for pre-contract checklist, got empty boilerplate",
+        "Only 1 concrete candidate across all turns for a major city (Grodno)",
+        "Turn 2 did not explain criteria in any meaningful way — just repeated generic template",
+        "No attempt to suggest how to find more candidates despite user's clear business need"
+      ],
+      "strengths": [
+        "Turn 1 correctly identified at least one cleaning company in Grodno",
+        "Honest about limited matches in catalog"
+      ],
+      "nextUserProbe": "Где еще искать клининг в Гродно? И дай чеклист для договора!"
+    },
+    {
+      "scenarioId": "S024",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Only 1 candidate and it's a used car dealer (ОЛНЬЮКАРС — 'Автомобили подержанные'), not accounting outsourcing",
+        "Turn 2: Repeated same irrelevant candidate with generic template",
+        "Turn 3: Empty response with only 'Работаю по данным каталога Biznesinfo'"
+      ],
+      "criticalIssues": [
+        "Critical category mismatch: user asked for accounting outsourcing (аутсорс-бухгалтерия), got used car dealership",
+        "ОЛНЬЮКАРС has nothing to do with accounting services — this is a completely wrong match",
+        "Turn 3 complete failure — user asked for documents checklist, got empty boilerplate",
+        "No actual accounting firms suggested across any turn"
+      ],
+      "strengths": [
+        "None — this is a complete miss on user intent"
+      ],
+      "nextUserProbe": "Это же автосалон, а не бухгалтерия! Вы что, не понимаете запрос?"
+    },
+    {
+      "scenarioId": "S025",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Only 1 relevant candidate (Белэкс-Логистик), others missing",
+        "Turn 2: Ranking includes construction company and railcar factory — completely irrelevant to refrigerated transport",
+        "Turn 3: Empty response with only 'Работаю по данным каталога Biznesinfo'"
+      ],
+      "criticalIssues": [
+        "Turn 2 ranking is absurd: Гомельремстрой (construction) and Гомельский вагоностроительный завод (railcar manufacturing) have nothing to do with refrigerated trucking",
+        "Only 1 out of 3 ranked companies is actually a transport company",
+        "Turn 3 complete failure — user asked for SLA clauses, got empty boilerplate",
+        "Turn 2 'риски' section is generic template about certificates, not specific to refrigerated transport risks"
+      ],
+      "strengths": [
+        "Turn 1 at least identified one actual transport company in Gomel",
+        "Turn 1 included relevant temperature control questions"
+      ],
+      "nextUserProbe": "Почему в списке строители и завод? Мне нужны рефрижераторные перевозки!"
+    }
+  ]
+}
+```
