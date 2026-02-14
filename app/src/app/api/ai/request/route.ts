@@ -3195,12 +3195,12 @@ function sanitizeAssistantReplyLinks(text: string): string {
   };
 
   const linkToken =
-    "(?:https?:\\/\\/[A-Za-z0-9\\-._~:/?#\\[\\]@!$&()*+,;=%]+|\\/company\\/[A-Za-z0-9%\\-._~]+|(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,}(?:\\/[A-Za-z0-9\\-._~:/?#\\[\\]@!$&()*+,;=%]*)?)";
+    "(?:https?:\\/\\/[A-Za-z0-9\\-._~:/?#\\[\\]@!$&()*+,;=%]+|\\/company\\/[A-Za-z0-9%\\-._~]+|(?<![@A-Za-z0-9-])(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,}(?:\\/[A-Za-z0-9\\-._~:/?#\\[\\]@!$&()*+,;=%]*)?)";
 
   const markdownLinkRe = new RegExp("\\[[^\\]]{1,180}\\]\\(\\s*(" + linkToken + ")\\s*\\)", "giu");
   const angleLinkRe = new RegExp("<\\s*(" + linkToken + ")\\s*>", "giu");
-  const prefixedLinkRe = new RegExp("(?:[`\"'«»“”„‘’([{<])+\\s*(" + linkToken + ")", "giu");
-  const plainLinkRe = new RegExp(linkToken, "giu");
+  const prefixedLinkRe = new RegExp("(?:[`\"'«»“”„‘’(\\[{<])+\\s*(" + linkToken + ")", "giu");
+  const plainLinkRe = new RegExp(linkToken + "[`\"'«»“”„‘’.,;:!?\\]\\)\\}]*", "giu");
 
   let out = text;
   out = out.replace(markdownLinkRe, "$1");
