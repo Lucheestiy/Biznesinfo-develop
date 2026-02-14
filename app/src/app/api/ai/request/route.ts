@@ -3046,7 +3046,10 @@ function postProcessAssistantReply(params: {
 
   const hardFormattedReply = buildHardFormattedReply(params.message || "", {
     history: params.history,
-    vendorCandidates: params.vendorCandidates,
+    vendorCandidates: [
+      ...(params.vendorCandidates || []),
+      ...(params.historyVendorCandidates || []),
+    ],
   });
   if (hardFormattedReply) return hardFormattedReply;
 
