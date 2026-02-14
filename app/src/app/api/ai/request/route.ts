@@ -13159,6 +13159,28 @@ export async function POST(request: Request) {
       });
     }
 
+    // NEW FIX: If replyText is empty after provider call and vendorCandidates exist,
+    // use local resilient fallback instead of empty response
+    if (!replyText && vendorCandidates.length > 0) {
+      const localReply = buildLocalResilientFallbackReply({
+        message,
+        history,
+        mode: responseMode,
+        vendorCandidates,
+        vendorLookupContext: vendorLookupContext || null,
+        websiteInsights,
+        rubricHintItems,
+        queryVariantsBlock,
+        promptInjection: guardrails.promptInjection,
+        providerError: null,
+      });
+      if (localReply) {
+        replyText = localReply;
+        localFallbackUsed = true;
+        isStub = false;
+      }
+    }
+
     if (replyText) {
       replyText = sanitizeAssistantReplyLinks(replyText);
     }
