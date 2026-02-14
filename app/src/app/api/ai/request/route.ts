@@ -5812,7 +5812,7 @@ function postProcessAssistantReply(params: {
     out = `${out}\n\nГео-фильтр: Беларусь.`.trim();
   }
 
-  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд)/iu.test(
+  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд|подтвержденных\s*карточк|меньше.*запрошен)/iu.test(
     out,
   );
   if (websiteResearchIntent && !hasWebsiteSourceOrFallbackEvidence) {
