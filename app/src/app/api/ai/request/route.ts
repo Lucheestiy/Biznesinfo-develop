@@ -5098,7 +5098,11 @@ function postProcessAssistantReply(params: {
         out = lines.join("\n");
         hasCompanyLinks = /\/\s*company\s*\/\s*[a-z0-9-]+/iu.test(out);
         claimsNoRelevantVendors = replyClaimsNoRelevantVendors(out);
-        if (!reverseBuyerIntentFromContext && (hasCompanyLinks || countNumberedListItems(out) >= 2)) return out;
+        // UV015 fix: Don't return early if user asks for 4-criteria comparison - need to run comparison post-processing
+        const asksCompareByFourCriteriaEarly = /(?:сравн\p{L}*\s+по\s*4\s+критер\p{L}*|4\s+критер\p{L}*|цена.*гарант.*сервис.*навес|гарант.*сервис.*навес)/iu.test(
+          params.message || "",
+        );
+        if (!reverseBuyerIntentFromContext && !asksCompareByFourCriteriaEarly && (hasCompanyLinks || countNumberedListItems(out) >= 2)) return out;
       }
       const shortlistRows = formatVendorShortlistRows(followUpRenderablePool, 4);
       const questions = buildConstraintVerificationQuestions(params.message);
@@ -6771,7 +6775,11 @@ function postProcessAssistantReply(params: {
               return relaxed;
             })()
           : [];
-      if (rankingRequestedNow && continuityFallbackPool.length > 0) {
+      const asksCompareByFourCriteriaForRanking = /(?:сравн\p{L}*\s+по\s*4\s+критер\p{L}*|4\s+критер\p{L}*|цена.*гарант.*сервис.*навес|гарант.*сервис.*навес)/iu.test(
+        params.message || "",
+      );
+      // UV015 fix: Don't return early if user asks for 4-criteria comparison - need to run comparison post-processing
+      if (rankingRequestedNow && continuityFallbackPool.length > 0 && !asksCompareByFourCriteriaForRanking) {
         const requested = detectRequestedShortlistSize(params.message || "") || Math.min(4, continuityFallbackPool.length);
         out = buildForcedShortlistAppendix({
           candidates: continuityFallbackPool,
