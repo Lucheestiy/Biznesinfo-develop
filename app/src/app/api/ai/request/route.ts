@@ -6113,7 +6113,14 @@ function postProcessAssistantReply(params: {
           detectGeoHints(noConcreteSeedForClarify).region ||
           "",
       );
-      if (!websiteResearchIntent && !reverseBuyerIntentFromContext) {
+      
+      // CRITICAL FIX for UV017: Don't ask for criteria if there's already sourcing history from Turn 1
+      // If Turn 1 already gave companies or specific criteria, Turn 2 should NOT ask for criteria again
+      const hasSourcingHistory = Boolean(getLastUserSourcingMessage(params.history || []));
+      const hasAssistantCompanyLinks = (params.history || []).some(m => m.role === "assistant" && /\/company\//i.test(m.content || ""));
+      const hasHistoryContext = hasSourcingHistory || hasAssistantCompanyLinks;
+      
+      if (!websiteResearchIntent && !reverseBuyerIntentFromContext && !hasHistoryContext) {
         return buildSourcingClarifyingQuestionsReply({
           message: noConcreteSeedForClarify || params.message || "",
           history: params.history || [],
@@ -6386,7 +6393,22 @@ function postProcessAssistantReply(params: {
       const concreteLookupRequestedNow = true;
       if (websiteResearchIntent) {
         noConcreteLines.push("Для проверки по сайтам нужны 3 конкретные карточки компаний; в текущем фильтре их 0.");
-        noConcreteLines.push("Следующий шаг: расширяю выборку по смежному гео/рубрике и возвращаю кандидатов с /company/... для live-проверки.");
+        // CRITICAL FIX for UV012: When no companies found for website verification, give explicit guidance
+        // instead of just saying "expanding search"
+        const websiteCommodityHint = detectCoreCommodityTag(noConcreteSeed);
+        const websiteGeoHint = detectGeoHints(noConcreteSeed);
+        const searchGuidance = [];
+        if (websiteCommodityHint) {
+          searchGuidance.push(`Товар: ${describeCommodityFocus(websiteCommodityHint)}`);
+        }
+        if (websiteGeoHint.city || websiteGeoHint.region) {
+          searchGuidance.push(`Гео: ${websiteGeoHint.city || websiteGeoHint.region}`);
+        }
+        if (searchGuidance.length > 0) {
+          noConcreteLines.push(`Поиск с учетом: ${searchGuidance.join(", ")}. Расширяю по смежным рубрикам...`);
+        } else {
+          noConcreteLines.push("Следующий шаг: расширяю выборку по смежным гео/рубрике и возвращаю кандидатов с /company/... для live-проверки.");
+        }
       }
       if (!reverseBuyerIntentFromContext && concreteLookupRequestedNow && !websiteResearchIntent) {
         const requestedProfileCount = Math.max(
@@ -11024,9 +11046,16 @@ function isStrictReverseBuyerIntent(searchTerms: string[]): boolean {
 function isFoodExporterProcessingIntentByTerms(searchTerms: string[]): boolean {
   const source = normalizeComparableText((searchTerms || []).join(" "));
   if (!source) return false;
-  const hasFoodSignals = /(пищев|молоч|кондитер|соус|майонез|кетчуп|кулинар|консерв|продукт\p{L}*)/u.test(source);
-  if (!hasFoodSignals) return false;
-  return /(экспорт\p{L}*|экспортер\p{L}*|вэд|международн\p{L}*|снг|еаэс|incoterm|fca|dap|cpt)/u.test(source);
+  // Check for explicit export signals
+  const hasExportSignals = /(экспорт\p{L}*|экспортер\p{L}*|вэд|международн\p{L}*|снг|еаэс|incoterm|fca|dap|cpt)/u.test(source);
+  // Check for food processing industry signals (not just raw agriculture)
+  const hasFoodProcessingSignals = /(пищев\p{L}*|молоч\p{L}*|кондитер\p{L}*|соус|майонез|кетчуп|кулинар|консерв|переработ\p{L}*|производств\p{L}*\s+пищев|молокозавод|мясокомбинат|хлебозавод)/u.test(source);
+  
+  // Trigger on explicit export OR food processing industry queries
+  if (hasExportSignals && hasFoodProcessingSignals) return true;
+  // Also trigger on "пищевая промышленность" type queries (food processing, not raw agriculture)
+  if (hasFoodProcessingSignals && /(промышленност\p{L}*|производител\p{L}*|переработчик\p{L}*|поставщик\p{L}*|найти\b)/u.test(source)) return true;
+  return false;
 }
 
 function isFoodProcessingExporterCandidate(haystack: string): boolean {
@@ -12168,6 +12197,9 @@ function buildAssistantSystemPrompt(): string {
     "- NEVER ask user to send link or provide company if companies are already in conversation history.",
     "- If no companies exist in context: explicitly say Извините, в каталоге не найдено компаний по этому запросу для проверки and stop.",
     "- Response format for website verification failure: Статус: [подтверждено/не подтверждено/невозможно]. Причина: [конкретная причина]. Следующий шаг: [конкретное действие].",
+    "- CRITICAL: When user asks to verify 'производители обуви' or similar on websites in Turn 1, you MUST first find companies in catalog BEFORE giving fallback.",
+    "- If initial search returns empty: try broader search terms, related categories, or generic supplier searches.",
+    "- NEVER give generic priority template without first attempting to find concrete companies in catalog.",
   ].join("\n");
 }
 
