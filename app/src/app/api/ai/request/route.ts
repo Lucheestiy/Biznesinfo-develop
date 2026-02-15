@@ -6118,9 +6118,33 @@ function postProcessAssistantReply(params: {
       // If Turn 1 already gave companies or specific criteria, Turn 2 should NOT ask for criteria again
       const hasSourcingHistory = Boolean(getLastUserSourcingMessage(params.history || []));
       const hasAssistantCompanyLinks = (params.history || []).some(m => m.role === "assistant" && /\/company\//i.test(m.content || ""));
-      const hasHistoryContext = hasSourcingHistory || hasAssistantCompanyLinks;
       
-      if (!websiteResearchIntent && !reverseBuyerIntentFromContext && !hasHistoryContext) {
+      // ENHANCED FIX: Also check if there's ANY assistant response in history (broader check)
+      const hasAnyAssistantResponse = (params.history || []).some(m => m.role === "assistant" && m.content && m.content.length > 10);
+      
+      // CRITICAL FIX for UV017 Turn 2: If current message is explicit shortlist/ranking request,
+      // ALWAYS use Turn 1's context - never ask for criteria again
+      const currentMessage = params.message || "";
+      const isExplicitShortlistRequest = 
+        (/\bshortlist\b/i.test(currentMessage) || /\bтоп\s*\d+/i.test(currentMessage) || /\bрейтинг/i.test(currentMessage) ||
+         /\b(выбер|подбер|составь|сделай)\b.*\d+.*\b(поставщик|компани)/iu.test(currentMessage)) &&
+        (/\b(shortlist|топ|рейтинг|ранжир|排名|выбер|подбер|составь|сделай)/iu.test(currentMessage));
+      
+      // If explicit shortlist request AND we have ANY prior conversation (any assistant response),
+      // NEVER ask for criteria - use the existing context from Turn 1
+      const hasHistoryContext = hasSourcingHistory || hasAssistantCompanyLinks || (hasAnyAssistantResponse && isExplicitShortlistRequest);
+      
+      // Additional check: if there's any sourcing message in history (not just the last one)
+      const hasAnySourcingInHistory = (params.history || []).some(m => 
+        m.role === "user" && 
+        (/\b(поставщ|производител|поиск|ищу|подобрать|поставка)/iu.test(m.content || "") ||
+         looksLikeSourcingIntent(m.content || ""))
+      );
+      
+      // ULTIMATE FIX: If we have any sourcing in history AND explicit shortlist request, use context
+      const ultimateHasContext = hasHistoryContext || (hasAnySourcingInHistory && isExplicitShortlistRequest);
+      
+      if (!websiteResearchIntent && !reverseBuyerIntentFromContext && !ultimateHasContext) {
         return buildSourcingClarifyingQuestionsReply({
           message: noConcreteSeedForClarify || params.message || "",
           history: params.history || [],
@@ -12175,7 +12199,9 @@ function buildAssistantSystemPrompt(): string {
     "FOOD EXPORT CONTEXT (UV005):",
     "- When user asks for 'пищевая промышленность', 'молочная продукция', 'кондитерские изделия', 'экспортеры ЕАЭС/СНГ' - these are FOOD PROCESSORS, not raw agricultural suppliers.",
     "- Search for companies in categories: 'молочные продукты', 'кондитерские изделия', 'пищевое производство', 'переработка молока', 'производство сладостей'.",
-    "- CRITICAL: Do NOT return raw grain/vegetable suppliers (фермерские хозяйства, агрокомплексы) when user specifically asks for food PROCESSORS.",
+    "- CRITICAL: Do NOT return raw grain/vegetable suppliers (фермерские хозяйства, агрокомплексы, агрофирмы, агрохолдинги) when user specifically asks for food PROCESSORS.",
+    "- REJECT these company types: фермерск, агрокомплекс, агрохолдинг, агрофирма, сельхозпроизводитель, растениевод, зерноторг, зерновоз, овощевод, плодоовощ (when used for raw commodities).",
+    "- ACCEPT only: молокозавод, молочный комбинат, кондитерская фабрика, пищевое производство, переработка молока, производство молочных продуктов, мясокомбинат, хлебозавод.",
     "- If your search finds only agricultural raw suppliers, explicitly state: 'В каталоге найдены преимущественно сельхозпроизводители (сырьё). Для переработчиков молочной/кондитерской продукции рекомендую:' and provide specific next steps.",
     "- NEVER give generic 'расширьте поиск' - provide concrete guidance.",
     "",
