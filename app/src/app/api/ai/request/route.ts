@@ -6129,22 +6129,22 @@ function postProcessAssistantReply(params: {
         
         // CRITICAL FIX: Also detect intent anchors for anti-noise filtering
         // This prevents hospitals/polyclinics from appearing in footwear queries
+        // Also detect commodity from ALL history messages to preserve context across turns
+        const historyTextForIntentDetection = (params.history || [])
+          .filter(m => m.role === "user")
+          .map(m => m.content || "")
+          .join(" ");
+        const fullContextForDetection = oneLine([
+          params.vendorLookupContext?.searchText || "",
+          getLastUserSourcingMessage(params.history || []) || "",
+          params.message || "",
+          historyTextForIntentDetection, // Add ALL history for better commodity detection
+        ].filter(Boolean).join(" "));
+        
         const websiteRecoveryIntentAnchors = detectVendorIntentAnchors(
           expandVendorSearchTermCandidates([
-            ...extractVendorSearchTerms(
-              oneLine([
-                params.vendorLookupContext?.searchText || "",
-                getLastUserSourcingMessage(params.history || []) || "",
-                params.message || "",
-              ].filter(Boolean).join(" "))
-            ),
-            ...suggestSourcingSynonyms(
-              oneLine([
-                params.vendorLookupContext?.searchText || "",
-                getLastUserSourcingMessage(params.history || []) || "",
-                params.message || "",
-              ].filter(Boolean).join(" "))
-            ),
+            ...extractVendorSearchTerms(fullContextForDetection),
+            ...suggestSourcingSynonyms(fullContextForDetection),
           ])
         );
         
@@ -6195,22 +6195,22 @@ function postProcessAssistantReply(params: {
       // Also apply anti-noise filtering here
       if (websiteResearchIntent && continuityCandidates.length === 0 && params.vendorCandidates && params.vendorCandidates.length > 0) {
         // Detect intent anchors for anti-noise filtering
+        // Also detect commodity from ALL history messages to preserve context across turns
+        const historyTextForFallbackDetection = (params.history || [])
+          .filter(m => m.role === "user")
+          .map(m => m.content || "")
+          .join(" ");
+        const fullContextForFallbackDetection = oneLine([
+          params.vendorLookupContext?.searchText || "",
+          getLastUserSourcingMessage(params.history || []) || "",
+          params.message || "",
+          historyTextForFallbackDetection, // Add ALL history for better commodity detection
+        ].filter(Boolean).join(" "));
+        
         const websiteFallbackIntentAnchors = detectVendorIntentAnchors(
           expandVendorSearchTermCandidates([
-            ...extractVendorSearchTerms(
-              oneLine([
-                params.vendorLookupContext?.searchText || "",
-                getLastUserSourcingMessage(params.history || []) || "",
-                params.message || "",
-              ].filter(Boolean).join(" "))
-            ),
-            ...suggestSourcingSynonyms(
-              oneLine([
-                params.vendorLookupContext?.searchText || "",
-                getLastUserSourcingMessage(params.history || []) || "",
-                params.message || "",
-              ].filter(Boolean).join(" "))
-            ),
+            ...extractVendorSearchTerms(fullContextForFallbackDetection),
+            ...suggestSourcingSynonyms(fullContextForFallbackDetection),
           ])
         );
         
