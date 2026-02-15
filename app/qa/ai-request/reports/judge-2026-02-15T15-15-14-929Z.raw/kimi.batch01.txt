@@ -1,0 +1,43 @@
+I can see that UV017 has already been evaluated in the file `qa_judge_uv005_uv012_uv013_uv016_uv017.json`. However, the user is asking me to re-evaluate it based on the transcript provided in the prompt. Let me analyze the scenario again carefully.
+
+Looking at the transcript in the prompt:
+
+**Turn 1**: Assistant gave 4 companies (Турпродплюс, Амифрут, Минская овощная фабрика, Агромашмаркет) - all seem relevant to food/vegetables in Minsk.
+
+**Turn 2**: User asks for "shortlist 3 релевантных поставщиков". Assistant provides a ranking of the same 3 companies but the response is garbled - it repeats the user's query text at the end ("Фокус запроса: Где в Минске купить 500 кг красного буряка оптом? Сделай shortlist 3 релевантных поставщиков...") and ends with "Дальше могу сделать top-3 по прозрачным критериям" which suggests it didn't actually complete the task.
+
+**Turn 3**: User asks for message template. The assistant's response is completely broken - it has garbled text like "Здравствуйте, уточняется!" and placeholders like "уточняетсяи" instead of actual content. The template is unusable.
+
+This is actually worse than the previous evaluation suggested. The Turn 3 response is completely garbled/nonsensical.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV017",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: дал 4 релевантных поставщика овощей в Минске, но без подтверждения наличия конкретно красного буряка",
+        "Turn 2: повторил список но не выполнил запрос на shortlist — ответ обрывается и дублирует текст пользователя",
+        "Turn 3: полностью сломанный ответ — шаблон сообщения содержит 'уточняется' вместо реальных данных, нечитаемый garbage"
+      ],
+      "criticalIssues": [
+        "Turn 3 response is completely garbled/nonsensical with placeholder text 'уточняется' instead of actual content",
+        "Turn 2 fails to properly deliver shortlist — response is truncated and includes user's query text",
+        "No actual actionable message template produced despite explicit request"
+      ],
+      "strengths": [
+        "Turn 1 identified relevant vegetable/food suppliers in correct geography without irrelevant profiles"
+      ],
+      "nextUserProbe": "Что это за бред? В шаблоне одни 'уточняется' вместо текста. Вы вообще проверяете что выдаете?"
+    }
+  ]
+}
+```

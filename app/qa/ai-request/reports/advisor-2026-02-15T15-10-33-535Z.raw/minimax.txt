@@ -1,0 +1,117 @@
+{
+  "advisor": "minimax",
+  "executiveSummary": "Critical template generation failure and context amnesia are the dominant failure modes. The assistant systematically outputs templates with literal 'уточняется' placeholders (7+ scenarios) and loses company context mid-conversation (4+ Iris Inter Group scenarios). These two issues alone account for 50%+ of judge complaints. Fixing template variable resolution and implementing explicit context carryover will have the highest ROI.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template variable resolution to eliminate 'уточняется' placeholders",
+      "why": "7+ scenarios show broken templates with literal placeholder text. This is the #1 usability blocker - users cannot use RFQ/contact templates.",
+      "expectedImpact": "Template-related usefulness scores should increase from ~0.5 to ~2.5 across affected scenarios",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV007", "UV016", "UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Implement explicit context persistence for company names",
+      "why": "4 Iris Inter Group scenarios show complete context loss - assistant returns unrelated companies (SAVANA SERVIS, hospitals, onliner) instead of maintaining conversation state.",
+      "expectedImpact": "Context-related strict failures should drop from 4+ to 0",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add category relevance validation layer",
+      "why": "Category mismatches (doors for shoes, hospitals for footwear) indicate weak semantic filtering between user intent and search results.",
+      "expectedImpact": "Category-related strict failures should decrease by 50%",
+      "validationScenarios": ["UV008", "UV011", "UV012"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce user-specified criteria as template variables",
+      "why": "Quality criteria (FSC, whiteness, MOQ) and checklist requests are systematically ignored after Turn 1.",
+      "expectedImpact": "Criteria adherence rate should increase from ~30% to ~80%",
+      "validationScenarios": ["UV002", "UV006", "UV009"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Template Variable Resolution Fix",
+      "action": "Add post-processing layer that validates all template variables are populated before response. If any variable remains as 'уточняется' or similar placeholder, trigger fallback to extract missing context from conversation history or explicitly ask user.",
+      "implementationHint": "Implement in template generation module (likely in app/ai-response/generation/ or similar). Add a regex pattern check for 'уточняется|placeholder|\\$var' before response emission.",
+      "expectedImpact": "Eliminates broken template outputs in UV001, UV004, UV006, UV007, UV016, UV017",
+      "risk": "Low - validation only, no behavior change if variables populated correctly",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV007", "UV016", "UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Context Carryover Explicit Instruction",
+      "action": "Add system prompt rule: 'Before responding about ANY company, explicitly state: 1) Company name from previous turn, 2) Why your response relates to it, 3) If company changed, explain why.'",
+      "implementationHint": "Update system prompt in app/ai/prompts/ directory. Add context verification step before final response generation.",
+      "expectedImpact": "Reduces context amnesia in UV019, UV020, UV021, UV022 to near zero",
+      "risk": "Low - adds clarity, cannot harm",
+      "effort": "S",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Category Relevance Pre-Filter",
+      "action": "Before returning search results, run semantic check: Does company category match user intent keywords? If mismatch probability > threshold, reject result and fetch alternatives. Log rejection for analysis.",
+      "implementationHint": "Implement in retrieval layer (app/ai/retrieval/ or similar). Use embedding similarity between user query keywords and company category names. Reject if similarity < 0.6 threshold.",
+      "expectedImpact": "Eliminates category mismatches like doors→shoes, hospitals→footwear",
+      "risk": "Medium - may reduce recall if thresholds too aggressive",
+      "effort": "L",
+      "validationScenarios": ["UV008", "UV011", "UV012"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Criteria Tracking Post-Processor",
+      "action": "After generating response, verify all user-specified criteria are addressed. If criteria missing, prepend note: '[Unmet criteria: X, Y]. Either address or explain limitation.'",
+      "implementationHint": "Implement as post-processing step after template generation. Parse user turn for criteria patterns (FSC, MOQ, whiteness, gluten, etc.) and verify presence in response.",
+      "expectedImpact": "Ensures UV002 (quality criteria), UV006 (FSC), UV009 (checklist) get addressed",
+      "risk": "Low - additive information only",
+      "effort": "M",
+      "validationScenarios": ["UV002", "UV006", "UV009"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Website Check Promise Enforcement",
+      "action": "When user explicitly requests website verification, assistant MUST output one of: (a) Confirmed finding with source URL, (b) Explicit statement of what was checked and why no data found, (c) Honest admission of inability to access.",
+      "implementationHint": "Add guardrail rule in prompt: 'User explicitly requested website check. Your response MUST include: [verification_status: success/failed] + [sources: URL list] or [checked_pages: description] + [limitation: explanation].'",
+      "expectedImpact": "Prevents UV012, UV013 failures where websites were not actually checked",
+      "risk": "Low - improves transparency",
+      "effort": "S",
+      "validationScenarios": ["UV012", "UV013"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Clarification Response Differentiation",
+      "action": "When user provides specific clarification, assistant MUST: (a) Acknowledge the new information explicitly, (b) Show how response differs from previous turn, (c) If response unchanged, explain why the clarification didn't yield new results.",
+      "implementationHint": "Add to system prompt: 'After user clarification, demonstrate incorporation of new info. If no change possible, explain limitation clearly.'",
+      "expectedImpact": "Fixes UV001, UV019 generic fallback after clarification",
+      "risk": "Low - forces clarity",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV019"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV001", "UV004", "UV006", "UV019", "UV020", "UV021"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+      "app/qa/ai-request/scenarios.strict.company-context*.json",
+      "app/qa/ai-request/scenarios.strict.template-generation*.json"
+    ],
+    "successMetrics": [
+      "Template placeholders (уточняется): <1% of responses",
+      "Context continuity rate: >95% for company names across turns",
+      "Category relevance precision: >85% for shoe/manufacturer queries",
+      "Criteria adherence: >80% for explicitly stated quality/logistics requirements",
+      "Overall pass rate: >95% (from current 91%)"
+    ]
+  }
+}

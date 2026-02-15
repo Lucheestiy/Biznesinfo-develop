@@ -1,0 +1,158 @@
+Based on my analysis of the QA data and the codebase, I can now provide concrete engineering advice. Let me compile the findings into the requested JSON format.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical systemic failures in multi-turn context retention and template generation. Assistant loses company context between turns (UV019-UV022), generates unusable templates with placeholder garbage (UV001, UV004, UV006, UV016), and fails to distinguish manufacturers from retailers (UV001, UV012). Root causes: 1) Context carryover logic insufficient for company name hints across turns; 2) Template fill hints extraction fails to aggregate constraints from full conversation history; 3) Missing hard guardrails against retailer fallback when manufacturer intent is explicit.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder garbage generation",
+      "why": "Templates with 'уточняется' placeholders are completely unusable - user cannot send them to suppliers. Affects 4+ scenarios (UV001, UV004, UV006, UV016).",
+      "expectedImpact": "Template usefulness score rises from 0-1 to 3-4. Eliminates 'template generation completely broken' judge issue.",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix catastrophic context loss for company name carryover",
+      "why": "Assistant loses 'Ирис Интер групп' context between turns, hallucinates unrelated companies (hospitals, ministries). Affects UV019-UV022.",
+      "expectedImpact": "Company context retention across multi-turn flows. Eliminates 'complete context disconnect' and 'hallucinated response' judge issues.",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix manufacturer vs retailer classification",
+      "why": "Returns 'Глобал Шуз' (shoe store) as manufacturer; 'ЖК Трейд' (spare parts) as tractor seller. Affects UV001, UV008, UV012.",
+      "expectedImpact": "Correct business type filtering. Eliminates 'category mismatch' and 'wrong rubric' judge issues.",
+      "validationScenarios": ["UV001", "UV008", "UV012"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix RFQ template parameter extraction from conversation history",
+      "why": "User specifies '500 кг', '3 дней', 'Минск' in earlier turns, but template contains only placeholders. Affects UV006, UV017.",
+      "expectedImpact": "Templates populated with actual conversation constraints. Eliminates 'RFQ template not usable' judge issues.",
+      "validationScenarios": ["UV006", "UV017"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add checklist generation for explicit document requests",
+      "why": "Turn 4 in UV002 requests 'чеклист из 6 пунктов' - assistant ignores or returns generic advice instead of structured checklist.",
+      "expectedImpact": "Structured numbered checklists for document/verification requests. Improves usefulness for B2B procurement workflows.",
+      "validationScenarios": ["UV002", "UV009"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Pre-fill template placeholders from full conversation history",
+      "action": "In extractTemplateFillHints(), scan ALL history messages (not just last 10) for qty, deadline, city, delivery patterns. Add aggressive regex for '500 кг', 'в течение 3 дней', 'самовывоз' patterns. Apply hints BEFORE template generation, not after.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: lines 1657-1756. Modify extractTemplateFillHints to use params.history.slice().reverse() for full scan. Add explicit pattern matching for quantity+unit combinations (\\d+\\s*(кг|тонн|шт)) and deadline phrases.",
+      "expectedImpact": "Templates contain actual user constraints instead of 'уточняется'.",
+      "risk": "May over-fill if user changed constraints mid-conversation. Mitigation: prefer most recent mention.",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV006", "UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Block template output with excessive placeholder spam",
+      "action": "Add post-processing guardrail: if output contains 'уточняется' 3+ times AND template mode is active, trigger repairTemplatePlaceholderSpam() with full history scan. If repair fails, fall back to structured template with explicit 'не указано в диалоге' labels.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: lines 2742-2812. Add detectPlaceholderGarbage() call in postProcessAssistantReply before final output. If hasGarbage=true and placeholderCount>=3, force template regeneration with hints.",
+      "expectedImpact": "Eliminates unusable templates with placeholder cascades.",
+      "risk": "Slightly higher latency for template regeneration. Acceptable.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016"]
+    },
+    {
+      "id": "R3",
+      "area": "context",
+      "title": "Persist company name hints across all turns in session",
+      "action": "When company name is mentioned (extractCompanyNameHintsFromText), store in session context. In collectWebsiteResearchCompanyNameHints(), prioritize session-stored names over re-extraction. In postProcessAssistantReply, if company name exists in session but assistant asks for link/card, inject company name into response.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: lines 2105-2138. Add session-level companyNameHints array. In POST handler, load from session at start, save at end. In link gate recovery (lines 3677-3685), use session hints as primary source.",
+      "expectedImpact": "Eliminates context loss for UV019-UV022 scenarios.",
+      "risk": "May persist wrong company if user switched topics. Mitigation: clear hints on explicit category change.",
+      "effort": "M",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R4",
+      "area": "ranking",
+      "title": "Boost manufacturer signals and penalize retailer signals in ranking",
+      "action": "In refineConcreteShortlistCandidates(), add manufacturer scoring. Companies with 'производство/завод/фабрика' in name get +0.3 boost. Companies with 'магазин/торговля/розница' get -0.5 penalty when query contains 'производитель'.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: lines 2971-3076. Add detectManufacturerSignal() scoring to filterAndRankVendorCandidates. Use existing MANUFACTURER_KEYWORDS/RETAILER_KEYWORDS arrays (lines 1922-1944).",
+      "expectedImpact": "Correct manufacturer filtering for footwear, tractor, equipment queries.",
+      "risk": "May exclude hybrid companies (manufacturer+retail). Mitigation: only apply when explicit 'производитель' in query.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV008", "UV012"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add explicit checklist generation prompt branch",
+      "action": "When looksLikeChecklistRequest() returns true AND explicit count detected (detectRequestedDocumentCount), bypass LLM and return structured checklist from buildPrimaryVerificationDocumentsChecklist(). Do not delegate to LLM for checklist formatting.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: lines 1601-1636. In POST handler, before LLM call, check if checklist mode with explicit count. If yes, return hard-formatted checklist immediately with company context if available.",
+      "expectedImpact": "Reliable checklist generation for UV002, UV009 scenarios.",
+      "risk": "Less flexibility in checklist content. Mitigation: keep document list extensible via buildPrimaryVerificationDocumentsChecklist().",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV009"]
+    },
+    {
+      "id": "R6",
+      "area": "retrieval",
+      "title": "Fix company lookup by name to use Meilisearch fuzzy matching",
+      "action": "In POST handler, when singleCompanyLookupName detected but no candidates, perform explicit biznesinfoSearch() with the company name. Use rankSingleCompanyLookupCandidates() to score matches. Include top match in vendorCandidates for subsequent turns.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: lines 2171-2193. After extractSingleCompanyLookupName, if name found but vendorCandidates empty, trigger search with { query: lookupName, limit: 5 }. Add results to singleCompanyNearbyCandidates.",
+      "expectedImpact": "Enables 'Найди компанию X' -> subsequent 'проверь на сайте' flow to work.",
+      "risk": "May return wrong company on fuzzy match. Mitigation: require score >= 0.55 for inclusion.",
+      "effort": "M",
+      "validationScenarios": ["UV022", "UV019"]
+    },
+    {
+      "id": "R7",
+      "area": "geo",
+      "title": "Preserve geo constraints across template generation",
+      "action": "In extractTemplateFillHints, ensure city/region from vendorLookupContext is merged with detectGeoHints results. In applyTemplateFillHints, always fill {city} with conversation geo if available, even if not explicitly mentioned in current message.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: lines 1674-1692. Add params.vendorLookupContext?.city as fallback in city extraction. Priority: current message > recent history > vendorLookupContext.",
+      "expectedImpact": "Templates contain correct city from conversation context.",
+      "risk": "None.",
+      "effort": "S",
+      "validationScenarios": ["UV016", "UV017"]
+    },
+    {
+      "id": "R8",
+      "area": "guardrails",
+      "title": "Prevent context switch to unrelated categories",
+      "action": "In postProcessAssistantReply, detect if response contains companies from completely different rubrics than previous turn (e.g., hospitals when user asked for shoe manufacturers). If detected, replace with fallback using historyVendorCandidates.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: lines 3551-4000+. Add continuity check: compare primary_rubric_name of companies in output vs companies in historyVendorCandidates. If mismatch and history exists, force history-based fallback.",
+      "expectedImpact": "Eliminates 'поликлиника вместо производителей обуви' hallucinations.",
+      "risk": "May block legitimate category switches. Mitigation: only apply when user message contains 'проверь/уточни' (refinement intent, not new search).",
+      "effort": "M",
+      "validationScenarios": ["UV012"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV001",
+      "UV004",
+      "UV006",
+      "UV016",
+      "UV019",
+      "UV020",
+      "UV021",
+      "UV022"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.template-announcement.json"
+    ],
+    "successMetrics": [
+      "templatePassRate >= 0.8 (currently 0.0 for UV001, UV004, UV006, UV016)",
+      "contextCarryoverPassRate >= 0.9 (currently 0.0 for UV019-UV022)",
+      "usefulRate >= 0.5 (currently 0.0-0.5 across focus scenarios)",
+      "strictPassRate >= 0.95 (currently 0.91)",
+      "avgUsefulness >= 2.5 (currently 1.5)"
+    ]
+  }
+}
+```

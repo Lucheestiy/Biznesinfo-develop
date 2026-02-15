@@ -1,0 +1,115 @@
+Based on my analysis of the codebase and the QA evidence, I can now provide concrete engineering advice. The issue is clear from the evidence:
+
+1. **Turn 3 response is completely garbled** with placeholder text "уточняется" instead of actual content
+2. **Turn 2 fails to properly deliver shortlist** — response is truncated and includes user's query text
+3. **No actual actionable message template produced** despite explicit request
+
+The root cause appears to be in the `sanitizeUnfilledPlaceholdersInNonTemplateReply` function and related template processing logic. The model is generating templates with unfilled placeholders that are being replaced with "уточняется" repeatedly, creating garbage output.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "UV017 failure reveals critical template generation bug: placeholders are being replaced with 'уточняется' spam instead of actual values, and shortlist truncation occurs in multi-turn contexts. The issue is in post-processing logic that fails to extract conversation context for template fills.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder spam in multi-turn scenarios",
+      "why": "Turn 3 of UV017 shows completely garbled output with 'уточняется' repeated instead of actual template content. The extractTemplateFillHints function fails to scan full conversation history properly, causing all placeholders to be replaced with the fallback 'уточняется' text.",
+      "expectedImpact": "Eliminates garbage template output; improves usefulness score from 1 to 4+ for template requests in multi-turn scenarios.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix shortlist truncation in Turn 2 follow-ups",
+      "why": "Turn 2 response is truncated and includes user's query text. The looksLikeTopCompaniesRequestWithoutCriteria function has overly aggressive criteria detection that triggers false positives in follow-up turns.",
+      "expectedImpact": "Proper shortlist delivery in multi-turn ranking requests; reduces context loss between turns.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add explicit validation for template block completeness",
+      "why": "No guardrail currently validates that Subject/Body/WhatsApp blocks contain actual content vs placeholder spam before returning to user.",
+      "expectedImpact": "Prevents incomplete templates from reaching users; triggers clarification prompt instead.",
+      "validationScenarios": ["UV017", "UV001", "UV004", "UV006"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Fix extractTemplateFillHints to properly scan all history",
+      "action": "Modify extractTemplateFillHints (lines 1657-1756) to use a single combined scan of all messages instead of separate loops for each hint type. The current implementation resets iteration for each field (city, qty, deadline) causing O(n*m) scans and missing values when hints are distributed across different messages.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1657-1756 - Replace nested loop pattern with single pass that extracts all hints from each message before moving to next message. Add debug logging for extracted hints.",
+      "expectedImpact": "Fixes UV017 Turn 3 garbage output; ensures 500 кг, Минск, 3 дней are extracted from conversation history",
+      "risk": "Low - pure refactoring of extraction logic",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Strengthen system prompt for template generation",
+      "action": "Add explicit instruction in system prompt: 'When generating Subject/Body/WhatsApp templates, NEVER use placeholder words like \"уточняется\", \"уточнить\", \"к сожалению\". Either fill with actual values from context or ask user for clarification.'",
+      "implementationHint": "Find system prompt construction (likely in buildSystemPrompt or similar) and add anti-placeholder instruction.",
+      "expectedImpact": "Prevents model from generating placeholder-laden templates in first place",
+      "risk": "Low - prompt-only change",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV001", "UV004", "UV006"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Add pre-return template validation gate",
+      "action": "Before returning template response, validate that: (1) No more than 1 occurrence of 'уточняется' per 100 chars, (2) All three blocks (Subject/Body/WhatsApp) have actual content, (3) At least 2 specific parameters from context are filled. If validation fails, return clarification request instead.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:3972-4003 - Add validateTemplateCompleteness() function called before final return in template mode.",
+      "expectedImpact": "Prevents garbage templates from reaching users; forces clarification loop instead",
+      "risk": "Medium - may increase clarification prompts",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV001", "UV004", "UV006", "UV016"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Fix shortlist context preservation in Turn 2",
+      "action": "The looksLikeTopCompaniesRequestWithoutCriteria function (lines 547-657) returns false for explicit shortlist requests when history exists, but the downstream logic doesn't properly use history candidates. Add explicit branch: when hasAnyHistory && isSelectionRequest, immediately use historyVendorCandidates without re-asking criteria.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:547-657 - After line 622 where it returns false, ensure the caller actually uses history candidates. May need to add early return with buildForcedShortlistAppendix.",
+      "expectedImpact": "Fixes Turn 2 truncation issue in UV017; proper shortlist delivery in multi-turn",
+      "risk": "Low - logic path already exists, needs completion",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "ranking",
+      "title": "Add commodity-aware candidate filtering for beet/vegetables",
+      "action": "The detectCoreCommodityTag function likely returns 'beet' for UV017, but candidateMatchesCoreCommodity may not properly match vegetable suppliers. Add explicit beet/vegetable matching logic using rubric names and keywords.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - Find candidateMatchesCoreCommodity and add beet/vegetable detection patterns: /овощ|буряк|свекл|корнеплод|овощная база/ in rubric/description.",
+      "expectedImpact": "Better supplier quality for vegetable sourcing queries; reduces irrelevant candidates",
+      "risk": "Low - additive matching logic",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Repair repairTemplatePlaceholderSpam function",
+      "action": "The repairTemplatePlaceholderSpam function (lines 2744-2812) has regex patterns that don't match actual 'уточняется' spam patterns. Fix the replacement logic to handle cases where 'уточняется' appears multiple times in template blocks.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2744-2812 - Replace line-by-line regex with block-aware parser that detects Subject/Body/WhatsApp sections and replaces ALL 'уточняется' occurrences with either extracted hint or generic placeholder like '{уточните}'.",
+      "expectedImpact": "Cleaner template output even when model generates placeholder spam",
+      "risk": "Low - post-processing improvement",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": ["scenarios.regressions.user-ideas-multistep-variants.json"],
+    "successMetrics": [
+      "UV017.T3 usefulness >= 4 (was 1)",
+      "Template block completeness: 100% of template requests have all 3 blocks with <2 'уточняется' occurrences",
+      "Shortlist delivery rate: 100% of explicit shortlist requests in multi-turn return company links",
+      "Zero responses with >3 'уточняется' occurrences in template mode"
+    ]
+  }
+}
+```

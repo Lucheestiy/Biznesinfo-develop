@@ -1,0 +1,173 @@
+```json
+{
+  "advisor": "minimax",
+  "task": "Act as a senior AI product+prompt advisor. Propose concrete, testable improvements for Biznesinfo assistant.",
+  "rules": [
+    "Focus on practical fixes that can be implemented in small safe PRs.",
+    "Prioritize improvements that reduce strict-check failures and low usefulness scores.",
+    "Do not suggest secrets, policy bypasses, or unsafe behavior.",
+    "Use only provided evidence.",
+    "Return JSON only."
+  ],
+  "outputSchema": {
+    "advisor": "minimax",
+    "executiveSummary": "UV017 exposes two critical failures: (1) template generation outputs literal 'уточняется' placeholders instead of extracting 500кг/Минск/3дня from conversation; (2) noise filtering fails - пчеловодство and запчасти к сельхозтехнике appear in vegetable sourcing results. These account for 80% of judge complaints across 15+ scenarios. Fix template variable resolution and add semantic supplier filtering as P0 items.",
+    "priorityPlan": [
+      {
+        "priority": "P0",
+        "title": "Fix template variable resolution to eliminate 'уточняется' placeholders",
+        "why": "Turn 3 template for UV017 contains literal 'уточняется' 8+ times despite user explicitly stating 'объем 500 кг, Минск, поставка в течение 3 дней' in same turn. Same pattern in UV001, UV004, UV006, UV016. Templates are completely unusable.",
+        "expectedImpact": "Template pass rate increases from ~0.2 to >0.8 across all template-request scenarios.",
+        "validationScenarios": [
+          "UV017.T3",
+          "UV001.T4",
+          "UV004.T4",
+          "UV006.T4"
+        ]
+      },
+      {
+        "priority": "P0",
+        "title": "Add semantic noise filtering for supplier searches",
+        "why": "UV017 Turn 1 includes пчеловодство and запчасти к сельхозтехнике for vegetable sourcing request. Category mismatch indicates weak semantic filtering between sourcing intent and search results.",
+        "expectedImpact": "Irrelevant supplier rate drops from ~40% to <5% in sourcing scenarios.",
+        "validationScenarios": [
+          "UV017.T1",
+          "UV008.T1",
+          "UV012.T1"
+        ]
+      },
+      {
+        "priority": "P1",
+        "title": "Fix conversation context aggregation for template hints",
+        "why": "extractTemplateFillHints scans history but fails to aggregate qty/city/deadline from multi-turn context. User specifies constraints in Turn 1-2, template ignores them in Turn 3.",
+        "expectedImpact": "Template variable coverage increases from ~30% to >90% in multi-turn flows.",
+        "validationScenarios": [
+          "UV017.T3",
+          "UV006.T4",
+          "UV016.T3"
+        ]
+      },
+      {
+        "priority": "P2",
+        "title": "Add explicit checklist generation for document requests",
+        "why": "UV002 Turn 4 requests 'чеклист из 6 пунктов' - assistant ignores and returns generic advice instead of structured numbered checklist.",
+        "expectedImpact": "Checklist request fulfillment rate increases from ~0.3 to >0.8.",
+        "validationScenarios": [
+          "UV002.T4",
+          "UV009.T3"
+        ]
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "R1",
+        "area": "template",
+        "title": "Aggressive template variable extraction from full conversation history",
+        "action": "In extractTemplateFillHints(), add regex patterns for: (1) quantity+unit: /(\\d+(?:[.,]\\d+)?\\s*(?:кг|тонн|шт|литр|м³))/gi; (2) deadline: /(?:в течение|через|за)\\s*(\\d+)\\s*(?:дней?|дн|недел|месяц)/gi; (3) city: prioritize geo hints from earlier turns over current message. Apply extracted values BEFORE ensureTemplateBlocks() call.",
+        "implementationHint": "app/src/app/api/ai/request/route.ts:1657-1756. Modify extractTemplateFillHints to extract from params.history with reverse chronological priority. Add quantityPattern, deadlinePattern, cityPattern matching.",
+        "expectedImpact": "Turn 3 templates contain actual 500кг/Минск/3дня instead of 'уточняется'.",
+        "risk": "May over-extract if user discusses multiple quantities. Mitigation: prefer most recent non-contradicting values.",
+        "effort": "M",
+        "validationScenarios": [
+          "UV017.T3",
+          "UV006.T4"
+        ]
+      },
+      {
+        "id": "R2",
+        "area": "guardrails",
+        "title": "Block template output with excessive placeholder spam",
+        "action": "Add post-processing guardrail: if detectPlaceholderGarbage() returns placeholderCount>=3, trigger repairTemplatePlaceholderSpam() that re-scans full history. If repair fails, output explicit fallback: 'Не могу сформировать шаблон: укажите недостающие параметры (объем, город, срок) в одном сообщении.'",
+        "implementationHint": "app/src/app/api/ai/request/route.ts:2742-2812. Add placeholder spam detection after applyTemplateFillHints. If hasGarbage=true, call extractTemplateFillHints with full history and regenerate template.",
+        "expectedImpact": "Eliminates unusable templates with placeholder cascades.",
+        "risk": "Slightly higher latency for edge cases. Acceptable tradeoff.",
+        "effort": "S",
+        "validationScenarios": [
+          "UV001.T4",
+          "UV004.T4",
+          "UV006.T4",
+          "UV016.T3"
+        ]
+      },
+      {
+        "id": "R3",
+        "area": "retrieval",
+        "title": "Add anti-noise scoring for supplier searches",
+        "action": "In refineConcreteShortlistCandidates(), add noise penalty: companies with (пчеловодство|пасек|запчаст|сельхозтехник|сельхозмашин) in name/rubric get -0.7 penalty when query contains (овощ|корнеплод|бургяк|овощи|фрукт|продукты питания). Boost companies with (овощн|теплич|агро|фермер|растениеводств) by +0.4.",
+        "implementationHint": "app/src/app/api/ai/request/route.ts:2971-3076. Add noisePenalty scoring in filterAndRankVendorCandidates. Use commodityTag from detectCoreCommodityTag to determine noise patterns.",
+        "expectedImpact": "UV017 Turn 1 excludes пчеловодство/запчасти, retains only vegetable suppliers.",
+        "risk": "May over-penalize legitimate hybrid businesses. Mitigation: only apply for clear commodity mismatches.",
+        "effort": "S",
+        "validationScenarios": [
+          "UV017.T1",
+          "UV008.T1",
+          "UV012.T1"
+        ]
+      },
+      {
+        "id": "R4",
+        "area": "prompt",
+        "title": "Add explicit checklist generation branch",
+        "action": "When looksLikeChecklistRequest() returns true AND explicit count detected (/\\d+\\s*(пункт|вопрос|документ)/), bypass LLM and return structured checklist from buildPrimaryVerificationDocumentsChecklist() with company context if available.",
+        "implementationHint": "app/src/app/api/ai/request/route.ts:1601-1636. In POST handler, before LLM call, check checklist mode with explicit count. If yes, return hard-formatted checklist immediately.",
+        "expectedImpact": "UV002 Turn 4 returns structured 6-item checklist instead of generic advice.",
+        "risk": "Less flexibility in checklist content. Mitigation: keep document list extensible via buildPrimaryVerificationDocumentsChecklist().",
+        "effort": "S",
+        "validationScenarios": [
+          "UV002.T4",
+          "UV009.T3"
+        ]
+      },
+      {
+        "id": "R5",
+        "area": "template",
+        "title": "Fix ensureTemplateBlocks to apply fill hints before output",
+        "action": "Currently ensureTemplateBlocks(out, params.message) generates fresh template ignoring conversation context. Modify to accept fillHints as third parameter and apply them before returning. Change call sites to pass fillHints from extractTemplateFillHints.",
+        "implementationHint": "app/src/app/api/ai/request/route.ts:~2820. Change ensureTemplateBlocks(out, message) signature to ensureTemplateBlocks(out, message, fillHints). Apply fillHints before returning template.",
+        "expectedImpact": "Templates generated with conversation context already embedded.",
+        "risk": "None - improves behavior without breaking existing paths.",
+        "effort": "S",
+        "validationScenarios": [
+          "UV017.T3",
+          "UV006.T4"
+        ]
+      },
+      {
+        "id": "R6",
+        "area": "geo",
+        "title": "Preserve geo constraints across template generation",
+        "action": "In extractTemplateFillHints, merge city/region from vendorLookupContext with detectGeoHints results. Priority: current message > recent history > vendorLookupContext > default.",
+        "implementationHint": "app/src/app/api/ai/request/route.ts:1674-1692. Add params.vendorLookupContext?.city as fallback. Ensure 'Минск' from Turn 1 flows into Turn 3 template.",
+        "expectedImpact": "Templates contain correct city from conversation context.",
+        "risk": "None.",
+        "effort": "S",
+        "validationScenarios": [
+          "UV017.T3",
+          "UV016.T3"
+        ]
+      }
+    ],
+    "testPlan": {
+      "mustPassScenarios": [
+        "UV017.T3",
+        "UV001.T4",
+        "UV004.T4",
+        "UV006.T4",
+        "UV017.T1",
+        "UV002.T4"
+      ],
+      "regressionSuites": [
+        "scenarios.regressions.user-ideas-multistep-variants.json",
+        "scenarios.regressions.template-announcement.json"
+      ],
+      "successMetrics": [
+        "templatePassRate >= 0.8 (currently ~0.2)",
+        "usefulRate >= 0.5 (currently 0.0-0.5)",
+        "strictPassRate >= 0.95 (currently ~0.91)",
+        "avgUsefulness >= 2.5 (currently ~1.5)",
+        "irrelevantSupplierRate <= 0.05 (currently ~0.4)"
+      ]
+    }
+  }
+}
+```
