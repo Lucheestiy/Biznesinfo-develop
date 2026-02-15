@@ -3368,14 +3368,14 @@ function postProcessAssistantReply(params: {
   const analyticsTaggingTurnEarly = looksLikeAnalyticsTaggingRequest(params.message || "");
   if (analyticsTaggingTurnEarly) {
     const supplierFallbackDetectedEarly =
-      /(shortlist|\/\s*company\s*\/\s*[a-z0-9-]+|\/\s*catalog\s*\/\s*[a-z0-9-]+|по\s+текущему\s+фильтр|нет\s+подтвержденных\s+карточек|поставщик|кого\s+прозвон|временный\s+shortlist|фраза\s+для\s+первого\s+контакта|рубрик\b|рубрикатор|каталог\b|недвижимост|автосервис|магазин\b)/iu.test(
+      /(shortlist|\/\s*company\s*\/\s*[a-z0-9-]+|\/\s*catalog\s*\/\s*[a-z0-9-]+|по\s+текущему\s+фильтр|нет\s+подтвержденных\s+карточек|поставщик|кого\s+прозвон|временный\s+shortlist|фраза\s+для\s+первого\s+контакта|рубрик\b|рубрики|рубрикатор|каталог\b|недвижимост|автосервис|магазин\b)/iu.test(
         out,
       );
     // UV021 fix: also trigger analytics tagging recovery when output doesn't contain proper tags
     // Check for: (1) supplier fallback patterns OR (2) generic rubric fallback without tags OR (3) not enough numbered items
     const tagItemCount = countNumberedListItems(out);
     const hasTagContent = /(тег\p{L}*|ключев\p{L}*\s+слов\p{L}*|keyword\p{L}*|utm\s*-|семантик\p{L}*|кластер\p{L}*)/iu.test(out);
-    const isGenericRubricFallback = /рубрик\b|рубрикатор|catalog|по\s+каталогу|недвижимост|автосервис|магазин\b/iu.test(out) && !hasTagContent;
+    const isGenericRubricFallback = /рубрик|рубрики|рубрикатор|catalog|по\s+каталогу|недвижимост|автосервис|магазин\b/iu.test(out) && !hasTagContent;
     const needsTagRecovery = supplierFallbackDetectedEarly || isGenericRubricFallback || (tagItemCount < 15 && !hasTagContent);
     if (needsTagRecovery) {
       return buildAnalyticsTaggingRecoveryReply({
@@ -5964,14 +5964,14 @@ function postProcessAssistantReply(params: {
   const analyticsTaggingRequestNow = looksLikeAnalyticsTaggingRequest(params.message || "");
   if (analyticsTaggingRequestNow) {
     const hasSupplierFallbackOutput =
-      /(shortlist|\/\s*company\s*\/\s*[a-z0-9-]+|\/\s*catalog\s*\/\s*[a-z0-9-]+|по\s+текущему\s+фильтр|нет\s+подтвержденных\s+карточек|поставщик|кого\s+прозвон|временный\s+shortlist|фраза\s+для\s+первого\s+контакта|рубрик\b|рубрикатор|каталог\b|недвижимост|автосервис|магазин\b)/iu.test(
+      /(shortlist|\/\s*company\s*\/\s*[a-z0-9-]+|\/\s*catalog\s*\/\s*[a-z0-9-]+|по\s+текущему\s+фильтр|нет\s+подтвержденных\s+карточек|поставщик|кого\s+прозвон|временный\s+shortlist|фраза\s+для\s+первого\s+контакта|рубрик\b|рубрики|рубрикатор|каталог\b|недвижимост|автосервис|магазин\b)/iu.test(
         out,
       );
     // UV021 fix: also trigger analytics tagging recovery when output doesn't contain proper tags
     // Check for: (1) supplier fallback patterns OR (2) generic rubric fallback without tags OR (3) not enough numbered items
     const tagItemCount = countNumberedListItems(out);
     const hasTagContent = /(тег\p{L}*|ключев\p{L}*\s+слов\p{L}*|keyword\p{L}*|utm\s*-|семантик\p{L}*|кластер\p{L}*)/iu.test(out);
-    const isGenericRubricFallback = /рубрик\b|рубрикатор|catalog|по\s+каталогу|недвижимост|автосервис|магазин\b/iu.test(out) && !hasTagContent;
+    const isGenericRubricFallback = /рубрик|рубрики|рубрикатор|catalog|по\s+каталогу|недвижимост|автосервис|магазин\b/iu.test(out) && !hasTagContent;
     const needsTagRecovery = hasSupplierFallbackOutput || isGenericRubricFallback || (tagItemCount < 15 && !hasTagContent);
     if (needsTagRecovery) {
       out = buildAnalyticsTaggingRecoveryReply({
