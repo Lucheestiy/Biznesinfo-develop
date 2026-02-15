@@ -1,0 +1,57 @@
+Based on my analysis of the scenarios and the rubric, here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV021",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 3 completely ignores context - user asks about 'Ирис Интер групп' website news, assistant returns 'САВАНА СЕРВИС ООО' with wrong URL",
+        "Turn 4 catastrophic failure - instead of finding news on Ирис Интер групп site, returns random unrelated companies (18 УП, АВАНТАЖ-АГРО)",
+        "Zero continuity: company explicitly named in turns 1-2 completely disappears from turns 3-4"
+      ],
+      "criticalIssues": [
+        "Complete loss of context continuity - 'Ирис Интер групп' vanishes from responses",
+        "Turn 3 returns wrong company (САВАНА СЕРВИС) with unrelated website",
+        "Turn 4 returns completely irrelevant search results instead of accessing Ирис Интер групп website",
+        "Assistant appears to have no actual access to company card data despite claiming to work with catalog"
+      ],
+      "strengths": [
+        "Turns 1-2 provided relevant tags and UTM structure for the company"
+      ],
+      "nextUserProbe": "Вы о чем? Я спрашивал про Ирис Интер групп, а не про Савану Сервис или какие-то УП18. Вы помните, о какой компании речь?"
+    },
+    {
+      "scenarioId": "UV022",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1 fails basic search - instead of finding 'Ирис Интер групп', returns generic rubric advice about IT/internet categories",
+        "Turn 2 after explicit search request, when asked about company news, returns completely unrelated results (Минсельхоз, Автомобильные конструкции)",
+        "Assistant never actually found the requested company in either turn"
+      ],
+      "criticalIssues": [
+        "Failed to find explicitly named company 'Ирис Интер групп' in catalog",
+        "Turn 1 gave generic category browsing instead of direct search result",
+        "Turn 2 returned random unrelated companies instead of accessing requested company's website",
+        "Complete hallucination of search results - none match the query"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Почему вы не можете найти компанию, которую я прямо назвал? И зачем мне Минсельхоз, когда я спрашиваю про логистическую компанию?"
+    }
+  ]
+}
+```
