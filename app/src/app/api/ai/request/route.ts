@@ -4211,7 +4211,31 @@ function postProcessAssistantReply(params: {
     }
     if (isPackagingIntentByTerms(vendorIntentTerms)) {
       const filtered = continuityForVendorFlow.filter((c) => isPackagingCandidate(c));
-      if (filtered.length > 0) continuityForVendorFlow = filtered;
+      if (filtered.length > 0) {
+        continuityForVendorFlow = filtered;
+      }
+      // CRITICAL FIX: When packaging intent is detected but no candidates match isPackagingCandidate,
+      // apply anti-noise filter to remove plastic packaging companies instead of keeping all candidates
+      else if (continuityForVendorFlow.length > 0) {
+        // Get intent anchors for packaging to apply conflict rules
+        const packagingAnchors = VENDOR_INTENT_ANCHOR_DEFINITIONS.filter(
+          (a) => a.key === "packaging"
+        );
+        if (packagingAnchors.length > 0) {
+          const antiNoiseFiltered = continuityForVendorFlow.filter((candidate) => {
+            const haystack = buildVendorCompanyHaystack(candidate);
+            if (!haystack) return true; // Keep if no haystack
+            // Filter out candidates that violate packaging conflict rules (plastic, etc.)
+            if (candidateViolatesIntentConflictRules(haystack, packagingAnchors)) return false;
+            return true;
+          });
+          // Only apply if we still have candidates after filtering
+          if (antiNoiseFiltered.length > 0) {
+            continuityForVendorFlow = antiNoiseFiltered;
+          }
+          // If ALL candidates are filtered out by anti-noise, return empty to avoid returning plastic packaging
+        }
+      }
     }
     const intentAnchors = detectVendorIntentAnchors(continuitySearchTerms);
     if (intentAnchors.length > 0 && continuityForVendorFlow.length > 0) {
@@ -11669,14 +11693,22 @@ async function fetchVendorCandidates(params: {
   const applyAntiNoiseFilter = (companies: BiznesinfoCompanySummary[]): BiznesinfoCompanySummary[] => {
     // Always filter for vendor searches - even follow-up queries like "check sites" should exclude non-vendors
     if (companies.length === 0) return companies;
-    return companies.filter((c) => {
+    const before = companies.length;
+    const filtered = companies.filter((c) => {
       const rubric = (c.primary_rubric_name || "").toLowerCase();
-      // Block if rubric contains any blocklisted term
+      // Block if rubric contains any blocklisted term (check partial match at word boundaries)
       for (const blocked of ANTI_NOISE_BLOCKLIST_FOR_VENDOR) {
-        if (rubric.includes(blocked)) return false;
+        if (rubric.includes(blocked)) {
+          console.log("[ANTI_NOISE] BLOCKED:", c.name, "rubric:", rubric, "matched:", blocked);
+          return false;
+        }
       }
       return true;
     });
+    if (filtered.length < before) {
+      console.log("[ANTI_NOISE] Filtered:", before, "->", filtered.length, "companies");
+    }
+    return filtered;
   };
 
   const postProcess = (
