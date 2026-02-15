@@ -3326,7 +3326,7 @@ function postProcessAssistantReply(params: {
   const analyticsTaggingTurnEarly = looksLikeAnalyticsTaggingRequest(params.message || "");
   if (analyticsTaggingTurnEarly) {
     const supplierFallbackDetectedEarly =
-      /(shortlist|\/\s*company\s*\/\s*[a-z0-9-]+|\/\s*catalog\s*\/\s*[a-z0-9-]+|по\s+текущему\s+фильтр|нет\s+подтвержденных\s+карточек|поставщик|кого\s+прозвон)/iu.test(
+      /(shortlist|\/\s*company\s*\/\s*[a-z0-9-]+|\/\s*catalog\s*\/\s*[a-z0-9-]+|по\s+текущему\s+фильтр|нет\s+подтвержденных\s+карточек|поставщик|кого\s+прозвон|временный\s+shortlist|фраза\s+для\s+первого\s+контакта|рубрик\b)/iu.test(
         out,
       );
     if (supplierFallbackDetectedEarly) {
@@ -3347,7 +3347,16 @@ function postProcessAssistantReply(params: {
     /(на\s+сайте|из\s+карточки|проверь\s+сайт|посмотри\s+сайт|проверим\s+сайты)\b/iu.test(params.message || "") ||
     /(карточк\p{L}*|сайт\p{L}*)\s+(эт\p{L}*|это|этой|данн\p{L}*)/iu.test(params.message || "")
   );
-  const linkGateAsksForNewLink = linkGateRequested && /(пришли|дай|покажи)\s+(мне\s+)?(ссылку|сайт|url)/iu.test(out) && !/\/company\/[a-z0-9-]+/iu.test(out);
+  // Extended anti-link-gate patterns from QA scenarios UV019-UV022
+  const linkGateAsksForNewLink = linkGateRequested && (
+    /(пришли|дай|покажи)\s+(мне\s+)?(ссылку|сайт|url)/iu.test(out) ||
+    /не\s+вижу\s+(в\s+чате\s+)?саму\s+карточку/iu.test(out) ||
+    /нужна\s+(точн\w+\s+)?ссылк/iu.test(out) ||
+    /дайте\s+ссылк/iu.test(out) ||
+    /отправьте\s+(домен|сайт|карточку)/iu.test(out) ||
+    /точное\s+доменное\s+имя/iu.test(out) ||
+    /по\s+текущему\s+фильтру\s+в\s+каталоге\s+нет\s+подтвержденных\s+карточек/iu.test(out)
+  ) && !/\/company\/[a-z0-9-]+/iu.test(out);
 
   if (linkGateRequested && linkGateAsksForNewLink && linkGateCandidates.length > 0) {
     const recoveryLines = ["Использую компании из контекста диалога:"];
@@ -11598,13 +11607,74 @@ async function fetchVendorCandidates(params: {
       lookupIntentAnchors,
     );
   };
+  // Anti-noise blocklist for supplier/manufacturer searches (applied after search to catch meiliSearch results too)
+  const ANTI_NOISE_BLOCKLIST_FOR_VENDOR = [
+    "поликлиника",
+    "больница",
+    "госпиталь",
+    "клиника",
+    "медицинский центр",
+    "стоматологическая поликлиника",
+    "диспансер",
+    "военкомат",
+    "военная часть",
+    "военно-патриотический",
+    "военно-спортивный",
+    "дворец культуры",
+    "дом культуры",
+    "клуб",
+    "библиотека",
+    "школа",
+    "гимназия",
+    "лицей",
+    "колледж",
+    "университет",
+    "институт",
+    "учебный центр",
+    "образовательный центр",
+    "курсы",
+    "спортивная школа",
+    "стадион",
+    "бассейн",
+    "спортзал",
+    "общежитие",
+    "гостиница",
+    "отель",
+    "хостел",
+    "турбаза",
+    "дом отдыха",
+    "санаторий",
+    "детский лагерь",
+    "дом творчества",
+    "дом детского творчества",
+    "центр творчества",
+  ];
+
+  // Check if search has supplier/manufacturer intent
+  const hasSupplierIntent = lookupIntentAnchors.length > 0 || /произв|поставщ|завод|изготовитель|manufacturer|supplier|прода|купить|оптом/i.test(searchTerms.join(" "));
+
+  // Anti-noise filter: apply to both meiliSearch and biznesinfoSearch results
+  const applyAntiNoiseFilter = (companies: BiznesinfoCompanySummary[]): BiznesinfoCompanySummary[] => {
+    if (!hasSupplierIntent || companies.length === 0) return companies;
+    return companies.filter((c) => {
+      const rubric = (c.primary_rubric_name || "").toLowerCase();
+      // Block if rubric contains any blocklisted term
+      for (const blocked of ANTI_NOISE_BLOCKLIST_FOR_VENDOR) {
+        if (rubric.includes(blocked)) return false;
+      }
+      return true;
+    });
+  };
+
   const postProcess = (
     companies: BiznesinfoCompanySummary[],
     scopeRegion: string | null = region,
     scopeCity: string | null = city,
-  ) =>
-    filterAndRankVendorCandidates({
-      companies,
+  ) => {
+    // Apply anti-noise filter before ranking
+    const filtered = applyAntiNoiseFilter(companies);
+    return filterAndRankVendorCandidates({
+      companies: filtered,
       searchTerms,
       region: scopeRegion,
       city: scopeCity,
@@ -11612,6 +11682,7 @@ async function fetchVendorCandidates(params: {
       excludeTerms,
       reverseBuyerIntent,
     });
+  };
 
   const runSearch = async (params: {
     query: string;
