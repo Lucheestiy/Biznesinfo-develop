@@ -325,6 +325,114 @@ function detectPlaceholderGarbage(text: string): { hasGarbage: boolean; placehol
   };
 }
 
+// Constraint tracking guardrail: verify that user constraints from history are addressed in response
+// This addresses judge feedback where Turn 2 often ignores constraints from Turn 1 (location, quantity, etc.)
+interface ConstraintInfo {
+  type: "location" | "quantity" | "delivery" | "company_type" | "quality";
+  pattern: RegExp;
+  evidencePatterns: RegExp[];
+}
+
+const CONSTRAINT_TRACKING_RULES: ConstraintInfo[] = [
+  {
+    type: "location",
+    pattern: /(?:малиновка|партизанск|автозавод|октябр|советск|первомайск|москвош|US|центр|ленинск|фрунзе|вязынк|каменная горка|сергеевка|богдановича|ясенец|юго-запад|запад|восток|север|м(?:инс)?к?\s*(?:област|р-н|район|обл)|минск|г\.?\s*минск|м\.?\s*минск|гродно|витебск|гомель|брест|могилев|могил(?:е|ё)в|бобруйск|барановичи|боровляны|ждановичи|колодищи|малиновка|слуцк|sole|минский\s*р-н)/iu,
+    evidencePatterns: [
+      /малиновк[а-у]/iu, /партизанск[а-у]/iu, /автозавод[а-у]/iu, /октябр[а-у]/iu,
+      /советск[а-у]/iu, /первомайск[а-у]/iu, /US/iu, /центр[а-у]/iu,
+      /минск[а-у]/iu, /г\.?\s*минск/iu, /м\.?\s*минск/iu,
+      /гродно/iu, /витебск/iu, /гомел/iu, /брест/iu, /могилев/iu, /могил[её]в/iu,
+      /боровлян/iu, /жданович/iu, /колодищ/iu, /слуцк/iu,
+    ],
+  },
+  {
+    type: "quantity",
+    pattern: /(\d+(?:[.,]\d+)?\s*(?:кг|тонн|т|штук|шт|ед|пачек|мешков|рулонов|литр|л|м3|м²|м2|коробок|упаковок))\b|\b(?:500\s*кг|1\s*тонн|2-?3\s*тонн|5\s*тонн|10\s*тонн|100\s*кг|300\s*кг|1000\s*кг)\b/iu,
+    evidencePatterns: [
+      /\d+\s*(?:кг|тонн|т|штук|шт|ед|пачк|мешк|рулон|литр|л|м3|м²|м2|коробк|упаковк)/iu,
+      /500\s*кг/i, /1\s*тонн/i, /2-?3\s*тонн/i, /5\s*тонн/i, /10\s*тонн/i,
+      /100\s*кг/i, /300\s*кг/i, /1000\s*кг/i,
+    ],
+  },
+  {
+    type: "delivery",
+    pattern: /(?:завтра|сегодня|до\s+\d+\s*часов|к\s*\d+\s*числ(?:у|а)|в\s*\d+\s*дней|недел(?:я|ю|е|ы|ой|ам|ами|ах)|срочн|express|доставк(?:а|у|е|ой|ам|ами|ах)|самовывоз)/iu,
+    evidencePatterns: [
+      /завтра/iu, /сегодня/iu, /до\s+\d+\s*час/iu, /к\s*\d+\s*числ/iu,
+      /в\s*\d+\s*дней/iu, /недел/iu, /срочн/iu, /экспресс/iu,
+      /доставк/iu, /самовывоз/iu,
+    ],
+  },
+  {
+    type: "company_type",
+    pattern: /(?:только\s+производител(?:ь|и)|только\s+завод|юрлиц[а-у]|юридическ(?:ое|ий)|ип|чпуп|ооо|пао|р-up|manufacturer|factory|factory.*production)/iu,
+    evidencePatterns: [
+      /производител/iu, /завод/iu, /юрлиц/iu, /юридическ/iu,
+      /ИП|ЧУП|OAO|OOO|РА-UP|manufacturer|factory/iu,
+    ],
+  },
+];
+
+function extractConstraintsFromText(text: string): Set<string> {
+  const constraints = new Set<string>();
+  const normalized = oneLine(text).toLowerCase();
+  
+  for (const rule of CONSTRAINT_TRACKING_RULES) {
+    if (rule.pattern.test(normalized)) {
+      constraints.add(rule.type);
+    }
+  }
+  
+  return constraints;
+}
+
+function checkConstraintsInResponse(response: string, constraints: Set<string>): { missing: string[]; addressed: string[] } {
+  const responseLower = response.toLowerCase();
+  const addressed: string[] = [];
+  const missing: string[] = [];
+  
+  for (const constraint of constraints) {
+    const rule = CONSTRAINT_TRACKING_RULES.find(r => r.type === constraint);
+    if (!rule) continue;
+    
+    // Check if any evidence pattern matches in the response
+    const isAddressed = rule.evidencePatterns.some(pattern => pattern.test(responseLower));
+    if (isAddressed) {
+      addressed.push(constraint);
+    } else {
+      missing.push(constraint);
+    }
+  }
+  
+  return { missing, addressed };
+}
+
+function buildConstraintReminderNote(missingConstraints: string[]): string {
+  const parts: string[] = [];
+  
+  for (const constraint of missingConstraints) {
+    switch (constraint) {
+      case "location":
+        parts.push("• Уточните, какие компании ближе к нужному району/городу");
+        break;
+      case "quantity":
+        parts.push("• Укажите, какие компании могут обеспечить требуемый объем");
+        break;
+      case "delivery":
+        parts.push("• Проверьте, кто может выполнить в указанные сроки");
+        break;
+      case "company_type":
+        parts.push("• Отфильтруйте по типу компании (производитель, ИП, юрлицо)");
+        break;
+    }
+  }
+  
+  if (parts.length > 0) {
+    return `\n\n⚠️ Учтены ли в ответе требования: ${missingConstraints.join(", ")}?`;
+  }
+  return "";
+}
+
 function looksLikeAnalyticsTaggingRequest(message: string): boolean {
   const text = normalizeComparableText(message || "");
   if (!text) return false;
@@ -4137,6 +4245,57 @@ function postProcessAssistantReply(params: {
       `- Город/регион доставки?\n` +
       `- Срок поставки?\n\n` +
       `После уточнения я подготовлю полный шаблон с заполненными данными.`;
+  }
+
+  // P1 Guardrail: Constraint tracking - verify user constraints from history are addressed in response
+  // This addresses judge feedback where Turn 2 often ignores constraints from Turn 1
+  // Only apply to vendor/candidate responses, not templates
+  if (!hasTemplate && params.vendorCandidates) {
+    // Extract constraints from current message and history
+    const currentMessageConstraints = extractConstraintsFromText(params.message || "");
+    const historyConstraints = new Set<string>();
+    
+    // Also check recent history for constraints (last 2 turns)
+    const recentHistory = (params.history || []).slice(-4);
+    for (const msg of recentHistory) {
+      if (msg.role === "user") {
+        const msgConstraints = extractConstraintsFromText(msg.content || "");
+        msgConstraints.forEach(c => historyConstraints.add(c));
+      }
+    }
+    
+    // Combine all constraints
+    const allConstraints = new Set<string>();
+    currentMessageConstraints.forEach(c => allConstraints.add(c));
+    historyConstraints.forEach(c => allConstraints.add(c));
+    
+    // Check if constraints are addressed in the response
+    if (allConstraints.size > 0) {
+      const { missing, addressed } = checkConstraintsInResponse(out, allConstraints);
+      
+      // If constraints exist in history but not addressed in current response, add a reminder
+      // Only add this if there are meaningful constraints and the response is a vendor list
+      if (missing.length > 0 && addressed.length > 0) {
+        // Only add subtle reminder, not intrusive
+        const reminder = buildConstraintReminderNote(missing);
+        if (reminder && !out.includes(reminder)) {
+          // Check if response already mentions constraint handling to avoid duplication
+          const responseHasConstraintHint = missing.some(constraint => {
+            const hintPatterns = [
+              /по\s*локац/iu, /по\s*городу/iu, /по\s*региону/iu, /по\s*району/iu,
+              /по\s*объем/iu, /по\s*количеств/iu,
+              /по\s*срок/iu, /по\s*доставк/iu,
+              /по\s*типу/iu, /по\s*производител/iu,
+            ];
+            return hintPatterns.some(p => p.test(out));
+          });
+          
+          if (!responseHasConstraintHint) {
+            out = out + reminder;
+          }
+        }
+      }
+    }
   }
 
   const portalPromptSource = oneLine(
