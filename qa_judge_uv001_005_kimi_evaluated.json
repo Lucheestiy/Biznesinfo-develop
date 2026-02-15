@@ -1,0 +1,208 @@
+{
+  "judge": "kimi",
+  "task": "Rate usefulness as a real frustrated business user in realistic multi-turn sourcing conversations.",
+  "rubric": {
+    "scale": {
+      "0": "Бесполезно: не по запросу, ломает контекст, дает мусор.",
+      "1": "Почти бесполезно: очень слабая практическая ценность.",
+      "2": "Частично полезно: есть польза, но много критичных проблем.",
+      "3": "Рабочий минимум: можно использовать с правками.",
+      "4": "Полезно: хорошо помогает в задаче.",
+      "5": "Очень полезно: точный, практичный и надежный ответ."
+    },
+    "dimensions": [
+      "Relevance to user intent",
+      "Geo adherence and context continuity",
+      "Actionability and concrete next steps",
+      "Non-hallucination and honesty about limits",
+      "Formatting quality for requested mode (ranking/template/checklist)",
+      "Real-user trust: would a rushed buyer continue this dialog?",
+      "Penalty: generic fallback after user gives concrete constraints"
+    ],
+    "usefulThreshold": 3
+  },
+  "instructions": [
+    "Act as a real paying user and judge if this is actually helpful in practice.",
+    "Penalize wrong city, irrelevant supplier list, generic filler, refusal-only behavior.",
+    "Strongly penalize when assistant previously gave concrete candidates but later falls back to generic rubric advice after user clarification.",
+    "If user gives extra constraints (quality/spec/logistics), continuity is mandatory.",
+    "Do not use any external tools; evaluate only transcript content.",
+    "Return JSON only.",
+    "You MUST return top-level key `ratings` as an array.",
+    "ratings length MUST equal expectedScenarioIds length.",
+    "Every scenarioId in ratings MUST be from expectedScenarioIds and appear exactly once.",
+    "Do not return summary-only JSON. If uncertain, still output a conservative per-scenario rating with low confidence."
+  ],
+  "expectedScenarioIds": [
+    "UV001",
+    "UV002",
+    "UV003",
+    "UV004",
+    "UV005"
+  ],
+  "requiredJsonSchema": {
+    "judge": "kimi",
+    "ratings": [
+      {
+        "scenarioId": "UV001",
+        "usefulness": "integer 0..5",
+        "verdict": "useful|not_useful",
+        "confidence": "number 0..1",
+        "userSatisfaction": "number 0..1 (how satisfied real user would be)",
+        "wouldContinue": "boolean (would real user continue conversation?)",
+        "feltGenericFallback": "boolean (assistant dropped to generic advice instead of concrete progress)",
+        "continuityScore": "integer 0..5",
+        "reasons": [
+          "short reason 1",
+          "short reason 2"
+        ],
+        "criticalIssues": [
+          "optional issue"
+        ],
+        "strengths": [
+          "optional strength"
+        ],
+        "nextUserProbe": "optional short realistic follow-up message that user might type"
+      }
+    ]
+  },
+  "ratings": [
+    {
+      "scenarioId": "UV001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1-3: Ассистент повторяет одну и ту же компанию 'Глобал Шуз' 3 раза подряд, игнорируя запрос на shortlist из 3-5 производителей",
+        "Критический провал continuity: после уточнения 'именно производители, не розничные магазины' и 'мужская классическая обувь' ассистент продолжает выдавать тот же единственный результат",
+        "Turn 4: Шаблон сообщения содержит бессмысленные placeholder'ы 'уточняется', 'срок срок поставки' — выглядит как неотредактированный шаблон",
+        "Нет ни одного реального анализа или сравнения кандидатов, нет рекомендации 'кого проверить первым'"
+      ],
+      "criticalIssues": [
+        "Повторение одного результата 3 раза вместо поиска дополнительных компаний",
+        "Generic fallback на Turn 2-3: вместо конкретных производителей дает список рубрик каталога",
+        "Turn 4 шаблон не заполнен реальными данными — содержит placeholder 'уточняется' 6 раз",
+        "Полное игнорирование уточнения про 'мужская классическая обувь'"
+      ],
+      "strengths": [
+        "Turn 1: Честно указано 'найдено 1 из 2' — не выдумывает несуществующие компании",
+        "Структура ответа пытается следовать запрошенному формату shortlist"
+      ],
+      "nextUserProbe": "У вас в базе только одна компания? Я трижды прошу список производителей, а вы даете одно и то же."
+    },
+    {
+      "scenarioId": "UV002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Хороший старт с 4 конкретными компаниями, но только 2 явно хлебопродуктовые (Брестхлебопродукт, Пинский КХП)",
+        "Turn 2: Критический fallback — вместо анализа по критериям белизны/клейковины дает тот же список с пометками 'проверьте данные'",
+        "Turn 3: Полный провал — shortlist схлопывается до 3 компаний, все помечены 'проверьте данные', нет анализа экспортной готовности",
+        "Turn 4: Вместо чеклиста из 6 пунктов по документам дает ranking из 3 компаний — полное несоответствие запросу"
+      ],
+      "criticalIssues": [
+        "Turn 4: Полное несоответствие формату — запрошен чеклист документов, получен ranking компаний",
+        "Нет анализа по критериям качества (белизна, клейковина, стабильность партии) на Turn 2",
+        "Нет указания экспортной готовности по каждому заводу на Turn 3",
+        "СМАК и ДЭЙНТИ — не очевидные производители муки, скорее торговые компании"
+      ],
+      "strengths": [
+        "Turn 1: Дает конкретные компании с контактами",
+        "Честность о границах данных — помечает когда информация требует проверки"
+      ],
+      "nextUserProbe": "Вы не сделали чеклист документов. И где анализ по белизне и клейковине?"
+    },
+    {
+      "scenarioId": "UV003",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.20,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Дает рестораны из разных городов (Минск, Витебск, Борисов) вместо 'поблизости' — не запросил геолокацию",
+        "Turn 2: Катастрофический сбой — вместо b2b-формата для Уручье дает совершенно нерелевантные компании (Master Records, Автоцентр, Рыболов, Сантехника)",
+        "Turn 3: Продолжает давать нерелевантные результаты — те же автоцентры и сантехника вместо вариантов запросов для кафе",
+        "Turn 4: Шаблон с бессмысленными placeholder'ами 'уточняется', 'сформируй сообщение' — не применим к реальному контакту"
+      ],
+      "criticalIssues": [
+        "Turn 2-3: Полная потеря контекста — нерелевантные категории (авто, сантехника, рыболовство) вместо HoReCa/продуктов",
+        "Не выполнен запрос '3 варианта запросов для портала' — даны случайные компании",
+        "Нет моста к b2b-поиску как обещано в personaGoal",
+        "Шаблон Turn 4 содержит placeholder 'сформируй сообщение' вместо реального текста"
+      ],
+      "strengths": [
+        "Turn 1: Рестораны хотя бы реальные, хоть и из разных городов",
+        "Turn 4: Структура Subject/Body/WhatsApp присутствует"
+      ],
+      "nextUserProbe": "Что происходит? Я спрашиваю про рестораны и продукты, а вы мне автоцентры и сантехнику показываете."
+    },
+    {
+      "scenarioId": "UV004",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.55,
+      "wouldContinue": true,
+      "feltGenericFallback": true,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Отличный старт с 4 конкретными производителями бытовой техники (Н-ТиВи, Атлант, Ареса-техно, Брестгазоаппарат)",
+        "Turn 2: Критический fallback — вместо анализа OEM/ODM возможностей дает общие инструкции по поиску в нерелевантных рубриках (легкая промышленность, швейное производство)",
+        "Turn 3: Вместо анализа 'по надежности и сервису' дает generic shortlist с одинаковыми пометками 'проверьте данные' для всех",
+        "Turn 4: Шаблон RFQ содержит placeholder'ы 'уточняется', 'сервису rfq', 'город' — не заполнен конкретикой"
+      ],
+      "criticalIssues": [
+        "Turn 2: Generic fallback — общие инструкции по поиску вместо анализа OEM/ODM возможностей конкретных заводов",
+        "Turn 3: Нет сравнения по надежности и сервису как запрошено — все кандидаты равнозначны",
+        "Turn 4: RFQ шаблон не заполнен — placeholder'ы вместо реальных параметров",
+        "Н-ТиВи (HORIZONT) и Брестгазоаппарат — крупные бренды, маловероятны для OEM/ODM под чужим брендом"
+      ],
+      "strengths": [
+        "Turn 1: Хороший first-pass с конкретными производителями бытовой техники",
+        "Turn 3: 5 вопросов для первого звонка — практичный чеклист",
+        "Turn 4: Структура RFQ корректная (MOQ, сроки, гарантия запрошены)"
+      ],
+      "nextUserProbe": "А по OEM/ODM — кто из этих реально работает под частными марками? И кого первым проверять?"
+    },
+    {
+      "scenarioId": "UV005",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Generic fallback — общие инструкции по поиску в рубриках вместо конкретных экспортеров",
+        "Turn 2: Хороший turn — дает 4 конкретных молочных комбината (Любанский, Полоцкий, Савушкин продукт, Брестское мороженое)",
+        "Turn 3: Деградация — shortlist из 4 компаний (вместо 5), причем Любанский филиал внезапно становится 'Luban Cheese' с неправильной локацией 'Слуцк'",
+        "Turn 4: Шаблон с placeholder'ами 'уточняется', 'outreach шаблон', 'город' — не заполнен конкретикой"
+      ],
+      "criticalIssues": [
+        "Turn 3: Неверная локация для Любанского филиала (Слуцк вместо Любань), нет 5-й компании как запрошено",
+        "Нет сегментации по рынкам ЕАЭС/СНГ как запрошено на Turn 2",
+        "Нет кондитерских производств в shortlist (только молочные)",
+        "Turn 4: Шаблон не адаптирован под молочную/кондитерскую продукцию — generic placeholder'ы"
+      ],
+      "strengths": [
+        "Turn 2: Хороший список молочных комбинатов с контактами",
+        "Turn 1: Поисковые фразы для каталога составлены логично",
+        "Turn 4: Структура outreach-шаблона корректная"
+      ],
+      "nextUserProbe": "Где кондитерские производства? И кто из этих работает со СНГ — можете уточнить?"
+    }
+  ]
+}

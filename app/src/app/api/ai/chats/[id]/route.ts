@@ -20,6 +20,8 @@ type TurnRow = {
   turn_index: number;
   user_message: string;
   assistant_message: string | null;
+  provider: string | null;
+  model: string | null;
   created_at: string;
 };
 
@@ -108,6 +110,8 @@ export async function GET(
           turn_index,
           user_message,
           assistant_message,
+          NULLIF(response_meta->>'provider', '') AS provider,
+          NULLIF(response_meta->>'model', '') AS model,
           created_at::text
         FROM ai_assistant_turns
         WHERE session_id = $1
@@ -138,6 +142,8 @@ export async function GET(
             turnIndex: Number(turn.turn_index || 0),
             userMessage: turn.user_message || "",
             assistantMessage: turn.assistant_message || null,
+            provider: turn.provider || null,
+            model: turn.model || null,
             createdAt: turn.created_at,
           })),
         },

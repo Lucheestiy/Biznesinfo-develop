@@ -27,11 +27,11 @@ function parseBoolQueryParam(raw: string | null): boolean {
   return value === "1" || value === "true" || value === "yes" || value === "on";
 }
 
-type ProviderFilter = "stub" | "openai" | "codex";
+type ProviderFilter = "stub" | "openai" | "codex" | "minimax";
 
 function parseProviderFilter(raw: string | null): ProviderFilter | null {
   const value = (raw || "").trim().toLowerCase();
-  if (value === "stub" || value === "openai" || value === "codex") return value;
+  if (value === "stub" || value === "openai" || value === "codex" || value === "minimax") return value;
   return null;
 }
 
@@ -44,13 +44,23 @@ function truncate(raw: string, max: number): string {
 
 function getProviderStatus() {
   const providerRaw = (process.env.AI_ASSISTANT_PROVIDER || "stub").trim().toLowerCase();
-  const provider = providerRaw === "openai" ? "openai" : (providerRaw === "codex" || providerRaw === "codex-auth" || providerRaw === "codex_cli" ? "codex" : "stub");
+  const provider =
+    providerRaw === "openai"
+      ? "openai"
+      : (providerRaw === "codex" || providerRaw === "codex-auth" || providerRaw === "codex_cli"
+        ? "codex"
+        : (providerRaw === "minimax" || providerRaw === "mini-max" || providerRaw === "minimax-api" || providerRaw === "m2.5"
+          ? "minimax"
+          : "stub"));
   const openaiModel = (process.env.OPENAI_MODEL || "").trim() || "gpt-4o-mini";
   const openaiBaseUrl = (process.env.OPENAI_BASE_URL || "").trim() || "https://api.openai.com/v1";
   const hasOpenaiKey = Boolean((process.env.OPENAI_API_KEY || "").trim());
   const codexModel = (process.env.CODEX_MODEL || "").trim() || "gpt-5.2-codex";
   const codexBaseUrl = (process.env.CODEX_BASE_URL || "").trim() || "https://chatgpt.com/backend-api/codex";
   const hasCodexAuthPath = Boolean((process.env.CODEX_AUTH_JSON_PATH || "").trim());
+  const minimaxModel = (process.env.MINIMAX_MODEL || "").trim() || "MiniMax-M2.5";
+  const minimaxBaseUrl = (process.env.MINIMAX_BASE_URL || "").trim() || "https://api.minimax.io/v1";
+  const hasMinimaxKey = Boolean((process.env.MINIMAX_API_KEY || "").trim());
 
   return {
     provider,
@@ -63,6 +73,11 @@ function getProviderStatus() {
       model: codexModel,
       baseUrl: codexBaseUrl,
       hasAuthPath: hasCodexAuthPath,
+    },
+    minimax: {
+      model: minimaxModel,
+      baseUrl: minimaxBaseUrl,
+      hasKey: hasMinimaxKey,
     },
   };
 }

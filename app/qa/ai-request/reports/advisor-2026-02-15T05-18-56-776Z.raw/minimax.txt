@@ -1,0 +1,139 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "UV017 exposes 4 critical failures: template parsing corruption ('сформируй сообщение' loops), zero supplier verification for red beet, missing alternative queries, and 100% generic fallback rate. All issues stem from weak system prompt constraints and missing validation hooks. Fix requires: (1) template guardrails to prevent self-referential placeholders, (2) mandatory verification step before presenting suppliers, (3) explicit alternative query requirement with fallback, (4) continuity validation to reject context shifts. Expected impact: eliminate garbage templates, improve relevance, recover user trust.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template generation guardrails - prevent self-referential garbage",
+      "why": "Turn 3 generated 'сформируй сообщение' loops instead of actual message. This is a parsing/regeneration corruption where the model echoes user instructions as content. Both judges flagged this as 'полный сбой генерации' (complete generation failure). Current pass rate is 100% but usefulness is 0% - technical checks pass while user value is nil.",
+      "expectedImpact": "Eliminate template parsing corruption. Template output should contain actual parameterized content, not instruction echoes. Expected improvement: genericFallbackRate from 100% -> <30%, continuity score from 1-2/5 -> 4+/5.",
+      "validationScenarios": [
+        "UV017",
+        "Any template generation scenario (UV005-UV007)"
+      ]
+    },
+    {
+      "priority": "P0",
+      "title": "Add mandatory supplier verification before presentation",
+      "why": "Both judges independently flagged: 'ни в одном turn не подтверждено, что компании реально торгуют свеклой' (no confirmation companies actually sell red beet). Minsk Vegetable Factory listed as 'Beekeeping', Agromashmarket as 'Spare parts for agricultural machinery'. System must validate product-category alignment BEFORE presenting companies to user.",
+      "expectedImpact": "Ensure only relevant suppliers are presented. Expected: elimination of category mismatches (beekeeping for vegetable supplier), improvement in relevance scoring, reduced noise in shortlist.",
+      "validationScenarios": [
+        "UV017",
+        "UV005-UV008 (vegetable/food scenarios)"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce alternative query generation when explicitly requested",
+      "why": "Turn 2 user explicitly asked for 'alternative search queries' - received none. Judge labeled this as 'zero alternative search queries provided despite explicit request'. This is a direct instruction following failure. The system should have a validation hook that fails if user requests X and assistant provides nothing for X.",
+      "expectedImpact": "100% instruction compliance when alternative queries requested. Expected: usefulRate improvement from 0% to >60% for multi-turn negotiation scenarios.",
+      "validationScenarios": [
+        "UV017",
+        "Any scenario with explicit sub-requests (UV010-UV012)"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Add continuity validation to reject context drift",
+      "why": "Continuity score: 2/5 (kimi) and 1/5 (minimax) - worst possible. After Turn 2 established context (500 kg, 3 days, Minsk), Turn 3 produced generic 'уточняется' placeholders. The system needs a continuity checkpoint that validates: 'Does Turn N output align with Turn N-1 specific parameters?'",
+      "expectedImpact": "Prevent context abandonment. Expected: continuity score improvement to 4+/5, reduced generic placeholders, consistent parameter propagation across turns.",
+      "validationScenarios": [
+        "UV017",
+        "All multi-turn scenarios (UV001-UV020)"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add template generation guardrails to prevent self-referential placeholders",
+      "action": "Update system prompt with explicit rule: 'NEVER echo user instructions as template content. If template field contains user's instruction text (e.g., 'сформируй сообщение', 'запрос по...'), treat this as CORRUPTION and regenerate. Template must contain PARAMETERIZED VALUES, not instruction references.'",
+      "implementationHint": "File: app/scripts/ai-request-qa-runner.mjs or system prompt file. Add a pre-output validation that checks: if template.text contains patterns matching user instructions, reject and regenerate. Pattern: /(сформир|запрос|сообщени)[а-я]{0,20}/i as trigger for regeneration.",
+      "expectedImpact": "Eliminate template corruption. Template output quality: actual parameterized content vs garbage echoes.",
+      "risk": "Low - adds validation, doesn't change model behavior, only prevents corrupted output",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017",
+        "All template generation tests"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add mandatory verification step for supplier relevance",
+      "action": "Update system prompt with rule: 'Before presenting ANY company, perform verification: Does company profile explicitly mention the requested product (red beet/sвекла)? If company categories are generic (food products, wholesale), ACQUIRE specific evidence from company description OR EXCLUDE company. Never present unverifiable companies. Use format: [COMPANY] - verified: [YES/NO] - evidence: [specific mention or \"no evidence\"]'",
+      "implementationHint": "File: app/scripts/ai-request-qa-runner.mjs. Before shortlist generation, add verification pass that requires explicit product mention in company data. Reject companies with no specific evidence.",
+      "expectedImpact": "Eliminate category mismatches (beekeeping for vegetable supplier). Only verified suppliers in shortlists.",
+      "risk": "Medium - may reduce number of presented companies, but improves quality",
+      "effort": "M",
+      "validationScenarios": [
+        "UV017",
+        "UV005-UV008"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Enforce instruction following for alternative queries",
+      "action": "Update system prompt: 'When user explicitly requests alternative search queries, you MUST provide them. If unable to find alternatives, state: \"Alternative queries I considered but cannot find results: [list]\". Never ignore explicit sub-requests. Treat ignored instructions as a FAILURE condition.' Add validation: if user asks for X and no X in response, flag as error.",
+      "implementationHint": "File: app/scripts/ai-request-qa-runner.mjs or response validator. Parse user request for explicit sub-requests (alternative queries, confirmations, assessments). Validate presence in assistant response.",
+      "expectedImpact": "100% compliance with explicit user instructions. Expected: elimination of 'zero alternative queries' failure.",
+      "risk": "Low - enforces existing expectations, adds validation",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017",
+        "UV010-UV012"
+      ]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Implement continuity checkpoint for multi-turn scenarios",
+      "action": "Add validation hook between turns that checks: (1) What specific parameters were established in previous turn? (2) Does current turn maintain those parameters? (3) If parameters are dropped (500 kg, 3 days), require explicit justification or treat as continuity violation. Use format: 'CONTINUITY_CHECK: [params preserved/dropped] - [list preserved/dropped params]'",
+      "implementationHint": "File: app/scripts/ai-request-qa-runner.mjs. Store Turn N-1 parameters in context. At Turn N, validate parameter preservation. Fail if context is abandoned without justification.",
+      "expectedImpact": "Continuity score improvement from 1-2/5 to 4+/5. Reduced parameter abandonment.",
+      "risk": "Low - adds validation, preserves user context",
+      "effort": "M",
+      "validationScenarios": [
+        "UV017",
+        "All multi-turn tests"
+      ]
+    },
+    {
+      "id": "R5",
+      "area": "template",
+      "title": "Add template schema validation to reject incomplete templates",
+      "action": "Add schema validation for template output: 'Template fields (subject, body, whatsapp) must contain at least 3 actual parameterized values, not placeholders like [уточняется] or repeated instructions. If template contains more than 1 placeholder per field, REJECT and regenerate.'",
+      "implementationHint": "File: app/scripts/ai-request-qa-runner.mjs. Add post-generation validator that checks template quality: count placeholders per field, validate parameterized content presence.",
+      "expectedImpact": "Eliminate templates with 'уточняется' placeholders. Improve template usefulness from 0% to >70%.",
+      "risk": "Low - validates output quality, rejects low-quality templates",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017",
+        "UV005-UV007"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV017",
+      "UV005-UV008 (vegetable/food supplier verification)",
+      "UV010-UV012 (explicit sub-requests compliance)",
+      "UV001-UV004 (single-turn template generation)"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+      "app/qa/ai-request/scenarios.uv001-uv020.json"
+    ],
+    "successMetrics": [
+      "genericFallbackRate: <35% (currently 100%)",
+      "continuityScore: >4/5 (currently 1-2/5)",
+      "alternativeQueryCompliance: 100% when requested (currently 0%)",
+      "supplierVerificationRate: >90% (currently ~0%)",
+      "usefulRate: >50% (currently 0%)"
+    ]
+  }
+}
+```

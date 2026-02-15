@@ -1,0 +1,120 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Scenario UV017 reveals critical failure modes: (1) template generation produces garbage output with circular placeholder references ('сформируй сообщение' echoed back), (2) no verification that listed companies actually trade the requested product (beet), (3) continuity breakdown between turns — context (500kg, 3 days) is lost. The system passes strict checks (format compliance) but delivers zero business value. Root causes: weak prompt constraints on template generation, missing product-to-company verification step, no guardrails against echo attacks in user input.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template generation prompt to prevent echo attacks",
+      "why": "Turn 3 output is completely unusable — user input text is being echoed back as template content due to weak prompt boundaries",
+      "expectedImpact": "Eliminates garbage template generation, restores basic usability for message composition feature",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add product verification step before company shortlisting",
+      "why": "Companies with 'Пчеловодство' and 'Запчасти к сельхозтехнике' are being returned for beet query — no semantic validation",
+      "expectedImpact": "Reduces false positive rate in supplier matching, increases trust in recommendations",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement continuity enforcement across multi-turn sessions",
+      "why": "Context (500kg, 3 days, Minsk) is lost between turns 2 and 3, breaking user workflow",
+      "expectedImpact": "Maintains session coherence, improves multi-turn task completion rate",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add strict output validation for template format",
+      "why": "Current output passes format checks but contains nonsense — validation is too permissive",
+      "expectedImpact": "Catches garbage output before delivery, triggers retry or fallback",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Harden template generation prompt against user input injection",
+      "action": "Add explicit instruction: 'NEVER copy user instructions into template content. Extract ONLY: product, volume, location, deadline from context. Reject if user input contains meta-commands like \"сформируй\".' Add negative examples in prompt showing forbidden echo patterns.",
+      "implementationHint": "Modify system prompt for template generation tool — likely in src/ai/prompts/templates.ts or similar. Add <forbidden_patterns> section with examples like 'сформируй сообщение', 'уточняется' as placeholders.",
+      "expectedImpact": "Prevents circular reference garbage in Turn 3 output",
+      "risk": "May over-reject legitimate template requests if patterns too broad",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Add product-to-NACE/activity verification filter",
+      "action": "Before returning company shortlist, verify that company's primary_activity or NACE codes semantically match requested product. Use embedding similarity threshold (e.g., >0.6) between 'свекла оптовая продажа' and company activity description. Filter out if below threshold.",
+      "implementationHint": "In retrieval pipeline (src/ai/retrieval/companies.ts or similar), add post-filter step after initial search. Compute similarity between query product embedding and each candidate's activity_description embedding.",
+      "expectedImpact": "Eliminates 'Пчеловодство' and 'Запчасти' results for beet queries",
+      "risk": "May filter legitimate diversified traders; add override flag for 'оптовая торговля' broad category",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Implement template output sanity checker",
+      "action": "Add post-generation validation: (1) template must not contain user instruction verbs ('сформируй', 'создай', 'напиши'), (2) placeholders must not be 'уточняется' when context provides values, (3) subject line must be <100 chars and business-relevant. Fail → retry with stronger prompt.",
+      "implementationHint": "Create src/ai/guardrails/template-validator.ts with regex patterns for instruction verbs and placeholder audit. Integrate into template generation flow before response delivery.",
+      "expectedImpact": "Blocks garbage templates at generation time, forces retry",
+      "risk": "Adds latency (one extra LLM call on failure)",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Inject session context into every turn system prompt",
+      "action": "Modify multi-turn handler to prepend accumulated context (extracted entities: product, volume, location, deadline) to system prompt on each turn. Format: '[Session context] Product: свекла, Volume: 500kg, Location: Минск, Deadline: 3 days'.",
+      "implementationHint": "In conversation manager (src/ai/conversation/manager.ts or similar), maintain entity extraction from each turn. Inject into system prompt prefix before LLM call.",
+      "expectedImpact": "Preserves 500kg/3 days context through Turn 3, maintains continuity",
+      "risk": "May confuse if context becomes stale; add timestamp or turn counter",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Require explicit product confirmation in shortlist response",
+      "action": "Add mandatory field in shortlist output schema: 'product_confidence' with enum ['confirmed', 'likely', 'unknown']. Model must justify 'confirmed' with evidence from company data. Default to 'unknown' if no evidence.",
+      "implementationHint": "Update JSON schema for shortlist tool response. Add validation that 'confirmed' requires citation from company description or product list.",
+      "expectedImpact": "Forces model to verify beet trading before claiming relevance",
+      "risk": "May increase false negatives; tune threshold based on QA feedback",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R6",
+      "area": "retrieval",
+      "title": "Expand search with alternative product terms when primary yields low confidence",
+      "action": "When <3 companies have 'confirmed' product match, automatically expand query with synonyms ('свёкла столовая', 'красная свекла', 'овощи оптом') and present alternatives to user with explanation.",
+      "implementationHint": "Add query expansion layer in retrieval pipeline. Use predefined synonym map or LLM-generated variants. Return 'alternative_searches' field in response.",
+      "expectedImpact": "Addresses judge finding: 'zero alternative search queries provided despite explicit request'",
+      "risk": "May drift to irrelevant products if expansion too aggressive; keep within same product category",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "template generation suite",
+      "multi-turn continuity suite",
+      "supplier verification suite"
+    ],
+    "successMetrics": [
+      "Usefulness score ≥3 for UV017 (currently 1)",
+      "Zero templates containing instruction verbs ('сформируй', 'создай')",
+      "Product confidence 'confirmed' or 'likely' for ≥80% of shortlisted companies",
+      "Context preservation: 500kg, 3 days, Minsk present in Turn 3 output",
+      "Pass rate for multi-turn scenarios ≥90%"
+    ]
+  }
+}
+```

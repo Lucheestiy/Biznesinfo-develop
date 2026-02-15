@@ -1,0 +1,115 @@
+{
+  "advisor": "minimax",
+  "executiveSummary": "The QA reveals 4 critical failure modes: (1) catastrophic context/continuity loss between turns, (2) wrong-category hallucination (healthcare→manufacturing), (3) template collapse into placeholder text, and (4) complete task misunderstanding when direct catalog lookup fails. P0 fixes: enforce category validation before output, hardcode continuity checkpoints in system prompt, and kill placeholder templates with explicit fill-instructions.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Enforce category validation before output",
+      "why": "UV012 returned polyclinics/hospitals as shoe manufacturers. System must reject companies whose category doesn't match the task domain.",
+      "expectedImpact": "Zero wrong-category outputs; strict pass on all website_scan scenarios",
+      "validationScenarios": ["UV012", "UV013"]
+    },
+    {
+      "priority": "P0",
+      "title": "Hardcode continuity checkpoints in system prompt",
+      "why": "UV022, UV019, UV020 all lost company context between turns. System must echo previous context and verify continuity.",
+      "expectedImpact": "100% context retention in multi-turn scenarios",
+      "validationScenarios": ["UV022", "UV019", "UV020"]
+    },
+    {
+      "priority": "P0",
+      "title": "Kill placeholder templates with explicit fill-or-fail",
+      "why": "UV001, UV003, UV004, UV006, UV007, UV016, UV017 all returned 'уточняется' placeholders. Templates must either be filled or explicitly state inability.",
+      "expectedImpact": "Zero placeholder-only outputs; all templates either real or honest fallback",
+      "validationScenarios": ["UV001", "UV003", "UV004", "UV006"]
+    },
+    {
+      "priority": "P1",
+      "title": "Anti-synthetic fallback: task refusal protocol",
+      "why": "UV018 asked for GA tags, got catalog rubrics. UV003 asked for B2B, got fishing/plumbing. System must admit inability and ask for clarification rather than generating synthetic fallback.",
+      "expectedImpact": "Eliminate synthetic task-avoidance responses",
+      "validationScenarios": ["UV018", "UV003", "UV009"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add category validation guardrail",
+      "action": "In system prompt: after any company lookup, before output, add explicit validation: CHECK: company category must contain at least one keyword from [task_domain]. Reject if mismatch with honest fallback: 'Catalog has no companies matching [task_domain]. Found [N] [actual_category]. Do you want to broaden search?'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts or similar AI orchestration layer; add pre-output validation function",
+      "expectedImpact": "Zero category-mismatch errors like 'polyclinics as shoe manufacturers'",
+      "risk": "Low - adds validation, doesn't change model behavior directly",
+      "effort": "M",
+      "validationScenarios": ["UV012", "UV013", "UV009"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Continuity checkpoint injection",
+      "action": "In system prompt: add mandatory turn-start checkpoint: 'CONTINUITY CHECK: Previous turn established: [company_name] / [task_domain] / [constraints]. Current response must reference and build on this. If you cannot find [company_name], state explicitly and ask: \"I cannot find [company_name] in current context. Should I search catalog fresh?\"'",
+      "implementationHint": "System prompt template in AI route handler; add continuity_section variable",
+      "expectedImpact": "Fixes all context-loss scenarios (UV019, UV020, UV022)",
+      "risk": "Low - improves coherence, no behavioral changes",
+      "effort": "S",
+      "validationScenarios": ["UV019", "UV020", "UV022", "UV021"]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Template fill-or-fail enforcement",
+      "action": "Replace all template patterns containing 'уточняется', '[проверьте данные]', or empty brackets with explicit instruction: 'OUTPUT TEMPLATE with these fields filled from conversation context: [product], [volume], [location], [timeline]. If any field is missing, ask user: \"To complete the template, I need: [missing_fields]. Please provide.\" NO placeholder-only responses.'",
+      "implementationHint": "Template generation function in UI components (AiRequestsClient.tsx, AssistantClient.tsx)",
+      "expectedImpact": "Eliminates unusable placeholder templates",
+      "risk": "Medium - changes user-facing output format",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV003", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Anti-synthetic fallback protocol",
+      "action": "In system prompt: add 'When catalog returns zero relevant results for [task_type=tags|news|analysis|comparison], do NOT generate synthetic content. Instead output: \"I cannot find [task_type] in catalog for [company/search_term]. Options: (1) Search web for [term] + news/tags, (2) Broaden catalog search, (3) Describe what you need.\" NO catalog rubric listings, NO generic advice, NO supplier search unless requested.'",
+      "implementationHint": "Zero-results handler in AI route; check for zero_results before template injection",
+      "expectedImpact": "Fixes UV018 (catalog rubrics→tags), UV009 (wrong categories), UV003 (B2B→fishing suppliers)",
+      "risk": "Low - honest fallback is better than wrong output",
+      "effort": "S",
+      "validationScenarios": ["UV018", "UV009", "UV003"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Website scan enforcement with honest marking",
+      "action": "For any website_scan task: (1) Must report actual URL checked, (2) Must report specific page/section reviewed, (3) If no manufacturer claim found, mark explicitly: '[Company] appears to be [retail/distributor/reseller], NOT manufacturer per [page evidence]. Continue to next candidate?'",
+      "implementationHint": "Website scanning function; add evidence_report parameter to output",
+      "expectedImpact": "Fixes UV013 (incorrect manufacturer claim), UV012 (no actual scan)",
+      "risk": "Medium - requires actual website access capability",
+      "effort": "L",
+      "validationScenarios": ["UV012", "UV013"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Multi-turn constraint propagation",
+      "action": "In system prompt: track constraints explicitly across turns. Add: 'ACTIVE CONSTRAINTS from Turn 1: [list]. These MUST be applied to ALL subsequent results unless user explicitly relaxes them. If filtered results < requested count, report: \"Found only [N] of [M] requested matching [constraints]. Continue with [N] or relax constraints?\"'",
+      "implementationHint": "Constraint tracking in conversation context; pass as system variables",
+      "expectedImpact": "Fixes UV001 (men's classical shoes ignored), UV002 (quality criteria ignored)",
+      "risk": "Low - better constraint enforcement",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV002", "UV015"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV012", "UV018", "UV022", "UV019", "UV001", "UV003"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "strictPassRate: target 0.8 (currently 0.55)",
+      "checkPassRate: maintain >0.9",
+      "avgUsefulness: target >2.0 (currently 1.3)",
+      "Zero category-mismatch errors in UV012-like scenarios",
+      "Zero placeholder-only template outputs"
+    ]
+  }
+}

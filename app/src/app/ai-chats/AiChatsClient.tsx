@@ -23,6 +23,8 @@ type ChatSessionRow = {
   turnCount: number;
   lastUserMessage: string | null;
   lastAssistantMessage: string | null;
+  lastProvider: string | null;
+  lastModel: string | null;
   user?: { id: string; email: string; name: string | null } | null;
 };
 
@@ -31,6 +33,8 @@ type ChatTurn = {
   turnIndex: number;
   userMessage: string;
   assistantMessage: string | null;
+  provider: string | null;
+  model: string | null;
   createdAt: string;
 };
 
@@ -234,6 +238,12 @@ export default function AiChatsClient({ currentUser }: { currentUser: CurrentUse
                               <span className="font-semibold">Ассистент:</span>{" "}
                               {shortText(session.lastAssistantMessage, 120) || "—"}
                             </div>
+                            {(session.lastProvider || session.lastModel) && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                AI: {session.lastProvider || "unknown"}
+                                {session.lastModel ? ` • ${session.lastModel}` : ""}
+                              </div>
+                            )}
                           </button>
                         </li>
                       );
@@ -275,7 +285,15 @@ export default function AiChatsClient({ currentUser }: { currentUser: CurrentUse
                           <div className="whitespace-pre-wrap text-sm text-gray-900">{turn.userMessage}</div>
                         </div>
                         <div className="rounded-xl border border-purple-100 bg-purple-50 px-3 py-2">
-                          <div className="text-xs font-semibold text-purple-800 mb-1">Ассистент</div>
+                          <div className="text-xs font-semibold text-purple-800 mb-1">
+                            Ассистент
+                            {(turn.provider || turn.model) && (
+                              <span className="ml-2 font-normal text-purple-700">
+                                ({turn.provider || "unknown"}
+                                {turn.model ? ` • ${turn.model}` : ""})
+                              </span>
+                            )}
+                          </div>
                           <div className="whitespace-pre-wrap text-sm text-gray-900">{turn.assistantMessage || "—"}</div>
                         </div>
                       </div>

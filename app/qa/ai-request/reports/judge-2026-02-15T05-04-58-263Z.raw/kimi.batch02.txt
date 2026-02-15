@@ -1,0 +1,166 @@
+I can see there's already an evaluation file. Let me carefully re-evaluate the scenarios based on the actual transcripts provided in the prompt, as the existing evaluation seems to be evaluating different assistant responses than what's shown in the current prompt.
+
+Let me analyze each scenario based on the actual transcripts provided:
+
+**UV006 (Лес на экспорт):**
+- Turn 1: Gives 4 leskhoz companies with contacts
+- Turn 2: Repeats similar list but doesn't address FSC or delivery to border specifically
+- Turn 3: Gives shortlist but doesn't mention contract checks
+- Turn 4: RFQ is completely broken - filled with placeholders like "уточняется", "город", "срок срок поставки"
+
+**UV007 (Reverse B2B - пластиковая тара):**
+- Turn 1: Returns irrelevant company (Техносклад - not related to packaging)
+- Turn 2: Falls back to generic rubric advice about search categories instead of concrete companies
+- Turn 3: Only gives segments without actual company names
+- Turn 4: Template message with placeholders
+
+**UV008 (Минитрактор):**
+- Turn 1: Only 1 company found (ЖК Трейд - spare parts, not tractors)
+- Turn 2: Same 1 company, doesn't address 30hp requirement
+- Turn 3: Still only 1 company, admits insufficient data
+- Turn 4: Can't compare 3 options with only 1 irrelevant candidate
+
+**UV009 (Стоматология с микроскопом):**
+- Turn 1: Returns completely irrelevant company (Сэльвин - household chemicals)
+- Turn 2: Good - gives criteria for choosing clinic when admits no data
+- Turn 3: Empty response
+- Turn 4: Returns irrelevant company again
+
+**UV010 (Молочная компания):**
+- Turn 1: Generic guidance without identifying Savushkin
+- Turn 2: Good - finds Savushkin and gives 3 alternatives
+- Turn 3: Good actionable algorithm
+- Turn 4: Good concrete queries
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV006",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 4 RFQ is completely broken with placeholders instead of actual content",
+        "Turn 2 ignores FSC and delivery requirements, just repeats generic leskhoz list",
+        "Turn 3 shortlist doesn't address contract check request"
+      ],
+      "criticalIssues": [
+        "RFQ template filled with 'уточняется' and 'город' placeholders - unusable",
+        "No actual FSC verification or logistics guidance provided",
+        "Assistant fails to maintain continuity on specific constraints"
+      ],
+      "strengths": [
+        "Turn 1 provides concrete companies from catalog",
+        "Maintains same companies across turns"
+      ],
+      "nextUserProbe": "Почему в RFQ шаблоне вместо реального текста стоят заглушки?"
+    },
+    {
+      "scenarioId": "UV007",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1 returns completely irrelevant company (Техносклад - warehouse equipment)",
+        "Turn 2 falls back to generic search advice instead of concrete companies",
+        "Turn 3 only provides segments without actual company names",
+        "Turn 4 template message has placeholders"
+      ],
+      "criticalIssues": [
+        "No concrete packaging buyers found in catalog despite clear request",
+        "Generic fallback to rubric advice after user gives specific constraints",
+        "Template message in Turn 4 contains 'уточняется' placeholders"
+      ],
+      "strengths": [
+        "Turn 2 segments are logically relevant (dairy, sauces, HoReCa)",
+        "Doesn't hallucinate fake companies"
+      ],
+      "nextUserProbe": "Найдите конкретные молочные заводы и производителей соусов в вашем каталоге"
+    },
+    {
+      "scenarioId": "UV008",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Only 1 company found across all turns (ЖК Трейд - spare parts, not tractors)",
+        "Turn 2-3 repeat same irrelevant company",
+        "Turn 4 comparison impossible with single non-relevant candidate"
+      ],
+      "criticalIssues": [
+        "No actual tractor suppliers found in catalog",
+        "Company provided sells spare parts, not equipment",
+        "User asks 'who to call first' - gets 1 wrong company"
+      ],
+      "strengths": [
+        "Turn 1 honestly admits limited data",
+        "Provides contact info for the one company found"
+      ],
+      "nextUserProbe": "Где купить минитрактор в Минской области?"
+    },
+    {
+      "scenarioId": "UV009",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1 returns completely irrelevant company (Сэльвин - household chemicals)",
+        "Turn 3 empty response - no checklist provided",
+        "Turn 4 returns irrelevant company again instead of script"
+      ],
+      "criticalIssues": [
+        "Turn 1 and 4 return Сэльвин which has nothing to do with dentistry",
+        "Turn 3 completely fails to provide requested checklist",
+        "No dental clinics found in catalog despite clear medical query"
+      ],
+      "strengths": [
+        "Turn 2 provides good criteria for clinic selection when admitting no data",
+        "Medical guidance is safe without diagnosis"
+      ],
+      "nextUserProbe": "Почему вы предлагаете компанию по бытовой химии для лечения зубов?"
+    },
+    {
+      "scenarioId": "UV010",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.80,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 2 correctly identifies Savushkin and provides 3 relevant alternatives",
+        "Turn 3 gives actionable 4-step verification algorithm",
+        "Turn 4 provides concrete usable queries for portal and phone call"
+      ],
+      "criticalIssues": [
+        "Turn 1 gives generic guidance without identifying the company directly"
+      ],
+      "strengths": [
+        "Good handling of fuzzy brand recall scenario",
+        "Alternatives are logical and relevant to dairy industry",
+        "Final queries are immediately actionable"
+      ],
+      "nextUserProbe": "Дайте прямую ссылку на карточку Савушкин продукт"
+    }
+  ]
+}
+```

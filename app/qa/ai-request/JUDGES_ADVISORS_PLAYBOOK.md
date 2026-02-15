@@ -132,6 +132,21 @@ npm run qa:run:external
 npm run qa:run:multi-model
 ```
 
+Before/after benchmark двух провайдеров (например `codex` vs `minimax`) с авто-документацией:
+
+```bash
+npm run qa:benchmark:providers -- \
+  --before-provider codex \
+  --after-provider minimax \
+  --after-model MiniMax-M2.5 \
+  --max-scenarios 20 \
+  --judges kimi,minimax
+```
+
+Скрипт запустит два QA-прогона, два judge-прогона и соберёт единый comparison report.
+Для request-level переключения провайдера в рамках одного runtime установите:
+`AI_ASSISTANT_ALLOW_PROVIDER_OVERRIDE=1` (только для QA/benchmark окружения).
+
 ```bash
 npm run qa:judge
 ```
@@ -272,6 +287,8 @@ node scripts/advise_ai_with_judges.mjs \
   Включая real-user метрики: `userSatisfaction`, `wouldContinue`, `genericFallbackRate`.
 - `scripts/advise_ai_with_judges.mjs`: actionable roadmap от Gemini/Kimi/MiniMax как советников:
   P0/P1/P2, конкретные правки, ожидаемый эффект, сценарии валидации.
+- `scripts/run_ai_provider_benchmark.mjs`: sequential before/after прогон для двух провайдеров ассистента
+  (`AI_ASSISTANT_PROVIDER`) с итоговым diff-отчётом.
 - `scripts/build_chatgpt_pro_test_pack.mjs`: собирает master-набор из сценариев, построенных на документе ChatGPT Pro.
 - `scripts/build_external_challenge_docs.mjs`: генерирует отдельные markdown-документы вопросов для Gemini/Kimi/MiniMax.
 - `scripts/build_multi_model_test_pack.mjs`: собирает единый multi-model pack (ChatGPT Pro + external sets).
@@ -288,6 +305,9 @@ node scripts/advise_ai_with_judges.mjs \
 - Advisor report:
   - `app/qa/ai-request/reports/latest.advice.json`
   - `app/qa/ai-request/reports/latest.advice.md`
+- Provider benchmark report:
+  - `app/qa/ai-request/reports/latest.provider-benchmark.json`
+  - `app/qa/ai-request/reports/latest.provider-benchmark.md`
 - Geo ambiguity trend:
   - `app/qa/ai-request/reports/geo-ambiguity-trend.json`
   - `app/qa/ai-request/reports/geo-ambiguity-trend.md`

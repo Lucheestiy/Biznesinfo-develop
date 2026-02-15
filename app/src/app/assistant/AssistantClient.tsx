@@ -19,6 +19,7 @@ type AssistantMessage = {
   localFallbackUsed?: boolean;
   fallbackNotice?: string | null;
   provider?: string | null;
+  model?: string | null;
   feedback?: AssistantFeedback | null;
 };
 
@@ -40,7 +41,22 @@ type AssistantSuggestionChip = {
   prompt: string;
 };
 
+type AssistantRuntimeOption = {
+  id: string;
+  label: string;
+  model: string | null;
+  available: boolean;
+};
+
+type AssistantRuntimeConfig = {
+  provider: string | null;
+  model: string | null;
+  canSwitch?: boolean;
+  providers?: AssistantRuntimeOption[];
+};
+
 const ASSISTANT_CHAT_STATE_KEY_PREFIX = "biznesinfo:assistant:chat:v1";
+const ASSISTANT_RUNTIME_STATE_KEY_PREFIX = "biznesinfo:assistant:runtime:v1";
 const ASSISTANT_STORED_MESSAGES_LIMIT = 60;
 const LEGACY_ASSISTANT_INTRO_FINGERPRINTS = [
   "я помогу разобраться с рубриками",
@@ -54,6 +70,26 @@ type PersistedAssistantChatState = {
   messages: AssistantMessage[];
   savedAt: string;
 };
+
+type PersistedAssistantRuntimeState = {
+  provider: string;
+  model: string;
+  savedAt: string;
+};
+
+function normalizeAssistantProviderId(raw: unknown): string {
+  return String(raw || "").trim().toLowerCase();
+}
+
+function isClearlyMismatchedModelForProvider(providerRaw: string, modelRaw: string): boolean {
+  const provider = normalizeAssistantProviderId(providerRaw);
+  const model = String(modelRaw || "").trim().toLowerCase();
+  if (!provider || !model) return false;
+  if (provider === "minimax") return model.includes("codex");
+  if (provider === "codex") return model.includes("minimax");
+  if (provider === "openai") return model.includes("minimax");
+  return false;
+}
 
 function normalizeAssistantMessageForCompare(text: string): string {
   return String(text || "").toLowerCase().replace(/\s+/gu, " ").trim();
@@ -85,6 +121,7 @@ function sanitizeStoredAssistantMessages(input: unknown): AssistantMessage[] {
     const requestId = typeof (item as any).requestId === "string" ? (item as any).requestId : undefined;
     const fallbackNotice = typeof (item as any).fallbackNotice === "string" ? (item as any).fallbackNotice : null;
     const provider = typeof (item as any).provider === "string" ? (item as any).provider : null;
+    const model = typeof (item as any).model === "string" ? (item as any).model : null;
     const localFallbackUsed = Boolean((item as any).localFallbackUsed);
 
     let feedback: AssistantFeedback | null = null;
@@ -108,6 +145,7 @@ function sanitizeStoredAssistantMessages(input: unknown): AssistantMessage[] {
       localFallbackUsed,
       fallbackNotice,
       provider,
+      model,
       feedback,
     });
   }
@@ -148,9 +186,11 @@ async function writeTextToClipboard(text: string): Promise<boolean> {
 export default function AssistantClient({
   user,
   initialUsage,
+  assistantRuntime,
 }: {
   user: { name: string | null; email: string; plan: UserPlan; aiRequestsPerDay: number };
   initialUsage?: { used: number; limit: number; day: string };
+  assistantRuntime?: AssistantRuntimeConfig;
 }) {
   const { t } = useLanguage();
   const router = useRouter();
@@ -185,6 +225,8 @@ export default function AssistantClient({
   const [shortlistCompanies, setShortlistCompanies] = useState<BiznesinfoCompanySummary[]>([]);
   const [shortlistCompaniesLoading, setShortlistCompaniesLoading] = useState(false);
   const [chatStateReady, setChatStateReady] = useState(false);
+  const [providerOverride, setProviderOverride] = useState<string>(() => normalizeAssistantProviderId(assistantRuntime?.provider));
+  const [modelOverride, setModelOverride] = useState<string>(() => String(assistantRuntime?.model || "").trim());
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
@@ -196,6 +238,10 @@ export default function AssistantClient({
   const chatCopyMarkerId = "__chat_conversation__";
   const chatStorageKey = useMemo(
     () => `${ASSISTANT_CHAT_STATE_KEY_PREFIX}:${String(user.email || "").trim().toLowerCase()}`,
+    [user.email],
+  );
+  const runtimeStorageKey = useMemo(
+    () => `${ASSISTANT_RUNTIME_STATE_KEY_PREFIX}:${String(user.email || "").trim().toLowerCase()}`,
     [user.email],
   );
 
@@ -378,6 +424,135 @@ export default function AssistantClient({
   }, [companyContext]);
 
   const showSuggestionChips = canChat && messages.length <= 1 && (!draft.trim() || draft.trim() === (companyPrefillPrompt || "").trim());
+
+  const configuredProvider = useMemo(() => {
+    const value = normalizeAssistantProviderId(assistantRuntime?.provider);
+    return value || null;
+  }, [assistantRuntime?.provider]);
+
+  const configuredModel = useMemo(() => {
+    const value = typeof assistantRuntime?.model === "string" ? assistantRuntime.model.trim() : "";
+    return value || null;
+  }, [assistantRuntime?.model]);
+
+  const runtimeProviders = useMemo<AssistantRuntimeOption[]>(() => {
+    const out: AssistantRuntimeOption[] = [];
+    const seen = new Set<string>();
+    const raw = Array.isArray(assistantRuntime?.providers) ? assistantRuntime.providers : [];
+
+    for (const item of raw) {
+      const id = normalizeAssistantProviderId(item?.id);
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      const label = typeof item?.label === "string" && item.label.trim() ? item.label.trim() : id;
+      const model = typeof item?.model === "string" && item.model.trim() ? item.model.trim() : null;
+      out.push({
+        id,
+        label,
+        model,
+        available: Boolean(item?.available),
+      });
+    }
+
+    if (configuredProvider && !seen.has(configuredProvider)) {
+      out.unshift({
+        id: configuredProvider,
+        label: configuredProvider,
+        model: configuredModel,
+        available: true,
+      });
+    }
+
+    return out;
+  }, [assistantRuntime?.providers, configuredProvider, configuredModel]);
+
+  const canSwitchAssistant = Boolean(assistantRuntime?.canSwitch) && runtimeProviders.length > 0;
+
+  const runtimeProviderDefaultModel = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const option of runtimeProviders) {
+      map.set(option.id, option.model || null);
+    }
+    return map;
+  }, [runtimeProviders]);
+
+  useEffect(() => {
+    const provider = configuredProvider || "";
+    const model = configuredModel || "";
+    setProviderOverride((prev) => (prev ? prev : provider));
+    setModelOverride((prev) => (prev ? prev : model));
+  }, [configuredProvider, configuredModel]);
+
+  useEffect(() => {
+    if (!canSwitchAssistant) return;
+    try {
+      const raw = window.sessionStorage.getItem(runtimeStorageKey);
+      if (!raw) return;
+      const parsed: PersistedAssistantRuntimeState = JSON.parse(raw);
+      const provider = normalizeAssistantProviderId((parsed as any)?.provider);
+      const model = typeof parsed?.model === "string" ? parsed.model.trim() : "";
+      if (provider) {
+        setProviderOverride(provider);
+        const defaultModel = runtimeProviderDefaultModel.get(provider) || "";
+        if (defaultModel) {
+          setModelOverride(defaultModel);
+        } else if (model) {
+          setModelOverride(model);
+        }
+      } else if (model) {
+        setModelOverride(model);
+      }
+    } catch {
+      // ignore storage parse/read errors
+    }
+  }, [canSwitchAssistant, runtimeStorageKey, runtimeProviderDefaultModel]);
+
+  useEffect(() => {
+    if (!canSwitchAssistant) return;
+    try {
+      const provider = normalizeAssistantProviderId(providerOverride);
+      const model = String(modelOverride || "").trim();
+      if (!provider && !model) {
+        window.sessionStorage.removeItem(runtimeStorageKey);
+        return;
+      }
+      const payload: PersistedAssistantRuntimeState = {
+        provider,
+        model,
+        savedAt: new Date().toISOString(),
+      };
+      window.sessionStorage.setItem(runtimeStorageKey, JSON.stringify(payload));
+    } catch {
+      // ignore storage write errors
+    }
+  }, [canSwitchAssistant, runtimeStorageKey, providerOverride, modelOverride]);
+
+  const selectedProvider = useMemo(() => {
+    if (!canSwitchAssistant) return configuredProvider;
+    return normalizeAssistantProviderId(providerOverride) || configuredProvider;
+  }, [canSwitchAssistant, providerOverride, configuredProvider]);
+
+  const selectedModel = useMemo(() => {
+    if (!canSwitchAssistant) return configuredModel;
+    const manual = String(modelOverride || "").trim();
+    if (manual) return manual;
+    if (selectedProvider) {
+      return runtimeProviderDefaultModel.get(selectedProvider) || configuredModel || null;
+    }
+    return configuredModel;
+  }, [canSwitchAssistant, modelOverride, selectedProvider, runtimeProviderDefaultModel, configuredModel]);
+
+  useEffect(() => {
+    if (!canSwitchAssistant) return;
+    const provider = selectedProvider || "";
+    const model = String(modelOverride || "").trim();
+    if (!provider || !model) return;
+    if (!isClearlyMismatchedModelForProvider(provider, model)) return;
+    const defaultModel = runtimeProviderDefaultModel.get(provider) || "";
+    setModelOverride(defaultModel);
+  }, [canSwitchAssistant, selectedProvider, modelOverride, runtimeProviderDefaultModel]);
+  const activeProvider = selectedProvider || configuredProvider;
+  const activeModel = selectedModel || configuredModel;
 
   useEffect(() => {
     if (!chatStateReady) return;
@@ -864,6 +1039,18 @@ export default function AssistantClient({
     setTimeout(() => draftRef.current?.focus(), 0);
   };
 
+  const handleProviderOverrideChange = (nextProviderRaw: string) => {
+    const nextProvider = normalizeAssistantProviderId(nextProviderRaw);
+    setProviderOverride(nextProvider);
+    const defaultModel = runtimeProviderDefaultModel.get(nextProvider) || "";
+    setModelOverride(defaultModel || "");
+  };
+
+  const resetProviderOverride = () => {
+    setProviderOverride(configuredProvider || "");
+    setModelOverride(configuredModel || "");
+  };
+
   const send = async () => {
     const text = draft.trim();
     if (!text) return;
@@ -892,6 +1079,12 @@ export default function AssistantClient({
 
     try {
       const payload: Record<string, unknown> = { source: "assistant_page", page: "/assistant" };
+      if (canSwitchAssistant) {
+        const provider = normalizeAssistantProviderId(selectedProvider || "");
+        const model = String(selectedModel || "").trim();
+        if (provider) payload._assistantProviderOverride = provider;
+        if (model) payload._assistantModelOverride = model;
+      }
       const context: Record<string, unknown> = {};
       if (companyContext) Object.assign(context, companyContext);
       if (shortlistCompanyIds.length > 0) context.shortlistCompanyIds = shortlistCompanyIds;
@@ -962,6 +1155,7 @@ export default function AssistantClient({
       let localFallbackUsed = false;
       let fallbackNotice: string | null = null;
       let provider: string | null = null;
+      let model: string | null = null;
       let done = false;
 
       const addAssistantIfNeeded = () => {
@@ -976,6 +1170,7 @@ export default function AssistantClient({
           localFallbackUsed,
           fallbackNotice,
           provider,
+          model,
           feedback: null,
         };
         setMessages((prev) => [...prev, assistantMessage]);
@@ -996,6 +1191,7 @@ export default function AssistantClient({
                   localFallbackUsed: localFallbackUsed || m.localFallbackUsed || false,
                   fallbackNotice: fallbackNotice ?? m.fallbackNotice ?? null,
                   provider: provider ?? m.provider ?? null,
+                  model: model ?? m.model ?? null,
                 }
               : m,
           ),
@@ -1069,6 +1265,7 @@ export default function AssistantClient({
             localFallbackUsed = Boolean(data?.reply?.localFallbackUsed);
             fallbackNotice = typeof data?.reply?.fallbackNotice === "string" ? data.reply.fallbackNotice : null;
             provider = typeof data?.reply?.provider === "string" ? data.reply.provider : null;
+            model = typeof data?.reply?.model === "string" ? data.reply.model : null;
             updateAssistant();
             break;
           }
@@ -1143,6 +1340,60 @@ export default function AssistantClient({
                   <div className="mt-1">
                     <span className="text-gray-500">Лимит:</span> {user.aiRequestsPerDay} запросов/день
                   </div>
+                  <div className="mt-1">
+                    <span className="text-gray-500">{tr("ai.currentModel", "AI модель")}:</span>{" "}
+                    {activeProvider || activeModel ? (
+                      <span className="font-medium text-gray-700">
+                        {activeProvider || "unknown"}
+                        {activeModel ? ` • ${activeModel}` : ""}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">не определена</span>
+                    )}
+                  </div>
+                  {canSwitchAssistant && (
+                    <div className="mt-3 rounded-lg border border-gray-200 bg-white p-3">
+                      <div className="text-xs text-gray-500">
+                        {tr("ai.switcherTitle", "Переключение AI для новых запросов")}
+                      </div>
+                      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-[180px_minmax(0,1fr)_auto]">
+                        <select
+                          value={selectedProvider || ""}
+                          onChange={(e) => handleProviderOverrideChange(e.target.value)}
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#820251]/30 focus:border-[#820251]"
+                        >
+                          {runtimeProviders.map((option) => (
+                            <option key={option.id} value={option.id} disabled={!option.available}>
+                              {option.label}
+                              {option.available ? "" : " (нет доступа)"}
+                            </option>
+                          ))}
+                        </select>
+
+                        <input
+                          type="text"
+                          value={modelOverride}
+                          onChange={(e) => setModelOverride(e.target.value)}
+                          placeholder={runtimeProviderDefaultModel.get(selectedProvider || "") || (configuredModel || "")}
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#820251]/30 focus:border-[#820251]"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={resetProviderOverride}
+                          className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                        >
+                          {tr("ai.switcherReset", "Дефолт")}
+                        </button>
+                      </div>
+                      <div className="mt-2 text-[11px] text-gray-500">
+                        {tr("ai.switcherNextRequest", "Следующий запрос")}:
+                        {" "}
+                        {selectedProvider || "unknown"}
+                        {selectedModel ? ` • ${selectedModel}` : ""}
+                      </div>
+                    </div>
+                  )}
                   {quota && (
                     <div className="mt-1">
                       <span className="text-gray-500">Сегодня ({quota.day}):</span> {quota.used}/{quota.limit}
@@ -1156,6 +1407,22 @@ export default function AssistantClient({
                   )}
                   {canChat && (
                     <div className="mt-3 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={resetChat}
+                        disabled={sending}
+                        className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {tr("ai.newChat", "Новый чат")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        disabled={sending}
+                        className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {tr("ai.refreshChat", "Обновить чат")}
+                      </button>
                       <button
                         type="button"
                         onClick={() => void resetPromptCounter()}
@@ -1342,6 +1609,12 @@ export default function AssistantClient({
                             </div>
                           )}
                           {renderAssistantMessageContent(m)}
+                          {m.role === "assistant" && m.id !== "intro" && (m.provider || m.model) && (
+                            <div className="mt-2 text-[11px] text-gray-400">
+                              AI: {m.provider || "unknown"}
+                              {m.model ? ` • ${m.model}` : ""}
+                            </div>
+                          )}
                           {m.role === "assistant" && m.id !== "intro" && m.localFallbackUsed && m.fallbackNotice && (
                             <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
                               {m.fallbackNotice}

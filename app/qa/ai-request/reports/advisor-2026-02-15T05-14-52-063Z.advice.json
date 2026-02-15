@@ -1,0 +1,1496 @@
+{
+  "runId": "advisor-2026-02-15T05-14-52-063Z",
+  "generatedAt": "2026-02-15T05:17:30.226Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceJudgeReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.usefulness.json",
+  "focusScenarios": [
+    {
+      "id": "UV012",
+      "title": "Проверка по сайтам компаний: источник + контакты + честная пометка подтверждения",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "website_scan",
+        "sources",
+        "contacts",
+        "footwear",
+        "minsk"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 0,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV012.T2.C2",
+          "type": "any_of",
+          "description": "Либо есть явный источник с сайта, либо честный fallback о невозможности проверить текущую тройку",
+          "reason": "No sub-check passed"
+        }
+      ],
+      "judgeIssueHints": [
+        "Критическая галлюцинация: детская поликлиника и больница выданы как производители обуви",
+        "Полное игнорирование запроса 'проверь на сайтах' — никакой проверки не выполнено",
+        "Нет continuity между turns: каждый ответ независимый и нерелевантный",
+        "Completely wrong companies (healthcare instead of manufacturing)"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: одна нерелевантная компания вместо 3, список рубрик вместо конкретных производителей",
+            "Turn 2: возвращает поликлинику и больницу как 'производителей обуви' — полный мусор"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 2: Included POLYCLINICS and HOSPITALS as shoe manufacturers",
+            "Never actually checked any websites - just listed random companies"
+          ]
+        }
+      ],
+      "lastReply": "Shortlist по текущим данным каталога: 1. ⚠️ ✅ Глобал Шуз ЧТУП — /company/shoesterra (Минск, minsk) [проверьте данные] Подтвержденных карточек меньше, чем запрошено: найдено 1 из 2. Как добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке. Учет ограничений: локация: Минск. Фокус: Какие в Минске есть производители обуви? Дай сначала 3 варианта для проверки. Если по сайту не подтверждается, так и отметь и предложи, ког…. Учет ограничений: локация: Минск. Тольк…",
+      "lastUser": "Если по сайту не подтверждается, так и отметь и предложи, кого проверить дальше."
+    },
+    {
+      "id": "UV018",
+      "title": "Ирис Интер групп: 20 тегов для GA/Метрики без ложного sourcing-fallback",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "tagging",
+        "analytics",
+        "consistency",
+        "anti_fallback"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 5,
+      "avgUsefulness": 0.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV018.T1.C2",
+          "type": "numbered_list_min",
+          "description": "Ожидается минимум 20 тегов в структурированном списке",
+          "reason": "Not enough numbered items"
+        },
+        {
+          "id": "UV018.T1.C3",
+          "type": "includes_any",
+          "description": "Должен удержать контекст тегирования и веб-аналитики",
+          "reason": "No required patterns matched"
+        },
+        {
+          "id": "UV018.T1.C4",
+          "type": "excludes_all",
+          "description": "Не должен уходить в supplier-search fallback и не должен подмешивать каталожный shortlist",
+          "reason": "Forbidden patterns found"
+        },
+        {
+          "id": "UV018.T2.C2",
+          "type": "numbered_list_min",
+          "description": "Должен выдать минимум 20 тегов",
+          "reason": "Not enough numbered items"
+        },
+        {
+          "id": "UV018.T2.C4",
+          "type": "excludes_all",
+          "description": "Не должно быть no-results/sourcing шаблонов",
+          "reason": "Forbidden patterns found"
+        }
+      ],
+      "judgeIssueHints": [
+        "Полное несоответствие задаче: запрос про теги Google Analytics → ответ про рубрики каталога",
+        "Generic fallback: вместо признания 'не умею генерировать теги' ассистент навязывает нерелевантный поиск поставщиков",
+        "Turn 2: после жёсткого уточнения продолжает давать нерелевантную выдачу (Недвижимость для ИТ-компании)",
+        "Failed core task completely - zero tags provided"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: вместо тегов для GA/Метрики ассистент даёт рубрики каталога Biznesinfo — полная нерелевантность задаче",
+            "Turn 2: после прямого уточнения 'не нужен поиск поставщиков, нужны только теги' — снова выдаёт рубрики каталога (Недвижимость!)"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Completely ignored user's request for 20 analytics tags",
+            "Turn 2 user explicitly said 'don't need supplier search' - assistant ignored"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Быстрый first-pass по каталогу Biznesinfo: Фокус задачи: ирис, интер, групп, нее. Рубрики для старта: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость / Недвижимость; 4) Недвижимость - аренда, продажа, оценка / Недвижимость. Поисковые формулировки: 1) Недвижимость; 2) Химия, энергетика, сырьё; 3) Недвижимость - аренда, продажа, оценка. Чтобы сузить подбор, уточните: 1) объем/тираж, 2) дедлайн, 3) бюджет или приоритет (скорость vs цена). Что подготовить для медиак…",
+      "lastUser": "Не нужен поиск поставщиков. Нужны только теги и краткая группировка: бренд, услуги, намерение."
+    },
+    {
+      "id": "UV022",
+      "title": "Ирис Интер групп: явный поиск -> последние новости с сайта (без запроса URL)",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "company_search",
+        "website_news",
+        "context_flow",
+        "anti_link_gate"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 0.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV022.T1.C4",
+          "type": "company_path_min_count",
+          "description": "Должна быть ссылка на карточку /company/...",
+          "reason": "Not enough /company links"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 2 hallucination: returns news from Минсельхозпрод and Автомобильные конструкции instead of Ирис Интер групп",
+        "Company 'Ирис Интер групп' was never actually found or stored in context from Turn 1",
+        "Generic fallback to random companies instead of admitting inability to find the specific company",
+        "Complete continuity failure — user asked about 'их' (their) news, assistant responded with completely different companies"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Generic methodology response without actually finding the requested company 'Ирис Интер групп'",
+            "Turn 2: Complete context loss — instead of news from Ирис Интер групп, returns random unrelated companies (Минсельхозпрод, Автомобильные конструкции)"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Returned completely wrong company (Ministry of Agriculture instead of Ирис Интер групп)",
+            "Severe hallucination - made up Instagram data, phone numbers, company contacts"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Собрал данные прямо с сайтов компаний (best-effort): 1. Министерство сельского хозяйства и продовольствия Республики Беларусь — /company/mshp-minsk (источник: https://www.instagram.com/mshp_gov_by/ - Заголовок страницы: mshp_by (@mshp_gov_by) • Instagram photos and videos - Кратко: 424 Followers, 7 Following, 642 Posts - See Instagram photos and videos from mshp_by (@mshp_gov_by) - Фрагмент: mshp_by (@mshp_gov_by) • Instagram photos and videos - Фрагмент: {\"require\":[[\"Schedu…",
+      "lastUser": "Какие последние новости есть у них на сайте?"
+    },
+    {
+      "id": "UV021",
+      "title": "Ирис Интер групп: консистентность между «нашел компанию» и «проверь на карточке»",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "consistency",
+        "company_card",
+        "website_news",
+        "anti_link_gate",
+        "anti_sourcing_fallback"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 0.5,
+      "usefulRate": 0,
+      "hardError": {
+        "status": 502,
+        "error": "HTTPError",
+        "message": "<html> <head><title>502 Bad Gateway</title></head> <body> <center><h1>502 Bad Gateway</h1></center> <hr><center>nginx</center> </body> </html>"
+      },
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Empty assistant response — technical failure or complete inability to process request",
+        "No tags generated despite explicit request for 20 tags related to Google Analytics and Yandex Metrika",
+        "No acknowledgment that company was found or recognized in catalog",
+        "User gave concrete company name but received nothing in return"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Assistant response is completely empty — no tags provided, no acknowledgment of company",
+            "User explicitly named company 'Ирис Интер групп' and requested 20 specific tags — got zero response"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Assistant gave no response at all",
+            "Cannot select tags for company if company not found or acknowledged"
+          ]
+        }
+      ],
+      "lastReply": "",
+      "lastUser": "У меня компания называется Ирис Интер групп, подбери для нее 20 тегов, релевантных Гугл аналитик и Яндекс метрике."
+    },
+    {
+      "id": "UV003",
+      "title": "Где поблизости вкусно поесть: consumer запрос -> b2b переформулировка",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "consumer_to_b2b",
+        "restaurants",
+        "reframing"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 1.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV003.T2.C3",
+          "type": "includes_any",
+          "description": "Должен дать b2b-направление, а не тупик",
+          "reason": "No required patterns matched"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 2-3: Полная потеря контекста — нерелевантные категории (авто, сантехника, рыболовство) вместо HoReCa/продуктов",
+        "Не выполнен запрос '3 варианта запросов для портала' — даны случайные компании",
+        "Нет моста к b2b-поиску как обещано в personaGoal",
+        "Шаблон Turn 4 содержит placeholder 'сформируй сообщение' вместо реального текста"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Дает рестораны из разных городов (Минск, Витебск, Борисов) вместо 'поблизости' — не запросил геолокацию",
+            "Turn 2: Катастрофический сбой — вместо b2b-формата для Уручье дает совершенно нерелевантные компании (Master Records, Автоцентр, Рыболов, Сантехника)"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Consumer restaurant request mishandled - assistant suggests fishing/ plumbing suppliers instead",
+            "Uruchie district ignored - generic Minsk companies returned"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по сформируй сообщение — Сформируй короткое сообщение поставщику продуктов в блоках Subject/Body/WhatsApp. Body: Здравствуйте, уточняется! Нам нужно сформируй сообщение в Минск. Просим подтвердить условия по объем, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняется уточняется WhatsApp: Здравствуйте! Нужен сформируй сообщение в Минск. Подскаж…",
+      "lastUser": "Сформируй короткое сообщение поставщику продуктов в блоках Subject/Body/WhatsApp."
+    },
+    {
+      "id": "UV009",
+      "title": "Стоматология с микроскопом в Минске: сложный consumer кейс + полезный fallback",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "dentistry",
+        "minsk",
+        "consumer",
+        "fallback"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 1.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV009.T3.C2",
+          "type": "numbered_list_min",
+          "description": "Нужен детальный чеклист",
+          "reason": "Not enough numbered items"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 1 and 4 return Сэльвин which has nothing to do with dentistry",
+        "Turn 3 completely fails to provide requested checklist",
+        "No dental clinics found in catalog despite clear medical query",
+        "Complete failure on dental clinic finding - most critical use case"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1 returns completely irrelevant company (Сэльвин - household chemicals)",
+            "Turn 3 empty response - no checklist provided"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1 found 0 dental clinics (found chemical distributor instead)",
+            "Turn 3 completely empty response - failed to deliver checklist"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Быстрый first-pass по релевантным компаниям из каталога: 1. ✅ Сэльвин ООО — /company/selvin (Бытовая химия; Минск, minsk; тел: +375 (17) 269 33 33) Фокус задачи: найди, стоматологию, лечат, каналы. Фокус по локации: Минск. Дальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+      "lastUser": "Сделай короткий скрипт звонка на 30-40 секунд."
+    },
+    {
+      "id": "UV002",
+      "title": "Заводы муки: Беларусь -> качество -> экспортные документы -> shortlist",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "flour",
+        "factories",
+        "export",
+        "quality"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 2,
+      "avgUsefulness": 2,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV002.T4.C2",
+          "type": "numbered_list_min",
+          "description": "Нужен подробный чеклист по документам",
+          "reason": "Not enough numbered items"
+        },
+        {
+          "id": "UV002.T4.C3",
+          "type": "includes_any",
+          "description": "Есть релевантные документы",
+          "reason": "No required patterns matched"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 4: Полное несоответствие формату — запрошен чеклист документов, получен ranking компаний",
+        "Нет анализа по критериям качества (белизна, клейковина, стабильность партии) на Turn 2",
+        "Нет указания экспортной готовности по каждому заводу на Turn 3",
+        "СМАК и ДЭЙНТИ — не очевидные производители муки, скорее торговые компании"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Хороший старт с 4 конкретными компаниями, но только 2 явно хлебопродуктовые (Брестхлебопродукт, Пинский КХП)",
+            "Turn 2: Критический fallback — вместо анализа по критериям белизны/клейковины дает тот же список с пометками 'проверьте данные'"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Lists food companies, not flour factories - wrong category interpretation",
+            "Quality criteria (whiteness, gluten, batch stability) ignored in favor of generic warnings"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Короткий прозрачный ranking (предварительно): 1. Брестхлебопродукт ОАО — /company/brestmuka (Хлебопродукты; Брест, brest) 2. Пинский комбинат хлебопродуктов ОАО — /company/pkhp (Хлебопродукты; Пинск) 3. СМАК ИЧУПП — /company/biznesinfo-598 (Продукты питания; Витебск, vitebsk) Критерии: релевантность профиля, локация, полнота контактов, риск несоответствия задаче. Фокус запроса: Какие заводы в Беларуси производят муку высшего качества? Дай чеклист из 6 пунктов, какие документы…",
+      "lastUser": "Дай чеклист из 6 пунктов, какие документы спросить перед контрактом."
+    },
+    {
+      "id": "UV015",
+      "title": "Вариант по минитракторам: покупка -> сравнение условий -> запрос для звонка",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "minitractor",
+        "comparison",
+        "call_script"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 2,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV015.T2.C2",
+          "type": "numbered_list_min",
+          "description": "Ожидается сравнение минимум по 4 пунктам",
+          "reason": "Not enough numbered items"
+        }
+      ],
+      "judgeIssueHints": [
+        "Generic fallback в turn 2: вместо сравнения по 4 критериям дана заглушка 'проверьте данные'",
+        "Компания 'ЖК Трейд' — запчасти для спецтехники, а не минитракторы для фермы",
+        "Скрипт звонка — одно предложение без структуры разговора",
+        "Only 1 company total for comparison task"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: одна нерелевантная компания (запчасти для спецтехники) вместо продавцов минитракторов",
+            "Turn 2: fallback с пометкой 'проверьте данные' вместо сравнения по 4 критериям"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 2: Generic fallback with only 1 company",
+            "Turn 3: Provided only ONE query (user asked for options) and basic call script"
+          ]
+        }
+      ],
+      "lastReply": "1. Запрос для портала: \"минитрактор Беларусь дилер навесное оборудование\". 2. Запрос для звонка поставщику: \"Подтвердите, что вы поставляете минитракторы для фермы: модели в наличии, гарантия, сервис, сроки поставки и доступное навесное оборудование.\"",
+      "lastUser": "Сделай один запрос для портала и короткий скрипт для первого звонка поставщику."
+    },
+    {
+      "id": "UV004",
+      "title": "Белорусские соковыжималки: заводы -> OEM/ODM -> shortlist -> RFQ",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "juicers",
+        "manufacturing",
+        "oem",
+        "rfq"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 2.5,
+      "usefulRate": 0.5,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV004.T2.C2",
+          "type": "includes_any",
+          "description": "Должен учитывать OEM/ODM вариант",
+          "reason": "No required patterns matched"
+        }
+      ],
+      "judgeIssueHints": [
+        "Turn 2: Generic fallback — общие инструкции по поиску вместо анализа OEM/ODM возможностей конкретных заводов",
+        "Turn 3: Нет сравнения по надежности и сервису как запрошено — все кандидаты равнозначны",
+        "Turn 4: RFQ шаблон не заполнен — placeholder'ы вместо реальных параметров",
+        "Н-ТиВи (HORIZONT) и Брестгазоаппарат — крупные бренды, маловероятны для OEM/ODM под чужим брендом"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1: Отличный старт с 4 конкретными производителями бытовой техники (Н-ТиВи, Атлант, Ареса-техно, Брестгазоаппарат)",
+            "Turn 2: Критический fallback — вместо анализа OEM/ODM возможностей дает общие инструкции по поиску в нерелевантных рубриках (легкая промышленность, швейное производство)"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "No Belarusian juicer factory exists - assistant fails to be honest about this",
+            "Lists general appliance manufacturers instead of addressing reality"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по сервису rfq — Сделай RFQ в блоках Subject/Body/WhatsApp с запросом MOQ, сроков и гарантии. Body: Здравствуйте, уточняется! Нам нужно сервису rfq в город. Просим подтвердить условия по объем, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняется уточняется WhatsApp: Здравствуйте! Нужен сервису rfq в город. Подскажите, сможете дать условия по…",
+      "lastUser": "Сделай RFQ в блоках Subject/Body/WhatsApp с запросом MOQ, сроков и гарантии."
+    },
+    {
+      "id": "UV014",
+      "title": "Reverse-buyer вариативный: пищевая тара -> целевые сегменты -> shortlist без общих советов",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "reverse_buyer",
+        "packaging",
+        "strict_mode"
+      ],
+      "strictPass": false,
+      "strictFailedCheckCount": 1,
+      "avgUsefulness": 3,
+      "usefulRate": 0.5,
+      "hardError": null,
+      "failedChecks": [
+        {
+          "id": "UV014.T1.C2",
+          "type": "includes_any",
+          "description": "Должен удержать reverse-buyer контекст",
+          "reason": "No required patterns matched"
+        }
+      ],
+      "judgeIssueHints": [
+        "Generic fallback в turn 3: вместо 'кого первым прозвонить и 3 вопроса' даны общие критерии",
+        "Нет конкретных контактов для звонка — только названия компаний",
+        "Не учтена специфика 'пищевая тара' — даны просто молочные комбинаты",
+        "Turn 1 too generic, no concrete companies"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: общие советы по рубрикам без конкретных компаний",
+            "Turn 2: даны 5 молочных комбинатов, но без контактов и без фокуса на потребности в таре"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 4,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 2: Good shortlist of 5 dairy companies with profiles",
+            "Turn 3: Prioritized 2 companies, gave clear call questions, no generic advice"
+          ]
+        }
+      ],
+      "lastReply": "Shortlist по текущим данным каталога: 1. ⚠️ Любанский филиал ОАО Слуцкий сыродельный комбинат — /company/luban-cheese (Слуцк, minsk-region) [проверьте данные] 2. ⚠️ Полоцкий молочный комбинат ОАО — /company/polotskmilk (Слуцк, brest) [проверьте данные] 3. ⚠️ Брестское мороженое ОАО — /company/brestmoroj (Брест, brest) [проверьте данные] Кого прозвонить первым сегодня: 1) Любанский филиал ОАО Слуцкий сыродельный комбинат, 2) Полоцкий молочный комбинат ОАО. Фокус: Нужны в Беларуси, приоритет: молочка, соусы, кулинар…",
+      "lastUser": "Без общих советов. Дай кого первым прозвонить и 3 вопроса для первого контакта."
+    },
+    {
+      "id": "UV007",
+      "title": "Найти потенциальных заказчиков моей продукции: reverse поиск + shortlist",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "reverse_search",
+        "buyers",
+        "shortlist",
+        "template"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 0.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "No concrete packaging buyers found in catalog despite clear request",
+        "Generic fallback to rubric advice after user gives specific constraints",
+        "Template message in Turn 4 contains 'уточняется' placeholders",
+        "Zero concrete leads provided despite user clarifying they sell plastic food containers"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1 returns completely irrelevant company (Техносклад - warehouse equipment)",
+            "Turn 2 falls back to generic search advice instead of concrete companies"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1 found 1 irrelevant company (technosklad sells forklifts, not needs plastic containers)",
+            "Turns 2-4 only gave market segments, NO ACTUAL COMPANY NAMES despite having catalog access"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по первое сообщение — Сделай первое сообщение для холодного контакта (Subject/Body/WhatsApp). Body: Здравствуйте, уточняется! Нам нужно первое сообщение в город. Просим подтвердить условия по объем, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняется уточняется WhatsApp: Здравствуйте! Нужен первое сообщение в город. Подскажите, сможете дать у…",
+      "lastUser": "Сделай первое сообщение для холодного контакта (Subject/Body/WhatsApp)."
+    },
+    {
+      "id": "UV019",
+      "title": "Ирис Интер групп: запрос последних новостей без требования ссылки от пользователя",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "news",
+        "website_lookup",
+        "self_search",
+        "anti_link_gate"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 0.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Полная потеря контекста: игнорируется упоминание 'Ирис Интер групп' из предыдущих сценариев",
+        "Turn 2: вместо проверки сайта запрошенной компании — случайные новости с Onliner и zarya.by",
+        "Нарушение continuity: контекст компании не сохраняется между запросами",
+        "Dangerous hallucination - provided fake company data"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: ассистент игнорирует контекст 'этой компании' и выдаёт данные про САВАНА СЕРВИС вместо Ирис Интер групп",
+            "Turn 2: вместо новостей 'Ирис Интер групп' выдаёт новости Onliner и Заря — полностью нерелевантные источники"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Hallucinated completely unrelated companies (Onliner, newspaper Zarya) instead of checking Iris Inter Grup",
+            "Never actually checked any website - just pretended to have data"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Собрал данные прямо с сайтов компаний (best-effort): 1. ОНЛАЙНЕР ООО — /company/onliner (источник: https://www.onliner.by/ - Заголовок страницы: Onlíner - Кратко: Onlíner посещают сотни тысяч белорусов, чтобы покупать в каталоге, размещать объявления, общаться на форуме, а также читать новости и статьи! - Фрагмент: Новости на сайте начались как экспериментальный блог в раннем байнете и довольно быстро выросли в полноценную редакцию со штатом из пары десятков журналистов, фото…",
+      "lastUser": "Да, найди сам. Если новостей на сайте нет — скажи это прямо и укажи, где проверял."
+    },
+    {
+      "id": "UV020",
+      "title": "Ирис Интер групп: команда «Найди на карточке компании» без запроса ссылки у пользователя",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "company_card",
+        "news_lookup",
+        "anti_link_gate",
+        "context_carryover"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 0.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Полный провал контекста: название компании упомянуто явно, но ассистент его не использует",
+        "Generic fallback: вместо поиска карточки компании — случайные новости с других сайтов",
+        "Повторяющаяся ошибка: в обоих turn'ах одна и та же нерелевантная выдача",
+        "Completely lost company context from conversation"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1-2: ассистент полностью игнорирует название компании 'Ирис Интер групп' и выдаёт новости с sb.by и 5element",
+            "Turn 2: после уточнения 'Найди на карточке компании' — снова те же нерелевантные новости, не связанные с Ирис Интер групп"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "reasons": [
+            "Both turns ignored the company 'Ирис Интер групп' from context",
+            "Provided completely unrelated companies (Belarus Today, PATIO)"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Собрал данные прямо с сайтов компаний (best-effort): 1. Беларусь Сегодня Издательский дом — /company/sb (источник: https://www.sb.by/ - Заголовок страницы: Новости Беларуси | белорусские новости | новости сегодня | последние новости | события в Беларуси и мире | темы дня | фото | видео | инфографика - Кратко: Главные новости дня Беларуси и регионов, информационная лента новостей, новости Беларуси и мира, события дня и последнего часа, аналитика, комментарии, фото, видео, инфо…",
+      "lastUser": "Найди на карточке компании."
+    },
+    {
+      "id": "UV001",
+      "title": "Производители обуви в Минске: уточнение типа + shortlist + шаблон контакта",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "footwear",
+        "minsk",
+        "manufacturers",
+        "template"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Повторение одного результата 3 раза вместо поиска дополнительных компаний",
+        "Generic fallback на Turn 2-3: вместо конкретных производителей дает список рубрик каталога",
+        "Turn 4 шаблон не заполнен реальными данными — содержит placeholder 'уточняется' 6 раз",
+        "Полное игнорирование уточнения про 'мужская классическая обувь'"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1-3: Ассистент повторяет одну и ту же компанию 'Глобал Шуз' 3 раза подряд, игнорируя запрос на shortlist из 3-5 производителей",
+            "Критический провал continuity: после уточнения 'именно производители, не розничные магазины' и 'мужская классическая обувь' ассистент продолжает выдавать тот же единственный резул…"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Assistant shows same single company across 4 turns despite explicit request for 3-5",
+            "Never addresses 'men's classical shoes' clarification - zero context continuity"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по первое сообщение — Сделай первое сообщение поставщику в блоках Subject/Body/WhatsApp. Body: Здравствуйте, уточняется! Нам нужно первое сообщение в Минск. Просим подтвердить условия по объем, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняется уточняется WhatsApp: Здравствуйте! Нужен первое сообщение в Минск. Подскажите, сможете дать услови…",
+      "lastUser": "Сделай первое сообщение поставщику в блоках Subject/Body/WhatsApp."
+    },
+    {
+      "id": "UV008",
+      "title": "Белорусский минитрактор: покупка + критерии + сравнение",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "minitractor",
+        "equipment",
+        "comparison"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "No actual tractor suppliers found in catalog",
+        "Company provided sells spare parts, not equipment",
+        "User asks 'who to call first' - gets 1 wrong company",
+        "Comparison promised but impossible without data"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Only 1 company found across all turns (ЖК Трейд - spare parts, not tractors)",
+            "Turn 2-3 repeat same irrelevant company"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Only 1 real company found across 4 turns despite catalog access",
+            "Turn 4 comparison fails completely - no prices, no delivery times, no warranty details"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Короткий прозрачный ranking (предварительно): 1. ЖК Трейд ЧТПУП — /company/jkt (Запчасти для спецтехники; Минск, minsk) 2. Резервный вариант — расширьте фильтр по смежной рубрике и подтвердите релевантность на карточке компании. Критерии: релевантность профиля, локация, полнота контактов, риск несоответствия задаче. Фокус запроса: Нужны варианты до 30 л.с., желательно с навесным и сервисом в Минской области. Сравни 3 лучших варианта по цене, сроку поставки и гарантии. Фокус з…",
+      "lastUser": "Сравни 3 лучших варианта по цене, сроку поставки и гарантии."
+    },
+    {
+      "id": "UV011",
+      "title": "No-results ветка: сверхузкий запрос на производителей обуви",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "no_results",
+        "footwear",
+        "guardrails",
+        "fallback"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Грубая галлюцинация: компания по производству дверей выдана как производитель обуви",
+        "Generic fallback в turn 2: вместо конкретных 2-3 альтернатив даны общие рекомендации",
+        "Полный разрыв continuity в turn 3: ассистент не понимает о чём речь и возвращает мусор",
+        "Gave completely wrong company type in Turn 1"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: возвращает абсолютно нерелевантную компанию 'Прима Порта' (двери и окна) на запрос о производителях обуви",
+            "Turn 2: вместо конкретных альтернатив даёт общие инструкции 'расширьте поиск', 'прогнать обзвон'"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: Wrong company type (doors/windows instead of shoes)",
+            "Turn 3: Massive fallback to generic template despite user asking for specific expanded query"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Быстрый first-pass по релевантным компаниям из каталога: Фокус задачи: сформируй, один, расширенный, запрос. Дальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски. Shortlist по текущим данным каталога: 1. ⚠️ ✅ Прима Порта ООО — /company/prima-porta (Минск, minsk) [проверьте данные] Подтвержденных карточек меньше, чем запрошено: найдено 1 из 2. Как добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и про…",
+      "lastUser": "Сформируй один расширенный запрос для портала, чтобы повысить шанс найти релевантных производителей."
+    },
+    {
+      "id": "UV006",
+      "title": "Лес на экспорт: условия качества + логистика + RFQ",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "timber",
+        "export",
+        "rfq",
+        "logistics"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "RFQ template filled with 'уточняется' and 'город' placeholders - unusable",
+        "No actual FSC verification or logistics guidance provided",
+        "Assistant fails to maintain continuity on specific constraints",
+        "RFQ template is unusable - 80% placeholder text"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 4 RFQ is completely broken with placeholders instead of actual content",
+            "Turn 2 ignores FSC and delivery requirements, just repeats generic leskhoz list"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 4 RFQ is completely generic with уточняется placeholders - no concrete product specs, pricing, or delivery terms",
+            "Assistant never asked about volume, destination country, or payment terms despite user giving concrete export constraints"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по сформируй rfq — Сформируй RFQ в блоках Subject/Body/WhatsApp. Body: Здравствуйте, уточняется! Нам нужно сформируй rfq в город. Просим подтвердить условия по объем, уточняется, доставка и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняется уточняется WhatsApp: Здравствуйте! Нужен сформируй rfq в город. Подскажите, сможете дать условия по объем/уточняется и срок срок постав…",
+      "lastUser": "Сформируй RFQ в блоках Subject/Body/WhatsApp."
+    },
+    {
+      "id": "UV016",
+      "title": "Вариативный экспорт муки: shortlist + документная проверка + шаблон запроса",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "flour",
+        "export",
+        "documents",
+        "template"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 1.5,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Шаблон письма непригоден для использования — placeholder'ы вместо конкретики",
+        "Generic fallback: вместо анализа экспортного потенциала даны пустые маркеры [проверьте данные]",
+        "Нарушение continuity: turn 2 игнорирует прямой вопрос пользователя об экспортной готовности",
+        "Systemic placeholder pattern prevents any real actionability"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 2: ассистент выдал бессмысленный shortlist с одинаковыми [проверьте данные] и не ответил на вопрос об экспортной готовности",
+            "Turn 3: шаблон письма полностью сломан — вместо реальных данных подставлены placeholder'ы 'уточняется', 'срок срок поставки'"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 3 uses 'уточняется' placeholders instead of actual templates",
+            "No export readiness assessment provided in turn 2"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по дай шаблон — Дай шаблон письма (Subject/Body/WhatsApp) и отдельно 5 документов для первичной проверки. Body: Здравствуйте, уточняется! Нам нужно дай шаблон в город. Просим подтвердить условия по объем, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняется уточняется WhatsApp: Здравствуйте! Нужен дай шаблон в город. Подскажите, сможете дать у…",
+      "lastUser": "Дай шаблон письма (Subject/Body/WhatsApp) и отдельно 5 документов для первичной проверки."
+    },
+    {
+      "id": "UV013",
+      "title": "Deep website-scan: внутренняя навигация сайта (контакты/о компании/продукция)",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "website_scan",
+        "website_scan_deep",
+        "sources",
+        "contacts",
+        "minsk",
+        "footwear"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 2,
+      "usefulRate": 0,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "В turn 2 не сделана честная пометка 'не производитель' — сайт ясно говорит что это магазин/представитель",
+        "В turn 3 игнорируется просьба пометить статус и предложить следующего кандидата",
+        "Не найдено ни одного реального производителя из 3 запрошенных",
+        "Only 1 company total (of 3 requested)"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 1: одна компания вместо 3, причём это продавец обуви а не производитель",
+            "Turn 2: попытка проверки сайта есть, но вывод неверный — компания 'представитель марок', не производитель"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "reasons": [
+            "Turn 2 actually scraped website and found it's a RETAIL network, not manufacturer - good honesty",
+            "Turn 3 falls back to generic template, doesn't offer next candidate"
+          ]
+        }
+      ],
+      "lastReply": "Shortlist по текущим данным каталога: 1. ✅ Глобал Шуз ЧТУП — /company/shoesterra (Обувь; Минск, minsk; тел: +375 (29) 342 92 67) Подтвержденных карточек меньше, чем запрошено: найдено 1 из 2. Как добрать кандидатов без выдумывания: расширьте поиск на смежные рубрики/регионы и проверьте профиль на карточке. Учет ограничений: локация: Минск. Фокус: Подбери 3 производителей обуви в Минске для проверки по сайтам. Если на главной нет подтверждения, пометь это и предложи следующего кандида…. Учет ограничений: локация: М…",
+      "lastUser": "Если на главной нет подтверждения, пометь это и предложи следующего кандидата для проверки."
+    },
+    {
+      "id": "UV017",
+      "title": "Свекла 500 кг в Минске: защита от нерелевантных \"не-поставщиков\"",
+      "tags": [
+        "regression",
+        "multi_turn",
+        "variants",
+        "beet",
+        "vegetables",
+        "anti_noise",
+        "supplier_quality"
+      ],
+      "strictPass": true,
+      "strictFailedCheckCount": 0,
+      "avgUsefulness": 2,
+      "usefulRate": 0.5,
+      "hardError": null,
+      "failedChecks": [],
+      "judgeIssueHints": [
+        "Turn 3: шаблон письма с placeholder'ами ('уточняется', 'срок срок поставки') — непригоден для отправки",
+        "Минская овощная фабрика в рубрике 'Пчеловодство' — возможна ошибка классификации в базе",
+        "Recommended non-supplier (machinery parts for food procurement)",
+        "Ignored user's explicit request for honest alternatives"
+      ],
+      "judgeReasons": [
+        {
+          "judge": "kimi",
+          "usefulness": 3,
+          "verdict": "useful",
+          "reasons": [
+            "Turn 1-2: найдены релевантные поставщики овощей/продуктов в Минске, нет учебных заведений или мусора",
+            "Turn 2: корректно сформирован shortlist из 3 кандидатов по заданным критериям"
+          ]
+        },
+        {
+          "judge": "minimax",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "reasons": [
+            "Included Agromashmarket (agricultural machinery parts supplier) in food sourcing list",
+            "Turn 3 uses 'уточняется' placeholders instead of requested templates"
+          ]
+        }
+      ],
+      "lastReply": "Работаю по данным каталога Biznesinfo. Subject: Запрос по сформируй сообщение — Сформируй сообщение поставщику в блоках Subject/Body/ WhatsApp: объем 500 кг, Минск, поста… Body: Здравствуйте, уточняется! Нам нужно сформируй сообщение в Минск. Просим подтвердить условия по 500 кг, уточняется, доставка/самовывоз и срок срок поставки. Также уточните, пожалуйста, гарантии, доступность и контактное лицо для быстрого согласования. С уважением, уточняется уточняется WhatsApp: Здравствуйте! Нужен сформируй сообщение в Мин…",
+      "lastUser": "Сформируй сообщение поставщику в блоках Subject/Body/WhatsApp: объем 500 кг, Минск, поставка в течение 3 дней."
+    }
+  ],
+  "advice": [
+    {
+      "advisor": "kimi",
+      "executiveSummary": "Biznesinfo AI assistant shows critical failures in 3 core areas: (1) Continuity breakdown - assistant loses company context between turns (UV012, UV019-022); (2) Wrong intent detection - analytics/tagging requests trigger sourcing fallbacks (UV018); (3) Template degradation - RFQ/checklist templates fill with placeholders instead of context. 10/22 scenarios fail strict checks. Pass rate 54.5% vs target 80%. Average usefulness 1.43/4. Root cause: context persistence gaps in multi-turn flow, insufficient intent classification guards, and missing template hydration from conversation history.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Fix context carryover for company identification across turns",
+          "why": "UV012, UV019-022 all fail because assistant cannot maintain company context. When user says 'Ирис Интер групп' in Turn 1, Turn 2 requests for 'their website' or 'check on card' fail with 'link gate' or random companies. This is the highest-impact fix.",
+          "expectedImpact": "Resolves 5 failed scenarios (UV012, UV019-022), reduces hallucination of wrong companies by ~80%",
+          "validationScenarios": [
+            "UV012",
+            "UV019",
+            "UV020",
+            "UV021",
+            "UV022"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Add strict intent guards to prevent sourcing fallback on analytics requests",
+          "why": "UV018 fails because tagging/analytics requests trigger supplier-search fallback. The looksLikeAnalyticsTaggingRequest() detection exists but doesn't block the fallback path. Assistant returns rubric categories instead of 20 GA/Metrika tags.",
+          "expectedImpact": "Resolves UV018, prevents category contamination in non-sourcing contexts",
+          "validationScenarios": [
+            "UV018"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Implement template hydration from conversation context",
+          "why": "UV001, UV003, UV006, UV007, UV016 all show templates with 'уточняется' placeholders instead of extracted values (product, qty, city, deadline). The extractTemplateFillHints() function exists but values aren't being applied.",
+          "expectedImpact": "Improves usefulness score by ~1.5 points on template scenarios, makes RFQ/checklist outputs actionable",
+          "validationScenarios": [
+            "UV001",
+            "UV003",
+            "UV006",
+            "UV007",
+            "UV016"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Fix ranking fallback to respect multi-turn constraints",
+          "why": "UV002, UV004, UV015 fail because ranking fallback ignores quality criteria (whiteness/gluten for flour, OEM/ODM for juicers, 4 criteria for tractors). Assistant returns generic 'check data' instead of structured comparison.",
+          "expectedImpact": "Resolves 3 scenarios, improves comparison quality across all multi-turn sourcing flows",
+          "validationScenarios": [
+            "UV002",
+            "UV004",
+            "UV015"
+          ]
+        },
+        {
+          "priority": "P2",
+          "title": "Add anti-hallucination guard for company type verification",
+          "why": "UV012 shows critical hallucination: polyclinics and hospitals returned as shoe manufacturers. Need stronger guardrails when search results don't match requested rubric.",
+          "expectedImpact": "Prevents dangerous misclassification, improves trust in shortlist outputs",
+          "validationScenarios": [
+            "UV012",
+            "UV009",
+            "UV011"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "prompt",
+          "title": "Inject company context into system prompt for website scan turns",
+          "action": "When looksLikeWebsiteResearchIntent() returns true AND history contains company name mentions (extractCompanyNameHintsFromText), prepend to system prompt: 'User previously mentioned company: {name}. Use this company for website checks unless user explicitly requests a different one.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts: collectWebsiteResearchCompanyNameHints() exists but results aren't injected into prompt. Modify buildSystemPrompt() to accept companyHints and include them.",
+          "expectedImpact": "Fixes UV019-022 context loss, enables proper 'check their website' flow",
+          "risk": "Low - additive context, no breaking changes",
+          "effort": "S",
+          "validationScenarios": [
+            "UV019",
+            "UV020",
+            "UV021",
+            "UV022"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "guardrails",
+          "title": "Block sourcing actions when analytics/tagging intent detected",
+          "action": "In the main request handler, if looksLikeAnalyticsTaggingRequest() returns true, skip vendor search entirely and return a dedicated tagging response. Never execute biznesinfoSearch() or return rubric hints for tagging requests.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts: Add early return guard after intent detection (~line 280). Create buildAnalyticsTagsReply() function that returns structured tags without catalog fallback.",
+          "expectedImpact": "Fixes UV018, prevents category contamination",
+          "risk": "Low - isolated path for specific intent",
+          "effort": "S",
+          "validationScenarios": [
+            "UV018"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "template",
+          "title": "Force template hydration before response finalization",
+          "action": "After LLM response received, if templateRequested mode detected, run applyTemplateFillHints() unconditionally and verify no placeholder patterns remain. If placeholders persist, re-prompt LLM with explicit fill instructions.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts: In finalize path (~line 2100+), add post-processing step: if mode.templateRequested, text = applyTemplateFillHints(text, hints); if still has {placeholder}, trigger one-shot correction.",
+          "expectedImpact": "Eliminates 'уточняется' placeholders in UV001, UV003, UV006, UV007, UV016",
+          "risk": "Low - post-processing only",
+          "effort": "M",
+          "validationScenarios": [
+            "UV001",
+            "UV003",
+            "UV006",
+            "UV007",
+            "UV016"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "retrieval",
+          "title": "Persist vendor candidates in conversation context for ranking turns",
+          "action": "When Turn 1 finds companies, store vendorCandidateIds in ai_assistant_turns table. On Turn 2+ ranking requests, retrieve these candidates instead of re-searching. Use existing vendor_candidate_ids column that's already defined but underutilized.",
+          "implementationHint": "app/src/lib/ai/conversations.ts: appendAssistantSessionTurn() already accepts vendorCandidateIds. Ensure route.ts passes them. In ranking turn, query previous turn's candidates via getAssistantSessionHistory() or add getLastTurnCandidates(…",
+          "expectedImpact": "Fixes UV002, UV004, UV015 ranking failures due to context loss",
+          "risk": "Medium - requires DB query pattern",
+          "effort": "M",
+          "validationScenarios": [
+            "UV002",
+            "UV004",
+            "UV015"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "ranking",
+          "title": "Extract and apply quality criteria from user constraints",
+          "action": "When user specifies criteria (e.g., 'белизна, клейковина, стабильность' for flour), extract these via pattern matching and include in ranking appendix. Modify buildRankingFallbackAppendix() to accept criteria list and format as comparison matrix.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts: Add extractQualityCriteria() function that parses comma-separated criteria from message. Pass to buildRankingFallbackAppendix() and render as 'Сравнение по критериям: 1. {criteria1}...'",
+          "expectedImpact": "UV002, UV004 pass strict checks for criteria inclusion",
+          "risk": "Low - additive to ranking output",
+          "effort": "S",
+          "validationScenarios": [
+            "UV002",
+            "UV004"
+          ]
+        },
+        {
+          "id": "R6",
+          "area": "guardrails",
+          "title": "Add rubric mismatch detection for search results",
+          "action": "After biznesinfoSearch(), verify returned companies match requested rubric. If primary_rubric_name contains 'медицин' but query was for 'обувь', trigger honest fallback instead of returning mismatched results.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts: Post-search validation function. Check if candidate.primary_rubric_name contains anti-indicators (медицин, поликлиник, больниц) when query contains target indicators (обувь, производитель).",
+          "expectedImpact": "Prevents UV012 critical hallucination (polyclinics as shoe manufacturers)",
+          "risk": "Low - validation layer only",
+          "effort": "S",
+          "validationScenarios": [
+            "UV012",
+            "UV009",
+            "UV011"
+          ]
+        },
+        {
+          "id": "R7",
+          "area": "prompt",
+          "title": "Strengthen anti-link-gate system prompt instruction",
+          "action": "Add explicit system prompt rule: 'NEVER ask user to send links or company cards. If company mentioned in conversation history, assume that company for all subsequent requests. If unsure which company, ask clarifying question about company name, not about links.'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts: Add to buildSystemPrompt() guardrails section. Current anti-link-gate exists in checks but not in generation guidance.",
+          "expectedImpact": "Reduces UV019-022 'пришлите ссылку' responses",
+          "risk": "Low - prompt text only",
+          "effort": "S",
+          "validationScenarios": [
+            "UV019",
+            "UV020",
+            "UV021",
+            "UV022"
+          ]
+        },
+        {
+          "id": "R8",
+          "area": "ui",
+          "title": "Add scenario tag to response metadata for debugging",
+          "action": "Include detected intent tags (analytics, sourcing, ranking, template) in responseMeta for each turn. This enables faster regression identification in QA reports.",
+          "implementationHint": "app/src/app/api/ai/request/route.ts: In responseMeta construction, add detectedIntents: { analytics: bool, sourcing: bool, ranking: bool, template: bool }.",
+          "expectedImpact": "Improves observability, faster debug of misclassified scenarios",
+          "risk": "None - metadata only",
+          "effort": "S",
+          "validationScenarios": [
+            "UV018",
+            "UV001-022"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "UV012",
+          "UV018",
+          "UV019",
+          "UV020",
+          "UV021",
+          "UV022"
+        ],
+        "regressionSuites": [
+          "scenarios.regressions.user-ideas-multistep-variants.json",
+          "scenarios.regressions.template-announcement.json"
+        ],
+        "successMetrics": [
+          "strictPassRate >= 0.80 (target: 18/22 scenarios)",
+          "avgUsefulness >= 2.5 (current: 1.43)",
+          "usefulRate >= 0.50 (current: 0.136)",
+          "zero hallucination of wrong company types (UV012 class errors)",
+          "zero link-gate responses when company in context (UV019-022 class errors)",
+          "zero sourcing fallback on analytics requests (UV018 class errors)"
+        ]
+      }
+    },
+    {
+      "advisor": "minimax",
+      "executiveSummary": "The QA reveals 4 critical failure modes: (1) catastrophic context/continuity loss between turns, (2) wrong-category hallucination (healthcare→manufacturing), (3) template collapse into placeholder text, and (4) complete task misunderstanding when direct catalog lookup fails. P0 fixes: enforce category validation before output, hardcode continuity checkpoints in system prompt, and kill placeholder templates with explicit fill-instructions.",
+      "priorityPlan": [
+        {
+          "priority": "P0",
+          "title": "Enforce category validation before output",
+          "why": "UV012 returned polyclinics/hospitals as shoe manufacturers. System must reject companies whose category doesn't match the task domain.",
+          "expectedImpact": "Zero wrong-category outputs; strict pass on all website_scan scenarios",
+          "validationScenarios": [
+            "UV012",
+            "UV013"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Hardcode continuity checkpoints in system prompt",
+          "why": "UV022, UV019, UV020 all lost company context between turns. System must echo previous context and verify continuity.",
+          "expectedImpact": "100% context retention in multi-turn scenarios",
+          "validationScenarios": [
+            "UV022",
+            "UV019",
+            "UV020"
+          ]
+        },
+        {
+          "priority": "P0",
+          "title": "Kill placeholder templates with explicit fill-or-fail",
+          "why": "UV001, UV003, UV004, UV006, UV007, UV016, UV017 all returned 'уточняется' placeholders. Templates must either be filled or explicitly state inability.",
+          "expectedImpact": "Zero placeholder-only outputs; all templates either real or honest fallback",
+          "validationScenarios": [
+            "UV001",
+            "UV003",
+            "UV004",
+            "UV006"
+          ]
+        },
+        {
+          "priority": "P1",
+          "title": "Anti-synthetic fallback: task refusal protocol",
+          "why": "UV018 asked for GA tags, got catalog rubrics. UV003 asked for B2B, got fishing/plumbing. System must admit inability and ask for clarification rather than generating synthetic fallback.",
+          "expectedImpact": "Eliminate synthetic task-avoidance responses",
+          "validationScenarios": [
+            "UV018",
+            "UV003",
+            "UV009"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "id": "R1",
+          "area": "prompt",
+          "title": "Add category validation guardrail",
+          "action": "In system prompt: after any company lookup, before output, add explicit validation: CHECK: company category must contain at least one keyword from [task_domain]. Reject if mismatch with honest fallback: 'Catalog has no companies matching [task_domain]. Found [N] [actual_category]. Do you want to broaden search?'",
+          "implementationHint": "app/src/app/api/ai/request/route.ts or similar AI orchestration layer; add pre-output validation function",
+          "expectedImpact": "Zero category-mismatch errors like 'polyclinics as shoe manufacturers'",
+          "risk": "Low - adds validation, doesn't change model behavior directly",
+          "effort": "M",
+          "validationScenarios": [
+            "UV012",
+            "UV013",
+            "UV009"
+          ]
+        },
+        {
+          "id": "R2",
+          "area": "prompt",
+          "title": "Continuity checkpoint injection",
+          "action": "In system prompt: add mandatory turn-start checkpoint: 'CONTINUITY CHECK: Previous turn established: [company_name] / [task_domain] / [constraints]. Current response must reference and build on this. If you cannot find [company_name], state explicitly and ask: \"I cannot find [company_name] in current context. Should I search catalog fresh?\"'",
+          "implementationHint": "System prompt template in AI route handler; add continuity_section variable",
+          "expectedImpact": "Fixes all context-loss scenarios (UV019, UV020, UV022)",
+          "risk": "Low - improves coherence, no behavioral changes",
+          "effort": "S",
+          "validationScenarios": [
+            "UV019",
+            "UV020",
+            "UV022",
+            "UV021"
+          ]
+        },
+        {
+          "id": "R3",
+          "area": "template",
+          "title": "Template fill-or-fail enforcement",
+          "action": "Replace all template patterns containing 'уточняется', '[проверьте данные]', or empty brackets with explicit instruction: 'OUTPUT TEMPLATE with these fields filled from conversation context: [product], [volume], [location], [timeline]. If any field is missing, ask user: \"To complete the template, I need: [missing_fields]. Please provide.\" NO placeholder-only responses.'",
+          "implementationHint": "Template generation function in UI components (AiRequestsClient.tsx, AssistantClient.tsx)",
+          "expectedImpact": "Eliminates unusable placeholder templates",
+          "risk": "Medium - changes user-facing output format",
+          "effort": "M",
+          "validationScenarios": [
+            "UV001",
+            "UV003",
+            "UV004",
+            "UV006",
+            "UV016",
+            "UV017"
+          ]
+        },
+        {
+          "id": "R4",
+          "area": "prompt",
+          "title": "Anti-synthetic fallback protocol",
+          "action": "In system prompt: add 'When catalog returns zero relevant results for [task_type=tags|news|analysis|comparison], do NOT generate synthetic content. Instead output: \"I cannot find [task_type] in catalog for [company/search_term]. Options: (1) Search web for [term] + news/tags, (2) Broaden catalog search, (3) Describe what you need.\" NO catalog rubric listings, NO generic advice, NO supplier search unless requested.'",
+          "implementationHint": "Zero-results handler in AI route; check for zero_results before template injection",
+          "expectedImpact": "Fixes UV018 (catalog rubrics→tags), UV009 (wrong categories), UV003 (B2B→fishing suppliers)",
+          "risk": "Low - honest fallback is better than wrong output",
+          "effort": "S",
+          "validationScenarios": [
+            "UV018",
+            "UV009",
+            "UV003"
+          ]
+        },
+        {
+          "id": "R5",
+          "area": "retrieval",
+          "title": "Website scan enforcement with honest marking",
+          "action": "For any website_scan task: (1) Must report actual URL checked, (2) Must report specific page/section reviewed, (3) If no manufacturer claim found, mark explicitly: '[Company] appears to be [retail/distributor/reseller], NOT manufacturer per [page evidence]. Continue to next candidate?'",
+          "implementationHint": "Website scanning function; add evidence_report parameter to output",
+          "expectedImpact": "Fixes UV013 (incorrect manufacturer claim), UV012 (no actual scan)",
+          "risk": "Medium - requires actual website access capability",
+          "effort": "L",
+          "validationScenarios": [
+            "UV012",
+            "UV013"
+          ]
+        },
+        {
+          "id": "R6",
+          "area": "prompt",
+          "title": "Multi-turn constraint propagation",
+          "action": "In system prompt: track constraints explicitly across turns. Add: 'ACTIVE CONSTRAINTS from Turn 1: [list]. These MUST be applied to ALL subsequent results unless user explicitly relaxes them. If filtered results < requested count, report: \"Found only [N] of [M] requested matching [constraints]. Continue with [N] or relax constraints?\"'",
+          "implementationHint": "Constraint tracking in conversation context; pass as system variables",
+          "expectedImpact": "Fixes UV001 (men's classical shoes ignored), UV002 (quality criteria ignored)",
+          "risk": "Low - better constraint enforcement",
+          "effort": "M",
+          "validationScenarios": [
+            "UV001",
+            "UV002",
+            "UV015"
+          ]
+        }
+      ],
+      "testPlan": {
+        "mustPassScenarios": [
+          "UV012",
+          "UV018",
+          "UV022",
+          "UV019",
+          "UV001",
+          "UV003"
+        ],
+        "regressionSuites": [
+          "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+        ],
+        "successMetrics": [
+          "strictPassRate: target 0.8 (currently 0.55)",
+          "checkPassRate: maintain >0.9",
+          "avgUsefulness: target >2.0 (currently 1.3)",
+          "Zero category-mismatch errors in UV012-like scenarios",
+          "Zero placeholder-only template outputs"
+        ]
+      }
+    }
+  ],
+  "advisorWarnings": [],
+  "consensus": {
+    "topAreas": [
+      {
+        "area": "prompt",
+        "count": 6
+      },
+      {
+        "area": "guardrails",
+        "count": 2
+      },
+      {
+        "area": "template",
+        "count": 2
+      },
+      {
+        "area": "retrieval",
+        "count": 2
+      },
+      {
+        "area": "ranking",
+        "count": 1
+      },
+      {
+        "area": "ui",
+        "count": 1
+      }
+    ],
+    "recurringTitles": [
+      {
+        "title": "inject company context into system prompt for website scan turns",
+        "count": 1
+      },
+      {
+        "title": "block sourcing actions when analytics/tagging intent detected",
+        "count": 1
+      },
+      {
+        "title": "force template hydration before response finalization",
+        "count": 1
+      },
+      {
+        "title": "persist vendor candidates in conversation context for ranking turns",
+        "count": 1
+      },
+      {
+        "title": "extract and apply quality criteria from user constraints",
+        "count": 1
+      },
+      {
+        "title": "add rubric mismatch detection for search results",
+        "count": 1
+      },
+      {
+        "title": "strengthen anti-link-gate system prompt instruction",
+        "count": 1
+      },
+      {
+        "title": "add scenario tag to response metadata for debugging",
+        "count": 1
+      },
+      {
+        "title": "add category validation guardrail",
+        "count": 1
+      },
+      {
+        "title": "continuity checkpoint injection",
+        "count": 1
+      },
+      {
+        "title": "template fill-or-fail enforcement",
+        "count": 1
+      },
+      {
+        "title": "anti-synthetic fallback protocol",
+        "count": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,130 @@
+Now I have a comprehensive understanding of the codebase. Based on my analysis, I can see the key issues:
+
+1. **Turn 3 template generation failure**: The template contains garbage like "Subject: Запрос по сформируй сообщение" and "Нам нужно сформируй сообщение в Минск" - this is an artifact of broken parsing where the user's request words are being echoed back as placeholders.
+
+2. **No product verification**: The companies listed (Турпродплюс, Амифрут, Минская овощная фабрика, Агромашмаркет) are not verified to actually sell beets - they are just general food/wholesale companies.
+
+3. **Missing alternative queries**: When no exact matches are found, the system doesn't provide alternative search queries as requested.
+
+4. **Continuity violation**: The template generation in Turn 3 completely ignores the context (beet, 500kg, 3 days) and generates meaningless placeholders.
+
+Let me provide the concrete engineering advice:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "UV017 scenario reveals critical failures in template generation (Turn 3 echo-loop bug), product relevance verification, and alternative query fallback. The assistant generates garbage templates that echo user request words ('сформируй сообщение') as placeholders, lists companies without verifying they sell the requested product (beet), and ignores explicit requests for alternative search queries when no exact matches exist.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template generation echo-loop bug",
+      "why": "Turn 3 generates 'Subject: Запрос по сформируй сообщение' - the model is echoing user's request words back as template content. This is a critical parsing/prompt bug that makes templates unusable.",
+      "expectedImpact": "Eliminates 100% of garbage template outputs where user request words leak into template blocks.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add product relevance verification for sourced companies",
+      "why": "Companies like 'Минская овощная фабрика' (listed as Пчеловодство) and 'Агромашмаркет' (Запчасти к сельхозтехнике) are clearly irrelevant to beet sourcing. The system must flag mismatches between rubric and requested product.",
+      "expectedImpact": "Prevents listing of clearly irrelevant companies, increases user trust in shortlists.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement alternative query generation for no-results fallback",
+      "why": "Turn 2 explicitly requests '3 рабочих альтернативы запроса на портале' but receives none. The system has `buildPortalAlternativeQueries()` but it's not being triggered.",
+      "expectedImpact": "Users get actionable next steps when exact matches don't exist.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce context preservation in multi-turn template requests",
+      "why": "Turn 3 ignores 'свекла 500 кг, 3 дня' context and uses generic placeholders. The `extractTemplateFillHints()` function exists but isn't extracting deadline ('3 дня') properly.",
+      "expectedImpact": "Templates contain actual user-specified parameters instead of generic placeholders.",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Fix ensureTemplateBlocks() to strip user command words from subject line",
+      "action": "In `ensureTemplateBlocks()` (line ~1188), the subject line is constructed as `Запрос по {product/service} — ${subjectHint}` where subjectHint comes from `oneLine(message)`. For template requests, this captures the entire user command ('сформируй сообщение поставщику...'). Add filtering to extract only the product/service noun phrase for the subject line, not the full command.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1188-1209. Replace `subjectHint = truncate(oneLine(message || \"\"), 90)` with extraction of product/service only using `pickTemplateProductService()` or similar. Never use raw user message in Subject line.",
+      "expectedImpact": "Eliminates 'Subject: Запрос по сформируй сообщение' garbage output.",
+      "risk": "Low - isolated to template generation path",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add explicit instruction to NOT echo user command words in template body",
+      "action": "The prompt building logic needs an explicit guardrail: 'NEVER include user command words like \"сформируй\", \"сделай\", \"запрос\" in the template content. Use only the extracted parameters (product, qty, city, deadline).'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add to system prompt in `buildSystemPrompt()` or template-specific prompt section. Add regex post-processing to strip command words.",
+      "expectedImpact": "Prevents 'Нам нужно сформируй сообщение в Минск' type garbage in Body.",
+      "risk": "Low - prompt-only change",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R3",
+      "area": "ranking",
+      "title": "Add rubric-product mismatch detection in vendor ranking",
+      "action": "In `formatVendorShortlistRows()` or `filterAndRankVendorCandidates()`, add logic to detect when company rubric is clearly mismatched with requested product (e.g., 'Пчеловодство' vs 'свекла', 'Запчасти к сельхозтехнике' vs 'свекла'). Flag or filter such mismatches.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1846-1863. Add `detectRubricProductMismatch(company, searchText)` function that returns confidence score. If mismatch is high (e.g., 'пчеловодство' vs 'овощи'), either filter out or add warning badge.",
+      "expectedImpact": "Prevents obviously irrelevant companies from appearing in shortlists.",
+      "risk": "Medium - may filter valid companies if logic is too aggressive",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Trigger alternative query fallback when user explicitly requests it",
+      "action": "Turn 2 says 'Если точных совпадений нет — честно скажи и дай 3 рабочих альтернативы'. The system has `buildPortalAlternativeQueries()` (line ~1356) but it's not being called. Add pattern detection for 'альтернативы запроса' and trigger the fallback.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add check in `buildHardFormattedReply()` or main handler for explicit alternative query requests. Pattern: `/альтернатив.*запрос|другие.*запросы/i`. Call `buildPortalAlternativeQueries()` and include in response.",
+      "expectedImpact": "Users receive actionable alternative search queries when exact matches don't exist.",
+      "risk": "Low - additive feature",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "template",
+      "title": "Fix deadline extraction for 'в течение X дней' pattern",
+      "action": "`pickTemplateDeadline()` (line ~1458) only matches calendar dates. It doesn't extract 'в течение 3 дней' style relative deadlines. Add pattern for `/в течение\s+(\d+)\s*(дн|дней|дня)/i`.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1458-1466. Add relative deadline patterns: `/в течение\s+(\d+)\s*(дн|дней|дня)/i`, `/(\d+)\s*(дн|дней|дня)\s*на поставку/i`, `/поставка\s+в\s+течение\s+(\d+)/i`.",
+      "expectedImpact": "Templates correctly include '3 дня' instead of generic '{deadline}' placeholder.",
+      "risk": "Low - additive pattern matching",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Add post-processing filter to strip command words from template output",
+      "action": "Add `sanitizeTemplateOutput()` function that runs before returning template to user. It should strip words like 'сформируй', 'сделай', 'запрос', 'сообщение' when they appear in template content (not placeholders).",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add new function after `normalizeTemplateBlockLayout()` (line ~1225). Regex: `/\b(сформируй|сделай|запрос|сообщение|уточняется)\b/gi` → replace with appropriate content or flag for regeneration.",
+      "expectedImpact": "Failsafe against echo-loop bugs in template generation.",
+      "risk": "Low - post-processing only",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.template-announcement.json"
+    ],
+    "successMetrics": [
+      "Template usefulness score >= 4/5 (UV017 Turn 3)",
+      "Zero instances of user command words in template output",
+      "Alternative queries provided when explicitly requested (100%)",
+      "Product-rubric mismatch detection rate >= 80%",
+      "Deadline extraction success for 'в течение X дней' patterns >= 90%"
+    ]
+  }
+}
+```

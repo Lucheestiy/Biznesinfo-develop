@@ -1,0 +1,115 @@
+{
+  "judge": "minimax",
+  "ratings": [
+    {
+      "scenarioId": "UV011",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Wrong company type (doors/windows instead of shoes)",
+        "Turn 3: Massive fallback to generic template despite user asking for specific expanded query"
+      ],
+      "criticalIssues": [
+        "Gave completely wrong company type in Turn 1",
+        "Turn 3 ignores user request for ONE specific query, repeats generic advice"
+      ],
+      "strengths": [
+        "Turn 2 honest about no confirmed manufacturers"
+      ],
+      "nextUserProbe": "Скажи прямо: есть ли в каталоге хоть один производитель обуви в Минске?"
+    },
+    {
+      "scenarioId": "UV012",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: Included POLYCLINICS and HOSPITALS as shoe manufacturers",
+        "Never actually checked any websites - just listed random companies",
+        "Zero progress toward verification goal"
+      ],
+      "criticalIssues": [
+        "Completely wrong companies (healthcare instead of manufacturing)",
+        "No website verification performed despite explicit requests",
+        "Failed core task: check if companies are manufacturers"
+      ],
+      "nextUserProbe": "Ты понимаешь, что поликлиники не производят обувь?"
+    },
+    {
+      "scenarioId": "UV013",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 2 actually scraped website and found it's a RETAIL network, not manufacturer - good honesty",
+        "Turn 3 falls back to generic template, doesn't offer next candidate"
+      ],
+      "criticalIssues": [
+        "Only 1 company total (of 3 requested)",
+        "Turn 3 doesn't follow up on Turn 2 finding"
+      ],
+      "strengths": [
+        "Turn 2 shows website content with source attribution",
+        "Correctly identifies company as retailer, not manufacturer"
+      ],
+      "nextUserProbe": "Нашел ли ты хоть одного реального производителя на сайте?"
+    },
+    {
+      "scenarioId": "UV014",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.7,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Turn 2: Good shortlist of 5 dairy companies with profiles",
+        "Turn 3: Prioritized 2 companies, gave clear call questions, no generic advice"
+      ],
+      "criticalIssues": [
+        "Turn 1 too generic, no concrete companies"
+      ],
+      "strengths": [
+        "Kept reverse-buyer context throughout",
+        "Actionable next steps with specific companies"
+      ],
+      "nextUserProbe": "Какой из этих комбинатов сейчас активнее всего закупает тару?"
+    },
+    {
+      "scenarioId": "UV015",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 2: Generic fallback with only 1 company",
+        "Turn 3: Provided only ONE query (user asked for options) and basic call script"
+      ],
+      "criticalIssues": [
+        "Only 1 company total for comparison task",
+        "Turn 2 couldn't do comparison as requested"
+      ],
+      "strengths": [
+        "Turn 3 gave reasonable query and call script"
+      ],
+      "nextUserProbe": "Дай минимум 3 компании для сравнения, а не один запрос"
+    }
+  ]
+}

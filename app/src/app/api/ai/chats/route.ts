@@ -13,6 +13,8 @@ type ListRow = {
   turn_count: number;
   last_user_message: string | null;
   last_assistant_message: string | null;
+  last_provider: string | null;
+  last_model: string | null;
   user_id: string | null;
   user_email: string | null;
   user_name: string | null;
@@ -54,6 +56,8 @@ export async function GET(request: Request) {
               COALESCE(tc.turn_count, 0)::int AS turn_count,
               lt.user_message AS last_user_message,
               lt.assistant_message AS last_assistant_message,
+              lt.provider AS last_provider,
+              lt.model AS last_model,
               s.user_id::text AS user_id,
               s.user_email AS user_email,
               s.user_name AS user_name
@@ -64,7 +68,11 @@ export async function GET(request: Request) {
               WHERE t.session_id = s.id
             ) tc ON true
             LEFT JOIN LATERAL (
-              SELECT t.user_message, t.assistant_message
+              SELECT
+                t.user_message,
+                t.assistant_message,
+                NULLIF(t.response_meta->>'provider', '') AS provider,
+                NULLIF(t.response_meta->>'model', '') AS model
               FROM ai_assistant_turns t
               WHERE t.session_id = s.id
               ORDER BY t.turn_index DESC
@@ -90,6 +98,8 @@ export async function GET(request: Request) {
               COALESCE(tc.turn_count, 0)::int AS turn_count,
               lt.user_message AS last_user_message,
               lt.assistant_message AS last_assistant_message,
+              lt.provider AS last_provider,
+              lt.model AS last_model,
               s.user_id::text AS user_id,
               NULL::text AS user_email,
               NULL::text AS user_name
@@ -100,7 +110,11 @@ export async function GET(request: Request) {
               WHERE t.session_id = s.id
             ) tc ON true
             LEFT JOIN LATERAL (
-              SELECT t.user_message, t.assistant_message
+              SELECT
+                t.user_message,
+                t.assistant_message,
+                NULLIF(t.response_meta->>'provider', '') AS provider,
+                NULLIF(t.response_meta->>'model', '') AS model
               FROM ai_assistant_turns t
               WHERE t.session_id = s.id
               ORDER BY t.turn_index DESC
@@ -125,6 +139,8 @@ export async function GET(request: Request) {
             COALESCE(tc.turn_count, 0)::int AS turn_count,
             lt.user_message AS last_user_message,
             lt.assistant_message AS last_assistant_message,
+            lt.provider AS last_provider,
+            lt.model AS last_model,
             NULL::text AS user_id,
             NULL::text AS user_email,
             NULL::text AS user_name
@@ -135,7 +151,11 @@ export async function GET(request: Request) {
             WHERE t.session_id = s.id
           ) tc ON true
           LEFT JOIN LATERAL (
-            SELECT t.user_message, t.assistant_message
+            SELECT
+              t.user_message,
+              t.assistant_message,
+              NULLIF(t.response_meta->>'provider', '') AS provider,
+              NULLIF(t.response_meta->>'model', '') AS model
             FROM ai_assistant_turns t
             WHERE t.session_id = s.id
             ORDER BY t.turn_index DESC
@@ -159,6 +179,8 @@ export async function GET(request: Request) {
       turnCount: Number(row.turn_count || 0),
       lastUserMessage: row.last_user_message || null,
       lastAssistantMessage: row.last_assistant_message || null,
+      lastProvider: row.last_provider || null,
+      lastModel: row.last_model || null,
       user:
         scope === "all"
           ? {

@@ -65,7 +65,7 @@ const ASSISTANT_INTERNET_SEARCH_MAX_RESULTS = 5;
 const ASSISTANT_INTERNET_SEARCH_MAX_BLOCK_CHARS = 2_800;
 const ASSISTANT_INTERNET_SEARCH_MAX_HTML_CHARS = 420_000;
 
-type AssistantProvider = "stub" | "openai" | "codex";
+type AssistantProvider = "stub" | "openai" | "codex" | "minimax";
 type PromptMessage = { role: "system" | "user" | "assistant"; content: string };
 type AssistantHistoryMessage = { role: "user" | "assistant"; content: string };
 type AssistantUsage = { inputTokens: number; outputTokens: number; totalTokens: number };
@@ -6635,11 +6635,43 @@ function postProcessAssistantReply(params: {
   return out;
 }
 
-function getAssistantProvider(): AssistantProvider {
-  const raw = (process.env.AI_ASSISTANT_PROVIDER || "stub").trim().toLowerCase();
-  if (raw === "openai") return "openai";
-  if (raw === "codex" || raw === "codex-auth" || raw === "codex_cli") return "codex";
-  return "stub";
+function parseAssistantProviderValue(raw: string): AssistantProvider | null {
+  const value = (raw || "").trim().toLowerCase();
+  if (value === "stub") return "stub";
+  if (value === "openai") return "openai";
+  if (value === "codex" || value === "codex-auth" || value === "codex_cli") return "codex";
+  if (value === "minimax" || value === "mini-max" || value === "minimax-api" || value === "m2.5") return "minimax";
+  return null;
+}
+
+function readAssistantQaOverrides(payload: unknown): { provider: AssistantProvider | null; model: string | null } {
+  const allowQaOverride = (process.env.AI_ASSISTANT_ALLOW_PROVIDER_OVERRIDE || "").trim() === "1";
+  const allowUiOverride = (process.env.AI_ASSISTANT_ALLOW_PROVIDER_OVERRIDE_UI || "").trim() === "1";
+  if (!allowQaOverride && !allowUiOverride) return { provider: null, model: null };
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return { provider: null, model: null };
+
+  const sourceRaw = typeof (payload as any)?.source === "string" ? (payload as any).source : "";
+  const source = sourceRaw.trim().toLowerCase();
+  const qaSource = source === "qa_runner" || source === "qa_eval" || source === "benchmark_runner";
+  const uiSource = source === "assistant_page";
+  if (!((allowQaOverride && qaSource) || (allowUiOverride && uiSource))) return { provider: null, model: null };
+
+  const overrideRaw = typeof (payload as any)?._assistantProviderOverride === "string" ? (payload as any)._assistantProviderOverride : "";
+  const provider = parseAssistantProviderValue(overrideRaw);
+  const modelRaw = typeof (payload as any)?._assistantModelOverride === "string" ? (payload as any)._assistantModelOverride : "";
+  const model = modelRaw ? truncate(oneLine(modelRaw), 140) : null;
+
+  return { provider, model: model || null };
+}
+
+function getAssistantProvider(payload?: unknown): AssistantProvider {
+  const configured = parseAssistantProviderValue((process.env.AI_ASSISTANT_PROVIDER || "stub").trim().toLowerCase()) || "stub";
+  const override = readAssistantQaOverrides(payload).provider;
+  return override || configured;
+}
+
+function getAssistantModelOverride(payload?: unknown): string | null {
+  return readAssistantQaOverrides(payload).model;
 }
 
 function pickEnvString(name: string, fallback: string): string {
@@ -6725,6 +6757,7 @@ async function generateOpenAiReply(params: {
   prompt: PromptMessage[];
   timeoutMs: number;
   maxTokens: number;
+  temperature?: number;
   signal?: AbortSignal;
 }): Promise<{ text: string; usage: AssistantUsage | null }> {
   const url = `${params.baseUrl.replace(/\/+$/, "")}/chat/completions`;
@@ -6743,7 +6776,7 @@ async function generateOpenAiReply(params: {
       body: JSON.stringify({
         model: params.model,
         messages: params.prompt.map((m) => ({ role: m.role, content: m.content })),
-        temperature: 0.2,
+        temperature: Number.isFinite(params.temperature) ? Math.max(0, Math.min(2, Number(params.temperature))) : 0.2,
         max_tokens: Math.max(64, Math.min(4096, Math.floor(params.maxTokens))),
       }),
       signal: controller.signal,
@@ -12172,6 +12205,22 @@ function buildAssistantSystemPrompt(): string {
     "- Never substitute a different company name for the established entity.",
     "- If you cannot find information about that specific company, say so using the EXACT name the user provided — do not suggest a different company as a replacement.",
     "",
+    "CONTINUITY CHECKPOINT (для ВСЕХ многоходовых сценариев):",
+    "- MANDATORY CHECK at the START of EVERY response in multi-turn dialogs:",
+    "  1. What was the PREVIOUS turn about? (company name, task domain, constraints)",
+    "  2. Does the CURRENT request reference or continue that previous context?",
+    "  3. If YES: Continue using the SAME company/constraints from previous turn.",
+    "  4. If the user mentions 'на карточке', 'на сайте', 'проверь', 'новости', 'контакты' — they mean the SAME company from previous turn.",
+    "- STRICT RULE: NEVER ask user to 'пришлите ссылку', 'откройте карточку', 'дайте URL' if the company was already mentioned or found in Turn 1.",
+    "- If you need to reference a company from Turn 1, use EXACT same name — do NOT re-search or ask for link.",
+    "- If you cannot find the previous company, explicitly state: 'Не могу найти [компания] в текущем контексте. Искать заново?' — do NOT substitute a different company.",
+    "",
+    "ANTI-LINK-GATE:",
+    "- NEVER ask user to send links, URLs, or company cards.",
+    "- If company was mentioned in conversation history, ASSUME that company for ALL subsequent requests.",
+    "- If user says 'проверь на сайте', 'что на карточке', 'последние новости' — use the company from Turn 1, do NOT ask for link.",
+    "- If you are unsure which company, ask for company NAME, not link: 'Уточните название компании' — never 'пришлите ссылку'.",
+    "",
     "CRITERIA PERSISTENCE:",
     "- Accumulate ALL user-specified criteria across turns (quality parameters, certifications, constraints, geographic filters, budget, timeline, temperature/special conditions).",
     "- On every turn that produces a company list or shortlist, re-apply ALL accumulated criteria.",
@@ -12430,7 +12479,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "UpgradeRequired", plan: effective.plan }, { status: 403 });
   }
 
-  const provider = getAssistantProvider();
+  const provider = getAssistantProvider(payload);
+  const providerModelOverride = getAssistantModelOverride(payload);
   const streamRequested = (() => {
     try {
       return new URL(request.url).searchParams.get("stream") === "1";
@@ -13293,7 +13343,7 @@ export async function POST(request: Request) {
     }
 
     if (provider === "openai") {
-      providerMeta = { provider: "openai", model: pickEnvString("OPENAI_MODEL", "gpt-4o-mini") };
+      providerMeta = { provider: "openai", model: providerModelOverride || pickEnvString("OPENAI_MODEL", "gpt-4o-mini") };
       const apiKey = (process.env.OPENAI_API_KEY || "").trim();
 
       if (!apiKey) {
@@ -13307,6 +13357,7 @@ export async function POST(request: Request) {
             prompt,
             timeoutMs: Math.max(1000, Math.min(120_000, pickEnvInt("OPENAI_TIMEOUT_SEC", 20) * 1000)),
             maxTokens: pickEnvInt("OPENAI_MAX_TOKENS", 800),
+            temperature: 0.2,
             signal: opts.signal,
           });
           replyText = openai.text;
@@ -13329,8 +13380,52 @@ export async function POST(request: Request) {
       }
     }
 
+    if (provider === "minimax" && !canceled) {
+      providerMeta = { provider: "minimax", model: providerModelOverride || pickEnvString("MINIMAX_MODEL", "MiniMax-M2.5") };
+      const apiKey = (process.env.MINIMAX_API_KEY || "").trim();
+
+      if (!apiKey) {
+        providerError = { name: "MiniMaxKeyMissing", message: "MINIMAX_API_KEY is missing" };
+      } else {
+        const minimaxTemperatureRaw = (process.env.MINIMAX_TEMPERATURE || "").trim();
+        const minimaxTemperatureParsed = minimaxTemperatureRaw ? Number.parseFloat(minimaxTemperatureRaw) : 0.2;
+        const minimaxTemperature = Number.isFinite(minimaxTemperatureParsed)
+          ? Math.max(0, Math.min(1, minimaxTemperatureParsed))
+          : 0.2;
+
+        try {
+          const minimax = await generateOpenAiReply({
+            apiKey,
+            baseUrl: pickEnvString("MINIMAX_BASE_URL", "https://api.minimax.io/v1"),
+            model: providerMeta.model!,
+            prompt,
+            timeoutMs: Math.max(1000, Math.min(120_000, pickEnvInt("MINIMAX_TIMEOUT_SEC", 20) * 1000)),
+            maxTokens: pickEnvInt("MINIMAX_MAX_TOKENS", 800),
+            temperature: minimaxTemperature,
+            signal: opts.signal,
+          });
+          replyText = minimax.text;
+          usage = minimax.usage;
+          isStub = false;
+        } catch (error) {
+          if (opts.signal?.aborted && isAbortError(error)) {
+            canceled = true;
+            replyText = "";
+            isStub = false;
+            providerError = null;
+          } else {
+            providerError = {
+              name: "MiniMaxRequestFailed",
+              message: error instanceof Error ? error.message : "Unknown error",
+            };
+            replyText = fallbackStubText;
+          }
+        }
+      }
+    }
+
     if (provider === "codex" && !canceled) {
-      providerMeta = { provider: "codex", model: pickEnvString("CODEX_MODEL", "gpt-5.2-codex") };
+      providerMeta = { provider: "codex", model: providerModelOverride || pickEnvString("CODEX_MODEL", "gpt-5.2-codex") };
       const auth = await readCodexAccessTokenFromAuth();
 
       if (!auth?.accessToken) {

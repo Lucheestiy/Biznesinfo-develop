@@ -43,6 +43,8 @@ function parseArgs(argv) {
     maxStubRetries: Number(process.env.QA_AI_MAX_STUB_RETRIES || 2),
     minTurnDelayMs: Number(process.env.QA_AI_MIN_TURN_DELAY_MS || 120),
     stubOutageThreshold: Number(process.env.QA_AI_STUB_OUTAGE_THRESHOLD || 12),
+    providerOverride: (process.env.QA_AI_PROVIDER_OVERRIDE || "").trim().toLowerCase() || null,
+    providerModelOverride: (process.env.QA_AI_PROVIDER_MODEL_OVERRIDE || "").trim() || null,
     targetPassCount: null,
     targetPassRate: null,
   };
@@ -73,6 +75,14 @@ function parseArgs(argv) {
     else if (a === "--max-stub-retries") out.maxStubRetries = Number(argv[++i] || 2);
     else if (a === "--min-turn-delay-ms") out.minTurnDelayMs = Number(argv[++i] || 0);
     else if (a === "--stub-outage-threshold") out.stubOutageThreshold = Number(argv[++i] || 12);
+    else if (a === "--provider-override") {
+      const raw = String(argv[++i] || "").trim().toLowerCase();
+      out.providerOverride = raw || null;
+    }
+    else if (a === "--provider-model-override") {
+      const raw = String(argv[++i] || "").trim();
+      out.providerModelOverride = raw || null;
+    }
     else if (a === "--target-pass-count") {
       const n = Number(argv[++i] || 0);
       out.targetPassCount = Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
@@ -110,6 +120,8 @@ function parseArgs(argv) {
         "  --max-stub-retries N          Retries when provider returns stub reply (default 2)",
         "  --min-turn-delay-ms N         Delay between turn requests to reduce burst load (default 120)",
         "  --stub-outage-threshold N     Stop run after N consecutive global stub replies (default 12)",
+        "  --provider-override NAME      Request-level provider override (stub|openai|codex|minimax)",
+        "  --provider-model-override M   Request-level model override for selected provider",
         "  --target-pass-count N         Required number of passed scenarios (default: 45 for 50-scenario suite; otherwise derived)",
         "  --target-pass-rate R          Required pass-rate (0..1 or 0..100); used to derive target-pass-count",
       ].join("\n"));
@@ -878,6 +890,8 @@ async function main() {
           ? { ...requestBody.payload }
           : {};
       if (!payloadBase.source) payloadBase.source = "qa_runner";
+      if (opts.providerOverride) payloadBase._assistantProviderOverride = opts.providerOverride;
+      if (opts.providerModelOverride) payloadBase._assistantModelOverride = opts.providerModelOverride;
       requestBody.payload = payloadBase;
       const requestBodySnapshot = JSON.parse(JSON.stringify(requestBody));
 
@@ -980,6 +994,14 @@ async function main() {
 
       const replyText = String(api.json?.reply?.text || "");
       const isStub = Boolean(api.json?.reply?.isStub);
+      const replyProvider =
+        typeof api.json?.reply?.provider === "string" && String(api.json.reply.provider).trim()
+          ? String(api.json.reply.provider).trim().toLowerCase()
+          : null;
+      const replyModel =
+        typeof api.json?.reply?.model === "string" && String(api.json.reply.model).trim()
+          ? String(api.json.reply.model).trim()
+          : null;
       const responseConversationId =
         typeof api.json?.conversationId === "string" ? String(api.json.conversationId).trim() : "";
       if (responseConversationId) {
@@ -1119,6 +1141,8 @@ async function main() {
         requestId: api.json?.requestId || null,
         conversationId: responseConversationId || scenarioConversationId || null,
         isStub,
+        provider: replyProvider,
+        model: replyModel,
         reply: replyText,
         companyPathProbeSummary: shouldProbeCompanyPaths
           ? {
@@ -1246,6 +1270,25 @@ async function main() {
     .map(([key, count]) => ({ key, count }))
     .sort((a, b) => b.count - a.count);
 
+  const providerCounts = new Map();
+  const modelCounts = new Map();
+  for (const scenarioResult of scenarioResults) {
+    for (const turn of scenarioResult.turns || []) {
+      const providerKey = String(turn?.provider || "unknown").trim().toLowerCase() || "unknown";
+      providerCounts.set(providerKey, (providerCounts.get(providerKey) || 0) + 1);
+      if (turn?.model) {
+        const modelKey = String(turn.model || "").trim();
+        if (modelKey) modelCounts.set(modelKey, (modelCounts.get(modelKey) || 0) + 1);
+      }
+    }
+  }
+  const providerUsage = Array.from(providerCounts.entries())
+    .map(([provider, turns]) => ({ provider, turns }))
+    .sort((a, b) => b.turns - a.turns || a.provider.localeCompare(b.provider));
+  const modelUsage = Array.from(modelCounts.entries())
+    .map(([model, turns]) => ({ model, turns }))
+    .sort((a, b) => b.turns - a.turns || a.model.localeCompare(b.model));
+
   const derivedTargetRate = opts.targetPassRate ?? (scenarioResults.length === 50 ? 0.9 : 0.8);
   const derivedTargetPassCount = Math.max(1, Math.ceil(scenarioResults.length * derivedTargetRate));
   const targetPassCount = Math.max(
@@ -1282,6 +1325,8 @@ async function main() {
     totalBusyRetries,
     totalRateLimitRetries,
     totalStubRetries,
+    providerUsage,
+    modelUsage,
     stoppedEarly: Boolean(outageStop),
     stopReason: outageStop,
   };
@@ -1309,6 +1354,8 @@ async function main() {
         maxStubRetries: opts.maxStubRetries,
         minTurnDelayMs: opts.minTurnDelayMs,
         stubOutageThreshold: opts.stubOutageThreshold,
+        providerOverride: opts.providerOverride,
+        providerModelOverride: opts.providerModelOverride,
         targetPassCount: opts.targetPassCount,
         targetPassRate: opts.targetPassRate,
       },
@@ -1348,6 +1395,12 @@ async function main() {
   md.push(`- Avg turn latency: ${summary.avgTurnLatencyMs} ms`);
   md.push(`- Busy retries: ${summary.totalBusyRetries}, rate-limit retries: ${summary.totalRateLimitRetries}, stub retries: ${summary.totalStubRetries}`);
   md.push(`- Stub replies observed: ${summary.totalStubReplies}`);
+  if (Array.isArray(summary.providerUsage) && summary.providerUsage.length > 0) {
+    md.push(`- Provider usage: ${summary.providerUsage.map((row) => `${row.provider}=${row.turns}`).join(", ")}`);
+  }
+  if (Array.isArray(summary.modelUsage) && summary.modelUsage.length > 0) {
+    md.push(`- Model usage: ${summary.modelUsage.map((row) => `${row.model}=${row.turns}`).join(", ")}`);
+  }
   md.push(`- Target ${summary.targetPassCount}/${summary.totalScenarios} reached: ${summary.targetReached ? "yes" : "no"}`);
   md.push("");
 

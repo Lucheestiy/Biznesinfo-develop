@@ -8,9 +8,10 @@ import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 type ProviderStatus = {
-  provider: "stub" | "openai" | "codex";
+  provider: "stub" | "openai" | "codex" | "minimax";
   openai: { model: string; baseUrl: string; hasKey: boolean };
   codex: { model: string; baseUrl: string; hasAuthPath: boolean };
+  minimax: { model: string; baseUrl: string; hasKey: boolean };
 };
 
 type AiRequestListRow = {
@@ -73,7 +74,7 @@ type AiRequestDetail = {
   payload: unknown;
 };
 
-type ProviderFilterOption = "all" | "stub" | "openai" | "codex";
+type ProviderFilterOption = "all" | "stub" | "openai" | "codex" | "minimax";
 type FilterPreset = "errors_non_stub" | "web_attempted_deep" | "down_feedback";
 type ListPagination = {
   limit: number;
@@ -99,7 +100,7 @@ function parseIntSearchParam(raw: string | null, fallback: number, min: number, 
 
 function parseProviderFilterOption(raw: string | null): ProviderFilterOption {
   const value = (raw || "").trim().toLowerCase();
-  if (value === "stub" || value === "openai" || value === "codex") return value;
+  if (value === "stub" || value === "openai" || value === "codex" || value === "minimax") return value;
   return "all";
 }
 
@@ -422,6 +423,7 @@ export default function AiRequestsClient() {
         if (providerFilter === "stub" && p !== "stub") return false;
         if (providerFilter === "openai" && p !== "openai") return false;
         if (providerFilter === "codex" && p !== "codex") return false;
+        if (providerFilter === "minimax" && p !== "minimax") return false;
       }
       if (onlyErrors && !r.providerError) return false;
       if (onlyInjected && !r.injectionFlagged) return false;
@@ -627,6 +629,13 @@ export default function AiRequestsClient() {
                       <span className="font-semibold">{status.codex.hasAuthPath ? "yes" : "no"}</span>
                     </>
                   )}
+                  {status.provider === "minimax" && (
+                    <>
+                      {" "}
+                      • Model: <span className="font-semibold">{status.minimax.model}</span> • Key:{" "}
+                      <span className="font-semibold">{status.minimax.hasKey ? "yes" : "no"}</span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -771,6 +780,7 @@ export default function AiRequestsClient() {
                       <option value="stub">stub</option>
                       <option value="openai">openai</option>
                       <option value="codex">codex</option>
+                      <option value="minimax">minimax</option>
                     </select>
                   </div>
                   <div>
