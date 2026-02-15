@@ -11695,21 +11695,52 @@ function buildVendorCompanyHaystack(company: BiznesinfoCompanySummary): string {
   );
 }
 
+// New: Build category-only haystack for relevance boosting
+function buildVendorCategoryHaystack(company: BiznesinfoCompanySummary): string {
+  return normalizeComparableText(
+    [
+      company.primary_rubric_name || "",
+      company.primary_category_name || "",
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+}
+
 function scoreVendorCandidateRelevance(company: BiznesinfoCompanySummary, terms: string[]): VendorCandidateRelevance {
   if (terms.length === 0) return { score: 1, strongMatches: 0, exactStrongMatches: 0, weakMatches: 0 };
 
   const haystack = buildVendorCompanyHaystack(company);
+  // CATEGORY RELEVANCE BOOST: Extract category-specific haystack for targeted boosting
+  const categoryHaystack = buildVendorCategoryHaystack(company);
 
   let score = 0;
   let strongMatches = 0;
   let exactStrongMatches = 0;
   let weakMatches = 0;
+  // CATEGORY RELEVANCE BOOST: Track category matches for bonus scoring
+  let categoryBoost = 0;
   for (const term of terms) {
     const normalized = normalizeComparableText(term);
     if (!normalized || normalized.length < 3) continue;
     const weakTerm = isWeakVendorTerm(normalized);
+    
+    // CATEGORY RELEVANCE BOOST: Check if term matches category/rubric specifically
+    // Category matches get a bonus since they indicate direct relevance
+    const categoryMatch = categoryHaystack.includes(normalized);
+    const categoryStemMatch = (() => {
+      const stem = normalizedStem(normalized);
+      return stem && normalized.length >= 5 && stem.length >= 5 && categoryHaystack.includes(stem);
+    })();
+    
     if (haystack.includes(normalized)) {
+      // Base score
       score += weakTerm ? 1 : 3;
+      // CATEGORY RELEVANCE BOOST: Add bonus for category matches
+      if (categoryMatch) {
+        categoryBoost += 1;
+        score += 2; // Additional boost for category match
+      }
       if (weakTerm) weakMatches += 1;
       else {
         strongMatches += 1;
@@ -11721,6 +11752,11 @@ function scoreVendorCandidateRelevance(company: BiznesinfoCompanySummary, terms:
     if (stem && normalized.length >= 5 && stem.length >= 5 && haystack.includes(stem)) {
       if (!weakTerm) {
         score += 1;
+        // CATEGORY RELEVANCE BOOST: Add bonus for category stem matches
+        if (categoryStemMatch) {
+          categoryBoost += 1;
+          score += 1;
+        }
         strongMatches += 1;
       } else {
         weakMatches += 1;
