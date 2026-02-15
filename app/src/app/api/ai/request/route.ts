@@ -1635,6 +1635,25 @@ function buildPrimaryVerificationDocumentsChecklist(message: string, requestedCo
   ].join("\n");
 }
 
+function detectOEMODMRequest(message: string): boolean {
+  const text = normalizeComparableText(message || "");
+  if (!text) return false;
+  // Detect OEM/ODM/private label/contract manufacturing requests
+  return /\b(oem|odem|private\s*label|контрактн\p{L}*\s*производств|производств\p{L}*\s*под\s*сво\p{L}*\s*бренд|производств\p{L}*\s*под\s*заказ|contract\s*manufactur)\b/iu.test(text);
+}
+
+function buildOEMODMChecklist(): string {
+  return [
+    "OEM/ODM чеклист (контрактное производство под вашим брендом):",
+    "1. MOQ (минимальный тираж) — минимальный объем заказа для запуска производства",
+    "2. Сроки образца (sample lead time) — время на изготовление прототипа (обычно 2-4 недели)",
+    "3. Сроки производства партии (production lead time) — время от заказа до отгрузки",
+    "4. Гарантия — условия гарантии на произведенную продукцию",
+    "5. Условия размещения заказа — предоплата, отсрочка, объемные скидки",
+    "6. Возможность производства под ключ — полный цикл от разработки до упаковки",
+  ].join("\n");
+}
+
 function extractTemplateFillHints(params: { message: string; history: AssistantHistoryMessage[] }): TemplateFillHints {
   // Scan ALL user messages from history (not just last 6) to maximize value extraction
   const userMessages = params.history
@@ -3973,6 +3992,14 @@ function postProcessAssistantReply(params: {
     if (docsRequestedByIntent) {
       out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(params.message || "", requestedDocCount || 6)}`.trim();
     }
+    // UV004 FIX: Add OEM/ODM checklist in template mode when explicitly requested
+    const oemOdmRequestedTemplate = detectOEMODMRequest(params.message || "");
+    if (oemOdmRequestedTemplate) {
+      const alreadyHasOEMODMChecklist = /MOQ.*минимальн\p{L}*тираж|сроки.*образца|production\s*lead|контрактн\p{L}*производств/i.test(out);
+      if (!alreadyHasOEMODMChecklist) {
+        out = `${out}\n\n${buildOEMODMChecklist()}`.trim();
+      }
+    }
     return out;
   }
 
@@ -4032,6 +4059,18 @@ function postProcessAssistantReply(params: {
 
     // Always add the checklist for explicit requests - don't check existing items
     out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(messageText, targetCount)}`.trim();
+  }
+
+  // UV004 FIX: Add OEM/ODM checklist when explicitly requested
+  // Similar to document checklist enforcement - model tends to generate RFQ template instead of OEM/ODM checklist
+  const oemOdmRequested = detectOEMODMRequest(params.message || "");
+  if (oemOdmRequested) {
+    // Check if response already contains OEM/ODM checklist items
+    const alreadyHasOEMODMChecklist = /MOQ.*минимальн\p{L}*тираж|сроки.*образца|production\s*lead|контрактн\p{L}*производств/i.test(out);
+    if (!alreadyHasOEMODMChecklist) {
+      // Add OEM/ODM checklist
+      out = `${out}\n\n${buildOEMODMChecklist()}`.trim();
+    }
   }
 
   const hasTemplate = Boolean(extractTemplateMeta(out)?.isCompliant);
