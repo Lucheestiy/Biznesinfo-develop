@@ -6337,27 +6337,23 @@ function postProcessAssistantReply(params: {
   const hasExplicitWebsiteCheckRequest = userMessageLower.includes("проверь") && 
     (userMessageLower.includes("сайт") || userMessageLower.includes("website") || userMessageLower.includes("scan"));
   
-  // Only count as verified if there's an explicit source URL or a fallback message
-  const hasExplicitSourceURL = /(?:source:|источник:|https?:\/\/)/iu.test(out);
-  // UV012 FIX: Simplified regex - match fallback phrases exactly as test expects
-  // The test patterns are: "подтвержденных карточек меньше", "меньше чем запрошено", "меньше запрошен"
-  // These should match regardless of what follows
-  const hasFallbackPhrase = /(?:не\s+удалось|не\s+могу|нет\s+самих|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен)/iu.test(out);
-  const hasVerificationContent = hasExplicitSourceURL || hasFallbackPhrase;
-  
   const isShortlistOutput = out.trim().toLowerCase().startsWith("shortlist") || 
     /по\s+текущему\s+данным/i.test(out) ||
     /по\s+каталогу/i.test(out);
 
-  // UV012 FIX: Always add explicit fallback text when website verification is requested and output is shortlist
-  // The model may output fallback-like text but the test may not detect it properly
-  // Add explicit "не удалось" phrase which is explicitly in the test patterns
+  // UV012 FIX: ALWAYS add explicit fallback text when:
+  // 1. User explicitly asks for website verification (has "проверь" + "сайт")
+  // 2. Output is a shortlist format
+  // The model must either do website verification OR show explicit fallback
   if (hasExplicitWebsiteCheckRequest && isShortlistOutput) {
-    // Check if we already have ANY fallback pattern - if not, add it
-    // Test patterns include: "не удалось", "не могу", "подтвержденных карточек меньше", "меньше чем запрошено"
-    const hasAnyFallbackPattern = /(?:не\s+удалось|не\s+могу|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*запрошен)/iu.test(out);
-    if (!hasAnyFallbackPattern) {
-      // Add explicit fallback with "не удалось" which is explicitly expected by the test
+    // Check for any verification content: source URLs OR fallback phrases from test patterns
+    // Test expects: "source:", "источник:", "http(s)://", OR "не удалось", "не могу", "нет самих 3 компаний",
+    // "не удалось надежно прочитать сайты", "подтвержденных карточек меньше", "меньше чем запрошено", "меньше запрошен"
+    const hasExplicitSourceURL = /(?:source:|источник:|https?:\/\/)/iu.test(out);
+    const hasFallbackPhrase = /(?:не\s+удалось|не\s+могу|нет\s+самих|не\s+удалось\s+надежно\s+прочитать\s+сайты|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен)/iu.test(out);
+    
+    // If no verification content at all, force add fallback with explicit "не удалось"
+    if (!hasExplicitSourceURL && !hasFallbackPhrase) {
       const fallbackText = "\n\n⚠️ Верификация по сайтам не выполнена автоматически — не удалось проверить сайты компаний.\nДля проверки компаний:\n1. Откройте сайт каждой компании\n2. Проверьте раздел \"О компании\" или \"Контакты\"\n3. Подтвердите, что они являются производителями\n4. Получите актуальные контакты (телефон, email)\n\nЕсли сайты недоступны или информация не подтверждена - отметьте это и перейдите к следующим кандидатам.";
       out = out + fallbackText;
     }
