@@ -3987,9 +3987,49 @@ function postProcessAssistantReply(params: {
   
   // If explicitly asking for checklist OR asking about documents in a question format, add checklist
   const shouldAddChecklist = isExplicitChecklistRequest || (asksAboutDocuments && (docCountForNonTemplate !== null || /\?$/.test(messageText.trim())));
-  
+
+  // P1 FIX: If explicitly requesting checklist, we need to suppress ranking/shortlist from model output
+  // MiniMax tends to generate ranking/shortlist even when checklist is explicitly requested
+  // We need to strip ranking-like content from the beginning when checklist is explicitly requested
   if (shouldAddChecklist) {
+    // Add debug marker in output to verify this code runs
     const targetCount = docCountForNonTemplate || 6;
+
+    // First, check if output starts with ranking/shortlist pattern (numbered companies with /company/ links)
+    // Pattern: starts with "1." or "1." followed by company name and /company/ link
+    const rankingStartPattern = /^[\s\S]*?(?=(?:\n\n|\n|$))(?:(?:^|\n)\s*(?:#{1,6}\s*)?(?:[-*]\s*)?(?:\*\*)?\d+[).]\s+[^/]*\/company\/[a-z0-9-]+)/mu;
+    const hasRankingAtStart = rankingStartPattern.test(out);
+
+    // If there's ranking at the start and this is explicit checklist request, remove it
+    if (hasRankingAtStart) {
+      // Find the end of ranking section - look for non-ranking content markers
+      // Common markers after ranking: "Критерии:", "Фокус", "Если нужно", new paragraphs, etc.
+      const afterRankingMarkers = [
+        /\nКритерии:/,
+        /\nФокус\s*(?:запроса|задачи):/,
+        /\nЕсли\s+(?:нужно|хотите)/,
+        /\n---\n/,
+      ];
+      
+      let rankingEndPos = -1;
+      for (const marker of afterRankingMarkers) {
+        const match = out.match(marker);
+        if (match && typeof match.index === 'number' && (rankingEndPos === -1 || match.index < rankingEndPos)) {
+          rankingEndPos = match.index;
+        }
+      }
+      
+      // If we found the end, remove the ranking section
+      if (rankingEndPos > 0) {
+        // Get everything before ranking section
+        const beforeRanking = out.substring(0, out.indexOf('Короткий прозрачный ranking'));
+        // Get everything after ranking section
+        const afterRanking = out.substring(rankingEndPos);
+        // Combine, removing the ranking part
+        out = (beforeRanking + afterRanking).trim();
+      }
+    }
+
     // Always add the checklist for explicit requests - don't check existing items
     out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(messageText, targetCount)}`.trim();
   }
