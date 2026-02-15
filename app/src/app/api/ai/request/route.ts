@@ -4332,8 +4332,9 @@ function postProcessAssistantReply(params: {
       const { missing, addressed } = checkConstraintsInResponse(out, allConstraints);
       
       // If constraints exist in history but not addressed in current response, add a reminder
-      // Only add this if there are meaningful constraints and the response is a vendor list
-      if (missing.length > 0 && addressed.length > 0) {
+      // FIXED: Also add reminder when ALL constraints are ignored (not just partial)
+      // This ensures that even when model completely ignores constraints, user gets a subtle hint
+      if (missing.length > 0) {
         // Only add subtle reminder, not intrusive
         const reminder = buildConstraintReminderNote(missing);
         if (reminder && !out.includes(reminder)) {
