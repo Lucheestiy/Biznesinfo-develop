@@ -7014,7 +7014,10 @@ function postProcessAssistantReply(params: {
   }
 
   // UV003/UV014 fix: Add B2B direction content when reverse buyer intent is detected but response lacks it
-  const hasReverseBuyerIntentForPostProcess = reverseBuyerIntentFinal || looksLikeBuyerSearchIntent(params.message || "");
+  // Also detect B2B format request (e.g., "предложи b2b-формат", "близкий b2b формат")
+  const b2bDirectionMessageText = params.message || "";
+  const hasB2bFormatRequest = /(b2b|битуби|б2б)[-\s]?формат|предложи.*b2b|предложи.*формат.*поиска|формат.*поиска.*b2b/iu.test(b2bDirectionMessageText);
+  const hasReverseBuyerIntentForPostProcess = reverseBuyerIntentFinal || looksLikeBuyerSearchIntent(b2bDirectionMessageText) || hasB2bFormatRequest;
   if (hasReverseBuyerIntentForPostProcess) {
     const normalizedOut = normalizeComparableText(out);
     const hasB2bDirection = /(кафе|рестора|общепит|столов|фабрик-кухон|кулинар|общественного\s+питания|заказчик|покупател|клиент)/u.test(normalizedOut);
