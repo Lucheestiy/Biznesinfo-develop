@@ -1,0 +1,128 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV006",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 4 RFQ generation is completely broken - filled with placeholder text like 'уточняется', 'к несоответствия', 'уточняетсядоставка'",
+        "Assistant completely ignored user constraints (FSC, dry board, delivery to border) in RFQ generation",
+        "Generic fallback to template with garbage data instead of using actual context from previous turns"
+      ],
+      "criticalIssues": [
+        "RFQ template is unusable - contains gibberish placeholder text instead of actual request details",
+        "No continuity between turns 1-3 and turn 4 - assistant 'forgot' all context about lumber export requirements"
+      ],
+      "strengths": [
+        "Turns 1-3 provided some relevant company listings from catalog"
+      ],
+      "nextUserProbe": "Почему в RFQ вставлены слова 'уточняется' и 'к несоответствия'? Это шаблон или что?"
+    },
+    {
+      "scenarioId": "UV007",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1 returned completely irrelevant company (Техносклад - forklift parts) for finding potential customers",
+        "Turn 2 fallback to generic rubric advice instead of searching for actual food packaging buyers",
+        "Turn 4 cold message template is broken - filled with placeholder garbage like 'уточняется', 'к страницы'"
+      ],
+      "criticalIssues": [
+        "Reverse B2B search failed - no actual potential buyers found in catalog",
+        "Cold outreach template is unusable due to placeholder text injection"
+      ],
+      "strengths": [
+        "Turn 2 at least identified relevant customer segments (dairy, sauces, culinary) even without specific companies",
+        "Turn 3 maintained segment-based approach though lacked concrete company names"
+      ],
+      "nextUserProbe": "Вы нашли только одну компанию про погрузчики, а мне нужны покупатели пищевой тары. Есть ли в каталоге конкретные заводы?"
+    },
+    {
+      "scenarioId": "UV008",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "Only found 1 company (ЖК Трейд - spare parts dealer, not tractor manufacturer/seller) across all 4 turns",
+        "Turn 4 comparison requested 3 options but only 1 company found, with 'reserve option' being generic advice to search more",
+        "User asked for up to 30 HP, attachments, service in Minsk region - none of these constraints were meaningfully addressed"
+      ],
+      "criticalIssues": [
+        "Catalog appears to lack Belarusian mini-tractor manufacturers/sellers - assistant couldn't find relevant companies",
+        "Comparison table impossible with only 1 irrelevant company (spare parts vs tractors)"
+      ],
+      "strengths": [
+        "At least consistently acknowledged the single found company",
+        "Did not hallucinate fake companies to fill the shortlist"
+      ],
+      "nextUserProbe": "ЖК Трейд продает запчасти, а мне нужен сам минитрактор. Где в Беларуси купить МТЗ или другой белорусский трактор?"
+    },
+    {
+      "scenarioId": "UV009",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.5,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1 returned irrelevant company (Сэльвин - household chemicals distributor) instead of dental clinics",
+        "Turn 2 provided genuinely useful guidance criteria for choosing endodontic clinic with microscope",
+        "Turn 3 checklist was generic procurement checklist, not specific to dental/microscope selection",
+        "Turn 4 completely off-track - returned to irrelevant company from turn 1 instead of call script"
+      ],
+      "criticalIssues": [
+        "Turn 4 failed to provide requested 30-40 second call script - reverted to irrelevant company listing",
+        "No actual dental clinics with microscopes found in catalog"
+      ],
+      "strengths": [
+        "Turn 2 guidance on dentist selection criteria was accurate and actionable (endodontist experience, microscope usage, CBCT diagnostics, warranty)",
+        "Honest about lack of catalog matches rather than hallucinating clinics"
+      ],
+      "nextUserProbe": "А конкретные клиники в Минске с микроскопом есть в каталоге? Или дайте скрипт звонка для проверки клиники"
+    },
+    {
+      "scenarioId": "UV010",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.7,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1 failed to directly identify Savushkin Product despite it being in catalog - gave generic category advice instead",
+        "Turn 2 successfully found and confirmed Savushkin Product plus provided 3 relevant alternatives (Luban cheese, Polotsk milk, Bellakt)",
+        "Turn 3 provided clear actionable algorithm for verifying company on portal",
+        "Turn 4 gave precise search query and call script that directly address user's need"
+      ],
+      "criticalIssues": [
+        "Turn 1 should have immediately recognized and confirmed Savushkin Product from catalog instead of generic rubric response"
+      ],
+      "strengths": [
+        "Turns 2-4 maintained excellent continuity and progressively refined to actionable output",
+        "Final portal query and call script are immediately usable",
+        "Good alternative hypotheses provided (Bellakt, Polotsk, Luban cheese factories)"
+      ],
+      "nextUserProbe": "Спасибо, позвоню по этому скрипту. Есть ли еще молочные комбинаты в Гродненской области?"
+    }
+  ]
+}
+```

@@ -1,0 +1,135 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Assistant returns same single company (Глобал Шуз) across 3 turns despite user asking for 3-5 manufacturers",
+        "Turn 4 template generation is completely broken - placeholders like 'уточняется', 'к меньше' instead of actual content",
+        "No attempt to find additional manufacturers after user clarified need for men's classic shoes"
+      ],
+      "criticalIssues": [
+        "Template generator produces gibberish with placeholder text instead of meaningful message",
+        "Fails to expand search or admit data limitations meaningfully",
+        "Complete disregard for 'мужская классическая обувь' constraint"
+      ],
+      "strengths": [
+        "Initial response correctly identifies one manufacturer",
+        "Maintains awareness of location constraint (Минск)"
+      ],
+      "nextUserProbe": "Почему вы трижды предложили одну и ту же компанию, а шаблон письма получился бессмысленным?"
+    },
+    {
+      "scenarioId": "UV002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 2-3: Assistant adds warning markers [проверьте данные] but doesn't address quality criteria (белизна, клейковина, стабильность партии)",
+        "Turn 3 incorrectly changes locations to 'Брест, brest' for Пинский комбинат and СМАК (geography errors)",
+        "Turn 4 checklist is generic rubric advice, not specific to flour export documentation"
+      ],
+      "criticalIssues": [
+        "Geography hallucination: Пинский комбинат and Витебская СМАК suddenly located in Брест",
+        "No actual data on flour quality parameters (белизна, клейковина) despite user explicitly asking",
+        "Export readiness assessment missing - user asked specifically for this"
+      ],
+      "strengths": [
+        "Initial first-pass provides relevant flour mill candidates",
+        "Checklist in turn 4 is structurally sound (6 items) though generic"
+      ],
+      "nextUserProbe": "Вы указали Пинский комбинат в Бресте, хотя он в Пинске. И где данные по белизне и клейковине муки?"
+    },
+    {
+      "scenarioId": "UV003",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 2 completely ignores Уручье location, returns irrelevant companies (auto center, fishing shop, plumbing)",
+        "Turn 3 fails to provide 3 query variants as requested, returns same irrelevant list",
+        "Turn 4 template is broken gibberish with placeholders like 'уточняется', 'самовывоз: к и'"
+      ],
+      "criticalIssues": [
+        "Massive relevance failure: auto centers and plumbing shops for restaurant query",
+        "No B2B bridge provided - user explicitly asked for alternative search approach",
+        "Template generator completely non-functional"
+      ],
+      "strengths": [
+        "Turn 1 provides relevant restaurant options",
+        "Attempts to maintain B2B framing in turn 2 mention (though execution fails)"
+      ],
+      "nextUserProbe": "Я просил рестораны в Уручье или b2b-альтернативу, а вы дали автосалоны и сантехнику. Почему?"
+    },
+    {
+      "scenarioId": "UV004",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.5,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1 provides relevant appliance manufacturers (Н-ТиВи/Horizont, Атлант, Ареса)",
+        "Turn 2 gives meaningful OEM/ODM checklist with relevant parameters (MOQ, sample lead time)",
+        "Turn 3 provides actionable shortlist with prioritization and 5 good questions for first call",
+        "Turn 4 template is broken (placeholders instead of actual RFQ content)"
+      ],
+      "criticalIssues": [
+        "RFQ template in turn 4 is gibberish - 'сервису rfq', 'уточняется', placeholder text throughout",
+        "No actual MOQ, timeline, or warranty details requested in template despite user asking"
+      ],
+      "strengths": [
+        "Strong OEM/ODM guidance in turn 2 with specific checklist items",
+        "Good prioritization framework in turn 3",
+        "Relevant company identification for juicer manufacturing"
+      ],
+      "nextUserProbe": "Шаблон RFQ получился с placeholder'ами - можете сделать нормальный с запросом MOQ и сроков?"
+    },
+    {
+      "scenarioId": "UV005",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.55,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1 starts with generic rubric but turn 2 successfully pivots to relevant dairy exporters",
+        "Turn 2 correctly identifies major dairy exporters (Савушкин продукт, Брестское мороженое, Полоцкий молочный)",
+        "Turn 3 provides shortlist with prioritization logic",
+        "Turn 4 template is broken with placeholders instead of actual outreach message"
+      ],
+      "criticalIssues": [
+        "Template generation fails completely - 'outreach шаблон' treated as product name, placeholders throughout",
+        "No mention of EAEU/SNG export markets in company descriptions despite user constraint",
+        "Confectionery exporters missing - only dairy found"
+      ],
+      "strengths": [
+        "Successfully identifies relevant dairy exporters with export markers (📤)",
+        "Good contact completeness for listed companies",
+        "Maintains focus on food industry exporters throughout"
+      ],
+      "nextUserProbe": "Хороший список молочных, но где кондитерские экспортеры? И шаблон письма получился бесполезным."
+    }
+  ]
+}
+```

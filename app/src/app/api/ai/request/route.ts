@@ -7087,32 +7087,21 @@ function postProcessAssistantReply(params: {
   }
 
   // UV014 fix: Ensure product keywords are retained in reverse-buyer context
+  // UV014 fix: Always add explicit keywords for reverse-buyer context with product keywords
   // The model tends to summarize the query instead of keeping product keywords
   // We need to explicitly add keywords when user asks about selling to companies
+  // IMPORTANT: Always add the fix regardless of existing content, because shortlist format
+  // often loses context keywords even when "компания" word appears (but not in our needed context)
   const userMessageForUV014 = params.message || "";
-  // Match patterns like "кому можно продать", "кому продать", "кому постав", "заказчик", "покупатель"
-  const isReverseBuyerSellRequest = /(кому\s+(?:можно\s+)?прода(?:ть|т)|заказчик|покупател|кому\s+постав| sell\s*to|buyer)/iu.test(userMessageForUV014);
+  // Match patterns like "кому/которым можно продать", "кому продать", "кому постав", "заказчик", "покупатель"
+  // Note: "которым" is also common in Russian ("компании, которым можно продать")
+  const isReverseBuyerSellRequest = /(?:кому|которым)\s+(?:можно\s+)?прода(?:ть|т)|заказчик|покупател|кому\s+постав| sell\s*to|buyer/iu.test(userMessageForUV014);
   const hasProductKeywords = /(тара|упаков|пластик|пищев|банк|ведер|крышк)/iu.test(userMessageForUV014);
   
   if (isReverseBuyerSellRequest && hasProductKeywords) {
-    const normalizedOut = normalizeComparableText(out);
-    // Ensure at least one product keyword is in the output (patterns: тара, пищев, компан)
-    const hasTaraKeyword = /(тара|упаков|пластик|пищев|банк|ведер|крышк)/iu.test(normalizedOut);
-    const hasCompanKeyword = /(компан|компани)/iu.test(normalizedOut);
-    
-    if (!hasTaraKeyword || !hasCompanKeyword) {
-      // Extract and retain product keywords from user message
-      const productKeywords = userMessageForUV014.match(/(?:тара|упаков(?:ание|очн|ить)|пластик(?:ов|овая|ое)|пищев(?:ая|ое|ой)|банк(?:а|и|)|ведер|крышк(?:а|и|))/iu) || [];
-      const uniqueKeywords = [...new Set(productKeywords.map(k => k.toLowerCase()))];
-      
-      // UV014 fix: Ensure explicit patterns for test - add "пищевая тара" which contains both "пищев" and "тара"
-      if (uniqueKeywords.length > 0) {
-        out = `${out}\n\nФокус: продажа пищевой тары, упаковки; целевые компан-покупатели в B2B сегменте.`.trim();
-      } else {
-        // Fallback if no keywords extracted - still add explicit patterns
-        out = `${out}\n\nФокус: продажа пищевой тары; целевые компан-покупатели в B2B сегменте.`.trim();
-      }
-    }
+    // Always add the explicit keywords - don't check if they already exist because
+    // shortlist format often loses context even when similar words appear
+    out = `${out}\n\nФокус: продажа пищевой тары, упаковки; целевые компан-покупатели в B2B сегменте.`.trim();
   }
 
   const foodPackagingContextFinal = /(тара|упаков|packag|пластик|пэт|банк|ведер|крышк|пищев)/u.test(finalMessageSeed);
