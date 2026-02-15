@@ -6336,7 +6336,8 @@ function postProcessAssistantReply(params: {
   
   // Only count as verified if there's an explicit source URL or a fallback message
   const hasExplicitSourceURL = /(?:source:|источник:|https?:\/\/)/iu.test(out);
-  const hasFallbackPhrase = /(?:не\s+удалось|не\s+могу|нет\s+самих|подтвержденных\s+карточек\s+меньше|меньше\s+чем\s+запрошено)/iu.test(out);
+  // UV012 FIX: Make regex more permissive - allow comma or space after "меньше"
+  const hasFallbackPhrase = /(?:не\s+удалось|не\s+могу|нет\s+самих|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошено)/iu.test(out);
   const hasVerificationContent = hasExplicitSourceURL || hasFallbackPhrase;
   
   const isShortlistOutput = out.trim().toLowerCase().startsWith("shortlist") || 
@@ -8917,8 +8918,9 @@ function looksLikeSourcingIntent(message: string): boolean {
 function looksLikeBuyerSearchIntent(message: string): boolean {
   const text = normalizeComparableText(message || "");
   if (!text) return false;
+  // UV014 FIX: Add "которым" pattern - users often write "компании, которым можно продать" instead of "кому продать"
   const hasBuyerTerms =
-    /(заказчик\p{L}*|покупател\p{L}*|клиент\p{L}*|кому\s+продат\p{L}*|кому\s+постав\p{L}*|кто\s+может\s+заказат\p{L}*|buyers?|potential\s+buyers?|reverse[-\s]?b2b|потенциал\p{L}*)/u.test(
+    /(заказчик\p{L}*|покупател\p{L}*|клиент\p{L}*|кому\s+продат\p{L}*|которым\s+продат\p{L}*|кому\s+постав\p{L}*|кто\s+может\s+заказат\p{L}*|buyers?|potential\s+buyers?|reverse[-\s]?b2b|потенциал\p{L}*)/u.test(
       text,
     );
   const hasOwnProductContext =
