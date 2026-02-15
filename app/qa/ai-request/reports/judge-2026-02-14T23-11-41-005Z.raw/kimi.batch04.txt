@@ -1,0 +1,135 @@
+Based on my analysis of the 5 scenarios (UV016-UV020), here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV016",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.80,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 5 concrete flour manufacturers with specific product profiles and direct links",
+        "Turn 2: Correctly narrowed to top-4 with export readiness assessment based on company scale and profiles",
+        "Turn 3: Delivered complete email template (Subject/Body/WhatsApp) and 5-document checklist for export verification"
+      ],
+      "criticalIssues": [
+        "Turn 2 export readiness assessment is inferred from company scale rather than confirmed export experience",
+        "No explicit mention of export certifications (ISO, HACCP) that would be critical for actual export"
+      ],
+      "strengths": [
+        "Excellent continuity: maintained экспорт муки высшего сорта context throughout all turns",
+        "Top-4 ranking with clear rationale (scale, product range, industrial capacity)",
+        "RFQ template is comprehensive and export-specific (FCA/FOB/CIF, bulk options, quality specs)",
+        "Document checklist covers key export requirements (certificates, origin, declarations)"
+      ],
+      "nextUserProbe": "У кого из них есть подтвержденный экспортный опыт в ЕС или страны СНГ?"
+    },
+    {
+      "scenarioId": "UV017",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.82,
+      "userSatisfaction": 0.78,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: Provided 3 relevant wholesale vegetable suppliers in Minsk, no irrelevant educational institutions",
+        "Turn 2: Honest about no exact 'red beet' matches in cards, gave working search alternatives",
+        "Turn 3: Delivered structured message template with all user constraints (500kg, Minsk, 3 days)"
+      ],
+      "criticalIssues": [
+        "Turn 2 search alternatives are generic ('буряк оптом Минск') rather than creative workarounds",
+        "No indication which supplier is most likely to have beetroot in stock"
+      ],
+      "strengths": [
+        "No irrelevant profiles: avoided educational institutions or non-supplier entities",
+        "Good continuity: maintained 500 кг, Минск, красный буряк, 3 дня constraints",
+        "Honest about limitations: admitted no exact 'red beet' matches in available data",
+        "Message template includes all critical procurement fields (price, availability, delivery, payment)"
+      ],
+      "nextUserProbe": "Кто из них обычно держит буряк в наличии? Можно позвонить сейчас?"
+    },
+    {
+      "scenarioId": "UV018",
+      "usefulness": 5,
+      "verdict": "useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.85,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Turn 1: Provided 20 relevant tags for logistics company without falling into supplier search",
+        "Turn 2: Correctly pivoted to structured grouping (Brand/Services/Intent) after user clarification",
+        "No sourcing-fallback: stayed strictly in analytics/tagging domain throughout"
+      ],
+      "criticalIssues": [
+        "Turn 1 tags were logistics-focused but not explicitly analytics/tracking oriented",
+        "No negative keywords or UTM structure provided (though offered as next step)"
+      ],
+      "strengths": [
+        "Perfect adherence to task: no supplier search, no shortlist, no no-results templates",
+        "Excellent response to correction: immediately switched to Brand/Services/Intent grouping",
+        "Tags cover all key dimensions: brand variations, service types, commercial intent",
+        "Offered logical next steps (CSV format, minus-words, UTM) without being pushy"
+      ],
+      "nextUserProbe": "Дай минус-слова для этих тегов и UTM-разметку для кампаний"
+    },
+    {
+      "scenarioId": "UV019",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Completely wrong company context — started talking about 'Деловые Медиа ООО' instead of 'Ирис Интер групп'",
+        "Turn 2: Instead of checking the website, asked user to confirm and provide more details"
+      ],
+      "criticalIssues": [
+        "Critical context failure: user mentioned 'Ирис Интер групп' in UV018, but assistant switched to different company",
+        "Turn 2 response is evasive — promises to check after user confirmation instead of acting now",
+        "Assistant shifted burden to user: 'нужен веб-обход' and 'уточните параметр' instead of executing",
+        "Failed core task: find latest news on company's website without asking user for URL"
+      ],
+      "strengths": [
+        "Honestly admitted no live web verification data available",
+        "Listed 3 websites to check (though wrong company)"
+      ],
+      "nextUserProbe": "Почему ты переключился на другую компанию? У меня же Ирис Интер групп."
+    },
+    {
+      "scenarioId": "UV020",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.20,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Failed to find company card despite user clearly stating name in previous turn (UV018)",
+        "Turn 2: Explicitly asked user for city instead of using context or searching card independently"
+      ],
+      "criticalIssues": [
+        "Critical continuity failure: user said 'Ирис Интер групп' in UV018 Turn 1, but assistant claims 'не вижу карточку'",
+        "Turn 2 is exactly the forbidden pattern: 'не вижу карточку, пришлите ссылку/уточните'",
+        "Assistant hallucinated unrelated company data (Беларусь Сегодня) instead of admitting failure",
+        "Failed core task: find news on company card without requesting URL from user",
+        "Context completely broken: assistant seems to have no memory of UV018 conversation"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Ты же уже знаешь название моей компании — почему просишь уточнить?"
+    }
+  ]
+}
+```

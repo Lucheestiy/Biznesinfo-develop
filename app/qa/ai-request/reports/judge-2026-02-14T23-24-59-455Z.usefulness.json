@@ -1,0 +1,1728 @@
+{
+  "runId": "judge-2026-02-14T23-24-59-455Z",
+  "generatedAt": "2026-02-14T23:30:36.014Z",
+  "sourceReport": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/reports/latest.json",
+  "sourceSummary": {
+    "runId": "run-2026-02-14T22-04-45-397Z-2774709-2xbjq",
+    "startedAt": "2026-02-14T22:04:45.397Z",
+    "endedAt": "2026-02-14T22:17:56.080Z",
+    "durationMs": 790683,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json",
+    "totalScenarios": 22,
+    "passedScenarios": 20,
+    "failedScenarios": 2,
+    "passRate": 0.9091,
+    "totalChecks": 214,
+    "passedChecks": 212,
+    "failedChecks": 2,
+    "checkPassRate": 0.9907,
+    "targetPassCount": 18,
+    "targetPassRate": 0.8,
+    "targetReached": true,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 73,
+    "avgTurnLatencyMs": 10824.88,
+    "totalTurnLatencyMs": 790216,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "totalScenarios": 22,
+  "judges": [
+    {
+      "judge": "kimi",
+      "summary": {
+        "total": 22,
+        "averageUsefulness": 2.818,
+        "usefulCount": 11,
+        "notUsefulCount": 11,
+        "usefulRate": 0.5,
+        "zeroUsefulnessCount": 0,
+        "averageUserSatisfaction": 0.5136,
+        "continueCount": 11,
+        "continueRate": 0.5,
+        "genericFallbackCount": 12,
+        "genericFallbackRate": 0.5455,
+        "synthesizedRatingCount": 0,
+        "synthesizedRatingRate": 0,
+        "averageContinuityScore": 2.727,
+        "topIssues": [
+          {
+            "issue": "генерация шаблонного ответа вместо реального поиска по каталогу",
+            "count": 1
+          },
+          {
+            "issue": "нарушение контекста: после уточнения 'производители, не магазины' ассистент всё равно показывает рубрики магазинов обуви",
+            "count": 1
+          },
+          {
+            "issue": "падение в generic fallback на turn 3 после конкретных turn 1-2",
+            "count": 1
+          },
+          {
+            "issue": "подтвержденных карточек 'найдено 1 из 3' — пользователь просил 3-5, получил 1 с предупреждением",
+            "count": 1
+          },
+          {
+            "issue": "в turn 3 в конце странная вставка про 'рыболов магазин' — не релевантно запросу про кафе",
+            "count": 1
+          },
+          {
+            "issue": "turn 2: предложение 'сантехника для ванных комнат' как 'локальная точка' выглядит нелепо",
+            "count": 1
+          },
+          {
+            "issue": "turn 3 — явный generic fallback: 'найдено 1 из 3' после просьбы shortlist",
+            "count": 1
+          },
+          {
+            "issue": "нет реального сравнения по надежности и сервису как запрошено",
+            "count": 1
+          },
+          {
+            "issue": "turn 1 слишком generic (рубрики вместо конкретных компаний), но это приемлемо для старта",
+            "count": 1
+          },
+          {
+            "issue": "нет прямого подтверждения экспорта в еаэс/снг в карточках — работа на доверии",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "UV020",
+            "usefulness": 1,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.2,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Turn 1: не нашел карточку 'Ирис Интер групп' несмотря на контекст из предыдущих диалогов",
+              "Turn 2: вместо поиска на карточке — снова запрашивает город и уточнение названия"
+            ],
+            "criticalIssues": [
+              "Не использует контекст компании из диалога, хотя UV018 подтвердил что компания известна",
+              "Generic fallback 'не вижу карточку, пришлите ссылку/город' — нарушение требования задачи"
+            ]
+          },
+          {
+            "scenarioId": "UV012",
+            "usefulness": 1,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.2,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Turn 1: дал только 1 компанию вместо запрошенных 3, причем без проверки сайта",
+              "Turn 2: полный провал — вместо проверки сайтов выдал 2 медицинских учреждения (детская поликлиника и больница) как 'производители обуви'"
+            ],
+            "criticalIssues": [
+              "Критическая галлюцинация в turn 2: детская поликлиника и больница представлены как производители обуви",
+              "Нарушение базовой релевантности: ассистент не понимает, что медучреждения не производят обувь"
+            ]
+          },
+          {
+            "scenarioId": "UV021",
+            "usefulness": 1,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.2,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 0,
+            "reasons": [
+              "Turn 3: Assistant completely lost context, started talking about 'Деловые Медиа ООО' instead of Ирис Интер групп",
+              "Turn 4: Despite user explicitly asking to find info 'на карточке компании', assistant provided random unrelated companies (18 УП, АВАНТАЖ-АГРО, Белкотломомаш) instead of Ирис Интер групп"
+            ],
+            "criticalIssues": [
+              "Complete loss of company context between turns",
+              "Hallucinated unrelated company data instead of admitting inability to find"
+            ]
+          },
+          {
+            "scenarioId": "UV019",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.3,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Turn 1: вместо поиска новостей 'Ирис Интер групп' — выдал нерелевантную компанию 'Деловые Медиа ООО'",
+              "Turn 2: не выполнил запрос 'найди сам' — переложил задачу на пользователя, запросил подтверждение"
+            ],
+            "criticalIssues": [
+              "Полная потеря контекста компании из предыдущих диалогов",
+              "Generic fallback: 'нужен веб-обход' вместо реального действия"
+            ]
+          },
+          {
+            "scenarioId": "UV007",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.4,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Turn 3: вместо конкретных компаний даёт абстрактные сегменты (молочка, соусы)",
+              "Нет ни одной реальной карточки компании в shortlist"
+            ],
+            "criticalIssues": [
+              "Generic fallback после конкретного запроса на top-5 заказчиков",
+              "Пользователь дал чёткие параметры (пластиковая тара, банки/ведра, Беларусь), но ассистент не выдал конкретных компаний"
+            ]
+          },
+          {
+            "scenarioId": "UV013",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.35,
+            "wouldContinue": false,
+            "feltGenericFallback": false,
+            "continuityScore": 3,
+            "reasons": [
+              "Turn 1: дал только 1 компанию вместо 3, но хотя бы релевантную",
+              "Turn 2: сделал вид 'проверки сайта', но на самом деле просто процитировал сниппет из карточки Biznesinfo без реального сканирования разделов"
+            ],
+            "criticalIssues": [
+              "Фальшивая 'глубокая проверка': ассистент не сканировал разделы /contacts, /about, /catalog как обещал — просто процитировал общий сниппет",
+              "Не выполнил запрос на 3 компании — в итоге дал только 1 на всю сессию"
+            ]
+          },
+          {
+            "scenarioId": "UV015",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.4,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Turn 1: дал только 1 слаборелевантную компанию (ЖК Трейд — запчасти, не тракторы), вместо вариантов для отбора",
+              "Turn 2: сравнение по 4 критериям выполнено только для 1 компании и сводится к 'нет данных'"
+            ],
+            "criticalIssues": [
+              "Generic fallback в turn 2: вместо конкретного сравнения компаний дал оценку 'нет данных' по единственной компании",
+              "Не выполнен запрос 'варианты для первичного отбора' — дана всего 1 компания, причем непрофильная"
+            ]
+          },
+          {
+            "scenarioId": "UV001",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.3,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Ассистент повторяет одну и ту же компанию (Глобал Шуз) на всех ходах, игнорируя запрос на 3-5 кандидатов",
+              "После уточнения про мужскую классическую обувь не происходит фильтрации — выдаётся тот же результат"
+            ],
+            "criticalIssues": [
+              "Генерация шаблонного ответа вместо реального поиска по каталогу",
+              "Нарушение контекста: после уточнения 'производители, не магазины' ассистент всё равно показывает рубрики магазинов обуви"
+            ]
+          },
+          {
+            "scenarioId": "UV008",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.35,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Только 1 компания в базе, но ассистент продолжает 'shortlist' из 1 кандидата",
+              "Turn 3: спамит каталогом рубрик вместо признания ограничений"
+            ],
+            "criticalIssues": [
+              "Не может дать сравнение 3 вариантов, но не предлагает альтернатив (расширить регион, поискать похожую технику)",
+              "Turn 3 содержит бессмысленный вывод каталога рубрик, не относящихся к тракторам"
+            ]
+          },
+          {
+            "scenarioId": "UV011",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.4,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Turn 1: корректно сообщил об отсутствии релевантных производителей, предложил уточнения",
+              "Turn 2: дал абсолютно бесполезные 'альтернативы' — это общие инструкции, а не рабочие варианты"
+            ],
+            "criticalIssues": [
+              "Generic fallback в turn 2: 'расширить поиск', 'временно расширить гео', 'обзвон по чеклисту' — это не 2-3 рабочие альтернативы как просил пользователь",
+              "В turn 3 ассистент выдал абсолютно нерелевантную компанию (Центральный Дом офицеров Вооруженных Сил) — галлюцинация/мусор в выдаче"
+            ]
+          }
+        ]
+      },
+      "diagnostics": {
+        "totalBatches": 5,
+        "nonJsonRetryBatches": 0,
+        "schemaRetryBatches": 0,
+        "synthesizedBatches": 0,
+        "synthesizedRatingCount": 0,
+        "nonJsonRetryRate": 0,
+        "schemaRetryRate": 0,
+        "synthesizedBatchRate": 0,
+        "synthesizedRatingRate": 0
+      },
+      "ratings": [
+        {
+          "scenarioId": "UV001",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.3,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Ассистент повторяет одну и ту же компанию (Глобал Шуз) на всех ходах, игнорируя запрос на 3-5 кандидатов",
+            "После уточнения про мужскую классическую обувь не происходит фильтрации — выдаётся тот же результат",
+            "Шаблон контакта (turn 4) — единственное полезное, но без конкретных кандидатов он бесполезен"
+          ],
+          "criticalIssues": [
+            "Генерация шаблонного ответа вместо реального поиска по каталогу",
+            "Нарушение контекста: после уточнения 'производители, не магазины' ассистент всё равно показывает рубрики магазинов обуви"
+          ],
+          "strengths": [
+            "Шаблон контакта структурирован и практичен"
+          ],
+          "nextUserProbe": "У вас вообще есть данные по производителям обуви в Минске или только один магазин?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV002",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.75,
+          "userSatisfaction": 0.5,
+          "wouldContinue": true,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 1-2: хороший старт с 3 производителями и попыткой ранжирования по критериям качества",
+            "Turn 3: катастрофический fallback — вместо shortlist с экспортной готовностью выдаётся 1 компания с пометкой 'проверьте данные'",
+            "Turn 4: чеклист документов качественный, но оторван от реальных кандидатов"
+          ],
+          "criticalIssues": [
+            "Падение в generic fallback на turn 3 после конкретных turn 1-2",
+            "Подтвержденных карточек 'найдено 1 из 3' — пользователь просил 3-5, получил 1 с предупреждением"
+          ],
+          "strengths": [
+            "Хороший чеклист документов для контракта",
+            "В turn 2 была попытка структурировать сравнение по критериям пользователя"
+          ],
+          "nextUserProbe": "Почему вы сначала дали 3 завода, а потом только 1? Где остальные?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV003",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.7,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Ассистент корректно обработал consumer-запрос и предложил b2b-мост без ломки диалога",
+            "Turn 2: честно признал отсутствие ресторанов в Уручье и предложил альтернативы (HoReCa-оборудование)",
+            "Turn 3-4: полезные actionable шаблоны запросов и outreach"
+          ],
+          "criticalIssues": [
+            "В turn 3 в конце странная вставка про 'Рыболов Магазин' — не релевантно запросу про кафе",
+            "Turn 2: предложение 'САНТЕХНИКА ДЛЯ ВАННЫХ КОМНАТ' как 'локальная точка' выглядит нелепо"
+          ],
+          "strengths": [
+            "Хорошая трансформация consumer -> b2b без отказа",
+            "Практичные шаблоны запросов и outreach",
+            "Честность об ограничениях данных"
+          ],
+          "nextUserProbe": "Можете конкретнее по поставщикам продуктов для кафе в Минске?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV004",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.7,
+          "userSatisfaction": 0.5,
+          "wouldContinue": true,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 1-2: честное признание ограниченности данных, но полезные гипотезы (Ареса-техно, HORIZONT)",
+            "Turn 3: провал — вместо shortlist по надежности выдаётся 1 компания с 'проверьте данные'",
+            "Turn 4: RFQ шаблон качественный и детальный"
+          ],
+          "criticalIssues": [
+            "Turn 3 — явный generic fallback: 'найдено 1 из 3' после просьбы shortlist",
+            "Нет реального сравнения по надежности и сервису как запрошено"
+          ],
+          "strengths": [
+            "RFQ шаблон полный и профессиональный",
+            "Честность о нехватке данных по OEM/ODM"
+          ],
+          "nextUserProbe": "Вы же сказали проверить 2 компании, почему в shortlist только 1?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV005",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.75,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Turn 1: полезная навигация по рубрикам портала для поиска экспортеров",
+            "Turn 2: хорошая сегментация — нашел 4 молочных производителя, честно сказал про отсутствие кондитерских",
+            "Turn 3: полноценный shortlist top-5 с приоритизацией по вероятности ответа",
+            "Turn 4: практичный outreach шаблон"
+          ],
+          "criticalIssues": [
+            "Turn 1 слишком generic (рубрики вместо конкретных компаний), но это приемлемо для старта",
+            "Нет прямого подтверждения экспорта в ЕАЭС/СНГ в карточках — работа на доверии"
+          ],
+          "strengths": [
+            "Отличная сегментация по продукту (молочка)",
+            "Ранжирование по вероятности ответа — редкий и ценный элемент",
+            "Честность об отсутствии кондитерских экспортеров"
+          ],
+          "nextUserProbe": "А у кого из этих есть прямые референсы поставок в Казахстан?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV006",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.8,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Конкретные компании с карточками портала на каждом этапе",
+            "RFQ структурирован по блокам Subject/Body/WhatsApp как запрошено"
+          ],
+          "criticalIssues": [
+            "Повторяет одни и те же 3-5 компаний без новых кандидатов после уточнения по FSC/сушке"
+          ],
+          "strengths": [
+            "Честно указывает на отсутствие данных по FSC и сушке в карточках",
+            "Практичные шаги: что запросить у поставщиков"
+          ],
+          "nextUserProbe": "Есть ли у вас ещё компании с FSC-сертификатом в карточке?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV007",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.4,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 3: вместо конкретных компаний даёт абстрактные сегменты (молочка, соусы)",
+            "Нет ни одной реальной карточки компании в shortlist"
+          ],
+          "criticalIssues": [
+            "Generic fallback после конкретного запроса на top-5 заказчиков",
+            "Пользователь дал чёткие параметры (пластиковая тара, банки/ведра, Беларусь), но ассистент не выдал конкретных компаний"
+          ],
+          "strengths": [
+            "Хороший cold message шаблон в turn 4",
+            "Правильная логика сегментации в turn 2"
+          ],
+          "nextUserProbe": "Почему вы не дали конкретные компании из каталога?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV008",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.35,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Только 1 компания в базе, но ассистент продолжает 'shortlist' из 1 кандидата",
+            "Turn 3: спамит каталогом рубрик вместо признания ограничений"
+          ],
+          "criticalIssues": [
+            "Не может дать сравнение 3 вариантов, но не предлагает альтернатив (расширить регион, поискать похожую технику)",
+            "Turn 3 содержит бессмысленный вывод каталога рубрик, не относящихся к тракторам"
+          ],
+          "strengths": [
+            "Честно признаёт в turn 4, что сравнение невозможно по данным",
+            "Правильно идентифицирует единственного кандидата ЖК Трейд"
+          ],
+          "nextUserProbe": "Можете поискать дилеров в соседних регионах или похожую технику?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV009",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.75,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "При отсутствии данных даёт полезные критерии выбора клиники",
+            "Чеклист из 7+ пунктов релевантен и практичен"
+          ],
+          "criticalIssues": [
+            "Turn 4: в конце скрипта вставлена нерелевантная компания (Сэльвин — бытовая химия)",
+            "Не предупреждает о медицинских рисках явно"
+          ],
+          "strengths": [
+            "Отличный чеклист для звонка в клинику с медицинскими деталями",
+            "Скрипт звонка лаконичен и покрывает ключевые вопросы"
+          ],
+          "nextUserProbe": "Можете найти клиники с микроскопом в соседних городах?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV010",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.9,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Корректно идентифицирует 'Савушкин продукт' по неполному описанию",
+            "Даёт альтернативные гипотезы с конкретными карточками компаний"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Turn 2: 4 конкретные компании с карточками, телефонами, городами",
+            "Алгоритм проверки на портале практичен и лаконичен",
+            "Запрос для звонка точный и проверяемый"
+          ],
+          "nextUserProbe": "Есть ли у Савушкина прямые контакты отдела закупок?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV011",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.4,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 1: корректно сообщил об отсутствии релевантных производителей, предложил уточнения",
+            "Turn 2: дал абсолютно бесполезные 'альтернативы' — это общие инструкции, а не рабочие варианты",
+            "Turn 3: критический провал — вместо расширенного запроса дал нерелевантную компанию (Центральный Дом офицеров — курсы, не обувь)"
+          ],
+          "criticalIssues": [
+            "Generic fallback в turn 2: 'расширить поиск', 'временно расширить гео', 'обзвон по чеклисту' — это не 2-3 рабочие альтернативы как просил пользователь",
+            "В turn 3 ассистент выдал абсолютно нерелевантную компанию (Центральный Дом офицеров Вооруженных Сил) — галлюцинация/мусор в выдаче",
+            "Нарушение continuity: после запроса на расширенный поисковый запрос ассистент дал нерелевантный результат"
+          ],
+          "strengths": [
+            "В turn 1 честно признал ограничения базы и не выдумал несуществующих производителей",
+            "Запросил релевантные уточнения (регион, материал, объемы)"
+          ],
+          "nextUserProbe": "Почему ты предложил Центральный Дом офицеров как производителя обуви?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV012",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.2,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Turn 1: дал только 1 компанию вместо запрошенных 3, причем без проверки сайта",
+            "Turn 2: полный провал — вместо проверки сайтов выдал 2 медицинских учреждения (детская поликлиника и больница) как 'производители обуви'",
+            "Turn 3: продолжает давать нерелевантные результаты и общие инструкции вместо конкретной проверки"
+          ],
+          "criticalIssues": [
+            "Критическая галлюцинация в turn 2: детская поликлиника и больница представлены как производители обуви",
+            "Нарушение базовой релевантности: ассистент не понимает, что медучреждения не производят обувь",
+            "Нет попытки реальной проверки сайтов: в turn 2-3 ассистент просто перечисляет карточки из базы без анализа",
+            "Generic fallback: вместо глубокой проверки сайтов дает шаблонные инструкции"
+          ],
+          "strengths": [
+            "В turn 3 попытался отметить статус 'проверьте данные', но это не компенсирует нерелевантность выдачи"
+          ],
+          "nextUserProbe": "Ты серьезно считаешь поликлинику производителем обуви?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV013",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.35,
+          "wouldContinue": false,
+          "feltGenericFallback": false,
+          "continuityScore": 3,
+          "reasons": [
+            "Turn 1: дал только 1 компанию вместо 3, но хотя бы релевантную",
+            "Turn 2: сделал вид 'проверки сайта', но на самом деле просто процитировал сниппет из карточки Biznesinfo без реального сканирования разделов",
+            "Turn 3: честно признал, что не может подтвердить статус производителя, но опять дал только 1 компанию"
+          ],
+          "criticalIssues": [
+            "Фальшивая 'глубокая проверка': ассистент не сканировал разделы /contacts, /about, /catalog как обещал — просто процитировал общий сниппет",
+            "Не выполнил запрос на 3 компании — в итоге дал только 1 на всю сессию",
+            "В turn 3 вместо предложения следующего кандидата дал общие рекомендации 'расширить поиск'"
+          ],
+          "strengths": [
+            "В turn 2 корректно процитировал доступные данные по сайту shoesterra.by",
+            "В turn 3 честно отметил ограничение: 'следующего без выдумывания дать не могу'"
+          ],
+          "nextUserProbe": "Ты реально заходил в разделы 'О компании' и 'Продукция' на сайте или просто процитировал описание?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV014",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.75,
+          "userSatisfaction": 0.5,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 3,
+          "reasons": [
+            "Turn 1: дал релевантные сегменты целевых клиентов для пищевой тары",
+            "Turn 2: выдал 5 конкретных молочных комбинатов с ссылками на карточки — это реальный shortlist",
+            "Turn 3: после жесткого уточнения 'без общих советов' дал конкретных кандидатов для прозвона и 3 вопроса для контакта"
+          ],
+          "criticalIssues": [
+            "В turn 3 отсутствуют сами 3 вопроса для первого контакта — ассистент дал только кого звонить",
+            "Ответ обрывается на 'Критерии отбора: релевантность профиля...' без завершения мысли",
+            "Маркировка [проверьте данные] на всех компаниях снижает доверие, хотя это молочные гиганты"
+          ],
+          "strengths": [
+            "Turn 2: правильно подобрал молочные комбинаты (Минский, Полоцкий, Лидский, Брестский) — релевантно запросу",
+            "Turn 3: понял интент 'без общих советов' и дал конкретных кандидатов для прозвона",
+            "Reverse-buyer сценарий реализован: даны компании, которым можно продать тару"
+          ],
+          "nextUserProbe": "Какие именно 3 вопроса задать при первом контакте?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV015",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.4,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 1: дал только 1 слаборелевантную компанию (ЖК Трейд — запчасти, не тракторы), вместо вариантов для отбора",
+            "Turn 2: сравнение по 4 критериям выполнено только для 1 компании и сводится к 'нет данных'",
+            "Turn 3: запрос для портала слишком короткий и generic, скрипт звонка — одно предложение без структуры"
+          ],
+          "criticalIssues": [
+            "Generic fallback в turn 2: вместо конкретного сравнения компаний дал оценку 'нет данных' по единственной компании",
+            "Не выполнен запрос 'варианты для первичного отбора' — дана всего 1 компания, причем непрофильная",
+            "Скрипт звонка в turn 3 — минималистичный, без структуры разговора, без уточняющих вопросов",
+            "Отсутствие continuity: после запроса сравнения по 4 критериям не появилось новых компаний для сравнения"
+          ],
+          "strengths": [
+            "Честно признал ограничения базы по минитракторам",
+            "В turn 2 структурировал ответ по запрошенным 4 критериям",
+            "В turn 3 дал хоть какой-то скрипт для звонка"
+          ],
+          "nextUserProbe": "А где конкретные компании-дилеры минитракторов в каталоге?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV016",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.8,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Turn 1: дал конкретный список из 5 производителей муки с карточками biznesinfo и обоснованием",
+            "Turn 2: выполнил запрос top-4 с ранжированием по экспортной готовности, сохранил контекст",
+            "Turn 3: дал полный шаблон письма (Subject/Body/WhatsApp) и список из 5 документов для проверки"
+          ],
+          "criticalIssues": [
+            "Turn 3: в списке документов для проверки не хватает конкретики — перечислены категории, но не детали"
+          ],
+          "strengths": [
+            "Стабильно держит экспортный контур на протяжении всего диалога",
+            "Переходит от sourcing к прикладным документам/шаблонам по запросу",
+            "Сохраняет continuity: каждый turn строится на предыдущем"
+          ],
+          "nextUserProbe": "Дай чек-лист конкретных документов для таможенного оформления муки в РФ",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV017",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.8,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Turn 1: дал 3 релевантных поставщика овощей в Минске, без нерелевантных учебных учреждений",
+            "Turn 2: честно признал отсутствие точного совпадения 'красный буряк' и дал 3 рабочие альтернативы запроса",
+            "Turn 3: сформировал полное сообщение поставщику со всеми требуемыми параметрами"
+          ],
+          "criticalIssues": [
+            "Turn 2: фраза '3 рабочие альтернативы запроса на портале' — это поисковые запросы, а не альтернативные поставщики"
+          ],
+          "strengths": [
+            "Не предложил нерелевантные профили (учебные учреждения, детсады)",
+            "Честность о точных совпадениях без домысливания",
+            "Практичный next step: отправить одинаковый запрос всем 3 для сравнения"
+          ],
+          "nextUserProbe": "Какие документы нужны от поставщика овощей для ИП?",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV018",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.9,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Turn 1: дал 20 релевантных тегов для логистической компании, без sourcing-fallback",
+            "Turn 2: выполнил уточнение 'не нужен поиск поставщиков' — дал только теги с группировкой",
+            "Группировка по бренд/услуги/намерение — структурировано и применимо для GA/Метрики"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Не скатился в sourcing-шаблоны несмотря на название компании",
+            "Понял контекст 'Ирис Интер групп' как логистическую компанию из предыдущих диалогов",
+            "Предложил next step в формате CSV для загрузки в рекламные кампании"
+          ],
+          "nextUserProbe": "Дай эту же структуру в CSV для загрузки",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV019",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.75,
+          "userSatisfaction": 0.3,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Turn 1: вместо поиска новостей 'Ирис Интер групп' — выдал нерелевантную компанию 'Деловые Медиа ООО'",
+            "Turn 2: не выполнил запрос 'найди сам' — переложил задачу на пользователя, запросил подтверждение",
+            "Контекст 'Ирис Интер групп' из предыдущих диалогов полностью потерян"
+          ],
+          "criticalIssues": [
+            "Полная потеря контекста компании из предыдущих диалогов",
+            "Generic fallback: 'нужен веб-обход' вместо реального действия",
+            "Turn 2: перекладывает на пользователя задачу поиска сайта несмотря на прямое требование 'найди сам'"
+          ],
+          "strengths": [
+            "Честность о невозможности проверки без доступа к страницам"
+          ],
+          "nextUserProbe": "Проверь сайт irisingroup.by — там должны быть новости",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV020",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "confidence": 0.8,
+          "userSatisfaction": 0.2,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Turn 1: не нашел карточку 'Ирис Интер групп' несмотря на контекст из предыдущих диалогов",
+            "Turn 2: вместо поиска на карточке — снова запрашивает город и уточнение названия",
+            "В обоих turns добавляет нерелевантный блок 'Собрал данные с сайтов компаний' про 'Беларусь Сегодня'"
+          ],
+          "criticalIssues": [
+            "Не использует контекст компании из диалога, хотя UV018 подтвердил что компания известна",
+            "Generic fallback 'не вижу карточку, пришлите ссылку/город' — нарушение требования задачи",
+            "Нерелевантный блок 'Собрал данные с сайтов' про медиа-компанию в ответе про логистику"
+          ],
+          "strengths": [],
+          "nextUserProbe": "Компания Ирис Интер групп есть на biznesinfo, найди её карточку",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV021",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.2,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 0,
+          "reasons": [
+            "Turn 3: Assistant completely lost context, started talking about 'Деловые Медиа ООО' instead of Ирис Интер групп",
+            "Turn 4: Despite user explicitly asking to find info 'на карточке компании', assistant provided random unrelated companies (18 УП, АВАНТАЖ-АГРО, Белкотломомаш) instead of Ирис Интер групп",
+            "Massive context failure - assistant forgot the company name from turn 1 and never recovered"
+          ],
+          "criticalIssues": [
+            "Complete loss of company context between turns",
+            "Hallucinated unrelated company data instead of admitting inability to find",
+            "Failed to answer either the tag request continuation or the news request"
+          ],
+          "strengths": [
+            "Turn 1 provided relevant 20 tags for logistics company",
+            "Turn 2 gave structured UTM templates"
+          ],
+          "nextUserProbe": "Вы вообще о какой компании говорите? Я спрашивал про Ирис Интер групп, а вы мне про какие-то другие компании рассказываете.",
+          "judge": "kimi",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV022",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.3,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Turn 1: Assistant correctly stated company not found in catalog - honest response",
+            "Turn 2: Instead of using context from explicit search attempt, fell back to generic 'what I can do next' rubric",
+            "Completely irrelevant data dump about Ministry of Agriculture at the end - total non-sequitur"
+          ],
+          "criticalIssues": [
+            "Failed to maintain continuity - user asked about 'их сайт' (their site) implying context should exist",
+            "Generic fallback instead of concrete progress after user gave explicit constraints",
+            "Random unrelated company data (Министерство сельского хозяйства) appended without context"
+          ],
+          "strengths": [
+            "Honest admission in turn 1 that company not confirmed in catalog",
+            "Offered alternative search strategies"
+          ],
+          "nextUserProbe": "Так вы нашли компанию или нет? И зачем мне информация про министерство сельского хозяйства?",
+          "judge": "kimi",
+          "synthesized": false
+        }
+      ]
+    },
+    {
+      "judge": "minimax",
+      "summary": {
+        "total": 22,
+        "averageUsefulness": 2.545,
+        "usefulCount": 9,
+        "notUsefulCount": 13,
+        "usefulRate": 0.4091,
+        "zeroUsefulnessCount": 2,
+        "averageUserSatisfaction": 0.4182,
+        "continueCount": 11,
+        "continueRate": 0.5,
+        "genericFallbackCount": 12,
+        "genericFallbackRate": 0.5455,
+        "synthesizedRatingCount": 0,
+        "synthesizedRatingRate": 0,
+        "averageContinuityScore": 2.955,
+        "topIssues": [
+          {
+            "issue": "сильный разрыв контекста: пользователь дал конкретные критерии качества и экспорта, но turn 3 проигнорировал их",
+            "count": 1
+          },
+          {
+            "issue": "generic fallback после turn 2 - штрафуется по rubric",
+            "count": 1
+          },
+          {
+            "issue": "turn 3 немного повторяет информацию из предыдущих turns",
+            "count": 1
+          },
+          {
+            "issue": "не всегда понятно какие данные проверены а какие гипотетичны",
+            "count": 1
+          },
+          {
+            "issue": "пользователь просил молочную и кондитерскую, но ответил только по молочной",
+            "count": 1
+          },
+          {
+            "issue": "нет явного объяснения почему кондитерская не представлена в shortlist",
+            "count": 1
+          },
+          {
+            "issue": "no filtering by quality/logistics constraints",
+            "count": 1
+          },
+          {
+            "issue": "assistant never confirms if any supplier can meet requirements",
+            "count": 1
+          },
+          {
+            "issue": "generic rfq template without actionable specificity",
+            "count": 1
+          },
+          {
+            "issue": "failed to find any actual potential customers",
+            "count": 1
+          }
+        ],
+        "worstScenarios": [
+          {
+            "scenarioId": "UV012",
+            "usefulness": 0,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.05,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Lists POLYCLINICS and HOSPITALS as shoe manufacturers - completely wrong",
+              "Zero verification discipline - keeps pushing non-manufacturers as candidates"
+            ],
+            "criticalIssues": [
+              "Lists medical institutions (1st city clinic, 1st clinical hospital) as shoe manufacturers",
+              "Persists with incorrect data across multiple turns despite user clarification"
+            ]
+          },
+          {
+            "scenarioId": "UV021",
+            "usefulness": 0,
+            "verdict": "not_useful",
+            "userSatisfaction": 0,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 0,
+            "reasons": [
+              "Assistant hallucinated wrong company (Деловые Медиа ООО instead of Ирис Интер групп)",
+              "Turn 4 listed completely unrelated companies (18 УП, АВАНТАЖ-АГРО) instead of requested company"
+            ],
+            "criticalIssues": [
+              "Severe entity confusion: claimed wrong company contact details",
+              "Total breakdown in continuity - could not maintain company context across turns"
+            ]
+          },
+          {
+            "scenarioId": "UV007",
+            "usefulness": 1,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.1,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Never delivered concrete company list despite 3 requests",
+              "Turn 3 gives segments instead of actual companies"
+            ],
+            "criticalIssues": [
+              "Failed to find any actual potential customers",
+              "Reverse B2B mode didn't work - only generic advice"
+            ]
+          },
+          {
+            "scenarioId": "UV011",
+            "usefulness": 1,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.1,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Assistant suggests Central House of Armed Forces Officers as shoe manufacturer - absurd hallucination",
+              "Falls back to generic advice after user explicitly asked for concrete alternatives or honest 'no'"
+            ],
+            "criticalIssues": [
+              "Hallucinates completely inappropriate candidate (military cultural center for shoe production)"
+            ]
+          },
+          {
+            "scenarioId": "UV020",
+            "usefulness": 1,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.1,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 1,
+            "reasons": [
+              "Failed to find company card despite clear company name",
+              "Repeatedly asked for clarification instead of searching"
+            ],
+            "criticalIssues": [
+              "No progress on finding company card after 2 turns",
+              "Generic fallback to asking user for more info"
+            ]
+          },
+          {
+            "scenarioId": "UV002",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.4,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "КРИТИЧЕСКАЯ ПРОБЛЕМА: Turn 3 полностью игнорирует критерии качества (белизна, клейковина, стабильность партии) из Turn 2",
+              "Turn 3 также игнорирует запрос про экспортную готовность из того же turn"
+            ],
+            "criticalIssues": [
+              "Сильный разрыв контекста: пользователь дал конкретные критерии качества и экспорта, но turn 3 проигнорировал их",
+              "Generic fallback после Turn 2 - штрафуется по rubric"
+            ]
+          },
+          {
+            "scenarioId": "UV009",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.25,
+            "wouldContinue": true,
+            "feltGenericFallback": true,
+            "continuityScore": 3,
+            "reasons": [
+              "Checklist and script are actually useful for consumer",
+              "But no actual dental clinic recommendations given"
+            ],
+            "criticalIssues": [
+              "No actual clinic recommendations provided",
+              "Medical query outside Biznesinfo scope - should redirect earlier"
+            ]
+          },
+          {
+            "scenarioId": "UV014",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.25,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 3,
+            "reasons": [
+              "Initially gives good dairy/food manufacturers list",
+              "But then falls back to generic 'check data' markers and vague advice instead of concrete contacts"
+            ],
+            "criticalIssues": [
+              "Top-5 list degrades to '[check data]' placeholders with no real info",
+              "No 3 questions for call - only generic advice"
+            ]
+          },
+          {
+            "scenarioId": "UV015",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.3,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 3,
+            "reasons": [
+              "Only 1 candidate (parts supplier, not tractors), honest about limited data",
+              "Request for 4-criteria comparison in generic 'no data' results and fallback to basic query"
+            ],
+            "criticalIssues": [
+              "Comparison table lacks substance - 'no data' for all 4 criteria",
+              "Call script is too generic to be useful"
+            ]
+          },
+          {
+            "scenarioId": "UV006",
+            "usefulness": 2,
+            "verdict": "not_useful",
+            "userSatisfaction": 0.2,
+            "wouldContinue": false,
+            "feltGenericFallback": true,
+            "continuityScore": 2,
+            "reasons": [
+              "Constraints (FSC, dry, delivery) from turn 2 ignored in shortlist",
+              "Shortlist same 5 companies regardless of constraints"
+            ],
+            "criticalIssues": [
+              "No filtering by quality/logistics constraints",
+              "Assistant never confirms if any supplier can meet requirements"
+            ]
+          }
+        ]
+      },
+      "diagnostics": {
+        "totalBatches": 5,
+        "nonJsonRetryBatches": 0,
+        "schemaRetryBatches": 0,
+        "synthesizedBatches": 0,
+        "synthesizedRatingCount": 0,
+        "nonJsonRetryRate": 0,
+        "schemaRetryRate": 0,
+        "synthesizedBatchRate": 0,
+        "synthesizedRatingRate": 0
+      },
+      "ratings": [
+        {
+          "scenarioId": "UV001",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.85,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Удерживает производственный фокус обуви на протяжении всех 4х turns",
+            "Корректно переключился с розничных магазинов на производителей во 2м turn",
+            "Предоставляет конкретный shortlist с контактами и приоритетом",
+            "Шаблон outreach в 4м turn структурированный и готов к использованию",
+            "Честно признает лимиты выборки (1 из 2, 1 из 5)"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Хорошая преемственность контекста между turn 1-4",
+            "Практичные next steps в каждом ответе",
+            "Адаптирует ответ под уточнение про мужскую классическую обувь",
+            "Структурированный shortlist с оценкой приоритета"
+          ],
+          "nextUserProbe": "А какие есть производители в других городах Беларуси?",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV002",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.4,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "КРИТИЧЕСКАЯ ПРОБЛЕМА: Turn 3 полностью игнорирует критерии качества (белизна, клейковина, стабильность партии) из Turn 2",
+            "Turn 3 также игнорирует запрос про экспортную готовность из того же turn",
+            "После конкретных уточнений пользователя (2й turn) ассистент дает generic fallback вместо персонализированного shortlist",
+            "В Turn 3 нет ранжирования по экспорту, только общий шаблон"
+          ],
+          "criticalIssues": [
+            "Сильный разрыв контекста: пользователь дал конкретные критерии качества и экспорта, но turn 3 проигнорировал их",
+            "Generic fallback после Turn 2 - штрафуется по rubric"
+          ],
+          "strengths": [
+            "Turn 1 и 2 хорошие - есть конкретные заводы с пояснениями",
+            "Turn 2 адекватно отвечает на критерии качества",
+            "Turn 4 дает полезный чеклист документов"
+          ],
+          "nextUserProbe": "А что насчет экспортной готовности? Вы можете переделать shortlist учитывая требования к качеству?",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV003",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.8,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Отлично обработал consumer запрос и трансформировал в B2B формат",
+            "Во 2м turn предложил альтернативный поиск когда ресторанов не нашлось",
+            "3й turn дает конкретные query variants для портала",
+            "4й turn предоставляет готовый outreach шаблон",
+            "Уточняет локацию (Уручье) и адаптирует ответ"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Гибкость в адаптации с consumer на b2b",
+            "Практичные query templates с доп. ключами",
+            "Структурированный outreach шаблон",
+            "Хорошая эскалация от простого вопроса к конкретным действиям"
+          ],
+          "nextUserProbe": "А есть конкретные поставщики продуктов в Уручье?",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV004",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.75,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Хорошо回应 OEM/ODM запрос во 2м turn",
+            "3й turn дает shortlist с приоритетом контактов",
+            "4й turn предоставляет детальный RFQ шаблон с MOQ, сроками, гарантией",
+            "Честно признает что OEM/ODM кандидатов немного и нужно подтверждение",
+            "Структура ответа логичная - от производителей к контрактному производству"
+          ],
+          "criticalIssues": [
+            "Turn 3 немного повторяет информацию из предыдущих turns",
+            "Не всегда понятно какие данные проверены а какие гипотетичны"
+          ],
+          "strengths": [
+            "Адекватно обрабатывает OEM/ODM запрос",
+            "Детальный RFQ шаблон",
+            "Практичные next steps",
+            "Прозрачность о лимитах данных"
+          ],
+          "nextUserProbe": "Какие сроки производства типичны для белорусских производителей?",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV005",
+          "usefulness": 4,
+          "verdict": "useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.8,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Хорошо сегментирует по рынкам (ЕАЭС/СНГ) и продукту (молочная)",
+            "3й turn дает shortlist top-5 с приоритетом по вероятности ответа",
+            "4й turn предоставляет готовый outreach шаблон",
+            "Во 2м turn корректно ответил что по кондитерской подтвержденных кандидатов нет",
+            "Структурированная информация о критериях отбора экспортеров"
+          ],
+          "criticalIssues": [
+            "Пользователь просил молочную И кондитерскую, но ответил только по молочной",
+            "Нет явного объяснения почему кондитерская не представлена в shortlist"
+          ],
+          "strengths": [
+            "Полезная структура для поиска экспортеров",
+            "Детальный shortlist с пояснениями",
+            "Практичные критерии оценки",
+            "Готовый outreach шаблон"
+          ],
+          "nextUserProbe": "А есть экспортеры кондитерской продукции?",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV006",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.2,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Constraints (FSC, dry, delivery) from turn 2 ignored in shortlist",
+            "Shortlist same 5 companies regardless of constraints",
+            "RFQ template generic, doesn't reflect user's specific needs"
+          ],
+          "criticalIssues": [
+            "No filtering by quality/logistics constraints",
+            "Assistant never confirms if any supplier can meet requirements",
+            "Generic RFQ template without actionable specificity"
+          ],
+          "strengths": [],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV007",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.1,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Never delivered concrete company list despite 3 requests",
+            "Turn 3 gives segments instead of actual companies",
+            "Pattern of asking for more info instead of providing value"
+          ],
+          "criticalIssues": [
+            "Failed to find any actual potential customers",
+            "Reverse B2B mode didn't work - only generic advice",
+            "User asked multiple times for concrete list, got segments"
+          ],
+          "strengths": [],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV008",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.15,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Only 1 company found repeatedly - can't compare 3",
+            "Constraints (30hp, attachment, service) not addressed",
+            "No filtering possible, just repeats same option"
+          ],
+          "criticalIssues": [
+            "Cannot fulfill comparison request with only 1 supplier",
+            "User constraints ignored in response",
+            "Generic fallback to 'best-effort' when no data available"
+          ],
+          "strengths": [],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV009",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.25,
+          "wouldContinue": true,
+          "feltGenericFallback": true,
+          "continuityScore": 3,
+          "reasons": [
+            "Checklist and script are actually useful for consumer",
+            "But no actual dental clinic recommendations given",
+            "Only 1 irrelevant company in 'best-effort' list"
+          ],
+          "criticalIssues": [
+            "No actual clinic recommendations provided",
+            "Medical query outside Biznesinfo scope - should redirect earlier",
+            "Best-effort list contains irrelevant company (chemical distributor)"
+          ],
+          "strengths": [
+            "Checklist questions are thorough and practical",
+            "Call script is appropriate length and content"
+          ],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV010",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.2,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 2,
+          "reasons": [
+            "Correct identification of Savushkin Product",
+            "Good alternative hypotheses provided",
+            "But algorithm and queries are overly generic"
+          ],
+          "criticalIssues": [
+            "Algorithm too obvious - user knows brand already",
+            "Queries don't leverage Biznesinfo specifics",
+            "Could have provided direct company URL immediately"
+          ],
+          "strengths": [
+            "Correct initial identification",
+            "Helpful alternative hypotheses",
+            "Appropriate confirmation approach"
+          ],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV011",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.1,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Assistant suggests Central House of Armed Forces Officers as shoe manufacturer - absurd hallucination",
+            "Falls back to generic advice after user explicitly asked for concrete alternatives or honest 'no'"
+          ],
+          "criticalIssues": [
+            "Hallucinates completely inappropriate candidate (military cultural center for shoe production)"
+          ],
+          "strengths": [],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV012",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.05,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Lists POLYCLINICS and HOSPITALS as shoe manufacturers - completely wrong",
+            "Zero verification discipline - keeps pushing non-manufacturers as candidates"
+          ],
+          "criticalIssues": [
+            "Lists medical institutions (1st city clinic, 1st clinical hospital) as shoe manufacturers",
+            "Persists with incorrect data across multiple turns despite user clarification"
+          ],
+          "strengths": [],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV013",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.4,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Actually checks website and honestly notes 'no manufacturer confirmation on homepage'",
+            "Provides source URLs and contacts, correctly identifies shoesterra as online store not manufacturer"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Honest about verification limits - admits only main page snippets available",
+            "Correctly identifies shoesterra as retailer, not manufacturer"
+          ],
+          "nextUserProbe": "Какие ещё есть варианты производителей в Минске?",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV014",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.25,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 3,
+          "reasons": [
+            "Initially gives good dairy/food manufacturers list",
+            "But then falls back to generic 'check data' markers and vague advice instead of concrete contacts"
+          ],
+          "criticalIssues": [
+            "Top-5 list degrades to '[check data]' placeholders with no real info",
+            "No 3 questions for call - only generic advice"
+          ],
+          "strengths": [],
+          "nextUserProbe": "Дай реальные контакты и кто конкретно отвечает за закупки тары",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV015",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.85,
+          "userSatisfaction": 0.3,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 3,
+          "reasons": [
+            "Only 1 candidate (parts supplier, not tractors), honest about limited data",
+            "Request for 4-criteria comparison in generic 'no data' results and fallback to basic query"
+          ],
+          "criticalIssues": [
+            "Comparison table lacks substance - 'no data' for all 4 criteria",
+            "Call script is too generic to be useful"
+          ],
+          "strengths": [],
+          "nextUserProbe": "Найди реальных продавцов минитракторов, а не запчастей",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV016",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.9,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Maintained export context through all 3 turns",
+            "Provided concrete top-4 ranking with export readiness assessment",
+            "Delivered practical email/WhatsApp templates with real documents checklist"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Strong continuity - never dropped to generic advice",
+            "Document checklist is export-specific and actionable"
+          ],
+          "nextUserProbe": "Проверь доступность на следующей неделе и согласуй образец качества",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV017",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.9,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Successfully avoided non-suppliers (educational, irrelevant profiles)",
+            "Honest about no exact beet matches, gave practical portal alternatives",
+            "Templates include all constraints: 500kg, Minsk, 3-day deadline"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Good anti-noise filtering",
+            "Specific actionable next steps"
+          ],
+          "nextUserProbe": "Сравни цены у всех троих и запроси доставку на конкретный адрес",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV018",
+          "usefulness": 5,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.9,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 5,
+          "reasons": [
+            "Stayed strictly on tagging task",
+            "No sourcing fallback or supplier search предложений",
+            "Clear grouping by brand/services/intent as requested"
+          ],
+          "criticalIssues": [],
+          "strengths": [
+            "Maintained focus on analytics tags despite no external tools",
+            "Good categorization structure"
+          ],
+          "nextUserProbe": "Сделай UTM-структуру для GA4 и Яндекс.Метрики по этим тегам",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV019",
+          "usefulness": 2,
+          "verdict": "not_useful",
+          "confidence": 0.9,
+          "userSatisfaction": 0.2,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 2,
+          "reasons": [
+            "Deflected to user for website links despite company context available",
+            "Hallucinated wrong company name (Delovye Media instead of Iris Inter Grup)",
+            "Turn 2 provided methodology instead of actual news check"
+          ],
+          "criticalIssues": [
+            "Used wrong company name from context",
+            "Didn't execute task, only described how would do it"
+          ],
+          "strengths": [
+            "Honest about web access limitations"
+          ],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV020",
+          "usefulness": 1,
+          "verdict": "not_useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.1,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 1,
+          "reasons": [
+            "Failed to find company card despite clear company name",
+            "Repeatedly asked for clarification instead of searching",
+            "Gave unrelated company news as fallback"
+          ],
+          "criticalIssues": [
+            "No progress on finding company card after 2 turns",
+            "Generic fallback to asking user for more info"
+          ],
+          "strengths": [],
+          "nextUserProbe": null,
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV021",
+          "usefulness": 0,
+          "verdict": "not_useful",
+          "confidence": 1,
+          "userSatisfaction": 0,
+          "wouldContinue": false,
+          "feltGenericFallback": true,
+          "continuityScore": 0,
+          "reasons": [
+            "Assistant hallucinated wrong company (Деловые Медиа ООО instead of Ирис Интер групп)",
+            "Turn 4 listed completely unrelated companies (18 УП, АВАНТАЖ-АГРО) instead of requested company",
+            "Complete loss of context - assistant forgot what company user was asking about"
+          ],
+          "criticalIssues": [
+            "Severe entity confusion: claimed wrong company contact details",
+            "Total breakdown in continuity - could not maintain company context across turns"
+          ],
+          "strengths": [],
+          "nextUserProbe": "Ирис Интер групп - вы вообще о той компании спрашиваете??",
+          "judge": "minimax",
+          "synthesized": false
+        },
+        {
+          "scenarioId": "UV022",
+          "usefulness": 3,
+          "verdict": "useful",
+          "confidence": 0.95,
+          "userSatisfaction": 0.6,
+          "wouldContinue": true,
+          "feltGenericFallback": false,
+          "continuityScore": 4,
+          "reasons": [
+            "Honest about limitations - correctly stated company card not confirmed",
+            "Offered practical alternatives to help user"
+          ],
+          "criticalIssues": [
+            "Could potentially have done more creative lookup despite unconfirmed card"
+          ],
+          "strengths": [
+            "Good honesty about system limits",
+            "Clear communication of next steps"
+          ],
+          "nextUserProbe": "А если карточки нет, можете найти их через Google?",
+          "judge": "minimax",
+          "synthesized": false
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "geminiAvg": null,
+    "kimiAvg": 2.818,
+    "minimaxAvg": 2.545,
+    "geminiUserSatisfaction": null,
+    "kimiUserSatisfaction": 0.5136,
+    "geminiContinueRate": null,
+    "kimiContinueRate": 0.5,
+    "geminiGenericFallbackRate": null,
+    "kimiGenericFallbackRate": 0.5455,
+    "avgGap": null,
+    "usefulRateGap": null,
+    "pairwise": [
+      {
+        "left": "kimi",
+        "right": "minimax",
+        "avgGap": 0.273,
+        "usefulRateGap": 0.0909,
+        "userSatisfactionGap": 0.0954,
+        "continueRateGap": 0,
+        "genericFallbackRateGap": 0
+      }
+    ]
+  },
+  "gate": {
+    "enabled": true,
+    "pass": false,
+    "failures": [
+      "kimi averageUserSatisfaction 0.5136 < 0.72",
+      "kimi continueRate 0.5 < 0.72",
+      "kimi genericFallbackRate 0.5455 > 0.35",
+      "minimax averageUserSatisfaction 0.4182 < 0.72",
+      "minimax continueRate 0.5 < 0.72",
+      "minimax genericFallbackRate 0.5455 > 0.35"
+    ],
+    "checks": [
+      {
+        "judge": "kimi",
+        "metric": "averageUserSatisfaction",
+        "actual": 0.5136,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "kimi",
+        "metric": "continueRate",
+        "actual": 0.5,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "kimi",
+        "metric": "genericFallbackRate",
+        "actual": 0.5455,
+        "expected": "<= 0.35",
+        "pass": false
+      },
+      {
+        "judge": "minimax",
+        "metric": "averageUserSatisfaction",
+        "actual": 0.4182,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "minimax",
+        "metric": "continueRate",
+        "actual": 0.5,
+        "expected": ">= 0.72",
+        "pass": false
+      },
+      {
+        "judge": "minimax",
+        "metric": "genericFallbackRate",
+        "actual": 0.5455,
+        "expected": "<= 0.35",
+        "pass": false
+      }
+    ]
+  }
+}

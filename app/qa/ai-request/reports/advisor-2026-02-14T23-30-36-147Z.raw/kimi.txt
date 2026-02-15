@@ -1,0 +1,156 @@
+Now I have a clear picture. The QA tests are for an AI assistant feature that needs to be built. Let me provide concrete engineering advice based on the evidence.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "The QA results reveal a pattern of failures in an AI assistant that doesn't exist in the current codebase. The current project is a Meilisearch-based company search portal (Next.js + Meilisearch), but the QA tests an AI assistant with multi-turn conversations, context management, and LLM-based responses. The 2 strict failures (UV012, UV022) and low usefulness scores (avg 2.18/5) indicate the assistant lacks: (1) entity validation to prevent hallucinations (policlinics as shoe manufacturers), (2) context continuity across turns, (3) website verification capabilities, and (4) proper fallback handling. To implement this assistant, you need to build an LLM orchestration layer with explicit guardrails.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Add entity type validation before returning company results",
+      "why": "UV012 failed catastrophically: assistant returned polyclinics and hospitals as 'shoe manufacturers'. This is a data validation bug that destroys user trust.",
+      "expectedImpact": "Eliminates category hallucinations; prevents medical/cultural institutions appearing as manufacturers.",
+      "validationScenarios": ["UV012", "UV011", "UV009"]
+    },
+    {
+      "priority": "P0",
+      "title": "Implement conversation context memory (session state)",
+      "why": "UV021, UV019, UV020 all show complete loss of company context between turns. Assistant forgets 'Ирис Интер групп' and hallucinates unrelated companies.",
+      "expectedImpact": "Maintains entity continuity; enables multi-turn workflows like 'find company → check website → get news'.",
+      "validationScenarios": ["UV021", "UV019", "UV020", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Build website verification tool with actual HTTP fetching",
+      "why": "UV013 shows fake 'deep checks' - assistant claims to scan /contacts, /about but only quotes existing snippets. UV012 demands real website verification.",
+      "expectedImpact": "Enables 'check website' requests; provides verified contact data; supports 'news from website' feature.",
+      "validationScenarios": ["UV013", "UV012", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add strict mode for 'no generic fallback' requests",
+      "why": "UV007, UV011, UV002 all show assistant falling back to generic advice when user explicitly demands concrete companies or 'no generic advice'.",
+      "expectedImpact": "Respects user constraints; reduces fallback rate from ~40% to <10%.",
+      "validationScenarios": ["UV007", "UV011", "UV002", "UV014"]
+    },
+    {
+      "priority": "P2",
+      "title": "Implement result count enforcement (3-5 candidates)",
+      "why": "Multiple scenarios show 'found 1 of 3' or repeating the same single company instead of finding more candidates.",
+      "expectedImpact": "Meets user quantity expectations; enables proper comparison workflows.",
+      "validationScenarios": ["UV001", "UV008", "UV015", "UV002"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "guardrails",
+      "title": "Add rubric-based entity validation layer",
+      "action": "Before returning any company in results, verify its rubric/category matches the query intent. Query 'производители обуви' must filter by rubrics containing 'производство' AND 'обувь'. Reject companies with mismatched rubrics (e.g., medical institutions).",
+      "implementationHint": "src/lib/validation/entityValidator.ts - create validateCompaniesAgainstIntent(companies, intent) function. Call in API route before returning results.",
+      "expectedImpact": "Prevents UV012-type hallucinations where wrong-category companies appear.",
+      "risk": "May reduce recall if rubric data is incomplete. Mitigate with rubric expansion mapping.",
+      "effort": "M",
+      "validationScenarios": ["UV012", "UV011"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Implement session-based conversation memory",
+      "action": "Store conversation turns in Redis/memory with session ID. Include last 3 turns in LLM context. Track mentioned entities (companies, locations) explicitly.",
+      "implementationHint": "Add session middleware in src/app/api/chat/route.ts. Use conversationId from client or generate UUID. Store turns in simple in-memory Map (scale to Redis later).",
+      "expectedImpact": "Fixes UV021/UV019/UV020 context loss issues.",
+      "risk": "Memory growth - implement TTL (1 hour) and max turns (10).",
+      "effort": "M",
+      "validationScenarios": ["UV021", "UV019", "UV020", "UV022"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Build website fetcher tool for LLM",
+      "action": "Create tool that fetches company website, extracts contacts, about text, and news. Use cheerio or similar for parsing. Cache results 1 hour.",
+      "implementationHint": "src/lib/tools/websiteFetcher.ts - export fetchWebsiteData(url): {contacts, about, news, products}. Add rate limiting (max 5 req/min per domain).",
+      "expectedImpact": "Enables UV013 'deep scan' and UV012 'check website' features to actually work.",
+      "risk": "Websites may block scraping. Implement fallback to cached Biznesinfo data with honest disclosure.",
+      "effort": "L",
+      "validationScenarios": ["UV013", "UV012", "UV022"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Add strict mode flag to system prompt",
+      "action": "When user says 'без общих советов' or 'только конкретные компании', set strictMode=true. In prompt: 'STRICT MODE: Do not provide generic advice. If insufficient data, say \"Недостаточно данных\" and suggest specific next search query.'",
+      "implementationHint": "Detect strict mode keywords in user message in src/app/api/chat/route.ts. Pass to LLM as system message modifier.",
+      "expectedImpact": "Reduces generic fallback rate from ~40% to <10% for strict requests.",
+      "risk": "May appear less helpful. Balance with explicit 'next step' suggestions.",
+      "effort": "S",
+      "validationScenarios": ["UV007", "UV011", "UV014"]
+    },
+    {
+      "id": "R5",
+      "area": "ranking",
+      "title": "Implement result aggregation to meet count requirements",
+      "action": "When user asks for N companies but only M<N found: (1) expand search to related rubrics, (2) expand geo if applicable, (3) return M with explicit note + search suggestions for remaining N-M.",
+      "implementationHint": "Modify search logic in src/lib/meilisearch/search.ts. If results.length < requestedCount, trigger secondary search with relaxed filters.",
+      "expectedImpact": "Meets UV001/UV008/UV015 quantity expectations.",
+      "risk": "Lower relevance with expanded search. Rank expanded results separately with confidence scores.",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV008", "UV015", "UV002"]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Create template parser for Subject/Body/WhatsApp blocks",
+      "action": "Build formatter that guarantees structured output for outreach templates. Use JSON mode or strict regex validation.",
+      "implementationHint": "src/lib/formatters/outreachTemplate.ts - parse LLM output and enforce blocks. Fallback to manual formatting if LLM fails structure.",
+      "expectedImpact": "Reliable template generation for UV001, UV003, UV004, UV016.",
+      "risk": "LLM may resist structured output. Use function calling or JSON mode.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV003", "UV004", "UV016"]
+    },
+    {
+      "id": "R7",
+      "area": "guardrails",
+      "title": "Add hallucination detection for company names",
+      "action": "Validate that mentioned companies exist in catalog before including in response. If LLM hallucinates 'Деловые Медиа ООО' instead of 'Ирис Интер групп', reject and re-query.",
+      "implementationHint": "Post-process LLM output: extract company mentions, verify against Meilisearch index. Flag mismatches for retry.",
+      "expectedImpact": "Prevents UV021/UV019 entity confusion bugs.",
+      "risk": "Adds latency. Run validation async or cache company list.",
+      "effort": "M",
+      "validationScenarios": ["UV021", "UV019", "UV020"]
+    },
+    {
+      "id": "R8",
+      "area": "geo",
+      "title": "Fix geo disambiguation for Minsk districts",
+      "action": "When user specifies district (Уручье, Малиновка), ensure search filters by district or nearby radius. Currently ignored.",
+      "implementationHint": "Enhance location.ts with district coordinates. Add geo filter to Meilisearch query when district detected.",
+      "expectedImpact": "Improves UV003, UV001 relevance for location-specific queries.",
+      "risk": "Limited district data in catalog. Fallback to 'nearby' with explicit note.",
+      "effort": "S",
+      "validationScenarios": ["UV003", "UV001"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV012",
+      "UV022",
+      "UV021",
+      "UV007",
+      "UV002"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.geo-ambiguity.json",
+      "scenarios.regressions.guardrails-extensions.json"
+    ],
+    "successMetrics": [
+      "strictPassRate >= 0.95 (currently 0.91)",
+      "avgUsefulness >= 3.5 (currently 2.18)",
+      "usefulRate >= 0.75 (currently 0.32)",
+      "zero hallucination of wrong-category companies",
+      "context continuity score >= 4 across multi-turn scenarios"
+    ]
+  }
+}
+```

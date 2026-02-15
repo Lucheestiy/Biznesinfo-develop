@@ -1,0 +1,149 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Pass rate 90.9% (20/22) with avg usefulness 2.55-2.82 across judges. Two critical failure patterns dominate: (1) anti-noise filtering lets completely irrelevant entities (hospitals, military centers, cleaning product companies) leak into results across 5+ scenarios, and (2) multi-turn context is lost for entity-specific queries (all 4 Ирис Интер групп variants score ≤1 usefulness). A third systemic issue is generic fallback responses replacing actionable output when the catalog has sparse data. Fixing these three areas would lift ~10 scenarios from not_useful to useful.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Eliminate irrelevant-entity leakage in catalog search results",
+      "why": "At least 5 scenarios (UV012, UV011, UV009, UV003, UV021) show completely unrelated companies injected into responses — polyclinics as shoe manufacturers, military cultural centers as cobblers, cleaning product companies in dental results. This destroys user trust instantly.",
+      "expectedImpact": "UV012 strict pass (fixes the only remaining strict failure besides UV022), UV011/UV009/UV003 usefulness +1-2 points each",
+      "validationScenarios": ["UV012", "UV011", "UV009", "UV003", "UV021"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix multi-turn entity context carryover for company-specific queries",
+      "why": "All 4 Ирис Интер групп scenarios (UV019-UV022) average usefulness 0.5-2.5 because the assistant loses track of which company the user is asking about, hallucinating 'Деловые Медиа ООО' or random catalog entries instead. UV022 also has the second strict failure.",
+      "expectedImpact": "UV019-UV022 usefulness from avg 1.25 → 3+, UV022 strict pass fix",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Replace generic fallback with structured sparse-data responses",
+      "why": "At least 8 scenarios trigger a 'generic fallback' pattern where the assistant gives vague advice ('расширьте поиск', 'обзвон по чеклисту') instead of (a) acknowledging what WAS found, (b) giving a concrete next step, (c) maintaining user criteria from prior turns. This is the #1 usefulness killer.",
+      "expectedImpact": "UV002, UV007, UV008, UV011, UV014, UV015 usefulness +1 each",
+      "validationScenarios": ["UV002", "UV007", "UV008", "UV011", "UV014", "UV015"]
+    },
+    {
+      "priority": "P2",
+      "title": "Ensure multi-turn criteria persistence (quality, export, constraints)",
+      "why": "UV002 turn 3 ignores белизна/клейковина criteria from turn 2. UV006 shortlist ignores FSC/drying constraints. UV008 ignores 30hp/attachment/service constraints. Users who invest 2-3 turns refining criteria expect them to persist.",
+      "expectedImpact": "UV002, UV006, UV008 usefulness +1 each",
+      "validationScenarios": ["UV002", "UV006", "UV008"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Add hard rubric-level anti-noise filter with category cross-validation",
+      "action": "Before including any company in a response, validate that the company's rubric/category is semantically compatible with the user's query intent. Implement a blocklist-based filter: if user asks for 'производители обуви' and candidate rubric contains 'поликлиника|больница|курсы|бытовая химия|досуговое учреждение', hard-reject that candidate. This should be a post-retrieval filter applied BEFORE the LLM formats the response.",
+      "implementationHint": "In the search/retrieval layer (likely src/ directory, look for the function that builds the company candidate list from Meilisearch/catalog results). Add a rubric-compatibility check using a negative-match list keyed by query intent category. The anti-noise patterns in the current codebase (filter medical institutions for footwear) need to be generalized beyond footwear to ALL query types.",
+      "expectedImpact": "Eliminates hallucinated irrelevant companies in UV012, UV011, UV009, UV003, UV021",
+      "risk": "Over-filtering could remove edge-case relevant companies. Mitigate by logging filtered candidates.",
+      "effort": "S",
+      "validationScenarios": ["UV012", "UV011", "UV009", "UV003"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add explicit entity-tracking instruction in system prompt for multi-turn",
+      "action": "Add to system prompt: 'ENTITY TRACKING: When a user has established a specific company name in conversation (e.g., by searching for it or referring to it), maintain that entity as the active subject for all subsequent turns until the user explicitly switches. Never substitute a different company name. If you cannot find the company, say so using the EXACT name the user provided — do not suggest a different company as if it were the same one.'",
+      "implementationHint": "Find the system prompt template (likely in src/ or app/ directory, search for systemPrompt or system_message). Add the entity-tracking rule near the top of the behavioral rules section.",
+      "expectedImpact": "Fixes UV019 (hallucinated Деловые Медиа instead of Ирис Интер групп), UV021 (entity confusion), UV020 (context loss)",
+      "risk": "Low — this is a behavioral guardrail, not a logic change",
+      "effort": "S",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Replace generic fallback template with structured sparse-data template",
+      "action": "Replace the current generic fallback ('расширьте поиск на смежные рубрики/регионы') with a structured template: '1. ЧТО НАШЛОСЬ: [N confirmed candidates]. 2. ЧЕГО НЕ ХВАТАЕТ: [specific gap vs user request]. 3. КОНКРЕТНЫЙ СЛЕДУЮЩИЙ ШАГ: [one actionable step, not generic advice]. 4. СОХРАНЁННЫЕ КРИТЕРИИ: [list user criteria from all turns].' Add to system prompt: 'When results are fewer than requested, NEVER give generic advice like «расширьте поиск» or «обзвон по чеклисту». Instead, state exactly what was found, what gap remains, and propose ONE concrete next action (e.g., specific alternative rubric to search, specific adjacent region).'",
+      "implementationHint": "Search for fallback or 'подтвержденных карточек меньше' pattern in the prompt/template files. This is the shortlist fallback template that triggers when confirmed_count < requested_count.",
+      "expectedImpact": "Reduces generic fallback penalty across UV002, UV007, UV008, UV011, UV014, UV015",
+      "risk": "Medium — needs testing to ensure the structured template doesn't cause verbosity issues",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV007", "UV011", "UV014"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Add multi-turn criteria persistence instruction",
+      "action": "Add to system prompt: 'CRITERIA PERSISTENCE: Accumulate ALL user-specified criteria across turns (quality parameters, certifications, constraints, geographic filters). On every turn that produces a company list or shortlist, re-apply ALL accumulated criteria. If a criterion cannot be verified from catalog data, mark it as [не подтверждено в карточке — уточните у поставщика] but do NOT silently drop it.'",
+      "implementationHint": "Same system prompt file as R2. Place after entity-tracking rule. Consider also adding a structured 'active_criteria' field to the conversation state if the architecture supports it.",
+      "expectedImpact": "Fixes UV002 turn 3 (quality criteria dropped), UV006 (FSC/drying ignored), UV008 (30hp/attachments ignored)",
+      "risk": "Low — additive instruction, unlikely to cause regression",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV006", "UV008"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Implement company-name fuzzy search for unconfirmed entities",
+      "action": "When a user asks about a specific company by name and no exact match exists, run a fuzzy/partial search across company names in the catalog (Levenshtein distance ≤ 3, or trigram similarity). Return top 3 candidates ranked by name similarity, instead of either (a) returning nothing, or (b) returning random catalog entries. If no candidates score above threshold, return 'company not found in catalog' with the EXACT user-provided name.",
+      "implementationHint": "In the company search function (look for Meilisearch query builder or catalog search). Meilisearch supports typo tolerance natively — ensure it's enabled for company name field. Add a name-similarity reranking step.",
+      "expectedImpact": "UV019-UV022 would find 'Ирис Интер групп' or honestly report not found, instead of returning random companies",
+      "risk": "Medium — fuzzy search could surface false positives. Mitigate by requiring similarity > 0.6",
+      "effort": "M",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Add tail-of-response noise guard to prevent random company injection",
+      "action": "Multiple scenarios show irrelevant companies appended at the END of otherwise acceptable responses (UV003: Рыболов Магазин after café query, UV009: Сэльвин after dental query, UV011: military center). Add a post-generation check: if the last company mentioned in the response has a rubric that doesn't match the query intent, strip that trailing block. Alternatively, add prompt instruction: 'NEVER append a «Быстрый first-pass» or similar catalog dump at the end of your response unless every listed company is directly relevant to the user query.'",
+      "implementationHint": "Search for 'first-pass' or 'Быстрый first-pass' in prompt templates. This appears to be an auto-appended catalog snippet. Either gate it behind a relevance check or remove the auto-append behavior entirely when the main response already contains company recommendations.",
+      "expectedImpact": "Eliminates the 'random company at the end' pattern in UV003, UV009, UV011, UV021",
+      "risk": "Low if prompt-based, medium if post-processing filter",
+      "effort": "S",
+      "validationScenarios": ["UV003", "UV009", "UV011"]
+    },
+    {
+      "id": "R7",
+      "area": "retrieval",
+      "title": "Expand candidate pool for sparse categories before giving up",
+      "action": "For queries where confirmed candidates < requested count (UV001, UV008, UV015 with 1 candidate), automatically broaden the search in a structured way: (1) try parent rubric, (2) try adjacent regions, (3) try synonym rubrics. Present results with clear provenance labels: '[точное совпадение]' vs '[расширенный поиск: смежная рубрика]' vs '[расширенный поиск: соседний регион]'. This replaces the current behavior of repeating the same single candidate or giving up with generic advice.",
+      "implementationHint": "In the search function, add a cascade: if results < requested_count, re-query with broader parameters. The rubric hierarchy likely exists in the catalog schema. Add region adjacency mapping (Минск → Минская область → вся Беларусь).",
+      "expectedImpact": "UV001 (1 shoe manufacturer → potentially 3-5 with broader search), UV008/UV015 (1 tractor supplier → more with adjacent categories), UV007 (no buyers → some with broader rubrics)",
+      "risk": "Medium — broader search may reduce precision. Mitigate with clear labeling.",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV008", "UV015", "UV007"]
+    },
+    {
+      "id": "R8",
+      "area": "qa",
+      "title": "Add anti-hallucination regression check for rubric-entity mismatch",
+      "action": "Add a new QA check type 'rubric_relevance' that validates: for every /company/ link in the response, the company's actual rubric (from catalog) must be semantically related to the query topic. This catches the hospital-as-shoe-manufacturer and military-center-as-cobbler failures automatically.",
+      "implementationHint": "In the QA check framework (app/qa/), add a new check that extracts /company/ slugs from responses, looks up their rubrics in the catalog, and validates relevance against the scenario's query intent tags.",
+      "expectedImpact": "Automated detection of the most egregious failure mode, preventing regressions",
+      "risk": "Low — read-only QA check, no production impact",
+      "effort": "M",
+      "validationScenarios": ["UV012", "UV011", "UV009", "UV003"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV012",
+      "UV022",
+      "UV019",
+      "UV020",
+      "UV021",
+      "UV011",
+      "UV007"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "strict pass rate ≥ 100% (22/22) — currently 20/22",
+      "kimi avg usefulness ≥ 3.2 — currently 2.818",
+      "minimax avg usefulness ≥ 3.0 — currently 2.545",
+      "kimi useful rate ≥ 0.7 — currently 0.5",
+      "minimax useful rate ≥ 0.6 — currently 0.409",
+      "zero scenarios with rubric-entity mismatch hallucinations",
+      "zero scenarios with entity confusion (wrong company name in response)"
+    ]
+  }
+}
+```

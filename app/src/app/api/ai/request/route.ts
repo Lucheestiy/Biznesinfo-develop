@@ -10447,6 +10447,12 @@ const VENDOR_INTENT_CONFLICT_RULES: Record<string, VendorIntentConflictRule> = {
     forbidden:
       /\b(банк\p{L}*|банков\p{L}*|лес\p{L}*|древес\p{L}*|инструмент\p{L}*|абразив\p{L}*|металлопрокат\p{L}*|подшип\p{L}*|клининг\p{L}*|уборк\p{L}*|сертификац\p{L}*|декларац\p{L}*|молок\p{L}*|овощ\p{L}*|лук\p{L}*|кофе\p{L}*|типограф\p{L}*|полиграф\p{L}*|поликлиник\p{L}*|больниц\p{L}*|госпитал\p{L}*|медицин\p{L}*|клиник\p{L}*|стоматологич\p{L}*|аптек\p{L}*|фармацевт\p{L}*)\b/u,
   },
+  // NEW: Anti-noise rule for boxes/packaging - filters plastic packaging when user wants printed boxes with logo
+  boxes: {
+    required: /\b(короб\p{L}*|картон\p{L}*|гофро\p{L}*|упаков\p{L}*|брендир\p{L}*|логотип\p{L}*|печатн\p{L}*|типograf\p{L}*|полиграф\p{L}*|box|packing|carton)\b/u,
+    forbidden:
+      /\b(пластик\p{L}*|полиэтилен\p{L}*|пэт\p{L}*|пвх\p{L}*|пнд\p{L}*|мешк\p{L}*|биг-бег\p{L}*|пленк\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|молок\p{L}*|овощ\p{L}*|клининг\p{L}*|уборк\p{L}*)\b/u,
+  },
   flour: {
     required: /\b(мук\p{L}*|мельниц\p{L}*|зернопереработ\p{L}*|flour|mill)\b/u,
     forbidden:
