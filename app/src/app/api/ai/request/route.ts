@@ -2099,6 +2099,19 @@ function extractCompanyNameHintsFromText(text: string): string[] {
     push(match?.[1] || "");
   }
 
+  // P0 FIX for UV019-UV022: Extract company names that are explicitly mentioned
+  // Pattern: "найди [company name]", "проверь [company name]", "что ты знаешь про [company name]"
+  const contextPatterns = [
+    /(?:найди|проверь|что\s+знаешь\s+про|информац\p{L}*\s+о|узнай\s+про)\s+([A-ZА-ЯЁ][a-zа-яё](?:[^\n,;!?]{0,100}?[a-zа-яё]){0,30})/iu,
+    /(?:компан\p{L}*\s+)?([A-ZА-ЯЁ][a-zа-яё](?:[^\n,;!?]{0,50}?[a-zа-яё]){1,20})\s+(?:в\s+|на\s+)?(?:Минск\b|Минске\b| Беларусь\b)/iu,
+  ];
+  for (const re of contextPatterns) {
+    const match = source.match(re);
+    if (match?.[1] && match[1].length >= 3) {
+      push(match[1].trim());
+    }
+  }
+
   return out.slice(0, 4);
 }
 
@@ -2755,54 +2768,86 @@ function repairTemplatePlaceholderSpam(
   // Extract fresh hints from full conversation history
   const hints = extractTemplateFillHints(params);
 
-  // If we have hints, try to replace "уточняется" with actual values
-  // Focus on the most common positions in templates
-
   // Count how many values we have
   const hasHints = hints.qty || hints.city || hints.productService || hints.deadline || hints.delivery;
   if (!hasHints) return out;
 
-  // Try to replace "уточняется" in template context with actual values
-  // Look for common template position patterns and replace with contextually appropriate values
+  // AGGRESSIVE REPAIR: Replace standalone "уточняется" with actual hint values
+  // This is more effective than relying on context words near placeholders
 
-  // For quantity context: replace "уточняется" near объем/количество
-  if (hints.qty) {
-    out = out.replace(
-      /(объем(?:а|у|е)?|количеств[оа]|qty)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
-      `$1: ${hints.qty}`,
-    );
+  // Strategy: Replace "уточняется" with the most relevant hint based on position/index
+  // First, split template into lines and replace strategically
+  const lines = out.split(/\r?\n/u);
+  let qtyReplaced = 0;
+  let cityReplaced = 0;
+  let deadlineReplaced = 0;
+  let deliveryReplaced = 0;
+  let productReplaced = 0;
+
+  const processedLines = lines.map((line) => {
+    let processedLine = line;
+
+    // Replace standalone "уточняется" with hints based on what appears to be missing
+    // Use position heuristics: earlier fields tend to be product, then qty, then city, etc.
+
+    // Replace with quantity if we have it and line mentions quantity-like concepts
+    if (hints.qty && qtyReplaced < 2) {
+      const qtyPattern = /(объем(?:а|у|е|ом)?|количеств[оа]|qty|кол-во)[^,.:\n]*/iu;
+      if (qtyPattern.test(processedLine)) {
+        processedLine = processedLine.replace(qtyPattern, `$1: ${hints.qty}`);
+        qtyReplaced++;
+      }
+    }
+
+    // Replace with city if we have it
+    if (hints.city && cityReplaced < 2) {
+      const cityPattern = /(город(?:а|у|е|ом)?|локаци[яи]|city)[^,.:\n]*/iu;
+      if (cityPattern.test(processedLine)) {
+        processedLine = processedLine.replace(cityPattern, `$1: ${hints.city}`);
+        cityReplaced++;
+      }
+    }
+
+    // Replace with deadline if we have it
+    if (hints.deadline && deadlineReplaced < 2) {
+      const deadlinePattern = /(срок(?:а|у|е|ом)?|дата[аы]?|deadline)[^,.:\n]*/iu;
+      if (deadlinePattern.test(processedLine)) {
+        processedLine = processedLine.replace(deadlinePattern, `$1: ${hints.deadline}`);
+        deadlineReplaced++;
+      }
+    }
+
+    // Replace with delivery if we have it
+    if (hints.delivery && deliveryReplaced < 2) {
+      const deliveryPattern = /(доставка|самовывоз|delivery)[^,.:\n]*/iu;
+      if (deliveryPattern.test(processedLine)) {
+        processedLine = processedLine.replace(deliveryPattern, `$1: ${hints.delivery}`);
+        deliveryReplaced++;
+      }
+    }
+
+    // Replace with product/service if we have it
+    if (hints.productService && productReplaced < 2) {
+      const productPattern = /(товар[ау]?|услуг[аи]?|продукт(?:а|у|е)?|product|service)[^,.:\n]*/iu;
+      if (productPattern.test(processedLine)) {
+        processedLine = processedLine.replace(productPattern, `$1: ${hints.productService}`);
+        productReplaced++;
+      }
+    }
+
+    return processedLine;
+  });
+
+  out = processedLines.join("\n");
+
+  // Second pass: For remaining "уточняется" that are completely standalone,
+  // replace with explicit "не указано" or try to infer from remaining hints
+  if (hints.qty && !qtyReplaced) {
+    // Replace first unmatched "уточняется" with quantity
+    out = out.replace(/^(\s*-\s*[^:]+:?\s*)уточняется$/gmu, `$1${hints.qty}`);
   }
-
-  // For city context: replace "уточняется" near город/локация
-  if (hints.city) {
-    out = out.replace(
-      /(город(?:а|у|е|ом)?|локаци[яи]|city)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
-      `$1: ${hints.city}`,
-    );
-  }
-
-  // For deadline context: replace "уточняется" near срок/дата
-  if (hints.deadline) {
-    out = out.replace(
-      /(срок(?:а|у|е|ом)?|дата[аы]?|deadline)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
-      `$1: ${hints.deadline}`,
-    );
-  }
-
-  // For delivery context
-  if (hints.delivery) {
-    out = out.replace(
-      /(доставка|самовывоз|delivery)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
-      `$1: ${hints.delivery}`,
-    );
-  }
-
-  // For product/service context
-  if (hints.productService) {
-    out = out.replace(
-      /(товар[ау]?|услуг[аи]?|продукт(?:а|у|е)?|product|service)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
-      `$1: ${hints.productService}`,
-    );
+  if (hints.city && !cityReplaced) {
+    out = out.replace(/^(\s*-\s*[^:]+:?\s*)уточняется$/gmu, `$1${hints.city}`);
   }
 
   // Final pass: clean up any remaining obvious placeholder spam patterns
