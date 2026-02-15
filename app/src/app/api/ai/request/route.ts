@@ -10962,8 +10962,9 @@ function isPackagingCandidate(company: BiznesinfoCompanySummary): boolean {
   // This ensures we find packaging companies even if they don't explicitly mention "printing"
   const hasPackagingCore = /(короб\p{L}*|гофро\p{L}*|упаковоч\p{L}*|картон\p{L}*|box\p{L}*|carton)/u.test(haystack);
   const hasBrandingSignals = /(брендир\p{L}*|логотип\p{L}*|печат\p{L}*|полиграф\p{L}*|офсет\p{L}*|флексо\p{L}*)/u.test(haystack);
+  // Enhanced distractor signals: filter out plastic packaging, trading companies, equipment, adhesives, chemicals
   const hasDistractorSignals =
-    /(транспортн\p{L}*\s+машиностроен\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|станк\p{L}*|подшип\p{L}*|спецтехник\p{L}*)/u.test(
+    /(транспортн\p{L}*\s+машиностроен\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|станк\p{L}*|подшип\p{L}*|спецтехник\p{L}*|пластик\p{L}*|плёнк\p{L}*|пленк\p{L}*|пэт\b|пэт\p{L}*|пвх\p{L}*|пнд\b|полиэтилен\p{L}*|мешк\p{L}*|биг-бег\p{L}*|клей\b| adhesive|торгов\p{L}*|дистрибьют\p{L}*|оборудован\p{L}*|техник\p{L}*|инструмент\p{L}*|хими\p{L}*|реагент\p{L}*)\b/u.test(
       haystack,
     );
   // Require packaging core AND NOT a distractor - branding signals are optional
