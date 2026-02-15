@@ -2745,6 +2745,8 @@ function sanitizeUnfilledPlaceholdersInNonTemplateReply(text: string): string {
   out = out.replace(/(?:уточняется[ \t,;:.\-]*){2,}/giu, "уточняется");
   out = out.replace(/уточняется\s+(?:до|по|и|или|в|на|за|при|со|о|об)\s+уточняется/giu, "уточняется");
   out = out.replace(/уточняется[?!.]*\s*уточняется/giu, "уточняется");
+  // Additional pattern: catch "уточняется X уточняется" where X can be any word
+  out = out.replace(/\bуточняется\s+\p{L}{1,15}\s+уточняется/giu, "уточняется");
 
   // Step 3: Handle ТЗ duplicates
   out = out.replace(/(?:по[ \t]+вашему[ \t]+тз[ \t,;:]*){2,}/giu, "по вашему ТЗ");
