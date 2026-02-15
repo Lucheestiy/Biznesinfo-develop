@@ -6317,10 +6317,11 @@ function postProcessAssistantReply(params: {
     out = `${out}\n\nГео-фильтр: Беларусь.`.trim();
   }
 
-  // FIX: The pattern "меньше.*запрошен" incorrectly matches "меньше, чем запрошено" which is a SUCCESS message
-  // (saying fewer found than requested), NOT a failure/fallback message
-  // Only match if there's NO "найден" or "из" between "меньше" and "запрошен" (those indicate success)
-  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд|подтвержденных\s*карточк|меньше(?:(?!найден|из).)*запрошен)/iu.test(
+  // FIX: The pattern "меньше.*запрошен" with negative lookahead incorrectly filters out valid fallback phrases
+  // like "Подтвержденных карточек меньше, чем запрошено" which ARE valid fallback indicators per test patterns.
+  // The negative lookahead (?!найден|из) was meant to exclude success messages but it incorrectly excludes valid fallbacks.
+  // Simplified: Just match the fallback patterns from test UV012.T2.C2
+  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд|подтвержденных\s*карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен)/iu.test(
     out,
   );
   if (websiteResearchIntent && !hasWebsiteSourceOrFallbackEvidence) {
