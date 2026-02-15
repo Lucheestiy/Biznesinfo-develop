@@ -2894,6 +2894,9 @@ function repairTemplatePlaceholderSpam(
   let deliveryReplaced = 0;
   let productReplaced = 0;
 
+  // ULTRA-AGGRESSIVE: Increase limits and try harder
+  const MAX_REPLACEMENTS = 20; // Increased from 2 to 20
+
   const processedLines = lines.map((line) => {
     let processedLine = line;
 
@@ -2901,7 +2904,7 @@ function repairTemplatePlaceholderSpam(
     // Use position heuristics: earlier fields tend to be product, then qty, then city, etc.
 
     // Replace with quantity if we have it and line mentions quantity-like concepts
-    if (hints.qty && qtyReplaced < 2) {
+    if (hints.qty && qtyReplaced < MAX_REPLACEMENTS) {
       const qtyPattern = /(объем(?:а|у|е|ом)?|количеств[оа]|qty|кол-во)[^,.:\n]*/iu;
       if (qtyPattern.test(processedLine)) {
         processedLine = processedLine.replace(qtyPattern, `$1: ${hints.qty}`);
@@ -2910,7 +2913,7 @@ function repairTemplatePlaceholderSpam(
     }
 
     // Replace with city if we have it
-    if (hints.city && cityReplaced < 2) {
+    if (hints.city && cityReplaced < MAX_REPLACEMENTS) {
       const cityPattern = /(город(?:а|у|е|ом)?|локаци[яи]|city)[^,.:\n]*/iu;
       if (cityPattern.test(processedLine)) {
         processedLine = processedLine.replace(cityPattern, `$1: ${hints.city}`);
@@ -2919,7 +2922,7 @@ function repairTemplatePlaceholderSpam(
     }
 
     // Replace with deadline if we have it
-    if (hints.deadline && deadlineReplaced < 2) {
+    if (hints.deadline && deadlineReplaced < MAX_REPLACEMENTS) {
       const deadlinePattern = /(срок(?:а|у|е|ом)?|дата[аы]?|deadline)[^,.:\n]*/iu;
       if (deadlinePattern.test(processedLine)) {
         processedLine = processedLine.replace(deadlinePattern, `$1: ${hints.deadline}`);
@@ -2928,7 +2931,7 @@ function repairTemplatePlaceholderSpam(
     }
 
     // Replace with delivery if we have it
-    if (hints.delivery && deliveryReplaced < 2) {
+    if (hints.delivery && deliveryReplaced < MAX_REPLACEMENTS) {
       const deliveryPattern = /(доставка|самовывоз|delivery)[^,.:\n]*/iu;
       if (deliveryPattern.test(processedLine)) {
         processedLine = processedLine.replace(deliveryPattern, `$1: ${hints.delivery}`);
@@ -2937,7 +2940,7 @@ function repairTemplatePlaceholderSpam(
     }
 
     // Replace with product/service if we have it
-    if (hints.productService && productReplaced < 2) {
+    if (hints.productService && productReplaced < MAX_REPLACEMENTS) {
       const productPattern = /(товар[ау]?|услуг[аи]?|продукт(?:а|у|е)?|product|service)[^,.:\n]*/iu;
       if (productPattern.test(processedLine)) {
         processedLine = processedLine.replace(productPattern, `$1: ${hints.productService}`);
@@ -2950,14 +2953,69 @@ function repairTemplatePlaceholderSpam(
 
   out = processedLines.join("\n");
 
-  // Second pass: For remaining "уточняется" that are completely standalone,
-  // replace with explicit "не указано" or try to infer from remaining hints
-  if (hints.qty && !qtyReplaced) {
-    // Replace first unmatched "уточняется" with quantity
-    out = out.replace(/^(\s*-\s*[^:]+:?\s*)уточняется$/gmu, `$1${hints.qty}`);
+  // AGGRESSIVE SECOND PASS: For remaining "уточняется" - replace ANY remaining with hints if we have them
+  // This is more aggressive than before - we don't require pattern matching
+  if (hints.qty) {
+    out = out.replace(/уточняется/g, (match, offset) => {
+      // Only replace if we still have capacity
+      if (qtyReplaced < MAX_REPLACEMENTS) {
+        qtyReplaced++;
+        return hints.qty || match;
+      }
+      return match;
+    });
   }
-  if (hints.city && !cityReplaced) {
-    out = out.replace(/^(\s*-\s*[^:]+:?\s*)уточняется$/gmu, `$1${hints.city}`);
+  
+  // Third pass: If we still have "уточняется" and have city, try city
+  if (hints.city) {
+    let cityRemaining = MAX_REPLACEMENTS - cityReplaced;
+    out = out.replace(/уточняется/g, (match) => {
+      if (cityRemaining > 0) {
+        cityRemaining--;
+        cityReplaced++;
+        return hints.city || match;
+      }
+      return match;
+    });
+  }
+
+  // Fourth pass: deadline
+  if (hints.deadline) {
+    let deadlineRemaining = MAX_REPLACEMENTS - deadlineReplaced;
+    out = out.replace(/уточняется/g, (match) => {
+      if (deadlineRemaining > 0) {
+        deadlineRemaining--;
+        deadlineReplaced++;
+        return hints.deadline || match;
+      }
+      return match;
+    });
+  }
+
+  // Fifth pass: delivery
+  if (hints.delivery) {
+    let deliveryRemaining = MAX_REPLACEMENTS - deliveryReplaced;
+    out = out.replace(/уточняется/g, (match) => {
+      if (deliveryRemaining > 0) {
+        deliveryRemaining--;
+        deliveryReplaced++;
+        return hints.delivery || match;
+      }
+      return match;
+    });
+  }
+
+  // Sixth pass: product/service
+  if (hints.productService) {
+    let productRemaining = MAX_REPLACEMENTS - productReplaced;
+    out = out.replace(/уточняется/g, (match) => {
+      if (productRemaining > 0) {
+        productRemaining--;
+        productReplaced++;
+        return hints.productService || match;
+      }
+      return match;
+    });
   }
 
   // Final pass: clean up any remaining obvious placeholder spam patterns
