@@ -277,6 +277,54 @@ function looksLikeChecklistRequest(message: string): boolean {
   );
 }
 
+// Detect placeholder garbage in template outputs (P0 fix for UV001, UV004, UV006, UV016)
+function detectPlaceholderGarbage(text: string): { hasGarbage: boolean; placeholderCount: number; samples: string[] } {
+  const normalized = String(text || "");
+  if (!normalized.trim()) return { hasGarbage: false, placeholderCount: 0, samples: [] };
+
+  // Patterns for placeholder garbage
+  const placeholderPatterns = [
+    /\bуточняется\b/gi,
+    /\bуточнить\b/gi,
+    /\bк\s+сожалению\b/gi,
+    /\bк\s+с\b/gi,          // к сожалению partial
+    /\bк\s+основному\b/gi,
+    /\bинформация\s+уточняется\b/gi,
+    /\bданные\s+уточняются\b/gi,
+    /\[(?:уточняется|указать|вставить|переменная|параметр)\]/gi,
+  ];
+
+  const samples: string[] = [];
+  let placeholderCount = 0;
+
+  for (const pattern of placeholderPatterns) {
+    const matches = normalized.match(pattern);
+    if (matches && matches.length > 0) {
+      placeholderCount += matches.length;
+      samples.push(...matches.slice(0, 3));
+    }
+  }
+
+  // Also check for suspicious patterns in template fields
+  const templateSections = normalized.split(/(?:^|\n)(?:Subject|Body|WhatsApp)\s*[:\-—]/imu);
+  for (let i = 1; i < templateSections.length; i++) {
+    const section = templateSections[i];
+    const shortPlaceholders = section.match(/\b[а-яёА-ЯЁa-zA-Z]{2,15}\b/gu) || [];
+    const suspiciousCount = shortPlaceholders.filter(w =>
+      /^(уточн|указа|встав|параметр|данн|информ|провер|узна|сообщи|подтверди|уточняется)$/i.test(w)
+    ).length;
+    if (shortPlaceholders.length > 5 && suspiciousCount / shortPlaceholders.length > 0.3) {
+      placeholderCount += suspiciousCount;
+    }
+  }
+
+  return {
+    hasGarbage: placeholderCount >= 3,
+    placeholderCount,
+    samples: [...new Set(samples)].slice(0, 5),
+  };
+}
+
 function looksLikeAnalyticsTaggingRequest(message: string): boolean {
   const text = normalizeComparableText(message || "");
   if (!text) return false;
@@ -1529,12 +1577,21 @@ function detectRequestedDocumentCount(message: string): number | null {
   const text = normalizeComparableText(message || "");
   if (!text) return null;
 
-  const direct = text.match(/(\d{1,2})\s*(?:документ|documents?|docs?)/u);
+  // Check for explicit count patterns like "6 документов", "6 пунктов", "чеклист из 6"
+  const direct = text.match(/(\d{1,2})\s*(?:документ|documents?|docs?|пункт|point|items?|list)/u);
   if (direct?.[1]) {
     const n = Number.parseInt(direct[1], 10);
     if (Number.isFinite(n)) return Math.max(3, Math.min(12, n));
   }
 
+  // Also check for "чеклист из N" pattern
+  const checklistMatch = text.match(/(?:чеклист|checklist|list)\s*(?:из|from)?\s*(\d{1,2})/u);
+  if (checklistMatch?.[1]) {
+    const n = Number.parseInt(checklistMatch[1], 10);
+    if (Number.isFinite(n)) return Math.max(3, Math.min(12, n));
+  }
+
+  if (/\b(шесть|six)\b/u.test(text)) return 6;
   if (/\b(пять|five)\b/u.test(text)) return 5;
   if (/\b(четыре|four)\b/u.test(text)) return 4;
   if (/\b(три|three)\b/u.test(text)) return 3;
@@ -3919,19 +3976,38 @@ function postProcessAssistantReply(params: {
 
   // Add document checklist even when not in template mode, if documents are explicitly requested
   const docCountForNonTemplate = detectRequestedDocumentCount(params.message || "");
+  // Also check for explicit checklist requests - these should ALWAYS get a checklist
+  const isExplicitChecklistRequest = /(чеклист|checklist|проверочный\s+лист|list\s*(?:of|из)\s*(?:documents?|items?|пунктов))/iu.test(params.message || "");
   const docsRequestedByIntentNonTemplate =
     docCountForNonTemplate !== null ||
+    isExplicitChecklistRequest ||
     /(документ|первичн\p{L}*\s+провер|сертифик|вэд|incoterms)/iu.test(normalizeComparableText(params.message || ""));
   if (docsRequestedByIntentNonTemplate) {
     const existingListItems = countNumberedListItems(out);
-    if (existingListItems < 6) {
-      out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(params.message || "", docCountForNonTemplate || 6)}`.trim();
+    const targetCount = docCountForNonTemplate || 6;
+    // For explicit checklist requests, ALWAYS add the checklist regardless of existing items
+    // For other document requests, only add if we don't have enough items
+    if (isExplicitChecklistRequest || existingListItems < targetCount) {
+      out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(params.message || "", targetCount)}`.trim();
     }
   }
 
   const hasTemplate = Boolean(extractTemplateMeta(out)?.isCompliant);
   if (hasTemplate && templateFillRequested) {
     out = applyTemplateFillHints(out, fillHints).trim();
+  }
+
+  // P0 Guardrail: Detect placeholder garbage in templates (UV001, UV004, UV006, UV016 fix)
+  const placeholderCheck = detectPlaceholderGarbage(out);
+  if (placeholderCheck.hasGarbage && hasTemplate) {
+    // If template contains too many placeholders, replace with explicit rejection message
+    out = `⚠️ Не могу сформировать шаблон — недостаточно данных для заполнения полей.\n\n` +
+      `Пожалуйста, уточните:\n` +
+      `- Какой товар/услуга?\n` +
+      `- Какой объем?\n` +
+      `- Город/регион доставки?\n` +
+      `- Срок поставки?\n\n` +
+      `После уточнения я подготовлю полный шаблон с заполненными данными.`;
   }
 
   const portalPromptSource = oneLine(
@@ -12472,10 +12548,16 @@ function buildAssistantSystemPrompt(): string {
     "- Do not add trailing quotes/backticks/punctuation to links.",
     "- In capability phrasing, refer to the interactive portal biznesinfo.by instead of 'catalog'.",
     "",
-    "ENTITY TRACKING:",
+    "ENTITY TRACKING (P0 CRITICAL):",
     "- When a user has established a specific company name in conversation (e.g., by searching for it or referring to it), maintain that entity as the active subject for all subsequent turns until the user explicitly switches.",
-    "- Never substitute a different company name for the established entity.",
-    "- If you cannot find information about that specific company, say so using the EXACT name the user provided — do not suggest a different company as a replacement.",
+    "- NEVER substitute a different company name for the established entity.",
+    "- CRITICAL: If user says 'новости', 'контакты', 'проверь', 'сайт' after mentioning a company — they mean THAT company, not a new search.",
+    "- EXAMPLES of correct behavior:",
+    "  - Turn 1: user searches 'Ирис Интер групп' → Turn 2: 'дай новости' → MUST return news for 'Ирис Интер групп'",
+    "  - Turn 1: user searches 'Ирис Интер групп' → Turn 2: 'что на карточке' → MUST return card for 'Ирис Интер групп'",
+    "- EXAMPLES of WRONG behavior (NEVER do this):",
+    "  - Turn 1: user searches 'Ирис Интер групп' → Turn 2: 'дай новости' → asking for link / searching new company",
+    "- If you cannot find information about that specific company, say so using the EXACT name: 'Компания [NAME] не найдена в каталоге' — do NOT suggest a different company as replacement.",
     "",
     "CONTINUITY CHECKPOINT (для ВСЕХ многоходовых сценариев):",
     "- MANDATORY CHECK at the START of EVERY response in multi-turn dialogs:",
