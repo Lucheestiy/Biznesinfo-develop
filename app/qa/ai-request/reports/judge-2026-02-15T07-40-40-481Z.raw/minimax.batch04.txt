@@ -1,0 +1,105 @@
+{
+  "judge": "minimax",
+  "ratings": [
+    {
+      "scenarioId": "UV016",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.40,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 2-3: Generic fallback — no actual export readiness assessment, just repeated list with '[проверьте данные]'",
+        "Turn 3: RFQ template filled with 'уточняется' placeholders instead of actual content from context"
+      ],
+      "criticalIssues": [
+        "Template completely unusable — every field is placeholder text, not concrete data",
+        "No use of flour/export context in 3 turns despite user providing specific constraints",
+        "Violates user instruction for export readiness assessment"
+      ],
+      "strengths": [
+        "Turn 1: Real companies from catalog with contacts"
+      ]
+    },
+    {
+      "scenarioId": "UV017",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1-2: Returns irrelevant companies — agricultural machinery parts, beekeeping factory instead of food suppliers",
+        "Turn 2: Ignored explicit user request for honesty about no exact matches — gave same irrelevant list",
+        "Turn 3: Generic template with placeholders"
+      ],
+      "criticalIssues": [
+        "Agromashmarket sells tractor parts, Minsk Honey Factory sells beekeeping products — not food",
+        "Complete failure to respect user's explicit request for honesty and alternatives in Turn 2",
+        "Zero actual beet suppliers found despite food sourcing query"
+      ]
+    },
+    {
+      "scenarioId": "UV018",
+      "usefulness": 5,
+      "verdict": "useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.90,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 5,
+      "reasons": [
+        "Turn 1-2: Perfect understanding — delivered 20 tags with proper grouping, no fallback to supplier search",
+        "Turn 2: Respected user constraint to stay on analytics only, no deviation"
+      ],
+      "strengths": [
+        "Clean task execution — tags are actionable, grouped logically, no hallucinations",
+        "Excellent adherence to scope constraint"
+      ]
+    },
+    {
+      "scenarioId": "UV019",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.10,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2: Completely ignored user request to search the company website directly",
+        "Returned random news from unrelated companies (Onliner, Zarya newspaper) instead of checking SAVANA SERVICE",
+        "Never stated whether news was found or not on the target website"
+      ],
+      "criticalIssues": [
+        "Major context loss — assistant identified company as SAVANA SERVICE but then searched completely different websites",
+        "Turn 2 explicitly asked to 'find yourself, if no news — say so directly' — violated completely",
+        "No accountability for whether requested action was performed"
+      ]
+    },
+    {
+      "scenarioId": "UV020",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1-2: Completely ignored company context 'Iris Inter Group' both times",
+        "Returned random news from unrelated major companies (Belarus Today, 5element) instead of finding on company card",
+        "Turn 2 explicitly asked 'find on company card' — assistant continued ignoring"
+      ],
+      "criticalIssues": [
+        "Complete failure of context continuity — never identified Iris Inter Group from catalog",
+        "Turn 2 command 'Найди на карточке компании' completely ignored",
+        "Would user trust continue? No — 2 turns of completely irrelevant responses"
+      ]
+    }
+  ]
+}
