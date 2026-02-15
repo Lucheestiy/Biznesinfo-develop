@@ -13271,7 +13271,10 @@ function buildAssistantPrompt(params: {
     prompt.push({
       role: "system",
       content:
-        "Response mode: template. Return exactly Subject/Body/WhatsApp blocks now. Do not prepend extra analysis before Subject.",
+        "Response mode: template. Return exactly Subject/Body/WhatsApp blocks now. Do not prepend extra analysis before Subject. " +
+        "CRITICAL: NEVER use placeholder words like 'уточняется', 'уточнить', 'к сожалению не могу', 'данные будут уточнены' in template fields. " +
+        "If you don't have specific values (quantity, city, deadline, product name), use generic but meaningful alternatives like '量大' → 'большой объем' or 'доставка' → 'доставка до склада'. " +
+        "Never leave a template field empty or with placeholder text — always provide a reasonable default or ask for clarification explicitly.",
     });
   } else {
     if (params.responseMode?.rankingRequested) {
