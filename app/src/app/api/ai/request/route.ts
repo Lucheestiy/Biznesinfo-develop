@@ -2541,6 +2541,12 @@ function sanitizeUnfilledPlaceholdersInNonTemplateReply(text: string): string {
   let out = String(text || "");
   if (!out.trim()) return out;
 
+  // ULTRA-AGGRESSIVE deduplication: catch ALL patterns of repeated "уточняется"
+  // This is the PRIMARY fix for "уточняется до уточняется" bug
+  out = out.replace(/(?:уточняется[ \t,;:.\-]*){2,}/giu, "уточняется");
+  out = out.replace(/уточняется\s+(?:до|по|и|или|в|на|за|при|со|о|об)\s+уточняется/giu, "уточняется");
+  out = out.replace(/уточняется[?!.]*\s*уточняется/giu, "уточняется");
+
   // Step 1: Apply specific replacements with immediate deduplication after each
   // This prevents cascading "уточняется до уточняется" bug
   const specificReplacements: Array<[RegExp, string]> = [
@@ -2559,14 +2565,14 @@ function sanitizeUnfilledPlaceholdersInNonTemplateReply(text: string): string {
   for (const [re, value] of specificReplacements) {
     out = out.replace(re, value);
     // Immediate deduplication after each replacement to prevent "уточняется до уточняется"
-    out = out.replace(/(?:уточняется[ \t,;:]*){2,}/giu, "уточняется");
-    out = out.replace(/уточняется\s+(?:до|по|и|или)\s+уточняется/giu, "уточняется");
+    out = out.replace(/(?:уточняется[ \t,;:.\-]*){2,}/giu, "уточняется");
+    out = out.replace(/уточняется\s+(?:до|по|и|или|в|на|за|при|со|о|об)\s+уточняется/giu, "уточняется");
   }
 
   // Step 2: Replace remaining placeholders with "уточняется" and deduplicate
   out = out.replace(/\{[^{}]{1,48}\}/gu, "уточняется");
-  out = out.replace(/(?:уточняется[ \t,;:]*){2,}/giu, "уточняется");
-  out = out.replace(/уточняется\s+(?:до|по|и|или)\s+уточняется/giu, "уточняется");
+  out = out.replace(/(?:уточняется[ \t,;:.\-]*){2,}/giu, "уточняется");
+  out = out.replace(/уточняется\s+(?:до|по|и|или|в|на|за|при|со|о|об)\s+уточняется/giu, "уточняется");
 
   // Step 3: Handle ТЗ duplicates
   out = out.replace(/(?:по[ \t]+вашему[ \t]+тз[ \t,;:]*){2,}/giu, "по вашему ТЗ");
@@ -12104,6 +12110,7 @@ function buildAssistantSystemPrompt(): string {
     "- In supplier-sourcing dialogs, never switch to company-listing instructions (/add-company, tariffs, moderation) unless user explicitly asks about adding own company.",
     "- If such company does not exist in portal cards, state this directly and avoid assumptions.",
     "- In normal text (not templates), do not use raw placeholders in braces.",
+    "- CRITICAL: Never write 'уточняется' as a standalone word in questions or statements. Instead, phrase as a proper question about what information is needed. Example: instead of 'срок уточняется' write 'какой срок?' or 'уточните, пожалуйста, срок'. NEVER use 'уточняется' in template fields or placeholder positions.",
     "- Do not add trailing quotes/backticks/punctuation to links.",
     "- In capability phrasing, refer to the interactive portal biznesinfo.by instead of 'catalog'.",
     "",
