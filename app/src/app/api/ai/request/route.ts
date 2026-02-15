@@ -1449,12 +1449,22 @@ function pickTemplateQty(text: string): string | null {
   const normalized = oneLine(text || "");
   if (!normalized) return null;
 
+  // Extended patterns for quantity extraction (including English units)
   const direct = normalized.match(
-    /(\d+(?:[.,]\d+)?)\s*(тонн(?:а|ы|у)?|т\b|килограмм(?:а|ов)?|кг|литр(?:а|ов)?|л\b|шт\.?|штук|м3|м²|м2)/iu,
+    /(\d+(?:[.,]\d+)?)\s*(тонн(?:а|ы|у)?|т\b|т(?=\s|$)|килограмм(?:а|ов)?|кг\b|килограм\b|kg\b|литр(?:а|ов)?|л\b|l\b|шт\.?|штук|единиц|м3|м³|м²|м2|метр(?:а|ов|ры)?|упаков(?:а|ок|ки)|короб(?:а|ок|ок)|пакет(?:а|ов|ов)?|рулон(?:а|ов|ов)?|погонн(?:ый|ых|ым))/iu,
   );
   if (direct?.[0]) return oneLine(direct[0]).replace(/\s+/gu, " ");
 
+  // Handle "500 kg", "100 L" etc (English format with space)
+  const engMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*(kg|lb|liters?|gallons?|pieces?|pcs|units?|meters?|sqm|m2)/iu);
+  if (engMatch?.[0]) {
+    return oneLine(engMatch[0]).replace(/\s+/gu, " ");
+  }
+
+  // Handle plural forms
   if (/\bтонн[ауы]\b/iu.test(normalized)) return "1 тонна";
+  if (/\bкилограмм\b/iu.test(normalized)) return "1 килограмм";
+  if (/\bлитр\b/iu.test(normalized)) return "1 литр";
   return null;
 }
 
@@ -1462,10 +1472,37 @@ function pickTemplateDeadline(text: string): string | null {
   const normalized = oneLine(text || "");
   if (!normalized) return null;
 
-  const match = normalized.match(
-    /(до\s+\d{1,2}(?:[./-]\d{1,2}(?:[./-]\d{2,4})?)?|до\s+\d{1,2}\s+[а-яё]+|на\s+следующ[а-яё]+\s+недел[ею])/iu,
-  );
-  return match?.[1] ? oneLine(match[1]) : null;
+  // Extended patterns for deadline extraction
+  // Priority: more specific patterns first
+  const patterns = [
+    // "в течение 3 дней", "в течение 2 недель", "в течение месяца"
+    /(?:в\s+(?:течение|течении)\s+)?(\d+)\s*(?:дней|недел[иья]|месяц[аев]?|год[ау]?|рабочих\s+дней)/iu,
+    // "до 15 марта", "до 20.02.2025", "до 15/02/25"
+    /(до\s+\d{1,2}(?:[./-]\d{1,2}(?:[./-]\d{2,4})?)?)/iu,
+    // "до 15 числа", "до 20-го"
+    /(до\s+\d{1,2}(?:-го)?(?:\s+числа)?)/iu,
+    // "на следующей неделе", "на следующий месяц"
+    /(на\s+следующ[а-яё]+\s+(?:недел[ею]|месяц|год))/iu,
+    // "к 15 марта", "к пятнице"
+    /(к\s+\d{1,2}\s+[а-яё]+|к\s+[а-яё]+)/iu,
+    // "сегодня", "завтра", "послезавтра"
+    /\b(сегодня|завтра|послезавтра)\b/iu,
+    // "срочно", "как можно скорее", "в ближайшее время"
+    /\b(срочно|как\s+можно\s+скорее|в\s+ближайшее\s+время|в\s+срок)\b/iu,
+  ];
+
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+    if (match?.[1]) {
+      return oneLine(match[1]);
+    }
+    // For patterns where the match is the full match
+    if (match?.[0]) {
+      return oneLine(match[0]);
+    }
+  }
+
+  return null;
 }
 
 function pickTemplateProductService(text: string): string | null {
@@ -1542,15 +1579,24 @@ function buildPrimaryVerificationDocumentsChecklist(message: string, requestedCo
 }
 
 function extractTemplateFillHints(params: { message: string; history: AssistantHistoryMessage[] }): TemplateFillHints {
+  // Scan ALL user messages from history (not just last 6) to maximize value extraction
   const userMessages = params.history
     .filter((m) => m.role === "user")
     .map((m) => oneLine(m.content || ""))
-    .filter(Boolean)
-    .slice(-6);
-  const latestFirst = [oneLine(params.message || ""), ...[...userMessages].reverse()].filter(Boolean);
+    .filter(Boolean);
+  // Also include assistant messages for context
+  const allMessages = params.history
+    .map((m) => oneLine(m.content || ""))
+    .filter(Boolean);
+
+  // Priority: current message first, then recent history (last 10 user messages), then all history
+  const recentUserMessages = userMessages.slice(-10);
+  const latestFirst = [oneLine(params.message || ""), ...[...recentUserMessages].reverse()].filter(Boolean);
   const combined = latestFirst.join(" ");
+  const allCombined = [oneLine(params.message || ""), ...userMessages.slice().reverse()].filter(Boolean).join(" ");
 
   let city: string | null = null;
+  // First try current + recent messages, then all messages
   for (const msg of latestFirst) {
     const geo = detectGeoHints(msg);
     if (geo.city) {
@@ -1558,11 +1604,28 @@ function extractTemplateFillHints(params: { message: string; history: AssistantH
       break;
     }
   }
+  // If not found in recent, search all messages
+  if (!city) {
+    for (const msg of allMessages) {
+      const geo = detectGeoHints(msg);
+      if (geo.city) {
+        city = geo.city;
+        break;
+      }
+    }
+  }
 
   let qty: string | null = null;
   for (const msg of latestFirst) {
     qty = pickTemplateQty(msg);
     if (qty) break;
+  }
+  // If not found in recent, search all messages
+  if (!qty) {
+    for (const msg of allMessages) {
+      qty = pickTemplateQty(msg);
+      if (qty) break;
+    }
   }
 
   let delivery: string | null = null;
@@ -1578,15 +1641,37 @@ function extractTemplateFillHints(params: { message: string; history: AssistantH
       break;
     }
   }
+  // If not found in recent, search all messages
+  if (!delivery) {
+    for (const msg of allMessages) {
+      const text = normalizeComparableText(msg);
+      if (!text) continue;
+      if (/самовывоз/u.test(text)) {
+        delivery = "самовывоз";
+        break;
+      }
+      if (/доставк/u.test(text)) {
+        delivery = "доставка";
+        break;
+      }
+    }
+  }
 
   let deadline: string | null = null;
   for (const msg of latestFirst) {
     deadline = pickTemplateDeadline(msg);
     if (deadline) break;
   }
+  // If not found in recent, search all messages
+  if (!deadline) {
+    for (const msg of allMessages) {
+      deadline = pickTemplateDeadline(msg);
+      if (deadline) break;
+    }
+  }
 
   return {
-    productService: pickTemplateProductService(combined),
+    productService: pickTemplateProductService(allCombined),
     qty,
     city,
     delivery,
@@ -2574,6 +2659,78 @@ function sanitizeUnfilledPlaceholdersInNonTemplateReply(text: string): string {
 
   // Step 3: Handle ТЗ duplicates
   out = out.replace(/(?:по[ \t]+вашему[ \t]+тз[ \t,;:]*){2,}/giu, "по вашему ТЗ");
+
+  return out;
+}
+
+// Post-processing function to repair excessive "уточняется" placeholders
+// This is called when a template has too many unfilled placeholders despite context
+function repairTemplatePlaceholderSpam(
+  text: string,
+  params: { message: string; history: AssistantHistoryMessage[] },
+): string {
+  let out = String(text || "");
+  if (!out.trim()) return out;
+
+  // Only attempt repair if there's significant "уточняется" spam
+  const utochnyaetsyaCount = (out.match(/уточняется/gu) || []).length;
+  if (utochnyaetsyaCount < 2) return out;
+
+  // Extract fresh hints from full conversation history
+  const hints = extractTemplateFillHints(params);
+
+  // If we have hints, try to replace "уточняется" with actual values
+  // Focus on the most common positions in templates
+
+  // Count how many values we have
+  const hasHints = hints.qty || hints.city || hints.productService || hints.deadline || hints.delivery;
+  if (!hasHints) return out;
+
+  // Try to replace "уточняется" in template context with actual values
+  // Look for common template position patterns and replace with contextually appropriate values
+
+  // For quantity context: replace "уточняется" near объем/количество
+  if (hints.qty) {
+    out = out.replace(
+      /(объем(?:а|у|е)?|количеств[оа]|qty)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
+      `$1: ${hints.qty}`,
+    );
+  }
+
+  // For city context: replace "уточняется" near город/локация
+  if (hints.city) {
+    out = out.replace(
+      /(город(?:а|у|е|ом)?|локаци[яи]|city)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
+      `$1: ${hints.city}`,
+    );
+  }
+
+  // For deadline context: replace "уточняется" near срок/дата
+  if (hints.deadline) {
+    out = out.replace(
+      /(срок(?:а|у|е|ом)?|дата[аы]?|deadline)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
+      `$1: ${hints.deadline}`,
+    );
+  }
+
+  // For delivery context
+  if (hints.delivery) {
+    out = out.replace(
+      /(доставка|самовывоз|delivery)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
+      `$1: ${hints.delivery}`,
+    );
+  }
+
+  // For product/service context
+  if (hints.productService) {
+    out = out.replace(
+      /(товар[ау]?|услуг[аи]?|продукт(?:а|у|е)?|product|service)[^,.:]*(?:уточняется|нужн[а-яё]+|требуется)?/giu,
+      `$1: ${hints.productService}`,
+    );
+  }
+
+  // Final pass: clean up any remaining obvious placeholder spam patterns
+  out = out.replace(/(?:уточняется[ \t,;:.\-]*){2,}/giu, "уточняется");
 
   return out;
 }
@@ -3747,6 +3904,8 @@ function postProcessAssistantReply(params: {
       out = normalizeTemplateBlockLayout(applyTemplateFillHints(ensureTemplateBlocks("", params.message), fillHints));
       out = sanitizeUnfilledPlaceholdersInNonTemplateReply(out).trim();
     }
+    // Post-process to repair excessive "уточняется" placeholder spam
+    out = repairTemplatePlaceholderSpam(out, { message: params.message, history: params.history || [] }).trim();
     out = normalizeTemplateBlockLayout(out);
     const requestedDocCount = detectRequestedDocumentCount(params.message || "");
     const docsRequestedByIntent =
