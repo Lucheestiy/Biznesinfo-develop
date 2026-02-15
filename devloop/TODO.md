@@ -117,11 +117,14 @@ Recently completed:
 77. ✅ Add criteria persistence: accumulate all user criteria across turns and re-apply.
 78. ✅ Add sparse-data response template: structured fallback instead of generic advice.
 79. ✅ Add rubric-based anti-noise filter: block hospitals/schools from supplier search results.
+80. ✅ Add placeholder garbage guardrail: detect 'уточняется' in templates and replace with explicit request for details.
+81. ✅ Strengthen ENTITY TRACKING in system prompt with explicit examples.
 
 Next:
 
-1. Run QA cycle again to verify improvements (entity-tracking, criteria persistence, sparse-data, anti-noise).
+1. Run QA cycle again to verify improvements (placeholder guardrail, entity tracking).
 2. Add strict QA gate for "redundant link request" patterns.
+3. Add category relevance filter for multi-candidate retrieval.
 
 ## Constraints
 
