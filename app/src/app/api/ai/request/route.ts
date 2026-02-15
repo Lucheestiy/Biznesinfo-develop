@@ -2541,38 +2541,33 @@ function sanitizeUnfilledPlaceholdersInNonTemplateReply(text: string): string {
   let out = String(text || "");
   if (!out.trim()) return out;
 
-  // ULTRA-AGGRESSIVE deduplication: catch ALL patterns of repeated "уточняется"
-  // This is the PRIMARY fix for "уточняется до уточняется" bug
-  out = out.replace(/(?:уточняется[ \t,;:.\-]*){2,}/giu, "уточняется");
-  out = out.replace(/уточняется\s+(?:до|по|и|или|в|на|за|при|со|о|об)\s+уточняется/giu, "уточняется");
-  out = out.replace(/уточняется[?!.]*\s*уточняется/giu, "уточняется");
-
-  // Step 1: Apply specific replacements with immediate deduplication after each
-  // This prevents cascading "уточняется до уточняется" bug
+  // Step 1: Replace ALL placeholders with "уточняется" FIRST
+  // This must happen BEFORE any deduplication to prevent "уточняется до уточняется" cascade
   const specificReplacements: Array<[RegExp, string]> = [
-    [/\{qty\}/giu, "объем"],
-    [/\{(?:об[ъь]ем|количеств[оа])\}/giu, "объем"],
-    [/\{city\}/giu, "город"],
-    [/\{(?:город|локаци[яи])\}/giu, "город"],
-    [/\{product\/service\}/giu, "товар/услуга"],
-    [/\{(?:товар|услуг[аи]|тип(?:\s+молока)?|вид(?:\s+молока)?)\}/giu, "товар/услуга"],
-    [/\{delivery\}/giu, "доставка/самовывоз"],
-    [/\{доставка\/самовывоз\}/giu, "доставка/самовывоз"],
-    [/\{deadline\}/giu, "срок поставки"],
-    [/\{(?:дата|срок(?:\s+поставки)?)\}/giu, "срок поставки"],
+    [/\{qty\}/giu, "уточняется"],
+    [/\{(?:об[ъь]ем|количеств[оа])\}/giu, "уточняется"],
+    [/\{city\}/giu, "уточняется"],
+    [/\{(?:город|локаци[яи])\}/giu, "уточняется"],
+    [/\{product\/service\}/giu, "уточняется"],
+    [/\{(?:товар|услуг[аи]|тип(?:\s+молока)?|вид(?:\s+молока)?)\}/giu, "уточняется"],
+    [/\{delivery\}/giu, "уточняется"],
+    [/\{доставка\/самовывоз\}/giu, "уточняется"],
+    [/\{deadline\}/giu, "уточняется"],
+    [/\{(?:дата|срок(?:\s+поставки)?)\}/giu, "уточняется"],
   ];
 
   for (const [re, value] of specificReplacements) {
     out = out.replace(re, value);
-    // Immediate deduplication after each replacement to prevent "уточняется до уточняется"
-    out = out.replace(/(?:уточняется[ \t,;:.\-]*){2,}/giu, "уточняется");
-    out = out.replace(/уточняется\s+(?:до|по|и|или|в|на|за|при|со|о|об)\s+уточняется/giu, "уточняется");
   }
 
-  // Step 2: Replace remaining placeholders with "уточняется" and deduplicate
+  // Replace remaining placeholders with "уточняется"
   out = out.replace(/\{[^{}]{1,48}\}/gu, "уточняется");
+
+  // Step 2: NOW run aggressive deduplication AFTER all placeholders are replaced
+  // This catches all patterns of repeated "уточняется"
   out = out.replace(/(?:уточняется[ \t,;:.\-]*){2,}/giu, "уточняется");
   out = out.replace(/уточняется\s+(?:до|по|и|или|в|на|за|при|со|о|об)\s+уточняется/giu, "уточняется");
+  out = out.replace(/уточняется[?!.]*\s*уточняется/giu, "уточняется");
 
   // Step 3: Handle ТЗ duplicates
   out = out.replace(/(?:по[ \t]+вашему[ \t]+тз[ \t,;:]*){2,}/giu, "по вашему ТЗ");
