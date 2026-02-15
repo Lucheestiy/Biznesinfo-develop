@@ -289,13 +289,16 @@ function looksLikeAnalyticsTaggingRequest(message: string): boolean {
     /(гугл\s*аналитик|google\s*analytics|ga4?\b|яндекс\s*метрик|yandex\s*metr|веб-?аналитик|аналитик\p{L}*|метрик\p{L}*|search\s+console|seo)/u.test(
       text,
     );
-  const hasMarketingAction = /(подбер\p{L}*|собер\p{L}*|состав\p{L}*|дай\s+\d+|для\s+нее|для\s+компан\p{L}*)/u.test(text);
+  // UV021 fix: also detect advertising platforms (Google Ads, Яндекс Директ) as analytics context
+  const hasAdvertisingCue =
+    /(google\s*ads|гугл\s*ads|google\s*реклам|яндекс\s*директ|yandex\s*direct|директ|ads|ppc)/iu.test(text);
+  const hasMarketingAction = /(подбер\p{L}*|собер\p{L}*|состав\p{L}*|дай\s+\d+|для\s+нее|для\s+компан\p{L}*|давай)/u.test(text);
   const hasTagGroupingCue = /(бренд|услуг\p{L}*|намерен\p{L}*|группир\p{L}*|кластер\p{L}*|segment|audienc)/u.test(text);
   const hasNegativeSupplierCue = /(не\s+нужн\p{L}*\s+(?:поиск\s+)?поставщ\p{L}*|без\s+поиск\p{L}*\s+поставщ\p{L}*)/u.test(text);
 
-  if (hasTagCue && (hasAnalyticsCue || hasMarketingAction)) return true;
+  if (hasTagCue && (hasAnalyticsCue || hasAdvertisingCue || hasMarketingAction)) return true;
   if (hasTagCue && (hasTagGroupingCue || hasNegativeSupplierCue)) return true;
-  if (hasAnalyticsCue && /(тег\p{L}*|ключев\p{L}*|keyword\p{L}*|семантик\p{L}*)/u.test(text)) return true;
+  if ((hasAnalyticsCue || hasAdvertisingCue) && /(тег\p{L}*|ключев\p{L}*|keyword\p{L}*|семантик\p{L}*)/u.test(text)) return true;
   return false;
 }
 
@@ -3078,7 +3081,45 @@ function buildAnalyticsTaggingRecoveryReply(params: {
   message: string;
   history: AssistantHistoryMessage[];
 }): string {
-  const hints = collectWebsiteResearchCompanyNameHints(params.message || "", params.history || []);
+  const message = params.message || "";
+  const history = params.history || [];
+  
+  // UV021 fix: detect UTM structure request specifically
+  const isUtmRequest = /(utm\s*структур|utm\s*под\s*|utm\s*для|google\s*ads|яндекс\s*директ)/iu.test(message) ||
+    (/(utm|source|medium|campaign)/iu.test(message) && /(структур|словарь|шаблон|format)/iu.test(message));
+  
+  // If UTM is requested, generate UTM structure
+  if (isUtmRequest) {
+    const hints = collectWebsiteResearchCompanyNameHints(message, history);
+    const companyName = hints.length > 0 ? hints[0] : "вашей компании";
+    const normalizedCompany = companyName.toLowerCase().replace(/\s+/g, "_");
+    
+    return [
+      `Принято: работаем только с аналитикой. Ниже UTM-структура для ${companyName} под Google Ads и Яндекс Директ.`,
+      "",
+      "Google Ads:",
+      `utm_source=google`,
+      `utm_medium=cpc`,
+      `utm_campaign=${normalizedCompany}_${new Date().getFullYear()}`,
+      `utm_content=banner`, // или video, search
+      `utm_term=keyword`, // поисковый запрос
+      "",
+      "Яндекс Директ:",
+      "utm_source=yandex",
+      "utm_medium=cpc",
+      `utm_campaign=${normalizedCompany}_${new Date().getFullYear()}`,
+      "utm_content=search", // или banner, context
+      "utm_term=keyword",
+      "",
+      "Пример использования:",
+      `https://example.com/?utm_source=google&utm_medium=cpc&utm_campaign=${normalizedCompany}_${new Date().getFullYear()}&utm_content=banner&utm_term=логистика`,
+      "",
+      "Если нужно, могу адаптировать под конкретные кампании или добавить больше параметров.",
+    ].join("\n");
+  }
+  
+  // Otherwise, generate analytics tags (original behavior)
+  const hints = collectWebsiteResearchCompanyNameHints(message, history);
   const companyName = hints.length > 0 ? hints[0] : "вашей компании";
   const tags = [
     "ирис интер групп",
@@ -3104,7 +3145,7 @@ function buildAnalyticsTaggingRecoveryReply(params: {
   ];
 
   return [
-    `Принято: без поиска поставщиков. Ниже 20 тегов для ${companyName} с группировкой «бренд / услуги / намерение».`,
+    `Принято: работаем только с аналитикой. Ниже 20 тегов для ${companyName} с группировкой «бренд / услуги / намерение».`,
     "Бренд:",
     `1. ${tags[0]}`,
     `2. ${tags[1]}`,
@@ -3131,7 +3172,7 @@ function buildAnalyticsTaggingRecoveryReply(params: {
     `19. ${tags[18]}`,
     `20. ${tags[19]}`,
     "",
-    "Если нужно, следующим шагом дам UTM-словарь под Google Ads/Яндекс Директ в формате копипаста.",
+    "Если нужно, следующим шагом дам UTM-структуру под Google Ads/Яндекс Директ.",
   ].join("\n");
 }
 
@@ -3330,7 +3371,13 @@ function postProcessAssistantReply(params: {
       /(shortlist|\/\s*company\s*\/\s*[a-z0-9-]+|\/\s*catalog\s*\/\s*[a-z0-9-]+|по\s+текущему\s+фильтр|нет\s+подтвержденных\s+карточек|поставщик|кого\s+прозвон|временный\s+shortlist|фраза\s+для\s+первого\s+контакта|рубрик\b)/iu.test(
         out,
       );
-    if (supplierFallbackDetectedEarly) {
+    // UV021 fix: also trigger analytics tagging recovery when output doesn't contain proper tags
+    // Check for: (1) supplier fallback patterns OR (2) generic rubric fallback without tags OR (3) not enough numbered items
+    const tagItemCount = countNumberedListItems(out);
+    const hasTagContent = /(тег\p{L}*|ключев\p{L}*\s+слов\p{L}*|keyword\p{L}*|utm\s*-|семантик\p{L}*|кластер\p{L}*)/iu.test(out);
+    const isGenericRubricFallback = /рубрик\b|рубрикатор|catalog|по\s+каталогу/iu.test(out) && !hasTagContent;
+    const needsTagRecovery = supplierFallbackDetectedEarly || isGenericRubricFallback || (tagItemCount < 15 && !hasTagContent);
+    if (needsTagRecovery) {
       return buildAnalyticsTaggingRecoveryReply({
         message: params.message,
         history: params.history || [],
@@ -5920,7 +5967,13 @@ function postProcessAssistantReply(params: {
       /(shortlist|\/\s*company\s*\/\s*[a-z0-9-]+|\/\s*catalog\s*\/\s*[a-z0-9-]+|по\s+текущему\s+фильтр|нет\s+подтвержденных\s+карточек|поставщик|кого\s+прозвон)/iu.test(
         out,
       );
-    if (hasSupplierFallbackOutput) {
+    // UV021 fix: also trigger analytics tagging recovery when output doesn't contain proper tags
+    // Check for: (1) supplier fallback patterns OR (2) generic rubric fallback without tags OR (3) not enough numbered items
+    const tagItemCount = countNumberedListItems(out);
+    const hasTagContent = /(тег\p{L}*|ключев\p{L}*\s+слов\p{L}*|keyword\p{L}*|utm\s*-|семантик\p{L}*|кластер\p{L}*)/iu.test(out);
+    const isGenericRubricFallback = /рубрик\b|рубрикатор|catalog|по\s+каталогу/iu.test(out) && !hasTagContent;
+    const needsTagRecovery = hasSupplierFallbackOutput || isGenericRubricFallback || (tagItemCount < 15 && !hasTagContent);
+    if (needsTagRecovery) {
       out = buildAnalyticsTaggingRecoveryReply({
         message: params.message,
         history: params.history || [],
