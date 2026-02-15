@@ -10958,14 +10958,16 @@ function isPackagingIntentByTerms(terms: string[]): boolean {
 function isPackagingCandidate(company: BiznesinfoCompanySummary): boolean {
   const haystack = buildVendorCompanyHaystack(company);
   if (!haystack) return false;
+  // Less strict: require packaging core OR branding signals (not both)
+  // This ensures we find packaging companies even if they don't explicitly mention "printing"
   const hasPackagingCore = /(короб\p{L}*|гофро\p{L}*|упаковоч\p{L}*|картон\p{L}*|box\p{L}*|carton)/u.test(haystack);
   const hasBrandingSignals = /(брендир\p{L}*|логотип\p{L}*|печат\p{L}*|полиграф\p{L}*|офсет\p{L}*|флексо\p{L}*)/u.test(haystack);
   const hasDistractorSignals =
     /(транспортн\p{L}*\s+машиностроен\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|станк\p{L}*|подшип\p{L}*|спецтехник\p{L}*)/u.test(
       haystack,
     );
-  if (!hasPackagingCore || !hasBrandingSignals) return false;
-  if (hasDistractorSignals) return false;
+  // Require packaging core AND NOT a distractor - branding signals are optional
+  if (!hasPackagingCore || hasDistractorSignals) return false;
   return true;
 }
 
@@ -12121,6 +12123,11 @@ function buildAssistantSystemPrompt(): string {
     "- Explicitly acknowledge applied criteria in response: 'Учитываю критерии: [список критериев]'.",
     "- If a criterion cannot be verified from catalog data, mark it as '[не подтверждено в карточке — уточните у поставщика]' but do NOT silently drop it.",
     "- If you cannot meet all criteria, explain which criteria cannot be satisfied and why.",
+    "",
+    "PACKAGING WITH LOGO SPECIAL HANDLING:",
+    "- When user specifically asks for 'коробки с логотипом', 'картонные коробки с печатью', 'упаковка с брендом' - these require custom printing services.",
+    "- If catalog shows only general packaging suppliers (no explicit printing/branding in company profile), explicitly state: 'В каталоге есть упаковочные компании, но не все предлагают печать на коробках. При звонке уточните: делают ли они печать на картоне (офсет, флексо)? Какие тиражи? Есть ли макеты?'",
+    "- Do NOT hide this limitation - users need to know which questions to ask suppliers.",
     "",
     "SPARSE DATA RESPONSE:",
     "- When results are fewer than requested, NEVER give generic advice like 'расширьте поиск'.",
