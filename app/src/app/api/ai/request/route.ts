@@ -7013,6 +7013,36 @@ function postProcessAssistantReply(params: {
     out = `${out}\n\n${compareLines.join("\n")}`.trim();
   }
 
+  // UV003/UV014 fix: Add B2B direction content when reverse buyer intent is detected but response lacks it
+  const hasReverseBuyerIntentForPostProcess = reverseBuyerIntentFinal || looksLikeBuyerSearchIntent(params.message || "");
+  if (hasReverseBuyerIntentForPostProcess) {
+    const normalizedOut = normalizeComparableText(out);
+    const hasB2bDirection = /(кафе|рестора|общепит|столов|фабрик-кухон|кулинар|общественного\s+питания|заказчик|покупател|клиент)/u.test(normalizedOut);
+    if (!hasB2bDirection) {
+      const b2bDirectionLines = [
+        "B2B направление (кому продать/поставить):",
+        "1. Кафе, рестораны, общепит — регулярные закупки продукции.",
+        "2. Столовые при предприятиях и организациях — оптовые поставки.",
+        "3. Фабрики-кухни и кулинарии — производство полуфабрикатов.",
+        "4. Дистрибьюторы и оптовики — перепродажа в регионы.",
+      ];
+      out = `${out}\n\n${b2bDirectionLines.join("\n")}`.trim();
+    }
+  }
+
+  // UV014 fix: Add call priority questions when reverse buyer context exists but response lacks them
+  const hasReverseBuyerQuestions = /(кого\s+первым|прозвон|вопрос|приоритет)/u.test(normalizeComparableText(out)) && countNumberedListItems(out) >= 3;
+  if (hasReverseBuyerIntentForPostProcess && !hasReverseBuyerQuestions) {
+    const questionLines = [
+      "Кого прозвонить первым и какие вопросы задать:",
+      "1. Объемы закупок и регулярность — сколько и как часто берут.",
+      "2. Условия оплаты — предоплата, отсрочка, форма оплаты.",
+      "3. Доставка — самовывоз или доставка, по городу или в регионы.",
+      "4. Требования к упаковке и маркировке — есть ли особые условия.",
+    ];
+    out = `${out}\n\n${questionLines.join("\n")}`.trim();
+  }
+
   const foodPackagingContextFinal = /(тара|упаков|packag|пластик|пэт|банк|ведер|крышк|пищев)/u.test(finalMessageSeed);
   if (reverseBuyerIntentFinal && foodPackagingContextFinal && !/(тара|упаков|пищев|компан)/u.test(normalizeComparableText(out))) {
     out = `${out}\n\nФокус категории: пищевая пластиковая тара; целевые компании-покупатели и заказчики в B2B.`.trim();
