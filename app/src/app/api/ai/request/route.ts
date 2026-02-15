@@ -12164,6 +12164,10 @@ function buildAssistantSystemPrompt(): string {
     "- For each candidate, provide: ✅ (confirmed from website) or ⚠️ (not confirmed / requires call).",
     "- STRICT RULE: Do NOT repeat the same fallback message 3 times (cyclic fallback).",
     "- If first scan attempt fails, try alternative candidates or explain what specifically failed.",
+    "- CRITICAL UV012 FIX: If Turn 1 gave ANY company names/links, Turn 2 MUST use those exact companies for website verification.",
+    "- NEVER ask user to send link or provide company if companies are already in conversation history.",
+    "- If no companies exist in context: explicitly say Извините, в каталоге не найдено компаний по этому запросу для проверки and stop.",
+    "- Response format for website verification failure: Статус: [подтверждено/не подтверждено/невозможно]. Причина: [конкретная причина]. Следующий шаг: [конкретное действие].",
   ].join("\n");
 }
 
