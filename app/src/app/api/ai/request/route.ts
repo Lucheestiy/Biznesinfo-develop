@@ -6317,7 +6317,10 @@ function postProcessAssistantReply(params: {
     out = `${out}\n\nГео-фильтр: Беларусь.`.trim();
   }
 
-  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд|подтвержденных\s*карточк|меньше.*запрошен)/iu.test(
+  // FIX: The pattern "меньше.*запрошен" incorrectly matches "меньше, чем запрошено" which is a SUCCESS message
+  // (saying fewer found than requested), NOT a failure/fallback message
+  // Only match if there's NO "найден" or "из" between "меньше" and "запрошен" (those indicate success)
+  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд|подтвержденных\s*карточк|меньше(?:(?!найден|из).)*запрошен)/iu.test(
     out,
   );
   if (websiteResearchIntent && !hasWebsiteSourceOrFallbackEvidence) {
@@ -6336,8 +6339,9 @@ function postProcessAssistantReply(params: {
   
   // Only count as verified if there's an explicit source URL or a fallback message
   const hasExplicitSourceURL = /(?:source:|источник:|https?:\/\/)/iu.test(out);
-  // UV012 FIX: Make regex more permissive - allow comma or space after "меньше"
-  const hasFallbackPhrase = /(?:не\s+удалось|не\s+могу|нет\s+самих|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошено)/iu.test(out);
+  // UV012 FIX: Make regex more specific - only match "меньше чем запрошен" when there's NO "найден" or "из" in between
+  // The phrase "Подтвержденных карточек меньше, чем запрошено: найдено 1 из 2" is a SUCCESS message, not a fallback
+  const hasFallbackPhrase = /(?:не\s+удалось|не\s+могу|нет\s+самих|подтвержденных\s+карточек\s*[,.]?\s*меньше(?!найден|из)|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошено(?!.*найден))/iu.test(out);
   const hasVerificationContent = hasExplicitSourceURL || hasFallbackPhrase;
   
   const isShortlistOutput = out.trim().toLowerCase().startsWith("shortlist") || 
