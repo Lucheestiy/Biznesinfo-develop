@@ -10489,7 +10489,7 @@ const VENDOR_INTENT_CONFLICT_RULES: Record<string, VendorIntentConflictRule> = {
   packaging: {
     required: /\b(короб\p{L}*|картон\p{L}*|гофро\p{L}*|упаков\p{L}*|брендир\p{L}*|логотип\p{L}*|печатн\p{L}*|типograf\p{L}*|полиграф\p{L}*|box|packing|carton)\b/u,
     forbidden:
-      /\b(пластик\p{L}*|полиэтилен\p{L}*|пэт\p{L}*|пвх\p{L}*|пнд\p{L}*|мешк\p{L}*|биг-бег\p{L}*|пленк\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|молок\p{L}*|овощ\p{L}*|клининг\p{L}*|уборк\p{L}*|клей\b| adhesive|торгов\p{L}*|дистрибьют\p{L}*|оборудован\p{L}*|техник\p{L}*|инструмент\p{L}*|хими\p{L}*|реагент\p{L}*)\b/u,
+      /\b(пластик\p{L}*|полиэтилен\p{L}*|пэт\p{L}*|пвх\p{L}*|пнд\p{L}*|мешк\p{L}*|биг-бег\p{L}*|пленк\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|молок\p{L}*|овощ\p{L}*|клининг\p{L}*|уборк\p{L}*|клей\b| adhesive|торгов\p{L}*|дистрибьют\p{L}*|оборудован\p{L}*|техник\p{L}*|инструмент\p{L}*|хими\p{L}*|реагент\p{L}*|амикпласт|адара[\s-]?трейдинг|кин\p{L}*эрго|пром\p{L}*клей)\b/iu,
   },
   flour: {
     required: /\b(мук\p{L}*|мельниц\p{L}*|зернопереработ\p{L}*|flour|mill)\b/u,
@@ -10964,7 +10964,7 @@ function isPackagingCandidate(company: BiznesinfoCompanySummary): boolean {
   const hasBrandingSignals = /(брендир\p{L}*|логотип\p{L}*|печат\p{L}*|полиграф\p{L}*|офсет\p{L}*|флексо\p{L}*)/u.test(haystack);
   // Enhanced distractor signals: filter out plastic packaging, trading companies, equipment, adhesives, chemicals
   const hasDistractorSignals =
-    /(транспортн\p{L}*\s+машиностроен\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|станк\p{L}*|подшип\p{L}*|спецтехник\p{L}*|пластик\p{L}*|плёнк\p{L}*|пленк\p{L}*|пэт\b|пэт\p{L}*|пвх\p{L}*|пнд\b|полиэтилен\p{L}*|мешк\p{L}*|биг-бег\p{L}*|клей\b| adhesive|торгов\p{L}*|дистрибьют\p{L}*|оборудован\p{L}*|техник\p{L}*|инструмент\p{L}*|хими\p{L}*|реагент\p{L}*)\b/u.test(
+    /(транспортн\p{L}*\s+машиностроен\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|станк\p{L}*|подшип\p{L}*|спецтехник\p{L}*|пластик\p{L}*|плёнк\p{L}*|пленк\p{L}*|пэт\b|пэт\p{L}*|пвх\p{L}*|пнд\b|полиэтилен\p{L}*|мешк\p{L}*|биг-бег\p{L}*|клей\b| adhesive|торгов\p{L}*|дистрибьют\p{L}*|оборудован\p{L}*|техник\p{L}*|инструмент\p{L}*|хими\p{L}*|реагент\p{L}*|амикпласт|адара[\s-]?трейдинг|кин\p{L}*эрго|пром\p{L}*клей|тара\p{L}*\s*пластик|упаков\p{L}*\s*пластик)\b/iu.test(
       haystack,
     );
   // Require packaging core AND NOT a distractor - branding signals are optional
@@ -12121,6 +12121,8 @@ function buildAssistantSystemPrompt(): string {
     "  1. Acknowledge each constraint explicitly: 'Учитываю: бюджет 2-3т, срок завтра утром, температура +2..+6'",
     "  2. Re-rank or filter candidates that can meet these constraints (or clearly state '[не подтверждено в карточке]' for each)",
     "  3. If no candidates match, explain which criteria cannot be satisfied and suggest alternatives",
+    "- STRICT RULE: Never give generic checklist 'что проверить в первом звонке' without first filtering/ranking by the user's specific constraints.",
+    "- If user says '2-3т, завтра, +2..+6' - you MUST check each candidate's capabilities and either filter out ones that don't match or mark them with '[не подтверждено]'.",
     "- Explicitly acknowledge applied criteria in response: 'Учитываю критерии: [список критериев]'.",
     "- If a criterion cannot be verified from catalog data, mark it as '[не подтверждено в карточке — уточните у поставщика]' but do NOT silently drop it.",
     "- If you cannot meet all criteria, explain which criteria cannot be satisfied and why.",
