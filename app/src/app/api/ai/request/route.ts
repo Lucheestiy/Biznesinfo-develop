@@ -10489,7 +10489,7 @@ const VENDOR_INTENT_CONFLICT_RULES: Record<string, VendorIntentConflictRule> = {
   packaging: {
     required: /\b(короб\p{L}*|картон\p{L}*|гофро\p{L}*|упаков\p{L}*|брендир\p{L}*|логотип\p{L}*|печатн\p{L}*|типograf\p{L}*|полиграф\p{L}*|box|packing|carton)\b/u,
     forbidden:
-      /\b(пластик\p{L}*|полиэтилен\p{L}*|пэт\p{L}*|пвх\p{L}*|пнд\p{L}*|мешк\p{L}*|биг-бег\p{L}*|пленк\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|молок\p{L}*|овощ\p{L}*|клининг\p{L}*|уборк\p{L}*)\b/u,
+      /\b(пластик\p{L}*|полиэтилен\p{L}*|пэт\p{L}*|пвх\p{L}*|пнд\p{L}*|мешк\p{L}*|биг-бег\p{L}*|пленк\p{L}*|автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|молок\p{L}*|овощ\p{L}*|клининг\p{L}*|уборк\p{L}*|клей\b| adhesive|торгов\p{L}*|дистрибьют\p{L}*|оборудован\p{L}*|техник\p{L}*|инструмент\p{L}*|хими\p{L}*|реагент\p{L}*)\b/u,
   },
   flour: {
     required: /\b(мук\p{L}*|мельниц\p{L}*|зернопереработ\p{L}*|flour|mill)\b/u,
@@ -11693,22 +11693,14 @@ async function fetchVendorCandidates(params: {
   const applyAntiNoiseFilter = (companies: BiznesinfoCompanySummary[]): BiznesinfoCompanySummary[] => {
     // Always filter for vendor searches - even follow-up queries like "check sites" should exclude non-vendors
     if (companies.length === 0) return companies;
-    const before = companies.length;
-    const filtered = companies.filter((c) => {
+    return companies.filter((c) => {
       const rubric = (c.primary_rubric_name || "").toLowerCase();
       // Block if rubric contains any blocklisted term (check partial match at word boundaries)
       for (const blocked of ANTI_NOISE_BLOCKLIST_FOR_VENDOR) {
-        if (rubric.includes(blocked)) {
-          console.log("[ANTI_NOISE] BLOCKED:", c.name, "rubric:", rubric, "matched:", blocked);
-          return false;
-        }
+        if (rubric.includes(blocked)) return false;
       }
       return true;
     });
-    if (filtered.length < before) {
-      console.log("[ANTI_NOISE] Filtered:", before, "->", filtered.length, "companies");
-    }
-    return filtered;
   };
 
   const postProcess = (
