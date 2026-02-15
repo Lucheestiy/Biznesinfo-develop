@@ -147,6 +147,26 @@ npm run qa:benchmark:providers -- \
 Для request-level переключения провайдера в рамках одного runtime установите:
 `AI_ASSISTANT_ALLOW_PROVIDER_OVERRIDE=1` (только для QA/benchmark окружения).
 
+Model-matrix прогон (общее ядро + модельные профили) с отдельной глубокой проверкой primary-модели:
+
+```bash
+npm run qa:matrix:models
+```
+
+Что делает `qa:matrix:models`:
+
+- запускает **общий regression pack** для каждой модели из матрицы (по умолчанию: MiniMax, Codex, OpenAI);
+- запускает **primary deep pack** только для primary-модели (по умолчанию MiniMax);
+- собирает единый отчет с метриками **по каждой модели**;
+- в отчете показывает короткий прогресс **было -> стало** относительно предыдущего matrix-ого прогона;
+- сохраняет артефакты в `app/qa/ai-request/reports/latest.model-matrix.{json,md}`.
+
+Быстрый smoke-вариант без judge-прогона:
+
+```bash
+npm run qa:matrix:models:fast
+```
+
 ```bash
 npm run qa:judge
 ```

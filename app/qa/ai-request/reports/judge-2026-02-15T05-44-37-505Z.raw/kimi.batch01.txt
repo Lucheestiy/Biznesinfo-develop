@@ -1,0 +1,133 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Assistant returns same single company (Глобал Шуз) across all 3 turns despite user explicitly asking for manufacturers not retailers, and specifically men's classic shoes",
+        "Turn 4 generates completely broken template with nonsense placeholders like 'уточняется', 'срок срок поставки', 'город' instead of actual content",
+        "No actual shortlist created - repeatedly shows 'найдено 1 из 5' without delivering value"
+      ],
+      "criticalIssues": [
+        "Generic fallback to same result after user gives concrete constraints (men's classic shoes, manufacturers only)",
+        "Template generation is completely broken with placeholder garbage",
+        "No continuity - ignores user refinement requests completely"
+      ],
+      "strengths": [
+        "At least found one shoe-related company in Minsk"
+      ],
+      "nextUserProbe": "Почему вы показываете одну и ту же компанию, хотя я просил производителей мужской классической обуви?"
+    },
+    {
+      "scenarioId": "UV002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1 gives decent first-pass with 4 flour-related companies",
+        "Turn 2-3: After user asks for specific quality criteria (whiteness, gluten, batch stability), assistant just marks companies with [проверьте данные] without addressing criteria",
+        "Turn 4 completely ignores request for 6-point checklist of documents, instead gives generic ranking"
+      ],
+      "criticalIssues": [
+        "Never addresses user's specific quality criteria (whiteness, gluten, batch stability)",
+        "Fails to provide requested 6-point document checklist in turn 4",
+        "Locations get corrupted in turn 2-3 (Пинск becomes Брест, Витебск becomes Брест)"
+      ],
+      "strengths": [
+        "Initial turn found relevant flour mills",
+        "Recognizes export readiness as a concept"
+      ],
+      "nextUserProbe": "Вы не ответили на мой вопрос про белизну и клейковину - где эта информация?"
+    },
+    {
+      "scenarioId": "UV003",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Returns random restaurants but ignores that portal is B2B not consumer",
+        "Turn 2: When user asks for B2B alternative search (products/equipment/services for cafes), returns completely irrelevant results (car dealership, fishing shop, bathroom fixtures)",
+        "Turn 3: Same garbage results - no understanding of user request for 3 query variants",
+        "Turn 4: Template generation broken with nonsense placeholders"
+      ],
+      "criticalIssues": [
+        "Completely fails to pivot to B2B context as requested",
+        "Turns 2-3 return absurdly irrelevant companies (Автоцентр, Рыболов, САНТЕХНИКА) for cafe supplier search",
+        "No attempt to suggest actual B2B search queries for food products, equipment, services",
+        "Template is garbage with placeholders"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Это вообще не то, что я просил - почему вы показываете автосалон и сантехнику когда я ищу поставщиков для кафе?"
+    },
+    {
+      "scenarioId": "UV004",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Good initial results with relevant appliance manufacturers (Horizont, Atlant, Aresa, Gefest)",
+        "Turn 2: Complete generic fallback - instead of addressing OEM/ODM question, dumps irrelevant rubrics (textile, metalworking) and media kit advice",
+        "Turn 3: Returns to relevant companies but with generic '5 questions' instead of reliability/service analysis",
+        "Turn 4: RFQ template is broken garbage with placeholders"
+      ],
+      "criticalIssues": [
+        "Turn 2 is complete hallucination/generic fallback - talks about textile industry and media kits for juice press OEM",
+        "RFQ template in turn 4 has nonsense placeholders instead of actual MOQ, terms, warranty request",
+        "Never actually addresses OEM/ODM capability question"
+      ],
+      "strengths": [
+        "Turn 1 found relevant appliance manufacturers",
+        "Turn 3 at least returned to relevant company list"
+      ],
+      "nextUserProbe": "Вы не ответили - кто из этих заводов делает OEM под частную марку?"
+    },
+    {
+      "scenarioId": "UV005",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.5,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Generic rubric dump without specific companies - weak start",
+        "Turn 2: Good pivot - found relevant dairy exporters (Савушкин продукт, Брестское мороженое, etc.) matching EAEU/SNG criteria",
+        "Turn 3: Decent shortlist with 4 companies, explains prioritization criteria",
+        "Turn 4: Template is broken garbage with placeholders"
+      ],
+      "criticalIssues": [
+        "Turn 1 is too generic - just rubrics without companies",
+        "No confectionery companies found despite user request (only dairy)",
+        "Template in turn 4 completely broken with placeholders"
+      ],
+      "strengths": [
+        "Turn 2 successfully found relevant dairy exporters for EAEU/SNG markets",
+        "Maintained continuity - shortlist matches previous criteria",
+        "Prioritization explanation in turn 3 is reasonable"
+      ],
+      "nextUserProbe": "А где кондитерские производители? И исправьте шаблон письма - там сплошные 'уточняется'"
+    }
+  ]
+}
+```

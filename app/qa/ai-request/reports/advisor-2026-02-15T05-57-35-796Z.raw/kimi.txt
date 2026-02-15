@@ -1,0 +1,149 @@
+Based on my analysis of the QA results and the codebase, here is my concrete engineering advice:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical systemic failures in context continuity (UV021, UV022, UV019, UV020), template generation (UV001, UV003, UV004, UV006, UV016, UV017), and company identification (UV021-UV022, UV009, UV012). The assistant loses track of mentioned companies between turns, generates broken templates with placeholder cascades ('уточняется до уточняется'), and fails to maintain conversation state. Root cause: insufficient context window management and missing company entity tracking in conversation state.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix Context Amnesia for Company Names",
+      "why": "UV021, UV022, UV019, UV020 all fail because assistant forgets 'Ирис Интер групп' between turns. This is the highest-impact fix.",
+      "expectedImpact": "Resolves 4 strict-fail scenarios (18% of failures), improves avgUsefulness from 0 to 2+",
+      "validationScenarios": ["UV021", "UV022", "UV019", "UV020"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix Template Placeholder Cascade Bug",
+      "why": "UV001, UV003, UV004, UV006, UV016, UV017 show templates with 'уточняется до уточняется' - placeholders are being double-processed",
+      "expectedImpact": "Fixes 6 scenarios with broken RFQ/outreach templates, improves usefulness scores by 1.5-2 points",
+      "validationScenarios": ["UV001", "UV003", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add Company Entity Resolution for Website Lookups",
+      "why": "UV012, UV013 fail because assistant cannot resolve company from context to perform website scans",
+      "expectedImpact": "Enables proper website research flow, fixes 2 strict-fail scenarios",
+      "validationScenarios": ["UV012", "UV013"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix Anti-Fallback Logic for Analytics Requests",
+      "why": "UV018 fails - assistant ignores explicit 'не нужен поиск поставщиков' and returns sourcing templates",
+      "expectedImpact": "Respects user intent for non-sourcing tasks, fixes 1 strict-fail with 5 failed checks",
+      "validationScenarios": ["UV018"]
+    },
+    {
+      "priority": "P2",
+      "title": "Improve Multi-Turn Document Checklist Generation",
+      "why": "UV002.T4 fails - 4-turn conversation loses context for export document checklist",
+      "expectedImpact": "Better continuity for complex multi-turn workflows",
+      "validationScenarios": ["UV002"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Inject explicit company context into system prompt",
+      "action": "Add a 'mentionedCompanies' array to conversation state. When user mentions a company name (detect via 'компания называется', 'у меня компания', quoted text), store it with timestamp. Inject into system prompt: 'User previously mentioned companies: {name} (turn {n}). If user refers to 'this company', 'она', 'у них', resolve to this entity.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: augment AssistantSessionRef to include mentionedCompanies[]; update buildLocalResilientFallbackReply to inject context",
+      "expectedImpact": "Fixes UV021-022, UV019-020 company amnesia",
+      "risk": "Low - additive change, no breaking changes",
+      "effort": "M",
+      "validationScenarios": ["UV021", "UV022", "UV019", "UV020"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add company resolution layer before website scan",
+      "action": "Before triggering website scan tools, explicitly resolve company name from context using collectWebsiteResearchCompanyNameHints() but add fallback: if no explicit company found in current message, check conversation state for last mentioned company within last 3 turns. Never ask 'какая компания' if we have one in state.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: modify website scan trigger logic around line 3400-3500; add resolveCompanyFromContextOrHistory() helper",
+      "expectedImpact": "Fixes UV012, UV013 website scan failures",
+      "risk": "Low - improves UX without changing API",
+      "effort": "S",
+      "validationScenarios": ["UV012", "UV013"]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Fix placeholder deduplication regex",
+      "action": "The sanitizeUnfilledPlaceholdersInNonTemplateReply() function at line 2540-2581 has aggressive dedup but still allows 'уточняется до уточняется'. Change the regex order: first replace all {placeholders} with 'уточняется', THEN run deduplication. Current code does partial replacements then dedup which creates cascade.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2540-2581 - restructure to: 1) Replace all {\\w+} with 'уточняется', 2) Single pass dedup: /(?:уточняется[\\s,;.:-]*){2,}/giu → 'уточняется'",
+      "expectedImpact": "Fixes broken templates in UV001, UV003, UV004, UV006, UV016, UV017",
+      "risk": "Low - pure bugfix",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV003", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Strengthen anti-sourcing-fallback for analytics tasks",
+      "action": "looksLikeAnalyticsTaggingRequest() at line 280-300 needs stronger negative signals. Add check: if user explicitly says 'не нужен поиск поставщиков' or similar negative sourcing cues, set a flag in conversation state that suppresses ALL sourcing fallbacks for next 2 turns.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:280-300 - add explicitNegativeSourcingCue detection; pass flag through to buildLocalResilientFallbackReply to skip sourcing templates",
+      "expectedImpact": "Fixes UV018 strict-fail (5 failed checks)",
+      "risk": "Low - adds guardrail without changing happy path",
+      "effort": "S",
+      "validationScenarios": ["UV018"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Add company search before website news lookup",
+      "action": "When user asks for 'новости на сайте компании', first search catalog for company by name from context, get website URL from company record, THEN scan. Current flow tries to scan without resolving company first.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: add pre-flight company lookup in handleWebsiteResearchIntent(); use biznesinfoSearch() with company name hints before calling website scanner",
+      "expectedImpact": "Fixes UV019, UV020, UV021, UV022 news lookup failures",
+      "risk": "Medium - adds latency, needs timeout handling",
+      "effort": "M",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Add conversation topic tracker",
+      "action": "Track conversation 'topic' (sourcing vs analytics vs templates) in session state. When topic is 'analytics' (detected via GA/Метрика/теги keywords), reject ALL attempts to switch to sourcing mode unless user explicitly requests it.",
+      "implementationHint": "app/src/lib/ai/conversations.ts: add topic field to AssistantSession; app/src/app/api/ai/request/route.ts: update detectConversationTopic() on each turn",
+      "expectedImpact": "Prevents UV018-type mode confusion, improves UX for analytics workflows",
+      "risk": "Low - state tracking only",
+      "effort": "M",
+      "validationScenarios": ["UV018"]
+    },
+    {
+      "id": "R7",
+      "area": "ranking",
+      "title": "Fix manufacturer detection for footwear queries",
+      "action": "UV001, UV011, UV012 fail to find shoe manufacturers. The detectManufacturerSignal() at line 1782-1803 works but refineConcreteShortlistCandidates() filters too aggressively. Add 'обувь' as manufacturer keyword and boost footwear manufacturer signals.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1782-1803 - add 'обувь', 'обувной', 'швейн' to MANUFACTURER_KEYWORDS; add commodity-specific boost for footwear tag",
+      "expectedImpact": "Better manufacturer detection for UV001, UV011, UV012",
+      "risk": "Low - keyword addition",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV011", "UV012"]
+    },
+    {
+      "id": "R8",
+      "area": "template",
+      "title": "Add template context preservation",
+      "action": "When generating templates (Subject/Body/WhatsApp), extract and preserve context from previous turns: product name, quantity, location, deadline. Current code extracts hints but doesn't apply them consistently across multi-turn.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:1541-1592 - enhance extractTemplateFillHints() to search deeper in history (6→10 turns); ensure applyTemplateFillHints() is called in ALL template generation paths",
+      "expectedImpact": "Better template quality for UV001, UV004, UV006, UV016, UV017",
+      "risk": "Low - improves existing feature",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV021", "UV022", "UV018", "UV012", "UV001"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "passRate >= 0.75 (up from 0.5455)",
+      "strictFailedCheckCount for UV021, UV022, UV018 = 0",
+      "avgUsefulness for fixed scenarios >= 2.0",
+      "Zero 'уточняется до уточняется' patterns in template outputs",
+      "Company name retention rate >= 90% in multi-turn scenarios"
+    ]
+  }
+}
+```

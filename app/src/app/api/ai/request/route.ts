@@ -3340,13 +3340,31 @@ function postProcessAssistantReply(params: {
 
   // Anti-link-gate: if user asks for link/site but we already have companies in context,
   // don't ask for the link again - use known companies from history.
+  // Also include singleCompanyNearbyCandidates (found by name) and company name hints from history
   const linkGateCandidates = params.historyVendorCandidates && params.historyVendorCandidates.length > 0
     ? params.historyVendorCandidates.slice(0, 3)
     : [];
-  const linkGateRequested = linkGateCandidates.length > 0 && (
+  
+  // Also check for company name hints from conversation history (UV019-UV022 fix)
+  const companyNameHintsFromHistory = collectWebsiteResearchCompanyNameHints("", params.history || []).slice(0, 2);
+  
+  // Include singleCompanyNearbyCandidates (companies found by name search)
+  const singleCompanyByName = params.singleCompanyNearbyCandidates 
+    ? params.singleCompanyNearbyCandidates.slice(0, 2)
+    : [];
+  
+  // Combine all sources for link gate recovery
+  const hasAnyCompanyContextForLinkGate = 
+    linkGateCandidates.length > 0 || 
+    singleCompanyByName.length > 0 || 
+    companyNameHintsFromHistory.length > 0;
+    
+  const linkGateRequested = hasAnyCompanyContextForLinkGate && (
     /^(дай|покажи|пришли|скинь|send|show|give)\s+(ссылку|сайт|сайты|link|url|адрес|контакт)/iu.test(params.message || "") ||
     /(на\s+сайте|из\s+карточки|проверь\s+сайт|посмотри\s+сайт|проверим\s+сайты)\b/iu.test(params.message || "") ||
-    /(карточк\p{L}*|сайт\p{L}*)\s+(эт\p{L}*|это|этой|данн\p{L}*)/iu.test(params.message || "")
+    /(карточк\p{L}*|сайт\p{L}*)\s+(эт\p{L}*|это|этой|данн\p{L}*)/iu.test(params.message || "") ||
+    // UV019-UV022: website/news/card lookup patterns
+    /(новост|сайти|карточк|контакт)\b/iu.test(params.message || "")
   );
   // Extended anti-link-gate patterns from QA scenarios UV019-UV022
   const linkGateAsksForNewLink = linkGateRequested && (
@@ -3356,13 +3374,41 @@ function postProcessAssistantReply(params: {
     /дайте\s+ссылк/iu.test(out) ||
     /отправьте\s+(домен|сайт|карточку)/iu.test(out) ||
     /точное\s+доменное\s+имя/iu.test(out) ||
-    /по\s+текущему\s+фильтру\s+в\s+каталоге\s+нет\s+подтвержденных\s+карточек/iu.test(out)
+    /по\s+текущему\s+фильтру\s+в\s+каталоге\s+нет\s+подтвержденных\s+карточек/iu.test(out) ||
+    // Additional patterns for UV019-UV022: "на карточке компании", "последние новости", etc.
+    /нужна\s+(сама\s+)?карточк/iu.test(out) ||
+    /пришлите\s+(мне\s+)?карточку/iu.test(out)
   ) && !/\/company\/[a-z0-9-]+/iu.test(out);
 
+  // Case 1: We have vendor candidates from history (/company/... links)
   if (linkGateRequested && linkGateAsksForNewLink && linkGateCandidates.length > 0) {
     const recoveryLines = ["Использую компании из контекста диалога:"];
     for (let i = 0; i < linkGateCandidates.length; i++) {
       const c = linkGateCandidates[i];
+      const path = c.id ? `/company/${companySlugForUrl(c.id)}` : "";
+      const name = c.name || c.id || `Компания ${i + 1}`;
+      recoveryLines.push(`${i + 1}. ${name}${path ? ` — ${path}` : ""}`);
+    }
+    recoveryLines.push("\nПроверьте актуальность информации на карточках компаний.");
+    return recoveryLines.join("\n");
+  }
+
+  // Case 2: We have company name hints from history but no vendor candidates (UV019-UV022 fix)
+  if (linkGateRequested && linkGateAsksForNewLink && companyNameHintsFromHistory.length > 0 && linkGateCandidates.length === 0) {
+    const recoveryLines = ["Использую название компании из контекста диалога:"];
+    for (let i = 0; i < companyNameHintsFromHistory.length; i++) {
+      const name = companyNameHintsFromHistory[i];
+      recoveryLines.push(`${i + 1}. ${name}`);
+    }
+    recoveryLines.push("\nПроверю карточки и сайты этих компаний для поиска информации.");
+    return recoveryLines.join("\n");
+  }
+
+  // Case 3: We have singleCompanyByName (found by name search)
+  if (linkGateRequested && linkGateAsksForNewLink && singleCompanyByName.length > 0) {
+    const recoveryLines = ["Использую компании, найденные по названию:"];
+    for (let i = 0; i < singleCompanyByName.length; i++) {
+      const c = singleCompanyByName[i];
       const path = c.id ? `/company/${companySlugForUrl(c.id)}` : "";
       const name = c.name || c.id || `Компания ${i + 1}`;
       recoveryLines.push(`${i + 1}. ${name}${path ? ` — ${path}` : ""}`);

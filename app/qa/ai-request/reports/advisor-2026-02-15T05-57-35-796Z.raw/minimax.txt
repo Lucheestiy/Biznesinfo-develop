@@ -1,0 +1,113 @@
+Based on my analysis of the QA data, I provide the following concrete recommendations:
+
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Critical failures in 3 areas: (1) 45% pass rate due to company context amnesia and wrong company types; (2) Template placeholders defaulting to 'уточняется' instead of extracting values from conversation history; (3) Sourcing fallback contamination in non-sourcing requests. Fix requires strict context carryover rules and template value extraction from history.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Force template value extraction from conversation history",
+      "why": "All 10+ failed template scenarios show 'уточняется' placeholders despite values being available in prior turns (UV001, UV003, UV004, UV006, UV016, UV017). The model must extract qty/city/product from T1-T3 context before generating templates.",
+      "expectedImpact": "Increase template usefulness from 0% to 60%+ for scenarios with prior context",
+      "validationScenarios": ["UV001.T4", "UV003.T4", "UV004.T4", "UV016.T4"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add strict company name continuity enforcement",
+      "why": "UV021, UV022, UV019, UV020 all show complete context loss - assistant returns wrong companies (САВАНА instead of Ирис Интер групп, hospitals instead of shoe manufacturers). Company name from Turn 1 must be preserved in working context.",
+      "expectedImpact": "Eliminate wrong-company hallucinations in multi-turn company lookup",
+      "validationScenarios": ["UV021", "UV022", "UV019", "UV020"]
+    },
+    {
+      "priority": "P1",
+      "title": "Block sourcing/rubric fallback in analytics/tagging requests",
+      "why": "UV018 fails all checks because assistant returns rubric navigation instead of requested 20 GA tags. Anti-sourcing rules must be enforced when request explicitly excludes sourcing (без поиска поставщиков).",
+      "expectedImpact": "UV018 pass rate from 0% to 80%+",
+      "validationScenarios": ["UV018.T1", "UV018.T2"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add domain-type guardrails for company searches",
+      "why": "UV012 returns hospitals/polyclinics for shoe manufacturers, UV009 returns chemical wholesale for dental clinics. Company type must match query domain (medical ≠ footwear, chemicals ≠ dental).",
+      "expectedImpact": "Reduce wrong-company-type failures by 70%",
+      "validationScenarios": ["UV012", "UV009"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add explicit template value extraction rules",
+      "action": "Add to system prompt: BEFORE generating any template, scan ALL prior turns for: product/service name, quantity, city, deadline, contact. If found in any prior turn, extract and insert. Only use 'уточняется' if value never appeared in conversation.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add extractTemplateValuesFromHistory() function, call before ensureTemplateBlocks()",
+      "expectedImpact": "Templates will contain real values from conversation context instead of placeholders",
+      "risk": "Low - extracts existing values, doesn't invent new ones",
+      "effort": "M",
+      "validationScenarios": ["UV001.T4", "UV003.T4", "UV004.T4", "UV017.T4"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add company name echo checkpoint",
+      "action": "Add to system prompt: AFTER any company lookup, BEFORE responding, echo the company name in the response. If you cannot find the company mentioned in user's Turn 1, explicitly state 'Не нашел компанию X в каталоге' instead of returning unrelated companies.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add companyNameEchoCheckpoint() before response finalization",
+      "expectedImpact": "Eliminates company context amnesia - assistant will either find correct company or honestly admit failure",
+      "risk": "Low - improves honesty, prevents hallucinations",
+      "effort": "S",
+      "validationScenarios": ["UV021", "UV022", "UV019", "UV020"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Add anti-sourcing rule for analytics requests",
+      "action": "When request contains patterns like 'теги|UTM|GA|аналитик' AND excludes sourcing (без поставщиков|не нужен поиск), BLOCK all rubric/catalog/sourcing patterns. Force tag generation only.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - enhance looksLikeAnalyticsTaggingRequest() to return strict mode, add explicit BLOCK for sourcing patterns when analytics requested",
+      "expectedImpact": "UV018 will generate tags instead of rubric suggestions",
+      "risk": "Low - stricter enforcement of user intent",
+      "effort": "S",
+      "validationScenarios": ["UV018.T1", "UV018.T2"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Add domain-type mismatch detector",
+      "action": "When searching for companies, verify returned companies match query domain. If query is footwear → reject medical/chemical companies. If query is dentistry → reject chemical wholesale. Add explicit domain whitelist/blacklist based on core commodity detection.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add companyTypeDomainMatch() check in ranking fallback, reject candidates where detectCoreCommodity(query) ≠ candidate.primary_rubric",
+      "expectedImpact": "Prevents hospitals for shoes, chemicals for dental failures",
+      "risk": "Medium - may reject valid companies if domain mapping is incomplete",
+      "effort": "M",
+      "validationScenarios": ["UV012.T2", "UV009.T1"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Fix vendorCandidates reuse in multi-turn",
+      "action": "When user says 'Сделай shortlist' in Turn 2+, use vendorCandidates from Turn 1 history. Do NOT re-query unless user changes criteria. Add explicit 'reuseExistingCandidates' flag.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - in looksLikeTopCompaniesRequestWithoutCriteria(), always return false when history contains vendorCandidates, forcing reuse path",
+      "expectedImpact": "Fixes UV017 duplicate-company bug where same company repeated 4 times",
+      "risk": "Low - improves efficiency and consistency",
+      "effort": "S",
+      "validationScenarios": ["UV017.T2", "UV016.T2"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV001.T4 - Template with extracted values (no уточняется)",
+      "UV003.T4 - B2B context preserved from Turn 1",
+      "UV018.T1 - 20 GA tags, no rubric suggestions",
+      "UV021 - Ирис Интер групп found, not wrong company",
+      "UV022 - Company card link for correct company"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "Scenario pass rate: 55% → 75% target",
+      "Template usefulness score: 1.0 → 2.5+",
+      "Company continuity failures: 10 → 0",
+      "Template placeholders 'уточняется': 100% elimination in T4 when context exists"
+    ]
+  }
+}
+```

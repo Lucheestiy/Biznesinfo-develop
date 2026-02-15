@@ -1,0 +1,139 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Analysis of QA run reveals 4 systemic issues: (1) Template generation produces 'уточняется' placeholders instead of usable content, (2) Multi-turn continuity frequently breaks when users pivot or refine requests, (3) Company type classification hallucinates (retailers as manufacturers, clinics as factories), (4) Request constraints ignored after Turn 1. Priority fixes needed in prompt continuity enforcement, template variable extraction, and catalog company type validation.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Eliminate template placeholder spam",
+      "why": "12 of 22 scenarios failed with 'уточняется' placeholders in RFQ/contact templates, making output unusable. This is the single highest-impact issue affecting user trust.",
+      "expectedImpact": "Templates should contain real extracted data from conversation context, not placeholders. Target: 100% template functionality.",
+      "validationScenarios": ["UV001", "UV002", "UV003", "UV004", "UV006", "UV007", "UV016", "UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix multi-turn continuity after user pivots",
+      "why": "UV003, UV012, UV018 show complete context loss when user redirects from consumer to b2b, or requests specific constraints. Assistant reverts to generic rubric instead of honoring the pivot.",
+      "expectedImpact": "When user explicitly redirects (e.g., 'не нужен поиск поставщиков, нужны только теги'), assistant must immediately comply, not repeat same errors.",
+      "validationScenarios": ["UV003", "UV018"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add company type validation guard",
+      "why": "Multiple scenarios show wrong company types: hospitals as shoe manufacturers (UV012), chemical distributor as dental clinic (UV009), parts supplier as mini-tractor dealer (UV008), retailer as manufacturer (UV001, UV013).",
+      "expectedImpact": "Before returning any company, validate: does company type match query intent? Mark as [retailer/trader] if manufacturing was requested.",
+      "validationScenarios": ["UV001", "UV008", "UV009", "UV012", "UV013"]
+    },
+    {
+      "priority": "P1",
+      "title": "Enforce request constraint carryover across turns",
+      "why": "UV002 (quality specs), UV004 (OEM/ODM), UV015 (4-criteria comparison) show constraints completely ignored after Turn 1. User explicitly asks for X in Turn N, assistant ignores and repeats generic content.",
+      "expectedImpact": "All constraints mentioned in any turn must be tracked and addressed. If constraints cannot be met, explain why and offer alternatives.",
+      "validationScenarios": ["UV002", "UV004", "UV015"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add explicit constraint tracking in system prompt",
+      "action": "Add to system prompt: 'MAINTAIN A LIVING LIST OF ALL USER CONSTRAINTS. Before each response, verify: [✓] Have I addressed every constraint mentioned so far? [✓] If not, explain why or incorporate now. Constraints include: location, quantity, quality specs, company type requirements, delivery timeline, document requirements.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add constraint_tracking_rule to prompt template",
+      "expectedImpact": "Forces assistant to acknowledge constraints rather than silently drop them. Reduces continuity failures by ~40%.",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV004", "UV015"]
+    },
+    {
+      "id": "R2",
+      "area": "template",
+      "title": "Implement mandatory variable extraction before template rendering",
+      "action": "Before generating RFQ/contact templates, extract: subject (what product/service), quantity, location, timeline, and any user-provided details. If variables missing, either (a) ask user OR (b) generate minimal viable template with best-effort from context, NOT placeholder.",
+      "implementationHint": "app/qa/ai-request/templates - add template_preprocessor that extracts variables or gracefully degrades",
+      "expectedImpact": "Eliminates 'уточняется' spam. Templates become usable or explicitly request missing info.",
+      "risk": "low",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV003", "UV004", "UV006", "UV007", "UV016", "UV017"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Add company type mismatch detector",
+      "action": "When returning companies for manufacturing/inquiry queries, validate: does category indicate manufacturer? If user asks 'производители' but returns 'retailer', mark with [⚠️ RETAILER - verify manufacturing status]. Add rule: 'For manufacturing queries, filter out companies whose primary category is retail, trading, or services unless explicitly appropriate.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add company_type_validator in post-processing before response",
+      "expectedImpact": "Prevents hospitals as shoe manufacturers, retailers as factories. Critical for B2B trust.",
+      "risk": "low",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV008", "UV009", "UV012", "UV013"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Add pivot acknowledgment rule",
+      "action": "Add to system prompt: 'When user explicitly redirects (e.g., \"не нужен поиск поставщиков\", \"переформулируй для b2b\", \"мне нужны только теги\"), IMMEDIATELY acknowledge and comply. Do not repeat the behavior user is correcting. Start response with acknowledgment like: \"Понял, фокус только на [новый фокус].\"'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add pivot_handling_rule",
+      "expectedImpact": "Reduces frustration when user corrects assistant direction. UV018, UV003 should show immediate compliance.",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["UV003", "UV018"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Anti-link-gate enforcement for company lookup",
+      "action": "When user references 'эта компания', 'на карточке компании', 'Ирис Интер групп', assistant must: (1) Identify exact company name from context, (2) Search catalog for that exact name, (3) If not found, explicitly state: 'Не нашёл [company] в каталоге. Возможные варианты: [alternatives]. Хотите уточнить?' Never substitute unrelated companies.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add strict_company_lookup_rule",
+      "expectedImpact": "Prevents hallucinations like 'Ирис Интер групп' → 'Беларусь Сегодня', 'САВАНА СЕРВИС', or random ministry Instagram.",
+      "risk": "low",
+      "effort": "M",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "No-results fallback with honest admission",
+      "action": "When company not found, don't substitute random results. Add rule: 'If requested company not in catalog, respond: 1) \"Компания [name] не найдена в каталоге\" 2) Offer 2-3 similar companies with [проверьте данные] tags 3) Suggest expanded search query. Never return random unrelated companies as substitutes.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add honest_no_results_rule",
+      "expectedImpact": "Honest failure > deceptive hallucination. Improves user trust and reduces judge criticism.",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["UV011", "UV019", "UV020"]
+    },
+    {
+      "id": "R7",
+      "area": "geo",
+      "title": "Location accuracy validation",
+      "action": "Add post-response check: for each company, verify location matches query. UV002 showed Brest/Vitebsk confusion, UV003 ignored Уручье. If mismatch detected, add [⚠️ LOCATION DISCREPANCY] tag.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add location_validator in post-processing",
+      "expectedImpact": "Prevents incorrect location assignments like factories in wrong regions.",
+      "risk": "low",
+      "effort": "M",
+      "validationScenarios": ["UV002", "UV003", "UV016"]
+    },
+    {
+      "id": "R8",
+      "area": "prompt",
+      "title": "Document checklist specificity enforcement",
+      "action": "For export/document queries (UV002, UV016), add rule: 'Document checklists must be specific to the industry (e.g., flour export: phytosanitary certificates, quality certificates, customs declarations; timber export: FSC certificates, phytosanitary, origin certificates). Generic B2B document lists fail the check.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add document_specificity_rule",
+      "expectedImpact": "Ensures flour export queries get flour-specific documents, not generic business document lists.",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV016"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV001", "UV002", "UV003", "UV004", "UV006", "UV012", "UV018"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "Pass rate target: 0.8 (currently 0.5455) - requires +12 passing scenarios",
+      "Check pass rate: 0.9159 is good, focus on strict failures",
+      "Usefulness rate target: 0.5 (currently 0.1364) - requires judge improvements",
+      "No 'уточняется' placeholders in template responses by end of Turn 4",
+      "100% constraint acknowledgment: every user constraint must be addressed or explained"
+    ]
+  }
+}
+```

@@ -1,0 +1,126 @@
+Let me check the content of the prompt more carefully. The user is asking me to evaluate scenarios UV016-UV020 based on the transcript content provided in the prompt. Looking at the scenarios in the prompt, I can see they contain the actual assistant responses that need to be evaluated. Let me evaluate all 5 scenarios based on the provided transcripts:
+
+Based on my analysis of the provided transcripts, here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV016",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: дал 4 производителя, но с ошибками в данных (Лидахлебопродукт в Пинске, brest?)",
+        "Turn 2: полный fallback — вместо ранжирования по экспортной готовности выдал список с [проверьте данные] и неверными локациями",
+        "Turn 3: шаблон письма полностью сломан — 'уточняется' вместо реальных данных, Subject некорректный"
+      ],
+      "criticalIssues": [
+        "Turn 2: нарушена continuity — вместо ранжирования по экспортной готовности выдал тот же список с пометками [проверьте данные]",
+        "Turn 3: шаблон содержит placeholder 'уточняется' вместо реальных значений из контекста (мука высшего сорта, экспорт)",
+        "Неверные локации в Turn 2 (Лидахлебопродукт в Пинске, Осиповичский в Лиде)"
+      ],
+      "strengths": [
+        "Turn 1 дал релевантных производителей муки"
+      ],
+      "nextUserProbe": "Почему в шаблоне письма везде написано 'уточняется' вместо моих данных? Я же указал: мука высшего сорта, экспорт."
+    },
+    {
+      "scenarioId": "UV017",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: дал 4 релевантных поставщика продуктов питания в Минске",
+        "Turn 2: дал shortlist из 3 компаний, но без подтверждения наличия красного буряка",
+        "Turn 3: шаблон снова содержит 'уточняется' вместо конкретных параметров"
+      ],
+      "criticalIssues": [
+        "Turn 3: шаблон outreach некорректно заполнен — 'уточняется' вместо '500 кг красного буряка', 'Минск', '3 дня'",
+        "Не подтверждено наличие конкретно красного буряка у поставщиков"
+      ],
+      "strengths": [
+        "Turn 1 и Turn 2 дали релевантных поставщиков овощей/продуктов в Минске",
+        "Нет нерелевантных профилей (учебных учреждений и т.п.)"
+      ],
+      "nextUserProbe": "Замените 'уточняется' на реальные данные из моего запроса: 500 кг красного буряка, срок 3 дня."
+    },
+    {
+      "scenarioId": "UV018",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: полностью игнорировал запрос на теги для аналитики — выдал sourcing-шаблон с рубриками каталога",
+        "Turn 2: после прямого уточнения 'не нужен поиск поставщиков, нужны только теги' — снова выдал sourcing-fallback с рубриками недвижимости"
+      ],
+      "criticalIssues": [
+        "Полное несоответствие задаче: пользователь просил теги для Google Analytics и Яндекс Метрики, а ассистент ищет поставщиков",
+        "После прямого уточнения (Turn 2) продолжил sourcing-fallback вместо тегов",
+        "Выдает рубрики каталога вместо аналитических тегов",
+        "Нарушена базовая интент-реконсиляция"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Я просил теги для веб-аналитики (GA4/Яндекс Метрика), а не поставщиков. Вы вообще понимаете, о чем речь?"
+    },
+    {
+      "scenarioId": "UV019",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: вместо поиска новостей по 'Ирис Интер групп' выдал данные совершенно другой компании (САВАНА СЕРВИС)",
+        "Turn 2: проигнорировал контекст компании и выдал новости совершенно других компаний (Onliner, Заря)"
+      ],
+      "criticalIssues": [
+        "Потеря контекста компании: пользователь упомянул 'Ирис Интер групп', но ассистент искал новости для других компаний",
+        "Не выполнил задачу поиска новостей на сайте указанной компании",
+        "Turn 2: выдает новости Onliner и Заря вместо Ирис Интер групп"
+      ],
+      "strengths": [
+        "Честно указал источники данных (сайты компаний)"
+      ],
+      "nextUserProbe": "Вы нашли новости для Onliner, а я просил для Ирис Интер групп. Почему вы поменяли компанию?"
+    },
+    {
+      "scenarioId": "UV020",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: вместо поиска новостей 'Ирис Интер групп' выдал новости совершенно других компаний (Беларусь Сегодня, ПАТИО)",
+        "Turn 2: после прямого указания 'Найди на карточке компании' — снова выдал те же нерелевантные новости других компаний"
+      ],
+      "criticalIssues": [
+        "Полная потеря контекста: не использовал название компании из диалога",
+        "Turn 2: повтор той же ошибки после уточнения пользователя",
+        "Не ответил шаблоном 'не вижу карточку', но и не нашел правильную компанию",
+        "Выдает новости медиа-компаний вместо данных по Ирис Интер групп"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы дважды выдали новости для других компаний. Где данные по Ирис Интер групп?"
+    }
+  ]
+}
+```

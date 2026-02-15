@@ -1,0 +1,66 @@
+Based on my analysis of the two scenarios UV021 and UV022, I can now provide the QA evaluation:
+
+**UV021 Analysis:**
+- Turn 1: User asks for tags for "Ирис Интер групп" company related to Google Analytics and Yandex Metrica. Assistant responds with completely irrelevant rubrics (IT, торговля, подшипники) - doesn't understand the task.
+- Turn 2: User asks for UTM structure. Assistant again gives irrelevant rubrics (торговля, машиностроение, подшипники) - still no understanding.
+- Turn 3: User asks if assistant can go to the company website and find latest news. Assistant suddenly talks about "САВАНА СЕРВИС ООО" - completely wrong company! This is a critical continuity failure.
+- Turn 4: User says "Find on the company card." Assistant returns a list of random companies (18 УП, АВАНТАЖ-АГРО) - nothing about "Ирис Интер групп".
+
+**UV022 Analysis:**
+- Turn 1: User explicitly asks to find "Ирис Интер групп" company in Minsk. Assistant gives generic rubric advice without actually finding the company.
+- Turn 2: User asks about latest news on their website. Assistant returns random companies (Министерство сельского хозяйства, Автомобильные конструкции) - completely unrelated to "Ирис Интер групп".
+
+Both scenarios show catastrophic failures: the assistant never actually finds "Ирис Интер групп", gives irrelevant rubrics instead of concrete answers, and completely loses context continuity.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV021",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1-2: Completely irrelevant rubric suggestions (подшипники, машиностроение) for analytics tagging task",
+        "Turn 3: Critical continuity failure - suddenly mentions 'САВАНА СЕРВИС ООО' instead of 'Ирис Интер групп'",
+        "Turn 4: Returns random companies (18 УП, АВАНТАЖ-АГРО) instead of the requested company"
+      ],
+      "criticalIssues": [
+        "Never actually found or acknowledged 'Ирис Интер групп' company across all 4 turns",
+        "Complete loss of context - assistant talks about different companies without explanation",
+        "Generic rubric spam instead of concrete answers to specific requests",
+        "Turn 3 is hallucination-level failure: wrong company presented as answer"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Почему вы говорите про другие компании? Я просил про Ирис Интер групп!"
+    },
+    {
+      "scenarioId": "UV022",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.92,
+      "userSatisfaction": 0.10,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Generic rubric advice instead of actually finding the requested company",
+        "Turn 2: Returns completely unrelated companies (Минсельхоз, Автомобильные конструкции) instead of news from 'Ирис Интер групп' website"
+      ],
+      "criticalIssues": [
+        "Failed to find 'Ирис Интер групп' despite explicit search request",
+        "Turn 2 response is random company scraping with no connection to user query",
+        "No acknowledgment that company wasn't found - just returns garbage data",
+        "User asked for news from specific company site, got Instagram of Ministry of Agriculture"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы нашли компанию Ирис Интер групп или нет? Эти сайты не имеют к ней отношения."
+    }
+  ]
+}
+```

@@ -1,0 +1,135 @@
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Assistant returns same single company across all 3 turns despite explicit requests for 3-5 manufacturers",
+        "Generic template generation in turn 4 is broken - fills with placeholders like 'уточняется' instead of actual product details",
+        "No attempt to find additional manufacturers or explain search limitations concretely"
+      ],
+      "criticalIssues": [
+        "Fails to deliver requested shortlist size (1 instead of 3-5)",
+        "Template generation is non-functional with placeholder spam",
+        "No continuity - ignores 'мужская классическая обувь' constraint",
+        "Location error: 'Глобал Шуз' is a retailer/trader, not manufacturer"
+      ],
+      "strengths": [
+        "Provides phone contact for the one company found"
+      ],
+      "nextUserProbe": "Почему вы даете один и тот же магазин вместо производителей? Где реальные фабрики?"
+    },
+    {
+      "scenarioId": "UV002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Initial response shows relevant flour mills but quality criteria (белизна, клейковина) are completely ignored",
+        "Turn 3 degrades to generic '[проверьте данные]' warnings without export readiness assessment",
+        "Turn 4 completely ignores checklist request, returns unrelated ranking instead"
+      ],
+      "criticalIssues": [
+        "No export readiness analysis provided when explicitly requested",
+        "Fails to deliver 6-point checklist for documents",
+        "Location errors in turns 2-3: assigns Brest/Vitebsk to companies from other regions",
+        "Quality specifications (белизна, клейковина) never addressed"
+      ],
+      "strengths": [
+        "Initial turn provides 4 relevant flour mill candidates with contacts",
+        "Maintains awareness of flour production focus"
+      ],
+      "nextUserProbe": "Где чеклист документов для экспорта? И кто из них реально работает на экспорт?"
+    },
+    {
+      "scenarioId": "UV003",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 2 completely loses context: returns car leasing, fishing shop, plumbing instead of food/cafe suppliers",
+        "Turn 3 continues irrelevant results despite explicit request for 3 query variants",
+        "No b2b bridge provided as requested - just random unrelated companies"
+      ],
+      "criticalIssues": [
+        "Total context loss after consumer-to-b2b pivot request",
+        "Completely ignores 'Уручье' location constraint",
+        "Template generation broken with placeholder spam",
+        "No attempt to suggest b2b search categories for cafe supplies"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы вообще читаете мои сообщения? Нужны поставщики для кафе, а не сантехника!"
+    },
+    {
+      "scenarioId": "UV004",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1 provides relevant appliance manufacturers but turn 2 completely loses OEM/ODM context",
+        "Turn 2 response about media kits and banners is nonsensical for manufacturing inquiry",
+        "RFQ template in turn 4 is broken with placeholder spam instead of actual MOQ/guarantee requests"
+      ],
+      "criticalIssues": [
+        "OEM/ODM inquiry completely mishandled - returns irrelevant media kit advice",
+        "RFQ template non-functional with 'уточняется' placeholders",
+        "No actual MOQ, timeline, or warranty questions in RFQ",
+        "Shortlist in turn 3 is generic without reliability/ service differentiation"
+      ],
+      "strengths": [
+        "Initial identification of relevant appliance manufacturers (Horizont, Atlant)",
+        "Provides contact information for candidates"
+      ],
+      "nextUserProbe": "Где информация по OEM производству? И почему шаблон RFQ пустой?"
+    },
+    {
+      "scenarioId": "UV005",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.5,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 2 successfully identifies relevant dairy exporters with EAES/SNG focus",
+        "Maintains context through turns 2-3 with dairy/confectionery segmentation",
+        "Shortlist provides 4 confirmed candidates with contacts"
+      ],
+      "criticalIssues": [
+        "Turn 1 is overly generic with no specific companies",
+        "Shortlist only delivers 4 of 5 requested companies",
+        "Template in turn 4 broken with placeholder spam",
+        "No confectionery companies included despite explicit request",
+        "No prioritization by response probability as requested"
+      ],
+      "strengths": [
+        "Successfully finds major dairy exporters (Savushkin, Brestsky syr)",
+        "Maintains EAES/SNG market context",
+        "Provides phone contacts for outreach"
+      ],
+      "nextUserProbe": "Где кондитерские производители? И кто из них отвечает быстрее?"
+    }
+  ]
+}
+```

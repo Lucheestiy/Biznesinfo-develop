@@ -1,0 +1,123 @@
+I see there's already a file with these scenarios evaluated. However, looking at the current request, the scenarios UV016-UV020 in the prompt have different content than what was previously evaluated. Let me analyze the new transcript content provided in the current request and provide fresh ratings.
+
+Based on my analysis of the provided scenarios UV016-UV020, here is my evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV016",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: дал 4 компании, но с ошибками в гео (Пинск, Лида, Осиповичи не проверены)",
+        "Turn 2: критический сбой — дублирование одной и той же компании 4 раза с меткой [проверьте данные], нет ранжирования по экспортной готовности",
+        "Turn 3: шаблон письма полностью сломан — вместо 'мука' и 'экспорт' подставлены фрагменты запроса пользователя 'дай шаблон'"
+      ],
+      "criticalIssues": [
+        "Turn 2: полная деградация ответа — 4 одинаковые записи вместо top-4 разных компаний",
+        "Turn 3: шаблон не заполнен реальными данными, использованы placeholder'ы 'уточняется' вместо конкретики",
+        "Нет фактической оценки экспортной готовности компаний"
+      ],
+      "strengths": [
+        "Turn 1 дал релевантные категории компаний (хлебопродукты)"
+      ],
+      "nextUserProbe": "Что это за дубли одной компании? И почему в шаблоне письма написано 'Нам нужно дай шаблон'?"
+    },
+    {
+      "scenarioId": "UV017",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.4,
+      "wouldContinue": false,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: дал 4 потенциально релевантных поставщика продуктов питания в Минске",
+        "Turn 2: сделал shortlist 3 компаний, но без подтверждения наличия красного буряка",
+        "Turn 3: outreach шаблон сломан — вместо 'красный буряк' подставлены фрагменты запроса 'сформируй сообщение'"
+      ],
+      "criticalIssues": [
+        "Не подтверждено наличие именно красного буряка у перечисленных поставщиков",
+        "Turn 3: шаблон с placeholder'ами вместо реальных данных, нарушена читаемость"
+      ],
+      "strengths": [
+        "Не предложил явно нерелевантные профили (учебные заведения и т.п.)",
+        "Сохранил контекст по объему и локации"
+      ],
+      "nextUserProbe": "А у этих компаний точно есть красный буряк в наличии? И почему в письме странные фразы?"
+    },
+    {
+      "scenarioId": "UV018",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.05,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: полностью проигнорировал запрос о тегах для GA/Метрики, выдал sourcing-шаблон для поиска поставщиков",
+        "Turn 2: после прямого уточнения 'не нужен поиск поставщиков' снова выдал sourcing-шаблон с рубриками недвижимости"
+      ],
+      "criticalIssues": [
+        "Полное несоответствие интенту пользователя: запросил теги для аналитики, получил шаблон поиска поставщиков",
+        "После явного уточнения продолжил выдавать sourcing-шаблоны вместо тегов",
+        "Нет ни одного тега для Google Analytics или Яндекс.Метрики"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы вообще читаете мои сообщения? Мне нужны теги для аналитики, а не поставщики!"
+    },
+    {
+      "scenarioId": "UV019",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: вместо поиска новостей по запрошенной компании выдал данные совершенно другой компании (САВАНА СЕРВИС)",
+        "Turn 2: после уточнения 'найди сам' выдал новости с сайтов Onliner и Заря — не имеющих отношения к 'Ирис Интер групп'"
+      ],
+      "criticalIssues": [
+        "Не идентифицировал компанию 'Ирис Интер групп' из контекста",
+        "В Turn 1 выдал данные не той компании",
+        "В Turn 2 проигнорировал контекст и выдал новости с общих новостных сайтов",
+        "Не выполнил основную задачу — найти новости конкретной компании"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Почему вы показываете мне новости Onliner? Я просил новости компании Ирис Интер групп!"
+    },
+    {
+      "scenarioId": "UV020",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: вместо новостей 'Ирис Интер групп' выдал новости с сайта sb.by (Беларусь Сегодня) — не той компании",
+        "Turn 2: после уточнения 'найди на карточке компании' снова выдал новости sb.by, полностью игнорируя контекст"
+      ],
+      "criticalIssues": [
+        "Не использовал контекст компании 'Ирис Интер групп' из диалога",
+        "Дважды выдавал новости с сайта sb.by вместо поиска по запрошенной компании",
+        "Не ответил шаблоном 'не вижу карточку', но и не нашел нужную информацию"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы находите новости не той компании. Где информация об Ирис Интер групп?"
+    }
+  ]
+}
+```

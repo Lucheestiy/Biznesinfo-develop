@@ -1,0 +1,137 @@
+Now I have a clear understanding of the expected JSON format. Let me evaluate the 5 scenarios (UV016-UV020) based on the provided transcripts.
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV016",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.45,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: Provided 4 concrete flour manufacturers with correct geo (Belarus)",
+        "Turn 3: Attempted to provide email/WhatsApp templates and document checklist",
+        "Turn 2: Failed to rank by export readiness — just repeated same 4 companies with garbled data",
+        "Turn 3: Template text is severely broken ('уточняется' placeholders, nonsensical content)"
+      ],
+      "criticalIssues": [
+        "Turn 2: Location data corrupted — shows wrong cities (Пинск, Лида, Брест) for companies",
+        "Turn 2: No actual export readiness assessment provided despite direct user request",
+        "Turn 3: Template contains gibberish like 'Нам нужно дай шаблон в город' — unusable",
+        "Turn 3: Document list cut off mid-word ('Договорной пакет: реквиз…') — incomplete"
+      ],
+      "strengths": [
+        "Initial company list is relevant to flour/high-grade requirement",
+        "Correctly identified Belarusian manufacturers from catalog"
+      ],
+      "nextUserProbe": "А у кого реально есть опыт экспорта? Дай конкретные факты"
+    },
+    {
+      "scenarioId": "UV017",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.75,
+      "userSatisfaction": 0.60,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: Provided 4 relevant food/vegetable suppliers in Minsk area",
+        "Turn 2: Created shortlist of 3 candidates with ranking criteria",
+        "Turn 3: Attempted structured message template in requested format"
+      ],
+      "criticalIssues": [
+        "Turn 1: Included Агромашмаркет (agricultural machinery parts) — clearly irrelevant to beet sourcing",
+        "Turn 3: Template text severely degraded with 'уточняется' placeholders — barely usable",
+        "No honesty about whether these suppliers actually sell beets in 500kg quantities",
+        "No indication of actual beet availability or pricing"
+      ],
+      "strengths": [
+        "Correctly focused on Minsk location as requested",
+        "Турпродплюс and Амифрут are plausible candidates for vegetable wholesale",
+        "Maintained context continuity (500kg, Minsk, beets) across turns"
+      ],
+      "nextUserProbe": "А у них точно есть свекла сейчас в наличии? Как узнать цену?"
+    },
+    {
+      "scenarioId": "UV018",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.25,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Completely misunderstood task — provided catalog rubrics instead of analytics tags",
+        "Turn 2: Despite user clarification, still provided sourcing rubrics and media kit advice instead of GA/Yandex tags"
+      ],
+      "criticalIssues": [
+        "Task was to provide 20 tags for Google Analytics/Yandex Metrica — assistant never did this",
+        "Turn 2: User explicitly said 'Не нужен поиск поставщиков' — assistant still gave sourcing rubrics",
+        "Response about 'медиакит' and 'баннеры' is completely off-topic for analytics tags request",
+        "No tags provided at all — complete failure on core task"
+      ],
+      "strengths": [
+        "None relevant to the actual user request"
+      ],
+      "nextUserProbe": "Ты не понял. Мне нужны UTM-метки и цели для аналитики, а не поставщики!"
+    },
+    {
+      "scenarioId": "UV019",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.88,
+      "userSatisfaction": 0.30,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Instead of finding news for 'Ирис Интер групп', provided completely unrelated company (САВАНА СЕРВИС)",
+        "Turn 2: Returned news from Onliner and Brest newspaper — nothing about the user's company"
+      ],
+      "criticalIssues": [
+        "Never identified or used 'Ирис Интер групп' from conversation context",
+        "Turn 1: Randomly selected САВАНА СЕРВИС — completely wrong company",
+        "Turn 2: Scraped news from generic news sites instead of company's website",
+        "No attempt to find actual website for 'Ирис Интер групп'",
+        "User explicitly asked assistant to find news on the website — assistant failed to do so"
+      ],
+      "strengths": [
+        "Turn 2 at least attempted web scraping format (though for wrong sources)"
+      ],
+      "nextUserProbe": "Ты ищешь новости не той компании! Мне нужно про Ирис Интер групп"
+    },
+    {
+      "scenarioId": "UV020",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.90,
+      "userSatisfaction": 0.20,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: Despite user stating company name 'Ирис Интер групп', returned news from Belarus Today and 5element — wrong sources entirely",
+        "Turn 2: User explicitly said 'Найди на карточке компании' — assistant still returned generic news from wrong sources"
+      ],
+      "criticalIssues": [
+        "Complete failure to identify or use 'Ирис Интер групп' from conversation context",
+        "Both turns returned news from unrelated websites (sb.by, 5element) — not the user's company",
+        "No attempt to locate company card for 'Ирис Интер групп' in Biznesinfo catalog",
+        "User gave clear company name twice — assistant ignored it both times",
+        "Response appears to be random news scraping with no connection to user request"
+      ],
+      "strengths": [
+        "None — complete task failure"
+      ],
+      "nextUserProbe": "Почему ты игнорируешь название компании? Найди Ирис Интер групп в каталоге!"
+    }
+  ]
+}
+```

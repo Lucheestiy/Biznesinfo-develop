@@ -1,0 +1,127 @@
+Now I have a comprehensive understanding of the system and the QA failures. Let me provide the concrete engineering advice in valid JSON format:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "The QA run shows a 54.5% pass rate with critical failures in: (1) Context continuity - assistant loses track of company names mentioned in previous turns (UV020-022), (2) Intent misclassification - analytics/tagging requests trigger supplier-search fallbacks (UV018, UV021), (3) Template generation - placeholders like 'уточняется' instead of extracted values (UV001, UV003, UV016, UV017), (4) No-results handling - generic rubric spam instead of honest fallbacks (UV011, UV012). The root cause is insufficient context preservation across turns and overly aggressive sourcing intent detection that overrides explicit user instructions.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix company name context carryover for website/news lookups",
+      "why": "UV020-022 all fail because assistant cannot find 'Ирис Интер групп' from previous turn context. This is a critical user journey - users expect the assistant to remember what company they mentioned.",
+      "expectedImpact": "Eliminates 3 high-visibility strict failures and improves trust in multi-turn conversations.",
+      "validationScenarios": ["UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P0",
+      "title": "Prevent sourcing fallback on analytics/tagging requests",
+      "why": "UV018 and UV021.T1 fail because '20 тегов для GA/Метрики' triggers supplier search instead of tag generation. The looksLikeAnalyticsTaggingRequest() check is insufficient.",
+      "expectedImpact": "Fixes 2 strict failures and improves usefulness score from 0 to functional.",
+      "validationScenarios": ["UV018", "UV021"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement template placeholder extraction from conversation context",
+      "why": "UV001, UV003, UV016, UV017 all produce templates with 'уточняется' placeholders despite explicit values (500 кг, Минск, 3 дней) being present in conversation history.",
+      "expectedImpact": "Improves usefulness scores across 4 scenarios and makes templates actually usable.",
+      "validationScenarios": ["UV001", "UV003", "UV016", "UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add honest no-results fallback with alternative query generation",
+      "why": "UV011 and UV012 show generic rubric spam instead of admitting no manufacturers found and generating 2-3 alternative search queries as requested.",
+      "expectedImpact": "Improves user experience when catalog has gaps and increases trust through transparency.",
+      "validationScenarios": ["UV011", "UV012"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Inject explicit company name context from history into system prompt",
+      "action": "In buildAssistantPrompt(), add a system message that extracts and repeats any company names mentioned in the last 4 user messages. Format: 'Context: User previously mentioned companies: Ирис Интер групп, ... When asked about 'this company' or 'на карточке компании', refer to these.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:buildAssistantPrompt() - add after line 12302, use extractCompanyNameHintsFromText() on recent history",
+      "expectedImpact": "Fixes UV020-022 context loss issues",
+      "risk": "Low - additive context only",
+      "effort": "S",
+      "validationScenarios": ["UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Add hard block on sourcing fallback for analytics/tagging requests",
+      "action": "In detectAssistantResponseMode() and buildHardFormattedReply(), add an early return that prevents ANY vendor lookup when looksLikeAnalyticsTaggingRequest() returns true. Even if the LLM later generates sourcing content, post-process it out.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:detectAssistantResponseMode() line ~773 - add: if (looksLikeAnalyticsTaggingRequest(message)) return { templateRequested: false, rankingRequested: false, checklistRequested: false };",
+      "expectedImpact": "Prevents UV018/UV021 sourcing spam for tag requests",
+      "risk": "Low - specific intent detection",
+      "effort": "S",
+      "validationScenarios": ["UV018", "UV021"]
+    },
+    {
+      "id": "R3",
+      "area": "template",
+      "title": "Enhance extractTemplateFillHints to scan full conversation history",
+      "action": "Current extractTemplateFillHints only scans last 6 user messages. Expand to scan ALL assistant+user history for values. Add specific extractors for: volume (\\d+\\s*(кг|тонн|шт)), location (city from geo hints), deadline (\\d+\\s*дней|до\\s+\\d+).",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:extractTemplateFillHints() line ~1541 - change slice(-6) to full history scan, add regex extractors for common B2B procurement terms",
+      "expectedImpact": "Fixes placeholder spam in UV001, UV003, UV016, UV017",
+      "risk": "Medium - may over-extract wrong values",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV003", "UV016", "UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Add explicit 'no results found' detection and alternative query generation",
+      "action": "When vendorCandidates.length === 0 after fetchVendorCandidates(), generate 2-3 alternative search queries using buildPortalAlternativeQueries() and return them explicitly instead of generic rubric advice.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts around line 12740 - after fetchVendorCandidates(), if empty, set a flag that triggers alternative query generation in the response builder",
+      "expectedImpact": "Fixes UV011, UV012 honest fallback requirements",
+      "risk": "Low - only activates on empty results",
+      "effort": "S",
+      "validationScenarios": ["UV011", "UV012"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add negative examples to system prompt for anti-sourcing behavior",
+      "action": "Add to buildAssistantSystemPrompt(): 'When user asks for tags, analytics, UTM - NEVER return supplier lists or /company/ links. When user asks for templates - NEVER use placeholder text like уточняется when values exist in conversation.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:buildAssistantSystemPrompt() - add negative instruction section",
+      "expectedImpact": "Reduces LLM hallucination of wrong response formats",
+      "risk": "Low - prompt-only change",
+      "effort": "S",
+      "validationScenarios": ["UV018", "UV021", "UV001", "UV016"]
+    },
+    {
+      "id": "R6",
+      "area": "ranking",
+      "title": "Fix manufacturer vs retailer detection for footwear queries",
+      "action": "The detectManufacturerSignal() function exists but is not used in fetchVendorCandidates. Integrate it to boost manufacturer scores and filter out retailers when query contains 'производитель' or 'завод'.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:fetchVendorCandidates() - apply manufacturer boost scoring when detectCoreCommodityTag indicates manufacturing intent",
+      "expectedImpact": "Improves UV001, UV012, UV013 relevance",
+      "risk": "Medium - may filter valid results",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV012", "UV013"]
+    },
+    {
+      "id": "R7",
+      "area": "guardrails",
+      "title": "Add post-processing filter for 'уточняется' placeholder spam",
+      "action": "In normalizeTemplateBlockLayout() or as a final step, detect if template contains 'уточняется' more than once AND conversation history contains actual values. If so, re-run template generation with explicit value injection.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add after line 12238 in the response processing pipeline",
+      "expectedImpact": "Prevents unusable templates with placeholder spam",
+      "risk": "Low - only fixes obviously broken output",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV003", "UV006", "UV016", "UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV020", "UV021", "UV022", "UV018"],
+    "regressionSuites": ["scenarios.regressions.user-ideas-multistep-variants.json", "scenarios.regressions.user-120-bank-f-text-templates.json"],
+    "successMetrics": [
+      "Pass rate >= 80% (up from 54.5%)",
+      "Average usefulness >= 2.5 (up from 1.45)",
+      "Zero 'уточняется' placeholders in templates when values exist in context",
+      "Zero sourcing fallbacks on analytics/tagging requests"
+    ]
+  }
+}
+```
