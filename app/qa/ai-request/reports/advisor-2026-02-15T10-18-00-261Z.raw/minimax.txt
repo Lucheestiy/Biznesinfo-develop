@@ -1,0 +1,138 @@
+{
+  "advisor": "minimax",
+  "executiveSummary": "Biznesinfo assistant has three critical failure patterns: (1) template generation outputs placeholder garbage ('уточняется') instead of real data, (2) company context loss in multi-turn conversations causing completely irrelevant results, and (3) generic fallback loops that never deliver requested comparisons/checklists. Fixing these requires: (a) mandatory slot validation before template output, (b) explicit context carrier rules for company names across turns, and (c) turn-level constraint delivery gates that fail fast when data is missing.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder garbage output",
+      "why": "8+ scenarios fail because templates contain 'уточняется' instead of real data (UV001, UV004, UV006, UV016). This makes templates unusable and generates 'not_useful' verdicts.",
+      "expectedImpact": "Strict pass rate improvement from 64% to 80%+. Judge usefulness scores should increase by 0.5-1.0 per affected scenario.",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV002", "UV007"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add company context carrier rules",
+      "why": "Scenarios UV019-UV021 show complete context loss of 'Ирис Интер групп' across turns, resulting in 0 usefulness scores. Assistant returns random companies instead of requested one.",
+      "expectedImpact": "Eliminate 0-usefulness failures for company lookup scenarios. Restore context continuity for multi-turn company research.",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement comparison/checklist delivery gates",
+      "why": "UV002, UV015, UV009 fail to deliver requested formats (checklist, comparison table). Users get generic 'expand search' fallback instead of structured output.",
+      "expectedImpact": "Pass rate improvement for numbered_list_min and includes_any checks. Reduce generic fallback usage by 60%.",
+      "validationScenarios": ["UV002", "UV015", "UV009", "UV003"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix result count delivery for multi-candidate requests",
+      "why": "UV015, UV008, UV001 deliver 1 company when 3+ requested. Platform limitations exposed - no graceful degradation or honest fallback.",
+      "expectedImpact": "Honest handling of platform data gaps. Clearer communication when insufficient candidates exist.",
+      "validationScenarios": ["UV015", "UV008", "UV001", "UV011"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Add template slot validation pre-output gate",
+      "action": "Before outputting any template (Subject/Body/WhatsApp), validate that all placeholders are replaced with actual values. If any slot is empty, fail with explicit 'cannot generate template' message instead of outputting garbage.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - Add template_slot_validator() function called before response generation. Check for patterns like 'уточняется', 'к с', 'к меньше', 'к основному' in output strings.",
+      "expectedImpact": "Eliminates placeholder garbage in UV001, UV004, UV006, UV007, UV016, UV017. Expected strict pass rate +15%.",
+      "risk": "Low - defensive validation, never reduces quality",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add explicit company context carrier rules to system prompt",
+      "action": "Add rule: 'When a company name is mentioned in ANY previous turn, it MUST appear in ALL subsequent responses unless user explicitly changes topic. If you cannot find data for that company, explicitly state: \"I could not find data for [COMPANY] in the catalog\" instead of returning unrelated companies.'",
+      "implementationHint": "System prompt file - add CONTEXT_CARRIER_RULES section with company name carryover enforcement. Test by requiring [COMPANY] token in responses.",
+      "expectedImpact": "Fixes context loss in UV019-UV022 (0-usefulness scenarios). Expected improvement from 0 to 2+ usefulness.",
+      "risk": "Medium - changes response behavior, requires monitoring",
+      "effort": "S",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Implement 'irrelevant result detector' for category mismatches",
+      "action": "Add post-search validation: if search results contain companies from fundamentally wrong categories (e.g., dental search returns chemical company, shoe search returns polyclinic), trigger NO_RESULTS_FALLBACK instead of returning irrelevant results. Categories to check: footwear↔medical, dentistry↔chemicals, tractors↔spare_parts, food_packaging↔forklifts.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - Add irrelevant_result_guard() function called after search. Check category names in results against user intent keywords.",
+      "expectedImpact": "Prevents embarrassing mismatches in UV009 (dental→chemicals), UV017 (beet→parts), UV007 (packaging→forklifts).",
+      "risk": "Medium - may reject valid results, requires tuning",
+      "effort": "M",
+      "validationScenarios": ["UV009", "UV017", "UV007", "UV008"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Add checklist/document delivery turn gates",
+      "action": "Add rule: 'When user requests a checklist or numbered items (e.g., \"чек из 6 пунктов\", \"сравни по 4 критериям\"), you MUST deliver the format in the SAME turn. Generic fallback \"expand search\" or repeating shortlist violates this rule.'",
+      "implementationHint": "system prompt - add FORMAT_DELIVERY_RULES section with specific attention to numbered_list_min checks. Map user intent patterns to required output format.",
+      "expectedImpact": "Fixes UV002.T4, UV009.T3, UV015.T2 checklist/comparison failures. Expected +20% pass rate for numbered checks.",
+      "risk": "Low - clarifies existing expectations",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV009", "UV015", "UV003"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Add candidate count delivery validation",
+      "action": "After search, validate: if user requests N candidates and you found < N/2, trigger explicit 'insufficient candidates' message instead of presenting inadequate list. Message should: (1) state found count vs requested, (2) explain why (catalog gaps, narrow criteria), (3) offer specific expansion paths.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - Add candidate_count_validator() function after search. Use UV015, UV008, UV001 as test cases.",
+      "expectedImpact": "Honest handling of data gaps. Prevents presentation of 1 company as 'shortlist of 3'.",
+      "risk": "Low - improves transparency",
+      "effort": "S",
+      "validationScenarios": ["UV015", "UV008", "UV001", "UV011"]
+    },
+    {
+      "id": "R6",
+      "area": "prompt",
+      "title": "Add OEM/ODM relevance checking",
+      "action": "When user asks about OEM/ODM capabilities for specific factories, system prompt should enforce: 'Only suggest companies that could plausibly offer OEM/ODM. Major consumer brands (Horizont, Atlant, Brestgazoapparat) are unlikely OEM suppliers - do not include them unless you have specific evidence.'",
+      "implementationHint": "system prompt - Add OEM_ODM_GUIDANCE section. Cross-reference with UV004 judge feedback about irrelevant company suggestions.",
+      "expectedImpact": "Improves UV004 relevance and reduces generic fallback in OEM discussions.",
+      "risk": "Low - guidance clarification",
+      "effort": "S",
+      "validationScenarios": ["UV004"]
+    },
+    {
+      "id": "R7",
+      "area": "template",
+      "title": "Add document checklist template with fixed structure",
+      "action": "Create document_checklist_template() function that outputs numbered list in format: '1. [Document Name] - [Purpose] - [What to verify]'. Pre-populate with actual export documents (certificate of origin, phytosanitary, quality certificate, contract, invoice, packing list). Do not output if no companies selected.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - Add document_checklist_template() with hardcoded BY export document list. Call when user requests 'документы' or 'чеклист' after company selection.",
+      "expectedImpact": "Fixes UV002.T4, UV012.T2 document checklist failures. Delivers 6+ items as requested.",
+      "risk": "Low - template improvement",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV012"]
+    },
+    {
+      "id": "R8",
+      "area": "retrieval",
+      "title": "Add quality criteria extraction for commodity searches",
+      "action": "When user asks about commodity quality (flour whiteness, grain gluten, timber FSC), system should extract and acknowledge these criteria explicitly before search. If criteria cannot be matched to catalog fields, state: 'Catalog does not contain quality specifications for [COMMODITY]. Results are based on company profiles only.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - Add quality_criteria_extractor() function. Use UV002 (flour quality) and UV006 (timber FSC) as test patterns.",
+      "expectedImpact": "Honest handling of missing quality data. Reduces judge criticism for not addressing criteria.",
+      "risk": "Low - improves transparency",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV006"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV001", "UV002", "UV004", "UV006", "UV009", "UV015", "UV016", "UV019"
+    ],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": [
+      "Strict pass rate: >80% (current 64%)",
+      "Average usefulness: >2.0 (current 1.5-1.7)",
+      "Template placeholder rate: <5% (current ~40% in failing scenarios)",
+      "Company context continuity: 100% for scenarios with explicit company name"
+    ]
+  }
+}

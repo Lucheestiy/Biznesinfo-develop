@@ -3965,8 +3965,10 @@ function postProcessAssistantReply(params: {
     out = repairTemplatePlaceholderSpam(out, { message: params.message, history: params.history || [] }).trim();
     out = normalizeTemplateBlockLayout(out);
     const requestedDocCount = detectRequestedDocumentCount(params.message || "");
+    const isExplicitChecklistRequest = /(чеклист|checklist|проверочный\s+лист|list\s*(?:of|из)\s*(?:documents?|items?|пунктов))/iu.test(params.message || "");
     const docsRequestedByIntent =
       requestedDocCount !== null ||
+      isExplicitChecklistRequest ||
       /(документ|первичн\p{L}*\s+провер|сертифик|вэд|incoterms)/iu.test(normalizeComparableText(params.message || ""));
     if (docsRequestedByIntent) {
       out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(params.message || "", requestedDocCount || 6)}`.trim();
@@ -3974,22 +3976,22 @@ function postProcessAssistantReply(params: {
     return out;
   }
 
-  // Add document checklist even when not in template mode, if documents are explicitly requested
+  // Add document checklist when documents are explicitly requested
+  // This runs in ALL cases (not just template mode) to ensure document checklists are always added
   const docCountForNonTemplate = detectRequestedDocumentCount(params.message || "");
-  // Also check for explicit checklist requests - these should ALWAYS get a checklist
-  const isExplicitChecklistRequest = /(чеклист|checklist|проверочный\s+лист|list\s*(?:of|из)\s*(?:documents?|items?|пунктов))/iu.test(params.message || "");
-  const docsRequestedByIntentNonTemplate =
-    docCountForNonTemplate !== null ||
-    isExplicitChecklistRequest ||
-    /(документ|первичн\p{L}*\s+провер|сертифик|вэд|incoterms)/iu.test(normalizeComparableText(params.message || ""));
-  if (docsRequestedByIntentNonTemplate) {
-    const existingListItems = countNumberedListItems(out);
+  const messageText = params.message || "";
+  // Check for explicit checklist requests
+  const isExplicitChecklistRequest = /(чеклист|checklist|проверочный\s+лист|list\s*(?:of|из)\s*(?:documents?|items?|пунктов))/iu.test(messageText);
+  // Check if user is asking about documents
+  const asksAboutDocuments = /(документ|сертифик|вэд|incoterms|первичн\p{L}*\s+провер)/iu.test(normalizeComparableText(messageText));
+  
+  // If explicitly asking for checklist OR asking about documents in a question format, add checklist
+  const shouldAddChecklist = isExplicitChecklistRequest || (asksAboutDocuments && (docCountForNonTemplate !== null || /\?$/.test(messageText.trim())));
+  
+  if (shouldAddChecklist) {
     const targetCount = docCountForNonTemplate || 6;
-    // For explicit checklist requests, ALWAYS add the checklist regardless of existing items
-    // For other document requests, only add if we don't have enough items
-    if (isExplicitChecklistRequest || existingListItems < targetCount) {
-      out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(params.message || "", targetCount)}`.trim();
-    }
+    // Always add the checklist for explicit requests - don't check existing items
+    out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(messageText, targetCount)}`.trim();
   }
 
   const hasTemplate = Boolean(extractTemplateMeta(out)?.isCompliant);

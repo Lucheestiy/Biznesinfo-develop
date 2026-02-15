@@ -1,0 +1,170 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Система Biznesinfo демонстрирует критическую неспособность сохранять контекст между ходами диалога (особенно UV019-UV022), шаблонный fallback вместо конкретных ответов (UV001, UV004, UV006, UV016), и галлюцинацию поисковых результатов (UV012, UV003). Основные проблемы: 1) Потеря контекста компании при переходе к веб-сканированию; 2) Заполнение шаблонов placeholder'ами вместо реальных данных из диалога; 3) Невозможность найти конкретную компанию по точному названию. Pass rate 63.6% ниже целевого 80%.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Исправить context carryover для company lookups (UV019-UV022)",
+      "why": "Полная потеря контекста 'Ирис Интер групп' — 4 сценария с usefulness=0. Система не может сохранить название компании между ходами.",
+      "expectedImpact": "Поднимет usefulness с 0 до 3+ для 4 сценариев, устранит критические галлюцинации",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P0",
+      "title": "Запретить placeholder fallback в шаблонах (UV001, UV004, UV006, UV016)",
+      "why": "Шаблоны заполняются 'уточняется' вместо реальных параметров из диалога — делает вывод непригодным для использования",
+      "expectedImpact": "Устранит broken RFQ/outreach шаблоны, повысит usefulness на 1-2 пункта",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016"]
+    },
+    {
+      "priority": "P1",
+      "title": "Улучшить strict company name search (UV012, UV022)",
+      "why": "Точное название 'Ирис Интер групп' не находится — система возвращает случайные компании вместо честного 'не найдено'",
+      "expectedImpact": "Устранит галлюцинации поиска, даст пользователю честный ответ",
+      "validationScenarios": ["UV012", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Добавить guardrail против irrelevant category results (UV003, UV012, UV017)",
+      "why": "Детская поликлиника в выдаче обувных производителей, сантехника вместо ресторанов — критические ошибки релевантности",
+      "expectedImpact": "Снизит rate нерелевантных результатов, повысит доверие",
+      "validationScenarios": ["UV003", "UV012", "UV017"]
+    },
+    {
+      "priority": "P2",
+      "title": "Улучшить multi-candidate retrieval (UV001, UV008, UV015)",
+      "why": "Повтор одной компании 3+ раза вместо поиска альтернатив — система не умеет добирать кандидатов",
+      "expectedImpact": "Увеличит diversity выдачи, позволит сравнения",
+      "validationScenarios": ["UV001", "UV008", "UV015"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Добавить explicit company name memory в system prompt",
+      "action": "В system prompt добавить инструкцию: 'Если пользователь упоминает конкретное название компании — сохрани его в <current_company> и используй во всех последующих ходах. При запросе \"новости на сайте\" или \"найди на карточке\" — работай ТОЛЬКО с этой компанией.'",
+      "implementationHint": "src/lib/ai/prompts/system-prompt.ts — добавить в baseSystemPrompt секцию CONTEXT_MEMORY",
+      "expectedImpact": "Устранит потерю контекста UV019-UV022, повысит usefulness с 0 до 3",
+      "risk": "Низкий — только добавление инструкции",
+      "effort": "S",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Запретить output с placeholder 'уточняется'",
+      "action": "Добавить post-processing guardrail: если ответ содержит 'уточняется' более 2 раз — reject и запросить re-generation с требованием использовать реальные данные из контекста или честно признать отсутствие данных",
+      "implementationHint": "src/lib/ai/guardrails/template-validator.ts — новый guardrail на placeholder detection",
+      "expectedImpact": "Устранит broken шаблоны UV001/UV004/UV006/UV016",
+      "risk": "Может увеличить latency на re-generation",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Улучшить exact name matching в company search",
+      "action": "Добавить приоритет exact match по полю name в Meilisearch перед fuzzy search. Если exact match не дает результатов — явно сообщать 'Компания \"X\" не найдена в каталоге' вместо возврата случайных результатов",
+      "implementationHint": "src/lib/search/company-search.ts — модифицировать buildSearchQuery для exact match boost",
+      "expectedImpact": "Устранит галлюцинации UV012/UV022, даст честный no-results",
+      "risk": "Может снизить recall для опечаток",
+      "effort": "M",
+      "validationScenarios": ["UV012", "UV022"]
+    },
+    {
+      "id": "R4",
+      "area": "ranking",
+      "title": "Добавить category relevance filter",
+      "action": "При поиске по рубрике проверять соответствие найденных компаний запрошенной категории. Если рубрика компании не совпадает — отфильтровывать или помечать как 'возможно нерелевантно'",
+      "implementationHint": "src/lib/search/ranking.ts — добавить category-mismatch penalty в scoring function",
+      "expectedImpact": "Устранит поликлиники в обуви (UV012), сантехнику в ресторанах (UV003)",
+      "risk": "Может отфильтровать legit multi-category компании",
+      "effort": "M",
+      "validationScenarios": ["UV003", "UV012", "UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Улучшить template generation prompt с explicit parameter extraction",
+      "action": "В prompt для генерации шаблонов добавить: 'Извлеки из истории диалога: продукт, объем, локацию, срок. Если параметр не указан — используй [укажите X] вместо [уточняется]. НЕ используй placeholder если данные есть в контексте.'",
+      "implementationHint": "src/lib/ai/prompts/template-prompt.ts — модифицировать TEMPLATE_GENERATION_PROMPT",
+      "expectedImpact": "Шаблоны будут содержать реальные данные из диалога",
+      "risk": "Низкий — улучшение существующего prompt",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV017"]
+    },
+    {
+      "id": "R6",
+      "area": "retrieval",
+      "title": "Добавить diversification для multi-candidate requests",
+      "action": "При запросе 'дай 3-5 вариантов' — использовать diverse retrieval: после нахождения первого кандидата, искать следующего с исключением уже найденных (negative filtering по ID)",
+      "implementationHint": "src/lib/search/company-search.ts — добавить excludeIds parameter и loop для N candidates",
+      "expectedImpact": "Устранит повтор одной компании UV001, даст реальные альтернативы",
+      "risk": "Может вернуть менее релевантных кандидатов ради diversity",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV008", "UV015"]
+    },
+    {
+      "id": "R7",
+      "area": "prompt",
+      "title": "Добавить explicit format adherence instruction",
+      "action": "В prompt добавить: 'Если пользователь просит чеклист — верни нумерованный список. Если shortlist — верни список компаний с /company ссылками. НЕ заменяй запрошенный формат на ranking компаний.'",
+      "implementationHint": "src/lib/ai/prompts/system-prompt.ts — добавить FORMAT_ADHERENCE section",
+      "expectedImpact": "Устранит несоответствие формату UV002.T4 (чеклист вместо ranking)",
+      "risk": "Низкий — clarifying instruction",
+      "effort": "S",
+      "validationScenarios": ["UV002", "UV009"]
+    },
+    {
+      "id": "R8",
+      "area": "guardrails",
+      "title": "Добавить self-correction loop для website lookups",
+      "action": "Если website lookup возвращает данные о другой компании (не той, что в контексте) — detect mismatch по названию и retry с explicit company name в query",
+      "implementationHint": "src/lib/ai/tools/website-scanner.ts — добавить company name verification в результате",
+      "expectedImpact": "Устранит случайные компании в UV019-UV022 при website scan",
+      "risk": "Может увеличить latency",
+      "effort": "M",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R9",
+      "area": "ui",
+      "title": "Добавить explicit 'context lost' signal в UI",
+      "action": "Если система обнаруживает potential context loss (запрос про X, но в истории обсуждали Y) — показывать warning: 'Вы сейчас спрашиваете про [X], ранее обсуждали [Y]. Уточните, пожалуйста, о какой компании идет речь?'",
+      "implementationHint": "src/components/chat/ContextWarning.tsx — новый компонент, интеграция в MessageList",
+      "expectedImpact": "Позволит пользователю корректировать до полной галлюцинации",
+      "risk": "Может раздражать при legit topic switch",
+      "effort": "M",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R10",
+      "area": "retrieval",
+      "title": "Добавить quality criteria extraction для специфических запросов",
+      "action": "Для запросов с критериями качества (белизна, клейковина, FSC, MOQ) — добавить explicit extraction в prompt и требовать ответа по каждому критерию или честного 'данные не найдены'",
+      "implementationHint": "src/lib/ai/prompts/quality-analysis-prompt.ts — новый prompt для quality criteria",
+      "expectedImpact": "Устранит generic fallback UV002.T2 (качество муки), улучшит полезность",
+      "risk": "Требует поддержки новых критериев для каждой индустрии",
+      "effort": "L",
+      "validationScenarios": ["UV002", "UV006"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV019", "UV020", "UV021", "UV022", "UV001", "UV004", "UV012"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "company-search-strict.json",
+      "template-generation.json",
+      "context-carryover.json"
+    ],
+    "successMetrics": [
+      "overall pass rate >= 0.80 (was 0.6364)",
+      "useful rate >= 0.60 (was 0.2273 kimi, 0.1364 minimax)",
+      "zero scenarios with usefulness=0",
+      "template placeholder rate < 0.05 (was ~0.30)"
+    ]
+  }
+}
+```

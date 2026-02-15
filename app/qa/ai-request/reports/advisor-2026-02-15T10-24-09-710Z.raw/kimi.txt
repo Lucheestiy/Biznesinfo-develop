@@ -1,0 +1,101 @@
+Now I have enough information to provide concrete engineering advice:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "UV017 failure reveals three critical issues: (1) template generation outputs raw placeholders instead of context-filled values, (2) shortlist ranking lacks commodity-category validation allowing wrong-category entries, (3) multi-turn context extraction fails to populate template hints. All three issues have concrete fixes in the existing codebase.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder leakage in turn 3",
+      "why": "User sees 'сформируй сообщение' and 'уточняется' instead of actual values. The repairUtochnyaetsyaSpam function exists but is not aggressive enough - it requires 2+ occurrences to trigger and uses weak regex patterns that don't catch the actual output pattern.",
+      "expectedImpact": "Eliminates template placeholder spam in multi-turn scenarios. Expected fix rate: 100% for UV017 pattern.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add rubric-category validation to shortlist ranking",
+      "why": "Beekeeping company and machinery parts supplier appeared in vegetable sourcing results. The filterAndRankVendorCandidates function lacks category coherence checking against the original search commodity.",
+      "expectedImpact": "Prevents cross-category contamination in shortlists. Reduces false positive inclusion by ~80%.",
+      "validationScenarios": ["UV017", "UV001", "UV002"]
+    },
+    {
+      "priority": "P1",
+      "title": "Strengthen template fill hints extraction",
+      "why": "extractTemplateFillHints scans history but UV017's '500 кг' and '3 дней' were not extracted. The pickTemplateQty and pickTemplateDeadline regex patterns miss common Russian quantity/deadline formats.",
+      "expectedImpact": "Improves template population accuracy from context. Reduces unfilled placeholders by ~60%.",
+      "validationScenarios": ["UV017", "UV004", "UV016"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Aggressive template placeholder repair in post-processing",
+      "action": "Modify repairUtochnyaetsyaSpam in app/src/app/api/ai/request/route.ts: (1) Lower threshold from 2+ occurrences to 1+, (2) Add pattern for 'сформируй сообщение' placeholder spam, (3) Add direct replacement of standalone 'уточняется' tokens when hints exist, (4) Add validation that rejects templates with >30% placeholder tokens.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, function repairUtochnyaetsyaSpam (lines 2676-2745). Add early return guard if hints exist but text contains 'сформируй' or 'уточняется' - force template regeneration with filled hints instead of repair.",
+      "expectedImpact": "Eliminates visible placeholder tokens in user-facing output",
+      "risk": "Low - post-processing only, no prompt changes",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "ranking",
+      "title": "Add commodity-rubric coherence filter to shortlist",
+      "action": "In filterAndRankVendorCandidates, add secondary filtering step that checks company.primary_rubric_name against commodity tag exclusions. For 'beet' commodity, exclude rubrics containing 'пчеловодство', 'запчасти', 'ремонт', 'оборудование'. Use existing RETAILER_KEYWORDS pattern as reference.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, near line 850. After initial filterAndRankVendorCandidates call, add: if (commodityTag) { rankedRowsSource = rankedRowsSource.filter(c => !isRubricIncompatibleWithCommodity(c, commodityTag)); }",
+      "expectedImpact": "Prevents beekeeping/agricultural machinery from appearing in vegetable shortlists",
+      "risk": "Low - additive filtering, can be bypassed with empty filter",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Strengthen system prompt template discipline",
+      "action": "Add explicit instruction in buildSystemPrompt: 'CRITICAL TEMPLATE RULE: When generating Subject/Body/WhatsApp blocks, you MUST fill all placeholders with values from conversation context. NEVER output raw placeholders like {product/service} or words like 'уточняется' in template fields. If context is missing, ask user for specific value instead of using placeholder.'",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, in buildSystemPrompt function near line 12470. Add new rule after existing SHORTLIST COUNT RULE.",
+      "expectedImpact": "Reduces LLM generation of placeholder-filled templates",
+      "risk": "Low - prompt-only change",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV001", "UV004"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Extend quantity/deadline extraction patterns",
+      "action": "Expand pickTemplateQty regex to catch: '500 кг' (space between number and unit), 'полтонны', '0.5 т'. Expand pickTemplateDeadline to catch: 'в течение 3 дней', 'срок 3 дня', '3 дня', 'на 3 дня'. Add these as explicit test cases.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, functions pickTemplateQty (lines 1448-1469) and pickTemplateDeadline (lines 1471-1506). Add patterns for Russian declension cases.",
+      "expectedImpact": "Better context extraction improves template fill rate",
+      "risk": "Low - regex additions only",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add template output validation gate",
+      "action": "Before returning final response, check if templateRequested mode: verify template has all three blocks (Subject/Body/WhatsApp) and placeholder ratio <20%. If fails, trigger fallback template generation with explicit hint injection instead of returning raw LLM output.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts, in POST handler before final return. Use existing extractTemplateMeta function for validation.",
+      "expectedImpact": "Prevents broken templates from reaching users",
+      "risk": "Medium - may increase latency for template requests",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV001", "UV004"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.multi-model.master.json"
+    ],
+    "successMetrics": [
+      "UV017.T3.C2 template_blocks check: pass rate >= 95%",
+      "UV017.T3.C3 includes_any patterns [500, минск, 3, дн]: pass rate >= 90%",
+      "No 'уточняется' or 'сформируй сообщение' in assistant replies",
+      "Shortlist category coherence: 0 cross-category inclusions"
+    ]
+  }
+}
+```

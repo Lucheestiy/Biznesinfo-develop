@@ -1,0 +1,174 @@
+{
+  "advisor": "minimax",
+  "executiveSummary": "The assistant fails on UV017 with two critical bugs: (1) Turn 3 generates template with 'уточняется' placeholders instead of extracting actual parameters (500kg beets, Minsk, 3 days) from conversation context, and (2) Turn 1-2 shortlist includes irrelevant companies (beekeeping farm, machinery parts dealer) without verifying category relevance. Both judges marked this as not_useful. These are architectural issues in template slot extraction and search result filtering, not prompt tweaks.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template slot extraction from conversation context",
+      "why": "Turn 3 outputs 'уточняется' placeholders instead of the actual parameters (500kg, Minsk, 3 days) that were explicitly stated in Turn 2. The assistant has all the data but fails to extract and fill slots.",
+      "expectedImpact": "Templates will contain actual values from conversation, eliminating broken output. Expected improvement: usefulness 1→3 for UV017.",
+      "validationScenarios": [
+        "UV017"
+      ]
+    },
+    {
+      "priority": "P0",
+      "title": "Add category relevance filter to shortlist generation",
+      "why": "Shortlist includes 'Минская овощная фабрика' under beekeeping category and 'Агромашмаркет' selling machinery parts - completely irrelevant to vegetable sourcing. No verification of profile-category match before inclusion.",
+      "expectedImpact": "Only companies with matching primary_rubric_name or core commodity tags will appear in shortlist. Eliminates noise from unrelated categories.",
+      "validationScenarios": [
+        "UV017",
+        "UV012",
+        "UV003"
+      ]
+    },
+    {
+      "priority": "P1",
+      "title": "Add company context carrier across conversation turns",
+      "why": "Multi-turn scenarios lose track of company name from earlier turns, causing random results in later turns. UV017 shows this is systemic.",
+      "expectedImpact": "Maintains <current_company> context across turns, enabling consistent company-specific lookups.",
+      "validationScenarios": [
+        "UV019",
+        "UV020",
+        "UV021",
+        "UV022"
+      ]
+    },
+    {
+      "priority": "P2",
+      "title": "Implement diversification for multi-candidate retrieval",
+      "why": "UV001 repeats single company 'Глобал Шуз' across 3 turns instead of finding additional candidates. System lacks negative filtering to exclude already-returned company IDs.",
+      "expectedImpact": "Shortlists will include diverse candidates, enabling actual comparison as user requested.",
+      "validationScenarios": [
+        "UV001",
+        "UV008",
+        "UV015"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Add explicit slot extraction instruction to template generation prompt",
+      "action": "Before generating any template (Subject/Body/WhatsApp), the assistant MUST extract from conversation history: (1) product/service name, (2) quantity, (3) city/location, (4) deadline/delivery timeframe. If any parameter was mentioned in previous turns, use it. NEVER output 'уточняется' when the value exists in context.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - modify ensureTemplateBlocks() or add pre-processing in template generation path to extract and validate slots before LLM call",
+      "expectedImpact": "Eliminates placeholder garbage in templates, makes outputs actually usable",
+      "risk": "Low - adds extraction logic, does not change model behavior",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017",
+        "UV001",
+        "UV004",
+        "UV006"
+      ]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Add primary_rubric_name filter to vendor candidate filtering",
+      "action": "In filterAndRankVendorCandidates(), add mandatory filter: company.primary_rubric_name must contain or be semantically close to the core commodity tag (e.g., 'овощ' for beets, 'обув' for footwear). If no match, exclude from results or mark as [проверьте релевантность].",
+      "implementationHint": "app/src/lib/biznesinfo/store.ts - add categoryRelevanceFilter() function called in biznesinfoSearch() before returning results",
+      "expectedImpact": "Eliminates beekeeping companies from vegetable searches, machinery dealers from produce searches",
+      "risk": "May filter legitimate multi-category companies - add fallback flag",
+      "effort": "M",
+      "validationScenarios": [
+        "UV017",
+        "UV012",
+        "UV003"
+      ]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Add <current_company> memory variable to system prompt",
+      "action": "In system prompt, add: 'CONTEXT_MEMORY: If user mentions a specific company name (e.g., 'Ирис Интер групп', 'Минская овощная фабрика'), store it in <current_company>. All subsequent turns must work with this company. When user asks for 'news on website' or 'find on company card', use <current_company> explicitly in the query.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add currentCompany extraction in detectIntent() and pass as context variable to LLM",
+      "expectedImpact": "Fixes context loss in UV019-UV022 where company name vanishes between turns",
+      "risk": "Low - adds memory tracking, does not change core behavior",
+      "effort": "S",
+      "validationScenarios": [
+        "UV019",
+        "UV020",
+        "UV021",
+        "UV022"
+      ]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Add excludeIds parameter to company search for diversification",
+      "action": "When user requests '3-5 companies', track already-returned company IDs in conversation state. In subsequent search calls, pass excludeIds=[id1, id2] to Meilisearch filter to prevent repetition. Fall back to adjacent rubrics if no new candidates found.",
+      "implementationHint": "app/src/lib/meilisearch/search.ts - add excludeIds filter to buildSearchQuery() and update callers in app/src/lib/biznesinfo/store.ts",
+      "expectedImpact": "Eliminates single-company repetition in UV001, UV008, UV015",
+      "risk": "May reduce total results if very narrow niche - acceptable tradeoff",
+      "effort": "M",
+      "validationScenarios": [
+        "UV001",
+        "UV008",
+        "UV015"
+      ]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add placeholder detection guardrail for template output",
+      "action": "Post-process template output: if response contains 'уточняется' more than 1 time, OR contains '{placeholder}' patterns more than 2 times, trigger re-generation with explicit instruction: 'Use actual values from conversation context. If value not in context, use bracketed hint like [укажите объем] instead of уточняется.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - add validateTemplateOutput() function called after extractTemplateMeta() check",
+      "expectedImpact": "Catches broken templates before returning to user, forces re-generation with valid slots",
+      "risk": "May increase latency with re-generation calls",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017",
+        "UV001",
+        "UV004"
+      ]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Hardcode fallback values for missing template slots",
+      "action": "In ensureTemplateBlocks(), if slot extraction returns null, do NOT leave 'уточняется' - instead use bracketed hints: '{product/service}' → '[укажите товар]', '{qty}' → '[укажите объем]', '{city}' → '[укажите город]', '{deadline}' → '[укажите срок]'. This makes template structure valid even without full context.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - modify ensureTemplateBlocks() to accept hints parameter with fallback values",
+      "expectedImpact": "Templates always have valid structure, user sees exactly what info is missing",
+      "risk": "Low - improves output quality",
+      "effort": "S",
+      "validationScenarios": [
+        "UV017",
+        "UV004",
+        "UV006"
+      ]
+    },
+    {
+      "id": "R7",
+      "area": "retrieval",
+      "title": "Add commodity-tag-based scoring boost in ranking",
+      "why": "When searching for 'свекла' (beets), companies with 'овощ' or 'корнеплод' in rubric should score higher than companies with 'пчеловодство'. Current ranking does not penalize category mismatch.",
+      "expectedImpact": "Relevant suppliers rank higher, irrelevant categories naturally fall below threshold",
+      "risk": "May require tuning of tag weights",
+      "effort": "M",
+      "validationScenarios": [
+        "UV017",
+        "UV012",
+        "UV003"
+      ]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV017",
+      "UV001",
+      "UV012"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "template-generation.json",
+      "context-carryover.json"
+    ],
+    "successMetrics": [
+      "template placeholder rate < 0.05 (was ~0.30)",
+      "category mismatch rate in shortlists < 0.10",
+      "usefulness score for UV017 ≥ 3 (was 1)"
+    ]
+  }
+}
