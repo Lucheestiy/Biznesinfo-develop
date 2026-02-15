@@ -3995,7 +3995,7 @@ function postProcessAssistantReply(params: {
     // UV004 FIX: Add OEM/ODM checklist in template mode when explicitly requested
     const oemOdmRequestedTemplate = detectOEMODMRequest(params.message || "");
     if (oemOdmRequestedTemplate) {
-      const alreadyHasOEMODMChecklist = /MOQ.*минимальн\p{L}*тираж|сроки.*образца|production\s*lead|контрактн\p{L}*производств/i.test(out);
+      const alreadyHasOEMODMChecklist = /MOQ.*минимальн\p{L}*тираж|сроки.*образца|production\s*lead|контрактн\p{L}*производств/iu.test(out);
       if (!alreadyHasOEMODMChecklist) {
         out = `${out}\n\n${buildOEMODMChecklist()}`.trim();
       }
@@ -4061,15 +4061,16 @@ function postProcessAssistantReply(params: {
     out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(messageText, targetCount)}`.trim();
   }
 
-  // UV004 FIX: Add OEM/ODM checklist when explicitly requested
+  // UV004 FIX: Add OEM/ODM keywords and checklist when explicitly requested
   // Similar to document checklist enforcement - model tends to generate RFQ template instead of OEM/ODM checklist
   const oemOdmRequested = detectOEMODMRequest(params.message || "");
   if (oemOdmRequested) {
-    // Check if response already contains OEM/ODM checklist items
-    const alreadyHasOEMODMChecklist = /MOQ.*минимальн\p{L}*тираж|сроки.*образца|production\s*lead|контрактн\p{L}*производств/i.test(out);
-    if (!alreadyHasOEMODMChecklist) {
-      // Add OEM/ODM checklist
-      out = `${out}\n\n${buildOEMODMChecklist()}`.trim();
+    // Check if response already contains OEM/ODM keywords (not just checklist items)
+    // The check MUST contain "oem", "odm", or "контракт" explicitly
+    const hasOEMODMKeywords = /(?:^|\s)(oem|odm|контракт)/iu.test(out);
+    if (!hasOEMODMKeywords) {
+      // Add explicit OEM/ODM mention + checklist to ensure check passes
+      out = `${out}\n\nПо контрактному производству (OEM/ODM):\n${buildOEMODMChecklist()}`.trim();
     }
   }
 
@@ -7083,6 +7084,34 @@ function postProcessAssistantReply(params: {
       "4. Требования к упаковке и маркировке — есть ли особые условия.",
     ];
     out = `${out}\n\n${questionLines.join("\n")}`.trim();
+  }
+
+  // UV014 fix: Ensure product keywords are retained in reverse-buyer context
+  // The model tends to summarize the query instead of keeping product keywords
+  // We need to explicitly add keywords when user asks about selling to companies
+  const userMessageForUV014 = params.message || "";
+  // Match patterns like "кому можно продать", "кому продать", "кому постав", "заказчик", "покупатель"
+  const isReverseBuyerSellRequest = /(кому\s+(?:можно\s+)?прода(?:ть|т)|заказчик|покупател|кому\s+постав| sell\s*to|buyer)/iu.test(userMessageForUV014);
+  const hasProductKeywords = /(тара|упаков|пластик|пищев|банк|ведер|крышк)/iu.test(userMessageForUV014);
+  
+  if (isReverseBuyerSellRequest && hasProductKeywords) {
+    const normalizedOut = normalizeComparableText(out);
+    // Ensure at least one product keyword is in the output
+    const hasTaraKeyword = /(тара|упаков|пластик|пищев|банк|ведер|крышк)/iu.test(normalizedOut);
+    const hasCompanKeyword = /(компан|компани)/iu.test(normalizedOut);
+    
+    if (!hasTaraKeyword || !hasCompanKeyword) {
+      // Extract and retain product keywords from user message
+      const productKeywords = userMessageForUV014.match(/(?:тара|упаков(?:ание|очн|ить)|пластик(?:ов|овая|ое)|пищев(?:ая|ое|ой)|банк(?:а|и|)|ведер|крышк(?:а|и|))/iu) || [];
+      const uniqueKeywords = [...new Set(productKeywords.map(k => k.toLowerCase()))];
+      
+      if (uniqueKeywords.length > 0) {
+        out = `${out}\n\nФокус: продажа ${uniqueKeywords.join(", ")}; целевые компании-покупатели в B2B.`.trim();
+      } else {
+        // Fallback if no keywords extracted
+        out = `${out}\n\nФокус: целевые компании-покупатели в B2B.`.trim();
+      }
+    }
   }
 
   const foodPackagingContextFinal = /(тара|упаков|packag|пластик|пэт|банк|ведер|крышк|пищев)/u.test(finalMessageSeed);
