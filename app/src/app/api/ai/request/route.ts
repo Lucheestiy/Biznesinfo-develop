@@ -3912,9 +3912,21 @@ function postProcessAssistantReply(params: {
       requestedDocCount !== null ||
       /(документ|первичн\p{L}*\s+провер|сертифик|вэд|incoterms)/iu.test(normalizeComparableText(params.message || ""));
     if (docsRequestedByIntent) {
-      out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(params.message || "", requestedDocCount || 5)}`.trim();
+      out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(params.message || "", requestedDocCount || 6)}`.trim();
     }
     return out;
+  }
+
+  // Add document checklist even when not in template mode, if documents are explicitly requested
+  const docCountForNonTemplate = detectRequestedDocumentCount(params.message || "");
+  const docsRequestedByIntentNonTemplate =
+    docCountForNonTemplate !== null ||
+    /(документ|первичн\p{L}*\s+провер|сертифик|вэд|incoterms)/iu.test(normalizeComparableText(params.message || ""));
+  if (docsRequestedByIntentNonTemplate) {
+    const existingListItems = countNumberedListItems(out);
+    if (existingListItems < 6) {
+      out = `${out}\n\n${buildPrimaryVerificationDocumentsChecklist(params.message || "", docCountForNonTemplate || 6)}`.trim();
+    }
   }
 
   const hasTemplate = Boolean(extractTemplateMeta(out)?.isCompliant);
