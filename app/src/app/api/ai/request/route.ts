@@ -6141,10 +6141,15 @@ function postProcessAssistantReply(params: {
           });
         }
         
-        // Fall back to filtered candidates or original if no filter match
-        const websiteRecoveryCandidates = commodityFilteredCandidates.length > 0 
-          ? commodityFilteredCandidates 
-          : continuityCandidates;
+        // CRITICAL FIX: When anti-noise filtering is applied and produces empty results,
+        // do NOT fall back to noisy candidates - return empty instead
+        // This prevents polyclinics/hospitals from appearing in footwear queries
+        const websiteRecoveryCandidates = 
+          (websiteRecoveryIntentAnchors.length > 0 && commodityFilteredCandidates.length === 0)
+            ? []  // Don't fall back to noisy candidates when filter produces empty results
+            : (commodityFilteredCandidates.length > 0 
+                ? commodityFilteredCandidates 
+                : continuityCandidates);
         
         const websiteRecoveryRows = formatVendorShortlistRows(
           websiteRecoveryCandidates,
@@ -11608,54 +11613,62 @@ async function fetchVendorCandidates(params: {
     );
   };
   // Anti-noise blocklist for supplier/manufacturer searches (applied after search to catch meiliSearch results too)
+  // Note: include both singular and plural forms to match rubric names like "Поликлиники", "Больницы"
   const ANTI_NOISE_BLOCKLIST_FOR_VENDOR = [
-    "поликлиника",
-    "больница",
-    "госпиталь",
-    "клиника",
-    "медицинский центр",
-    "стоматологическая поликлиника",
+    // Medical institutions
+    "поликлиник",
+    "больниц",
+    "госпитал",
+    "клиник",
+    "медицинск",
+    "стоматологическ",
     "диспансер",
+    // Military
     "военкомат",
-    "военная часть",
-    "военно-патриотический",
-    "военно-спортивный",
-    "дворец культуры",
-    "дом культуры",
-    "клуб",
-    "библиотека",
-    "школа",
-    "гимназия",
-    "лицей",
+    "военн",
+    // Education
+    "школ",
+    "гимназ",
+    "лице",
     "колледж",
     "университет",
     "институт",
-    "учебный центр",
-    "образовательный центр",
-    "курсы",
-    "спортивная школа",
+    "учебн",
+    "образовательн",
+    "курс",
+    // Culture/Sports
+    "дворц культуры",
+    "дом культуры",
+    "клуб",
+    "библиотек",
+    "спортивн",
     "стадион",
     "бассейн",
     "спортзал",
     "общежитие",
-    "гостиница",
+    // Hospitality
+    "гостиниц",
     "отель",
     "хостел",
-    "турбаза",
+    "турбаз",
     "дом отдыха",
     "санаторий",
-    "детский лагерь",
-    "дом творчества",
-    "дом детского творчества",
-    "центр творчества",
+    "детск лагер",
+    "дом творчеств",
+    "центр творчеств",
   ];
 
-  // Check if search has supplier/manufacturer intent
-  const hasSupplierIntent = lookupIntentAnchors.length > 0 || /произв|поставщ|завод|изготовитель|manufacturer|supplier|прода|купить|оптом/i.test(searchTerms.join(" "));
+  // Check if search has supplier/manufacturer intent - expanded to catch more cases
+  // Also check the raw searchText for intent keywords since searchTerms might not have them in follow-up turns
+  const hasSupplierIntent =
+    lookupIntentAnchors.length > 0 ||
+    /произв|поставщ|завод|изготовитель|manufacturer|supplier|прода|купить|оптом|проверь.*сайт|check.*site/i.test(searchText + " " + searchTerms.join(" "));
 
-  // Anti-noise filter: apply to both meiliSearch and biznesinfoSearch results
+  // Anti-noise filter: ALWAYS apply when doing vendor lookups to prevent hospitals/schools from appearing
+  // This is critical for any vendor/supplier search regardless of explicit intent keywords
   const applyAntiNoiseFilter = (companies: BiznesinfoCompanySummary[]): BiznesinfoCompanySummary[] => {
-    if (!hasSupplierIntent || companies.length === 0) return companies;
+    // Always filter for vendor searches - even follow-up queries like "check sites" should exclude non-vendors
+    if (companies.length === 0) return companies;
     return companies.filter((c) => {
       const rubric = (c.primary_rubric_name || "").toLowerCase();
       // Block if rubric contains any blocklisted term
