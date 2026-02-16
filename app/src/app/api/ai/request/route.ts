@@ -12655,6 +12655,27 @@ async function fetchVendorCandidates(params: {
     "торгов",
     "склад",
     "рынок",
+    // Auto dealers/services (UV003 fix - prevent auto centers from appearing as vendors)
+    "автоцентр",
+    "автосалон",
+    "автосервис",
+    "автомагазин",
+    // Fishing/hunting stores (UV003 fix)
+    "рыболов",
+    "охотник",
+    // Plumbing/heating stores (UV003 fix)
+    "сантехник",
+    "отоплен",
+    "климатич",
+    // Music/entertainment stores (UV003 fix)
+    "музык",
+    "пластинок",
+    "записей",
+    // Additional retail noise
+    "цветочн",
+    "зоомагазин",
+    "книжн",
+    "спортивн магазин",
   ];
 
   // Check if search has supplier/manufacturer intent - expanded to catch more cases
