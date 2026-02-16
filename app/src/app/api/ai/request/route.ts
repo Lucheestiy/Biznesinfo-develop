@@ -12612,6 +12612,22 @@ async function fetchVendorCandidates(params: {
     "детск лагер",
     "дом творчеств",
     "центр творчеств",
+    // Government entities (UV022 fix - prevent government ministries from appearing as companies)
+    "министерств",
+    "правительств",
+    "администрац",
+    "госорган",
+    "налоговая",
+    "таможня",
+    "суд",
+    "прокуратура",
+    "исполком",
+    "облисполком",
+    "горсовет",
+    "райисполком",
+    "депутат",
+    "парламент",
+    "сенат",
   ];
 
   // Check if search has supplier/manufacturer intent - expanded to catch more cases
