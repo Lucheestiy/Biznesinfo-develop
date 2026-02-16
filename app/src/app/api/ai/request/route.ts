@@ -3860,6 +3860,7 @@ function postProcessAssistantReply(params: {
     /(новост|сайти|карточк|контакт)\b/iu.test(params.message || "")
   );
   // Extended anti-link-gate patterns from QA scenarios UV019-UV022
+  // Also catch more subtle patterns: "no confirmed cards in filter", "can't find on site", etc.
   const linkGateAsksForNewLink = linkGateRequested && (
     /(пришли|дай|покажи)\s+(мне\s+)?(ссылку|сайт|url)/iu.test(out) ||
     /не\s+вижу\s+(в\s+чате\s+)?саму\s+карточку/iu.test(out) ||
@@ -3870,7 +3871,14 @@ function postProcessAssistantReply(params: {
     /по\s+текущему\s+фильтру\s+в\s+каталоге\s+нет\s+подтвержденных\s+карточек/iu.test(out) ||
     // Additional patterns for UV019-UV022: "на карточке компании", "последние новости", etc.
     /нужна\s+(сама\s+)?карточк/iu.test(out) ||
-    /пришлите\s+(мне\s+)?карточку/iu.test(out)
+    /пришлите\s+(мне\s+)?карточку/iu.test(out) ||
+    // STRICT QA GATE: Additional patterns that indicate redundant link request
+    // These patterns indicate the assistant is giving up instead of using context
+    /не\s+могу\s+найти\s+(информацию|данные|контакты)\s+на\s+сайте/iu.test(out) ||
+    /нет\s+подтвержденных\s+карточек\s*[,.]?\s*по\s+текущему\s+фильтру/iu.test(out) ||
+    /в\s+каталоге\s+нет\s+подтвержденных\s+карточек/iu.test(out) ||
+    /нужно\s+(сначала|добавить)\s+компанию/iu.test(out) ||
+    /компания\s+не\s+найдена\s+в\s+каталоге/iu.test(out) && !/^(1\.|2\.|3\.|Компания)/iu.test(out)
   ) && !/\/company\/[a-z0-9-]+/iu.test(out);
 
   // Case 1: We have vendor candidates from history (/company/... links)
