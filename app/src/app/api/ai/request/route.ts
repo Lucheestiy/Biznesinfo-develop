@@ -2883,9 +2883,31 @@ function repairTemplatePlaceholderSpam(
   let out = String(text || "");
   if (!out.trim()) return out;
 
-  // Only attempt repair if there's significant "уточняется" spam
+  // Check for placeholder spam patterns - trigger on 1+ occurrences
   const utochnyaetsyaCount = (out.match(/уточняется/gu) || []).length;
-  if (utochnyaetsyaCount < 2) return out;
+  const formiruyCount = (out.match(/сформируй[а-яё\s]+сообщени[ея]/giu) || []).length;
+
+  // Also check for raw instruction text that should not appear in template
+  const rawInstructionPatterns = [
+    /сформируй\s+сообщени[ея]/giu,
+    /напиши\s+письмо/giu,
+    /запрос\s+по\s+сформируй/giu,
+  ];
+  const hasRawInstruction = rawInstructionPatterns.some(p => p.test(out));
+
+  // Trigger repair if there's any spam pattern (lowered from 2 to 1)
+  if (utochnyaetsyaCount < 1 && formiruyCount < 1 && !hasRawInstruction) return out;
+
+  // NEW: Also clean up raw instruction patterns that shouldn't be in template
+  // Replace "сформируй сообщение..." patterns with hints-based content
+  if (formiruyCount > 0 || hasRawInstruction) {
+    // Pattern 1: "Сформируй сообщение в {city}"
+    out = out.replace(/сформируй\s+(?:сообщени[ея]\s+)?в\s+(\p{L}+)/giu, "запрос в $1");
+    // Pattern 2: "Запрос по сформируй сообщение"
+    out = out.replace(/запрос\s+по\s+сформируй\s+сообщени[ея]/giu, "запрос");
+    // Pattern 3: "сформируй сообщение" anywhere
+    out = out.replace(/сформируй\s+(?:сообщени[ея])/giu, "запрос");
+  }
 
   // Extract fresh hints from full conversation history
   const hints = extractTemplateFillHints(params);
