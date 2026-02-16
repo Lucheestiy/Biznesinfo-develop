@@ -11743,6 +11743,13 @@ function candidateMatchesCoreCommodity(candidate: BiznesinfoCompanySummary, tag:
   if (tag === "onion") {
     const hasOnionOrVegetableSignals = /(лук|репчат|плодоовощ|овощ|onion|vegetable)/u.test(haystack);
     if (!hasOnionOrVegetableSignals) return false;
+
+    // Anti-noise: filter out beekeeping, agricultural machinery, farm equipment
+    const hasBeekeepingSignals = /(пчеловод|пасек|мед\p{L}*|пчел\p{L}*)/u.test(haystack);
+    const hasAgriMachineSignals = /(сельхозтехник|агротехник|машмаркет|машинмаркет|трактор|минитрактор|комбайн|навесн|запчаст.*сельхоз|ремонт.*сельхоз)/u.test(haystack);
+    const hasFarmSignals = /(фермерск\p{L}*\s*хозяйств|агрохозяйств|агрофирм|сельхозпроизводитель|агрокомплекс|агрохолдинг)/u.test(haystack);
+    if (hasBeekeepingSignals || hasAgriMachineSignals || hasFarmSignals) return false;
+
     const hasPackagingSignals = /(тара|упаков|packag|короб|этикет|пленк)/u.test(haystack);
     const hasFreshProduceSupplySignals =
       /(овощебаз|овощехранил|сельхоз|фермер|выращив|урожай|свеж\p{L}*\s+овощ|опт\p{L}*\s+овощ|поставк\p{L}*\s+овощ|реализац\p{L}*\s+овощ|fresh\s+vegetable)/u.test(
@@ -11757,6 +11764,13 @@ function candidateMatchesCoreCommodity(candidate: BiznesinfoCompanySummary, tag:
     const hasBeetOrVegetableSignals =
       /(свекл|свёкл|буряк|бурак|корнеплод|плодоовощ|овощ|beet|beetroot|vegetable)/u.test(haystack);
     if (!hasBeetOrVegetableSignals) return false;
+
+    // Anti-noise: filter out beekeeping, agricultural machinery, farm equipment
+    const hasBeekeepingSignals = /(пчеловод|пасек|мед\p{L}*|пчел\p{L}*)/u.test(haystack);
+    const hasAgriMachineSignals = /(сельхозтехник|агротехник|машмаркет|машинмаркет|трактор|минитрактор|комбайн|навесн|запчаст.*сельхоз|ремонт.*сельхоз)/u.test(haystack);
+    const hasFarmSignals = /(фермерск\p{L}*\s*хозяйств|агрохозяйств|агрофирм|сельхозпроизводитель|агрокомплекс|агрохолдинг)/u.test(haystack);
+    if (hasBeekeepingSignals || hasAgriMachineSignals || hasFarmSignals) return false;
+
     const hasPackagingSignals = /(тара|упаков|packag|короб|этикет|пленк)/u.test(haystack);
     const hasFreshProduceSupplySignals =
       /(овощебаз|овощехранил|сельхоз|фермер|выращив|урожай|свеж\p{L}*\s+овощ|опт\p{L}*\s+овощ|поставк\p{L}*\s+овощ|реализац\p{L}*\s+овощ|fresh\s+vegetable|корнеплод)/u.test(
