@@ -12676,6 +12676,14 @@ async function fetchVendorCandidates(params: {
     "зоомагазин",
     "книжн",
     "спортивн магазин",
+    // Packaging noise (D009 fix - filter plastic packaging when user wants cardboard boxes)
+    "пластик",
+    "упаковк",
+    "тара",
+    "полиэтилен",
+    "пленк",
+    "мешк",
+    "пакет",
   ];
 
   // Check if search has supplier/manufacturer intent - expanded to catch more cases
