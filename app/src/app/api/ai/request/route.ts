@@ -2898,6 +2898,24 @@ function repairTemplatePlaceholderSpam(
   // Trigger repair if there's any spam pattern (lowered from 2 to 1)
   if (utochnyaetsyaCount < 1 && formiruyCount < 1 && !hasRawInstruction) return out;
 
+  // NEW: Fix concatenated placeholder patterns like "уточняетсядоставка" 
+  // This happens when placeholder gets merged with following word
+  out = out.replace(/уточняется([а-яёА-ЯЁa-zA-Z])/gu, "уточняется $1");
+  out = out.replace(/([а-яёА-ЯЁa-zA-Z])уточняется/gu, "$1 уточняется");
+
+  // NEW: Fix greeting line "Здравствуйте, уточняется!" - replace with proper greeting
+  out = out.replace(/^Здравствуйте[,\s]*уточняется[!.]*$/gimu, "Здравствуйте!");
+  out = out.replace(/Здравствуйте[,\s]*/gimu, "Здравствуйте! ");
+  // Clean up double greetings
+  out = out.replace(/(Здравствуйте[!.\s]*){2,}/gimu, "Здравствуйте! ");
+
+  // NEW: Fix duplicated patterns like "доставка: доставка:"
+  out = out.replace(/(\p{L}+)\s*:\s*\1\s*:/gu, "$1: ");
+
+  // NEW: Clean up "к несоответствия" and similar garbage
+  out = out.replace(/\s*к\s+несоответствия[.!]*$/gimu, ".");
+  out = out.replace(/к\s+меньше$/gimu, "меньше");
+
   // NEW: Also clean up raw instruction patterns that shouldn't be in template
   // Replace "сформируй сообщение..." patterns with hints-based content
   if (formiruyCount > 0 || hasRawInstruction) {
@@ -2923,9 +2941,14 @@ function repairTemplatePlaceholderSpam(
   // AGGRESSIVE REPAIR: Replace standalone "уточняется" with actual hint values
   // This is more effective than relying on context words near placeholders
 
-  // If no real hints, don't try to replace placeholders - let them stay for proper error handling
-  // This prevents generating low-quality output with generic fallbacks
+  // If no real hints, we should still do basic cleanup to remove garbage
+  // Don't leave "уточняется" alone - at minimum mark it as needing user input
   if (!effectiveHints) {
+    // Basic cleanup: remove "уточняется" in greeting and fix common patterns
+    out = out.replace(/^Здравствуйте[,\s]*уточняется[!.]*$/gimu, "Здравствуйте!");
+    out = out.replace(/Здравствуйте[,\s]*/gimu, "Здравствуйте! ");
+    // Replace remaining "уточняется" with generic placeholder indicating user needs to fill
+    out = out.replace(/уточняется/gu, "[заполните]");
     return out;
   }
 
@@ -5824,7 +5847,10 @@ function postProcessAssistantReply(params: {
   }
 
   if (!params.mode.templateRequested) {
-    out = sanitizeUnfilledPlaceholdersInNonTemplateReply(out).trim();
+    // REMOVED: sanitizeUnfilledPlaceholdersInNonTemplateReply - this ADDS "уточняется" placeholders
+    // which creates garbage output. For non-template replies, just pass through as-is.
+    // The AI should generate proper content without needing placeholder sanitization.
+    out = out.trim();
   }
   out = out.replace(
     /Из\s+доступных\s+релевантных\s+карточек\s+прямо\s+сейчас:\s*(?:\n\s*Причина:[^\n]+)+/giu,
