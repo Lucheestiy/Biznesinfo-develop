@@ -12641,6 +12641,13 @@ async function fetchVendorCandidates(params: {
     "депутат",
     "парламент",
     "сенат",
+    // Retail/Trading (UV011 fix - prevent doors/windows and other trading companies from appearing as manufacturers)
+    "дверей",
+    "окон",
+    "магазин",
+    "торгов",
+    "склад",
+    "рынок",
   ];
 
   // Check if search has supplier/manufacturer intent - expanded to catch more cases
