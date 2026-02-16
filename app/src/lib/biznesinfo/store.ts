@@ -485,6 +485,17 @@ const ANTI_NOISE_BLOCKLIST = [
   "центр творчества",
   "бытовая химия",
   "производство бытовой химии",
+  // Food query anti-noise (per advisor recommendations)
+  "пчеловодство",
+  "пасека",
+  "фермерское хозяйство",
+  "агрохозяйство",
+  "агрофирма",
+  "сельхозкооператив",
+  // Equipment/commercial service noise for food supplier queries
+  "сельхозтехника",
+  "запчасти к сельхозтехнике",
+  "ремонт сельхозтехники",
 ];
 
 function isRubricBlockedByIntent(rubricText: string | null, intentKeywords: string[]): boolean {
