@@ -6571,8 +6571,14 @@ function postProcessAssistantReply(params: {
   // This is placed early in post-processing to ensure it always runs
   const userMessage = params.message || "";
   const userMessageLower = userMessage.toLowerCase();
-  const hasExplicitWebsiteCheckRequest = userMessageLower.includes("проверь") && 
-    (userMessageLower.includes("сайт") || userMessageLower.includes("website") || userMessageLower.includes("scan"));
+  // UV012 FIX: More robust detection of website verification requests
+  // Include more patterns to ensure fallback is added when user asks about websites
+  const hasExplicitWebsiteCheckRequest = 
+    (userMessageLower.includes("проверь") && 
+      (userMessageLower.includes("сайт") || userMessageLower.includes("website") || userMessageLower.includes("scan") || userMessageLower.includes("верифиц"))) ||
+    (userMessageLower.includes("верифиц") && (userMessageLower.includes("сайт") || userMessageLower.includes("компан"))) ||
+    /(проверь|верифиц)\s+(?:на\s+)?(?:сайт|сайтах)/iu.test(userMessage) ||
+    /сайтах?\s+(?:перв|компан|производител)/iu.test(userMessage);
   
   // Check if output is a shortlist format (case-insensitive)
   const trimmedLowerOut = out.trim().toLowerCase();
