@@ -328,7 +328,7 @@ function detectPlaceholderGarbage(text: string): { hasGarbage: boolean; placehol
 // Constraint tracking guardrail: verify that user constraints from history are addressed in response
 // This addresses judge feedback where Turn 2 often ignores constraints from Turn 1 (location, quantity, etc.)
 interface ConstraintInfo {
-  type: "location" | "quantity" | "delivery" | "company_type" | "quality";
+  type: "location" | "quantity" | "delivery" | "company_type" | "quality" | "temperature";
   pattern: RegExp;
   evidencePatterns: RegExp[];
 }
@@ -369,6 +369,15 @@ const CONSTRAINT_TRACKING_RULES: ConstraintInfo[] = [
     evidencePatterns: [
       /производител/iu, /завод/iu, /юрлиц/iu, /юридическ/iu,
       /ИП|ЧУП|OAO|OOO|РА-UP|manufacturer|factory/iu,
+    ],
+  },
+  {
+    // Temperature constraint for refrigerated transport (+2..+6, -18, etc.)
+    type: "temperature",
+    pattern: /(?:темп(?:ератур|ература|ературе)?\s*[:\-]?\s*[+-]?\d+\s*[..\-]+\s*[+-]?\d+|холодильн(?:ый|ое|ую|ой|ом)|рефрижератор(?:ный|ное|ную)?|температур(?:ный|ное|ные|ных|условия))/iu,
+    evidencePatterns: [
+      /темп/iu, /[+-]?\d+\s*[..\-]+\s*[+-]?\d+\s*°?C?/iu, /холодильн/iu, /рефрижератор/iu,
+      /плюс\s*\d+/iu, /минус\s*\d+/iu, /-\d+/iu,
     ],
   },
 ];
@@ -423,6 +432,9 @@ function buildConstraintReminderNote(missingConstraints: string[]): string {
         break;
       case "company_type":
         parts.push("• Отфильтруйте по типу компании (производитель, ИП, юрлицо)");
+        break;
+      case "temperature":
+        parts.push("• Укажите компании с требуемым температурным режимом");
         break;
     }
   }
