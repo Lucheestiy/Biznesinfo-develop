@@ -6556,7 +6556,7 @@ function postProcessAssistantReply(params: {
   if (hasExplicitWebsiteCheckRequest && isShortlistOutput) {
     // Check if there's already a source URL or fallback phrase in the response
     const hasExplicitSourceURL = /(?:source:|источник:|https?:\/\/)/iu.test(out);
-    const hasFallbackPhrase = /(?:нет\b|не\s+удалось|не\s+могу|нет\s+самих|не\s+удалось\s+надежно\s+прочитать\s+сайты|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен|по\s+текущим\s+данным)/iu.test(out);
+    const hasFallbackPhrase = /(?:нет\b|не\s+удалось|не\s+могу|нет\s+самих|не\s+удалось\s+надежно\s+прочитать\s+сайты|подтвержденных\s+карточек\s*[,.]?\s*меньше[,.]?\s*чем|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен|по\s+текущим\s+данным)/iu.test(out);
     
     // If no source URL and no fallback phrase, add explicit fallback
     if (!hasExplicitSourceURL && !hasFallbackPhrase) {
@@ -6570,7 +6570,7 @@ function postProcessAssistantReply(params: {
   // like "Подтвержденных карточек меньше, чем запрошено" which ARE valid fallback indicators per test patterns.
   // The negative lookahead (?!найден|из) was meant to exclude success messages but it incorrectly excludes valid fallbacks.
   // Simplified: Just match the fallback patterns from test UV012.T2.C2
-  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|нет\b|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд|подтвержденных\s*карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен)/iu.test(
+  const hasWebsiteSourceOrFallbackEvidence = /(source:|источник:|https?:\/\/|нет\b|не удалось надежно прочитать сайты|не удалось|не могу|не\s*подтвержден|нет\s*подтвержд|подтвержденных\s*карточек\s*[,.]?\s*меньше[,.]?\s*чем|подтвержденных\s*карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен)/iu.test(
     out,
   );
   if (websiteResearchIntent && !hasWebsiteSourceOrFallbackEvidence) {
