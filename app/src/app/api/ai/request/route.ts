@@ -7693,8 +7693,10 @@ async function generateMiniMaxReply(params: {
   maxTokens: number;
   temperature?: number;
   signal?: AbortSignal;
+  groupId?: string;
 }): Promise<{ text: string; usage: AssistantUsage | null }> {
-  const url = "https://api.minimax.io/v1/text/chatcompletion_v2";
+  const baseUrl = "https://api.minimax.io/v1/text/chatcompletion_v2";
+  const url = params.groupId ? `${baseUrl}?GroupId=${encodeURIComponent(params.groupId)}` : baseUrl;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), params.timeoutMs);
   const onAbort = () => controller.abort();
@@ -14535,6 +14537,7 @@ export async function POST(request: Request) {
     if (provider === "minimax" && !canceled) {
       providerMeta = { provider: "minimax", model: providerModelOverride || pickEnvString("MINIMAX_MODEL", "M2-her") };
       const apiKey = (process.env.MINIMAX_API_KEY || "").trim();
+      const groupId = (process.env.MINIMAX_GROUP_ID || "").trim() || undefined;
 
       if (!apiKey) {
         providerError = { name: "MiniMaxKeyMissing", message: "MINIMAX_API_KEY is missing" };
@@ -14554,6 +14557,7 @@ export async function POST(request: Request) {
             maxTokens: pickEnvInt("MINIMAX_MAX_TOKENS", 800),
             temperature: minimaxTemperature,
             signal: opts.signal,
+            groupId,
           });
           replyText = minimax.text;
           usage = minimax.usage;
