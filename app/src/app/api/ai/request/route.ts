@@ -33,9 +33,9 @@ import type { BiznesinfoCompanyResponse, BiznesinfoCompanySummary } from "@/lib/
 export const runtime = "nodejs";
 
 const ASSISTANT_GUARDRAILS_VERSION = 3;
-const ASSISTANT_HISTORY_MAX_MESSAGES = 12;
-const ASSISTANT_HISTORY_MAX_MESSAGE_CHARS = 2_000;
-const ASSISTANT_HISTORY_MAX_TOTAL_CHARS = 12_000;
+const ASSISTANT_HISTORY_MAX_MESSAGES = 4;
+const ASSISTANT_HISTORY_MAX_MESSAGE_CHARS = 1_500;
+const ASSISTANT_HISTORY_MAX_TOTAL_CHARS = 4_000;
 const ASSISTANT_COMPANY_FACTS_MAX_CHARS = 2_500;
 const ASSISTANT_COMPANY_FACTS_MAX_TEXT_CHARS = 400;
 const ASSISTANT_COMPANY_FACTS_MAX_ITEMS = 8;
@@ -14524,7 +14524,10 @@ export async function POST(request: Request) {
       }
     }
 
-    if (provider === "minimax" && !canceled) {
+    // MiniMax doesn't support multi-turn (group chat) - skip if there's history
+    const hasHistory = history.length > 0;
+
+    if (provider === "minimax" && !canceled && !hasHistory) {
       providerMeta = { provider: "minimax", model: providerModelOverride || pickEnvString("MINIMAX_MODEL", "M2-her") };
       const apiKey = (process.env.MINIMAX_API_KEY || "").trim();
 
