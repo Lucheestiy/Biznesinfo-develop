@@ -1617,9 +1617,9 @@ function pickTemplateQty(text: string): string | null {
   const normalized = oneLine(text || "");
   if (!normalized) return null;
 
-  // Extended patterns for quantity extraction (including English units)
+  // Extended patterns for quantity extraction (including English units and "pairs")
   const direct = normalized.match(
-    /(\d+(?:[.,]\d+)?)\s*(тонн(?:а|ы|у)?|т\b|т(?=\s|$)|килограмм(?:а|ов)?|кг\b|килограм\b|kg\b|литр(?:а|ов)?|л\b|l\b|шт\.?|штук|единиц|м3|м³|м²|м2|метр(?:а|ов|ры)?|упаков(?:а|ок|ки)|короб(?:а|ок|ок)|пакет(?:а|ов|ов)?|рулон(?:а|ов|ов)?|погонн(?:ый|ых|ым))/iu,
+    /(\d+(?:[.,]\d+)?)\s*(тонн(?:а|ы|у)?|т\b|т(?=\s|$)|килограмм(?:а|ов)?|кг\b|килограм\b|kg\b|литр(?:а|ов)?|л\b|l\b|шт\.?|штук|единиц|м3|м³|м²|м2|метр(?:а|ов|ры)?|упаков(?:а|ок|ки)|короб(?:а|ок|ок)|пакет(?:а|ов|ов)?|рулон(?:а|ов|ов)?|погонн(?:ый|ых|ым)|пар(?:а|у|ы)?)/iu,
   );
   if (direct?.[0]) return oneLine(direct[0]).replace(/\s+/gu, " ");
 
@@ -1685,6 +1685,12 @@ function pickTemplateProductService(text: string): string | null {
   if (/(картошк|картофел)/u.test(normalized)) return "картофель";
   if (/морков/u.test(normalized)) return "морковь";
   if (/свекл/u.test(normalized)) return "свекла";
+  if (/обув/u.test(normalized)) return "обувь";
+  if (/\b(?:двер|окн)/u.test(normalized)) return "двери/окна";
+  if (/\b(?:стройматериал|строительн)/u.test(normalized)) return "стройматериалы";
+  if (/\b(?:мебель)/u.test(normalized)) return "мебель";
+  if (/\b(?:одежд)/u.test(normalized)) return "одежда";
+  if (/\b(?:электрон|техник)/u.test(normalized)) return "электроника/техника";
 
   const inferred = extractVendorSearchTerms(normalized)
     .filter((term) => !isWeakVendorTerm(term))
@@ -2507,8 +2513,11 @@ function buildLocalResilientFallbackReply(params: {
   const focusLine = focusTerms.length > 0 ? `Фокус задачи: ${focusTerms.join(", ")}.` : null;
 
   if (params.mode.templateRequested) {
+    // Extract fill hints from message and history for template filling
+    const fillHints = extractTemplateFillHints({ message: params.message, history: params.history || [] });
     const template = ensureCanonicalTemplatePlaceholders(ensureTemplateBlocks("", params.message));
-    return `${lines.join("\n\n")}\n\n${template}`.trim();
+    const filledTemplate = applyTemplateFillHints(template, fillHints);
+    return `${lines.join("\n\n")}\n\n${filledTemplate}`.trim();
   }
 
   if (!params.mode.rankingRequested && !params.mode.checklistRequested) {
