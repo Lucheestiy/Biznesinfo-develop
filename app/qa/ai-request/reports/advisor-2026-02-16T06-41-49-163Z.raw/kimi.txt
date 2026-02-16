@@ -1,0 +1,165 @@
+I have enough information to provide concrete engineering advice. Let me compile the JSON response based on my analysis of the QA data:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical systemic failures in template generation (placeholders instead of content), context continuity (company memory loss across turns), and retrieval relevance (returning hospitals for shoe manufacturers). MiniMax-M2.5 shows 18% useful rate. Immediate fixes needed for: 1) Template generation guardrails, 2) Context carryover for company names, 3) Search relevance filters.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template generation - eliminate placeholder garbage",
+      "why": "Template generation produces unusable output with 'уточняется' placeholders. Affects UV001, UV004, UV006, UV016, UV017. Users cannot send these templates to suppliers.",
+      "expectedImpact": "Useful rate increase from 18% to ~40% based on judge data. Eliminates #1 user complaint.",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix context continuity for company names",
+      "why": "Complete context loss between turns for 'Ирис Интер групп' (UV019-UV022). Assistant switches to random companies (САВАНА СЕРВИС) or returns unrelated results.",
+      "expectedImpact": "Fixes 4 high-visibility failure scenarios. Enables multi-turn workflows.",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix retrieval relevance - category filtering",
+      "why": "Returning children's polyclinics and hospitals for shoe manufacturer queries (UV012). Category/rubric filters are not being applied correctly.",
+      "expectedImpact": "Eliminates absurd relevance failures. Restores user trust in search.",
+      "validationScenarios": ["UV012", "UV003", "UV011"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add constraint tracking for user requirements",
+      "why": "User constraints (location, quantity, delivery time) from Turn 1 are ignored in Turn 2 responses. Detected in UV001, UV002, UV006.",
+      "expectedImpact": "Improved multi-turn coherence. Better user satisfaction scores.",
+      "validationScenarios": ["UV001", "UV002", "UV006", "UV008"]
+    },
+    {
+      "priority": "P1",
+      "title": "Expand manufacturer keyword coverage",
+      "why": "Only 1 shoe manufacturer found in Minsk (UV001). Keyword extraction missing manufacturing-focused terms in favor of generic trade terms.",
+      "expectedImpact": "Better recall for B2B manufacturing queries. Higher shortlist counts.",
+      "validationScenarios": ["UV001", "UV004", "UV008", "UV011"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add shortlist minimum count enforcement",
+      "why": "User requests 3-5 companies, receives 1. No retry mechanism to expand search when count is insufficient.",
+      "expectedImpact": "Better adherence to user explicit quantity requests.",
+      "validationScenarios": ["UV001", "UV008", "UV015"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Add hard rejection for placeholder-filled templates",
+      "action": "In app/src/app/api/ai/request/route.ts, enhance detectPlaceholderGarbage() (lines 281-326) to reject responses with >2 placeholders. When detected, retry with stricter system prompt that explicitly forbids 'уточняется' and requires concrete values from search context.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. Function: detectPlaceholderGarbage(). Add retry loop with modified system prompt that includes: 'Используй ТОЛЬКО реальные данные из контекста поиска. Запрещено: уточняется, [вставить], [указать]. Если данных недостаточно - честно скажи об этом.'",
+      "expectedImpact": "Eliminates template garbage. Forces concrete content or honest fallback.",
+      "risk": "May increase latency due to retries. Mitigate with max 1 retry.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Inject company context from history into system prompt",
+      "action": "When user mentions company name in any turn, extract and preserve in conversation state. Inject into system prompt for subsequent turns: 'Контекст: пользователь работает с компанией {name}'. Prevents UV019-UV022 context loss.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. Add function extractCompanyFromHistory() that scans history for 'Ирис Интер групп' patterns. Add to buildPrompt() system message section. Also check for company mentions in last 3 assistant responses.",
+      "expectedImpact": "Fixes context loss in UV019-UV022. Enables reliable multi-turn company workflows.",
+      "risk": "False positives on company name extraction. Mitigate with confidence threshold.",
+      "effort": "M",
+      "validationScenarios": ["UV019", "UV020", "UV021", "UV022"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Add rubric validation for search results",
+      "action": "In src/lib/meilisearch/search.ts meiliSearch(), add post-filter validation: if query contains 'производитель обуви', reject results without 'обувь' or 'легкая промышленность' in rubrics. Log mismatches for monitoring.",
+      "implementationHint": "File: src/lib/meilisearch/search.ts. After line 631 (page mapping), add validateRubricRelevance() that checks if result rubrics match query intent keywords. Reject medical facilities for manufacturing queries.",
+      "expectedImpact": "Eliminates absurd results (hospitals for shoes). Improves perceived relevance.",
+      "risk": "May reduce recall for edge cases. Add bypass for low-result queries.",
+      "effort": "M",
+      "validationScenarios": ["UV012", "UV003", "UV011"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Strengthen constraint tracking in system prompt",
+      "action": "Use existing CONSTRAINT_TRACKING_RULES (lines 336-383) to extract constraints from history. Add to system prompt: 'Требования пользователя: {constraints}. Проверь что ответ учитывает каждое требование.'",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. Function: buildPrompt(). Use extractConstraintsFromText() on history messages. Format missing constraints and inject into system prompt as reminder.",
+      "expectedImpact": "Better constraint adherence across turns. Fixes UV001, UV002, UV006 issues.",
+      "risk": "May increase prompt size. Mitigate with truncation for long histories.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV002", "UV006", "UV008"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Add manufacturing-specific keyword expansion",
+      "action": "In src/lib/biznesinfo/keywords.ts CATEGORY_KEYWORDS, add manufacturing terms: 'производство обуви', 'обувная фабрика', 'пошив обуви', 'обувной цех'. Currently only has trade/logistics terms.",
+      "implementationHint": "File: src/lib/biznesinfo/keywords.ts. Add to CATEGORY_KEYWORDS: 'обувная': ['производство обуви', 'обувная фабрика', 'пошив обуви', 'обувной цех', 'изготовление обуви']. Similar for other manufacturing categories.",
+      "expectedImpact": "Better recall for manufacturing queries. More companies in shortlists.",
+      "risk": "Minimal - additive change only.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV008", "UV011"]
+    },
+    {
+      "id": "R6",
+      "area": "ranking",
+      "title": "Implement minimum result count retry",
+      "action": "When user requests N companies and search returns <N/2, automatically trigger expanded search with relaxed filters (broader region, related rubrics). Don't just return 1 company for '3-5' request.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. In meiliSearch call site, check result count vs user request. If insufficient, retry with expanded parameters and add note: 'Расширен поиск, найдено X из Y'.",
+      "expectedImpact": "Better fulfillment of explicit quantity requests. Improved user satisfaction.",
+      "risk": "May return less relevant results. Add relevance threshold.",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV008", "UV015"]
+    },
+    {
+      "id": "R7",
+      "area": "prompt",
+      "title": "Add explicit anti-hallucination instruction for website scans",
+      "action": "For UV012/UV013 website scan scenarios, add system instruction: 'Если не можешь проверить сайт - честно скажи. Не выдумывай данные. Не проси ссылку если компания уже в контексте.'",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. In buildPrompt(), detect looksLikeWebsiteResearchIntent() and append specific anti-hallucination instructions.",
+      "expectedImpact": "Reduces fake website data. Improves trust in website scan feature.",
+      "risk": "Minimal - instruction-only change.",
+      "effort": "S",
+      "validationScenarios": ["UV012", "UV013"]
+    },
+    {
+      "id": "R8",
+      "area": "guardrails",
+      "title": "Add 504 timeout handling for multi-turn scenarios",
+      "action": "Current UV001 failure shows 504 Gateway Timeout on Turn 2. Add request timeout handling with graceful degradation - return partial results or retry with smaller context window.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. Add timeout handling in fetch() call to AI provider. On timeout, retry with truncated history (last 2 turns only).",
+      "expectedImpact": "Prevents hard failures in multi-turn scenarios. Better reliability.",
+      "risk": "Context loss on truncation. Log for monitoring.",
+      "effort": "M",
+      "validationScenarios": ["UV001"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV001",
+      "UV004",
+      "UV006",
+      "UV012",
+      "UV019",
+      "UV020",
+      "UV021"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.user-120-bank-f-text-templates.json",
+      "scenarios.regressions.geo-ambiguity.json"
+    ],
+    "successMetrics": [
+      "usefulRate >= 0.50 (target: 50% of scenarios rated useful)",
+      "zeroUsefulnessCount = 0 (no completely failed scenarios)",
+      "genericFallbackRate <= 0.50 (reduce generic responses by half)",
+      "templateCompliance >= 0.80 (80% of template requests properly formatted)",
+      "contextContinuityScore >= 3.0 (average continuity across multi-turn scenarios)"
+    ]
+  }
+}
+```

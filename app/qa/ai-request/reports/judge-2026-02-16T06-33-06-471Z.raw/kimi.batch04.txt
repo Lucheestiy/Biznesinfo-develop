@@ -1,0 +1,139 @@
+Now I have the context. The user wants me to evaluate 5 scenarios (UV016-UV020) as a QA judge. Let me analyze each scenario based on the provided transcripts:
+
+**UV016**: Export flour scenario - The transcript provided in the prompt shows corrupted output (placeholders like "уточняется", wrong locations in Turn 2, garbled template in Turn 3). This is different from the already evaluated version in the file which shows good performance. I need to evaluate based on the transcript in the prompt.
+
+**UV017**: Beet sourcing scenario - Similar issues with corrupted output and generic fallback.
+
+**UV018**: Tags for analytics - Actually looks good, the assistant provided relevant tags without falling back to supplier search.
+
+**UV019**: News from website - The assistant completely lost context, started talking about different companies (САВАНА СЕРВИС, ОНЛАЙНЕР, etc.) instead of "Ирис Интер групп".
+
+**UV020**: News from company card - Same issue, the assistant is returning news from random companies instead of "Ирис Интер групп".
+
+Let me provide the evaluation:
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV016",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: дал 4 производителя, но без подтверждения экспортной готовности",
+        "Turn 2: критическая ошибка — перепутал города компаний (Пинск/Лида/Брест), дал placeholder [проверьте данные] вместо анализа",
+        "Turn 3: шаблон письма полностью сломан — placeholder 'уточняется' вместо конкретики, отсутствуют реальные данные"
+      ],
+      "criticalIssues": [
+        "Нарушена гео-адгезия: перепутаны города у компаний в Turn 2",
+        "Generic fallback с placeholder'ами вместо конкретного шаблона письма",
+        "Не выполнил запрос на 5 документов для проверки — дал обрезанный список",
+        "Отсутствует анализ экспортной готовности, который просили в Turn 2"
+      ],
+      "strengths": [
+        "Turn 1 дал релевантных производителей муки из правильной категории"
+      ],
+      "nextUserProbe": "Почему у вас перепутаны города? И где нормальный шаблон письма с реальными данными?"
+    },
+    {
+      "scenarioId": "UV017",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: дал 4 поставщика продуктов питания, но без подтверждения наличия красного буряка",
+        "Turn 2: shortlist составлен, но без честного признания об отсутствии точных совпадений",
+        "Turn 3: шаблон сообщения полностью сломан — placeholder 'уточняется' вместо конкретных параметров"
+      ],
+      "criticalIssues": [
+        "Шаблон сообщения в Turn 3 непригоден для использования — сплошные placeholder'ы",
+        "Не честно признал отсутствие точных совпадений по буряку как просили в Turn 2",
+        "Агромашмаркет в Turn 1 — нерелевантный профиль (запчасти к сельхозтехнике)"
+      ],
+      "strengths": [
+        "Турпродплюс и Амифрут — релевантные оптовые поставщики продуктов",
+        "Не включил учебные учреждения или совсем нерелевантные профили"
+      ],
+      "nextUserProbe": "Уберите эти placeholder'ы и дайте нормальный шаблон с реальными данными моего запроса."
+    },
+    {
+      "scenarioId": "UV018",
+      "usefulness": 4,
+      "verdict": "useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.75,
+      "wouldContinue": true,
+      "feltGenericFallback": false,
+      "continuityScore": 4,
+      "reasons": [
+        "Turn 1: дал 20 релевантных тегов с правильной группировкой (бренд/услуги/намерение)",
+        "Turn 2: корректно подтвердил фокус на аналитике без fallback'а в поиск поставщиков",
+        "Теги релевантны для GA/Яндекс Метрики и логистической компании"
+      ],
+      "criticalIssues": [
+        "В Turn 2 полностью продублировал ответ из Turn 1 вместо краткого подтверждения"
+      ],
+      "strengths": [
+        "Устойчивость к контексту: не скатился в sourcing-fallback при запросе на теги",
+        "Правильная структура группировки тегов",
+        "Релевантные теги для логистической компании (Ирис Интер групп)"
+      ],
+      "nextUserProbe": "Отлично! Теперь дайте UTM-структуру под Google Ads."
+    },
+    {
+      "scenarioId": "UV019",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: полностью потерял контекст компании — вместо Ирис Интер групп начал говорить о САВАНА СЕРВИС",
+        "Turn 2: продолжил игнорировать контекст — выдает новости от ОНЛАЙНЕР и Заря, вместо сайта Ирис Интер групп"
+      ],
+      "criticalIssues": [
+        "Полный сброс контекста: не сохранил компанию 'Ирис Интер групп' из предыдущего сценария",
+        "Вместо поиска новостей по запрошенной компании выдал случайные компании из каталога",
+        "Не выполнил прямое требование 'найди сам' без запроса ссылки",
+        "В Turn 2 не указал где проверял — данные выглядят как случайный набор"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Вы о какой компании вообще говорите? Я просил новости про Ирис Интер групп!"
+    },
+    {
+      "scenarioId": "UV020",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: вместо поиска новостей Ирис Интер групп выдал новости от Беларусь Сегодня и ПАТИО",
+        "Turn 2: команда 'Найди на карточке компании' проигнорирована — снова выдает новости случайных компаний"
+      ],
+      "criticalIssues": [
+        "Не использовал контекст компании из диалога (Ирис Интер групп)",
+        "Не ответил шаблоном 'не вижу карточку', но и не нашел данные по правильной компании",
+        "Выдает данные с сайтов нерелевантных компаний (sb.by, 5element)",
+        "Игнорирует явную команду пользователя найти на карточке конкретной компании"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Почему вы игнорируете название моей компании? Мне нужны новости про Ирис Интер групп, а не про Беларусь Сегодня!"
+    }
+  ]
+}
+```

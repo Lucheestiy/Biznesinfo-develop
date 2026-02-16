@@ -1,0 +1,155 @@
+Now I have enough context to provide concrete engineering advice. Let me analyze the key issues:
+
+**Key Issues from Evidence:**
+
+1. **Template System Broken (UV001, UV004, UV006, UV016)**: Placeholder garbage like "уточняется", "к сожалению" appearing in templates
+2. **Context Loss in Multi-turn (UV001, S006-S010)**: Assistant forgets constraints from previous turns
+3. **Single Company Stuck (UV001)**: Gets stuck on 1 company instead of finding 3-5 alternatives
+4. **Irrelevant Candidates (S006-S010)**: Ranking includes completely wrong companies (cafes, bath houses for industrial requests)
+5. **Hard Conversation Reset (S010)**: Turn 3 asks for criteria user already provided
+6. **504 Gateway Timeout (UV001)**: Infrastructure issue causing failures
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical systemic failures in multi-turn continuity, template generation, and candidate relevance. 0% pass rate on UV001 due to 504 timeout + broken templates. S006-S010 show catastrophic candidate hallucination (cafes for ventilation, accounting firms for welding). Immediate fixes needed: template placeholder sanitization, constraint tracking enforcement, and retrieval relevance scoring.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix Template Placeholder Garbage Injection",
+      "why": "Templates output 'уточняется', 'к сожалению' instead of real content - makes feature unusable for business users",
+      "expectedImpact": "Eliminates 100% of broken template outputs in UV001, UV004, UV006, UV016",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016"]
+    },
+    {
+      "priority": "P0",
+      "title": "Enforce Constraint Tracking in Multi-turn",
+      "why": "Turn 2-3 consistently ignore constraints from Turn 1 (location, quantity, company_type)",
+      "expectedImpact": "Fixes S010 conversation reset, improves continuity score from 1 to 4",
+      "validationScenarios": ["S010", "UV001", "S006", "S007"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix 504 Gateway Timeout on Search",
+      "why": "UV001 hard error blocks entire scenario execution",
+      "expectedImpact": "Restores basic availability, reduces hard error rate to 0%",
+      "validationScenarios": ["UV001"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add Retrieval Relevance Scoring",
+      "why": "S006-S008 rank cafes and bath houses for industrial queries - complete category mismatch",
+      "expectedImpact": "Eliminates irrelevant candidates, improves usefulRate from 18% to 60%+",
+      "validationScenarios": ["S006", "S007", "S008", "S009"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement Minimum Candidate Expansion",
+      "why": "UV001 stuck on 1 company (Глобал Шуз) instead of finding 3-5 alternatives",
+      "expectedImpact": "Shortlists always contain 3+ candidates when available in catalog",
+      "validationScenarios": ["UV001", "UV005", "S007"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Block placeholder words in template generation",
+      "action": "Add post-processing filter in app/src/app/api/ai/request/route.ts: reject and regenerate template if output contains ['уточняется', 'уточнить', 'к сожалению', 'информация уточняется', 'данные уточняются']. Trigger fallback to hard-coded template patterns.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: detectPlaceholderGarbage() exists but not enforced. Add: if (templateMeta?.isCompliant && detectPlaceholderGarbage(text).hasGarbage) { return buildHardTemplateFallback(context); }",
+      "expectedImpact": "100% elimination of broken templates with placeholders",
+      "risk": "May increase latency by 1 retry",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Inject constraint reminder into system prompt",
+      "action": "Modify buildConstraintReminderNote() output to be injected into assistant system prompt when missing constraints detected. Current code returns note but doesn't enforce it.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts lines 419-446: Change buildConstraintReminderNote to return structured constraint list, append to system prompt: 'CRITICAL: Address these user constraints or explicitly state why each cannot be met: [list]'",
+      "expectedImpact": "Forces constraint acknowledgment, fixes S010 reset issue",
+      "risk": "May increase prompt token count by ~100 tokens",
+      "effort": "S",
+      "validationScenarios": ["S010", "UV001", "S006"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Add category mismatch detection for candidates",
+      "action": "Before returning candidates, verify keyword overlap between query (обувь, вентиляция, сварка) and company keywords. Reject candidates with <20% keyword overlap or containing conflicting categories (кафе, баня, бухгалтерия for industrial queries).",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: After meiliSearch() in getVendorCandidates(), filter results: const queryTokens = tokenize(serviceQuery); const relevant = candidates.filter(c => c.keywords?.some(k => queryTokens.includes(normalize(k))))",
+      "expectedImpact": "Eliminates cafes from ventilation queries, accounting firms from welding queries",
+      "risk": "May reduce recall for edge cases",
+      "effort": "M",
+      "validationScenarios": ["S006", "S007", "S008", "S009"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Increase search result pool for shortlist requests",
+      "action": "When looksLikeRankingRequest() or explicit shortlist pattern detected, fetch 50 results instead of default 24, then rank by relevance score before selecting top-N.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: In getVendorCandidates(), change limit from 24 to params.isShortlistRequest ? 50 : 24. Add ranking sort by keyword match density.",
+      "expectedImpact": "UV001 finds 3-5 manufacturers instead of getting stuck on 1",
+      "risk": "Increases search latency by ~50ms",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV005", "S007"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add explicit 'no conversation reset' instruction",
+      "action": "Append to system prompt: 'NEVER ask user to repeat information already provided in conversation history. If constraints are unclear, infer from history or state assumptions explicitly.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: In buildSystemPrompt(), add anti-reset instruction. Current prompt lacks explicit continuity enforcement.",
+      "expectedImpact": "Prevents S010-type hard resets",
+      "risk": "None",
+      "effort": "S",
+      "validationScenarios": ["S010", "UV001"]
+    },
+    {
+      "id": "R6",
+      "area": "ui",
+      "title": "Add timeout handling for search API",
+      "action": "Add fetch timeout with retry logic for Meilisearch calls. Current 504 suggests nginx timeout before upstream response.",
+      "implementationHint": "src/lib/meilisearch/client.ts: Add AbortController with 10s timeout, implement 1 retry with exponential backoff. nginx.conf: increase proxy_read_timeout to 30s.",
+      "expectedImpact": "Eliminates UV001 504 errors",
+      "risk": "None",
+      "effort": "M",
+      "validationScenarios": ["UV001"]
+    },
+    {
+      "id": "R7",
+      "area": "ranking",
+      "title": "Implement diversity enforcement in shortlists",
+      "action": "When selecting top-N candidates, ensure diversity by penalizing similar company names or identical primary categories. Prefer candidates from different rubrics that match query keywords.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts: In buildRankingFallbackAppendix() or candidate selection, add: const diversified = selectDiverse(candidates, n, keyFn: c => c.primary_rubric_slug)",
+      "expectedImpact": "Prevents 3 cafes in shortlist for industrial query",
+      "risk": "May reduce precision for niche queries",
+      "effort": "M",
+      "validationScenarios": ["S006", "S007", "S008"]
+    },
+    {
+      "id": "R8",
+      "area": "qa",
+      "title": "Add automated placeholder detection to CI",
+      "action": "Create post-processing validator that fails QA if template output contains placeholder patterns. Run on all judge-evaluated scenarios.",
+      "implementationHint": "app/qa/ai-request/validator.ts: Add checkTemplateQuality(response) function, integrate into qa runner pipeline.",
+      "expectedImpact": "Prevents regression of template quality issues",
+      "risk": "None",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV001", "S010", "S006", "S007", "S008"],
+    "regressionSuites": ["scenarios.regressions.user-ideas-multistep-variants.json", "scenarios.regressions.user-6-scenarios.json"],
+    "successMetrics": [
+      "template placeholderCount == 0 per response",
+      "continuityScore >= 3 for multi-turn scenarios",
+      "usefulRate >= 0.6 for UV001-UV005 batch",
+      "hardErrorRate == 0 (no 504s)",
+      "candidate relevance: 0% cafes/bath houses for industrial queries"
+    ]
+  }
+}
+```

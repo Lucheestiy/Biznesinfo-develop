@@ -1,0 +1,235 @@
+{
+  "meta": {
+    "scenarioMeta": {
+      "version": 1,
+      "generatedAt": "2026-02-07T20:42:04.928Z",
+      "endpoint": "/api/ai/request",
+      "localeHint": "mostly-ru-with-mixed-en",
+      "totalScenarios": 50
+    },
+    "options": {
+      "baseUrl": "http://127.0.0.1:8131",
+      "email": "qa.ai.runner@example.com",
+      "preparePaid": true,
+      "paidLimit": 200,
+      "maxScenarios": 1,
+      "onlyTags": [],
+      "maxRateLimitRetries": 4,
+      "maxBusyRetries": 8,
+      "busyRetryBaseMs": 900,
+      "busyRetryMaxMs": 180000,
+      "maxBusyTotalWaitMs": 300000,
+      "useRunLock": false,
+      "runLockFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/.qa-runner.lock",
+      "runLockTimeoutMs": 900000,
+      "runLockPollMs": 1000,
+      "runLockStaleMs": 5400000,
+      "maxStubRetries": 2,
+      "minTurnDelayMs": 120,
+      "stubOutageThreshold": 12,
+      "providerOverride": null,
+      "providerModelOverride": null,
+      "targetPassCount": null,
+      "targetPassRate": null
+    }
+  },
+  "summary": {
+    "runId": "run-2026-02-16T06-45-14-869Z-1998020-28h55",
+    "startedAt": "2026-02-16T06:45:14.869Z",
+    "endedAt": "2026-02-16T06:47:16.566Z",
+    "durationMs": 121697,
+    "baseUrl": "http://127.0.0.1:8131",
+    "scenarioFile": "/home/mlweb/biznesinfo-develop.lucheestiy.com/app/qa/ai-request/scenarios.json",
+    "totalScenarios": 1,
+    "passedScenarios": 0,
+    "failedScenarios": 1,
+    "passRate": 0,
+    "totalChecks": 3,
+    "passedChecks": 3,
+    "failedChecks": 0,
+    "checkPassRate": 1,
+    "targetPassCount": 1,
+    "targetPassRate": 0.8,
+    "targetReached": false,
+    "authUser": {
+      "id": "bb1de8c3-658c-46cc-9fa4-c8629b43f3d7",
+      "email": "qa.ai.runner@example.com",
+      "name": "AI QA Runner",
+      "role": "user",
+      "plan": "paid"
+    },
+    "totalTurnsExecuted": 2,
+    "avgTurnLatencyMs": 60664,
+    "totalTurnLatencyMs": 121328,
+    "totalStubReplies": 0,
+    "totalBusyRetries": 0,
+    "totalRateLimitRetries": 0,
+    "totalStubRetries": 0,
+    "providerUsage": [
+      {
+        "provider": "minimax",
+        "turns": 1
+      },
+      {
+        "provider": "unknown",
+        "turns": 1
+      }
+    ],
+    "modelUsage": [
+      {
+        "model": "MiniMax-M2.5",
+        "turns": 1
+      }
+    ],
+    "stoppedEarly": false,
+    "stopReason": null
+  },
+  "runStop": null,
+  "topFailurePatterns": [
+    {
+      "key": "api:HTTPError:504",
+      "count": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S001",
+      "title": "ПНД трубы: Минск -> Сухарево",
+      "tags": [
+        "sourcing",
+        "geo_refinement",
+        "multi_turn",
+        "ranking"
+      ],
+      "personaGoal": "Закупщик стройкомпании, ищет поставщиков ПНД труб по Минску с уточнением по району.",
+      "totalTurns": 3,
+      "completedTurns": 2,
+      "pass": false,
+      "hardError": {
+        "status": 504,
+        "error": "HTTPError",
+        "message": "<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body>\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      },
+      "failedChecks": [],
+      "toleratedFailedChecks": [],
+      "turnLatencyMs": 121328,
+      "stubReplies": 0,
+      "busyRetries": 0,
+      "rateLimitRetries": 0,
+      "stubRetries": 0,
+      "branchTrace": [
+        "1:sequential->2"
+      ],
+      "turns": [
+        {
+          "turn": 1,
+          "user": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+          "requestBody": {
+            "message": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней.",
+            "history": [],
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 1202,
+          "apiOk": true,
+          "status": 200,
+          "retryMeta": {
+            "quota": 0,
+            "busy": 0,
+            "busyWaitMs": 0,
+            "rateLimited": 0,
+            "stub": 0
+          },
+          "requestId": "5a1cbbf3-6ebb-47cf-aa66-2521eb0d26e2",
+          "conversationId": "c4d015eb-6cb7-4983-a77b-a74b57345975",
+          "isStub": false,
+          "provider": "minimax",
+          "model": "MiniMax-M2.5",
+          "reply": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. ✅ 📤 ADT center ООО — /company/biznesinfo-98383 (Автозапчасти и принадлежности; Минск, minsk; тел: (+375-17) 3603131)\n\nФокус задачи: пнд, труб, желательно, 2-3.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски.",
+          "companyPathProbeSummary": null,
+          "transition": {
+            "source": "sequential",
+            "branchId": null,
+            "verdict": "pass",
+            "nextTurnNumber": 2,
+            "failHandledByBranch": false
+          },
+          "checks": [
+            {
+              "id": "S001.T1.C1",
+              "type": "not_stub",
+              "description": "Ответ не должен быть stub/заглушкой",
+              "passed": true,
+              "reason": "Reply is non-stub",
+              "details": {
+                "isStub": false
+              }
+            },
+            {
+              "id": "S001.T1.C2",
+              "type": "includes_any",
+              "description": "Ответ должен быть по теме поиска поставщиков/услуги",
+              "passed": true,
+              "reason": "Matched at least one pattern",
+              "details": {
+                "patterns": [
+                  "пнд|полиэтилен|труб",
+                  "поставщ",
+                  "supplier",
+                  "рубр",
+                  "ключев"
+                ],
+                "hits": [
+                  "пнд|полиэтилен|труб"
+                ]
+              }
+            },
+            {
+              "id": "S001.T1.C3",
+              "type": "reply_length_min",
+              "description": "Ответ должен быть полезным, не односложным",
+              "passed": true,
+              "reason": "Reply length sufficient",
+              "details": {
+                "min": 120,
+                "len": 389
+              }
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "user": "Сухарево",
+          "requestBody": {
+            "message": "Сухарево",
+            "history": [
+              {
+                "role": "user",
+                "content": "Нужны поставщики ПНД труб в Минске, желательно с доставкой в течение 2-3 дней."
+              },
+              {
+                "role": "assistant",
+                "content": "Работаю по данным каталога Biznesinfo.\n\nБыстрый first-pass по релевантным компаниям из каталога:\n\n1. ✅ 📤 ADT center ООО — /company/biznesinfo-98383 (Автозапчасти и принадлежности; Минск, minsk; тел: (+375-17) 3603131)\n\nФокус задачи: пнд, труб, желательно, 2-3.\n\nФокус по локации: Минск.\n\nДальше могу сделать top-3 по прозрачным критериям: релевантность, локация, полнота контактов, риски."
+              }
+            ],
+            "conversationId": "c4d015eb-6cb7-4983-a77b-a74b57345975",
+            "payload": {
+              "source": "qa_runner"
+            }
+          },
+          "latencyMs": 120126,
+          "apiOk": false,
+          "apiError": {
+            "status": 504,
+            "error": "HTTPError",
+            "message": "<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body>\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+          },
+          "checks": [],
+          "reply": null
+        }
+      ],
+      "durationMs": 121329
+    }
+  ]
+}

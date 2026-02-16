@@ -1,0 +1,170 @@
+I see that there's already an evaluation file. The user is asking me to perform a QA judge evaluation for the same scenarios (UV001-UV005). Let me analyze the transcripts provided in the prompt and produce a fresh evaluation.
+
+Based on my analysis of the 5 scenarios:
+
+**UV001 (Производители обуви в Минске):**
+- Critical issues: Repeats the same single company "Глобал Шуз" 3 times despite user asking for 3-5 manufacturers
+- Ignores clarification about "men's classic shoes"
+- Turn 4 template has nonsense placeholders like "уточняется", "срок: к меньше"
+- Generic fallback to catalog categories instead of concrete manufacturers
+
+**UV002 (Заводы муки):**
+- Turn 1: Good start with 4 companies
+- Turn 2-3: Falls back to same list with "check data" warnings, no analysis of quality criteria (whiteness, gluten, batch stability)
+- Turn 3: No export readiness analysis as requested
+- Turn 4: Gives ranking instead of requested 6-point document checklist
+
+**UV003 (Где поесть → b2b):**
+- Turn 1: Gives restaurants from different cities without asking for geolocation
+- Turn 2-3: Catastrophic failure - gives completely irrelevant companies (auto centers, plumbing, fishing) instead of HoReCa/food
+- Turn 4: Template with meaningless placeholders
+
+**UV004 (Соковыжималки):**
+- Turn 1: Good start with 4 appliance manufacturers
+- Turn 2: Generic fallback - general search instructions instead of OEM/ODM capability analysis
+- Turn 3: No reliability/service comparison as requested
+- Turn 4: RFQ template has placeholders
+
+**UV005 (Экспортеры пищевой):**
+- Turn 1: Generic fallback - search instructions instead of concrete exporters
+- Turn 2: Good list of 4 dairy plants
+- Turn 3: Wrong location for Luban Cheese (Slutsk instead of Luban), only 4 of 5 requested, no confectionery
+- Turn 4: Template with placeholders, not adapted for dairy/confectionery
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV001",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.2,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Повторяет одну и ту же компанию 'Глобал Шуз' 3 раза вместо shortlist из 3-5 производителей",
+        "Игнорирует уточнение про 'мужская классическая обувь' на Turn 2",
+        "Turn 4: шаблон с бессмысленными placeholder'ами 'уточняется', 'срок: к меньше'",
+        "Generic fallback на список рубрик каталога вместо конкретных производителей"
+      ],
+      "criticalIssues": [
+        "Нет анализа 'кого проверить первым' как запрошено на Turn 3",
+        "Шаблон сообщения не заполнен реальными данными — 6 раз 'уточняется'",
+        "Нет попытки найти дополнительных производителей после уточнения"
+      ],
+      "strengths": [
+        "Честно указывает 'найдено 1 из 2' — не выдумывает несуществующие компании",
+        "Структура shortlist соответствует запрошенному формату"
+      ],
+      "nextUserProbe": "У вас в базе только одна компания? Я трижды прошу список производителей обуви."
+    },
+    {
+      "scenarioId": "UV002",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.3,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: хороший старт с 4 компаниями, но только 2 явно хлебопродуктовые",
+        "Turn 2: вместо анализа по белизне/клейковине дает тот же список с 'проверьте данные'",
+        "Turn 3: нет анализа экспортной готовности как запрошено",
+        "Turn 4: дает ranking вместо чеклиста из 6 пунктов по документам"
+      ],
+      "criticalIssues": [
+        "Несоответствие формату на Turn 4 — запрошен чеклист, получен ranking",
+        "СМАК и ДЭЙНТИ — неочевидные производители муки, скорее торговые компании",
+        "Нет ответа по критериям качества (белизна, клейковина, стабильность)"
+      ],
+      "strengths": [
+        "Turn 1: конкретные компании с контактами",
+        "Честность о границах данных"
+      ],
+      "nextUserProbe": "Вы не сделали чеклист документов. И где анализ по белизне и клейковине?"
+    },
+    {
+      "scenarioId": "UV003",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.15,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 1,
+      "reasons": [
+        "Turn 1: рестораны из разных городов без уточнения геолокации",
+        "Turn 2: катастрофический сбой — автоцентры и сантехника вместо b2b для Уручье",
+        "Turn 3: продолжает давать нерелевантные результаты вместо вариантов запросов",
+        "Turn 4: шаблон с placeholder'ами 'сформируй сообщение' — неприменим"
+      ],
+      "criticalIssues": [
+        "Полная потеря контекста на Turn 2-3 — нерелевантные категории",
+        "Не выполнен запрос '3 варианта запросов для портала'",
+        "Нет моста к b2b-поиску как ожидалось"
+      ],
+      "strengths": [
+        "Turn 1: рестораны реальные, хоть и из разных городов"
+      ],
+      "nextUserProbe": "Что происходит? Я спрашиваю про рестораны, а вы мне автоцентры показываете."
+    },
+    {
+      "scenarioId": "UV004",
+      "usefulness": 3,
+      "verdict": "useful",
+      "confidence": 0.8,
+      "userSatisfaction": 0.5,
+      "wouldContinue": true,
+      "feltGenericFallback": true,
+      "continuityScore": 3,
+      "reasons": [
+        "Turn 1: отличный старт с 4 производителями бытовой техники",
+        "Turn 2: generic fallback — общие инструкции вместо анализа OEM/ODM",
+        "Turn 3: нет сравнения 'по надежности и сервису' — все равнозначны",
+        "Turn 4: RFQ шаблон с placeholder'ами 'уточняется', 'сервису rfq'"
+      ],
+      "criticalIssues": [
+        "Н-ТиВи и Брестгазоаппарат — крупные бренды, маловероятны для OEM/ODM",
+        "Нет анализа OEM/ODM возможностей конкретных заводов",
+        "RFQ шаблон не заполнен конкретными параметрами"
+      ],
+      "strengths": [
+        "Turn 1: хороший first-pass с конкретными производителями",
+        "Turn 3: 5 вопросов для первого звонка — практично",
+        "Turn 4: структура RFQ корректная"
+      ],
+      "nextUserProbe": "А по OEM/ODM — кто из этих реально работает под частными марками?"
+    },
+    {
+      "scenarioId": "UV005",
+      "usefulness": 2,
+      "verdict": "not_useful",
+      "confidence": 0.85,
+      "userSatisfaction": 0.35,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 2,
+      "reasons": [
+        "Turn 1: generic fallback — инструкции по поиску вместо конкретных экспортеров",
+        "Turn 2: хороший список из 4 молочных комбинатов",
+        "Turn 3: неверная локация 'Слуцк' для Любанского филиала, только 4 из 5, нет кондитерских",
+        "Turn 4: шаблон с placeholder'ами, не адаптирован под молочную продукцию"
+      ],
+      "criticalIssues": [
+        "Нет сегментации по рынкам ЕАЭС/СНГ как запрошено",
+        "Нет кондитерских производств в shortlist",
+        "Неверная локация на Turn 3"
+      ],
+      "strengths": [
+        "Turn 2: хороший список молочных комбинатов с контактами",
+        "Turn 4: структура outreach-шаблона корректная"
+      ],
+      "nextUserProbe": "Где кондитерские производства? И кто из этих работает со СНГ?"
+    }
+  ]
+}
+```

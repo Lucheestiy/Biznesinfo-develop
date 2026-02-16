@@ -1,0 +1,140 @@
+Now I have a comprehensive understanding of the system. Let me provide the advisory review in the requested JSON format:
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Critical P0 issues identified: (1) Template generation produces garbled output with placeholder text 'уточняется' instead of actual values - affects UV001, UV004, UV006, UV016, UV017; (2) Multi-turn context loss in UV017 where Turn 2 fails to deliver shortlist and response is truncated; (3) Anti-link-gate logic still fails in UV012/UV022 when company context exists but not explicitly passed to lookup functions. Pass rate is 90.9% (20/22) with 2 strict failures. Judge evaluation shows 0% usefulness for UV017 due to hallucinated placeholder spam. Root cause: template post-processing logic in repairTemplatePlaceholderSpam() and sanitizeUnfilledPlaceholdersInNonTemplateReply() is insufficient - it replaces placeholders with 'уточняется' but fails to then substitute with actual extracted values from conversation history.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder spam (уточняется cascade)",
+      "why": "UV017, UV001, UV004, UV006, UV016 all show garbled template output with repeated 'уточняется' instead of actual values. This makes templates completely unusable. Judge scored usefulness=1.",
+      "expectedImpact": "Eliminates 100% of placeholder garbage in templates. Improves usefulness score from 1 to 4-5 for template scenarios.",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix multi-turn shortlist truncation in UV017",
+      "why": "Turn 2 response in UV017 is truncated and includes user's query text instead of proper shortlist. Indicates context loss between turns.",
+      "expectedImpact": "UV017 strict pass rate improves from FAIL to PASS. Enables proper shortlist delivery in multi-turn vegetable sourcing queries.",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Strengthen anti-link-gate for UV012/UV022",
+      "why": "UV012.T2.C2 and UV022.T1.C4 fail - assistant doesn't provide /company/ links when website scan is requested after initial company identification.",
+      "expectedImpact": "Improves strict pass rate from 90.9% to 95%+. Fixes website scan continuity issues.",
+      "validationScenarios": ["UV012", "UV022"]
+    },
+    {
+      "priority": "P1",
+      "title": "Add constraint verification to ranking fallback",
+      "why": "UV017 judge notes show AI listed irrelevant companies (пчеловодство, запчасти) for vegetable sourcing. Ranking fallback doesn't apply strict commodity filtering.",
+      "expectedImpact": "Reduces false positives in supplier ranking by 50%+. Improves relevance of fallback shortlists.",
+      "validationScenarios": ["UV017", "UV014"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add template format validation pre-flight",
+      "why": "Current template detection (extractTemplateMeta) only checks for Subject/Body/WhatsApp headers but doesn't validate content quality before returning to user.",
+      "expectedImpact": "Catches garbled templates before they reach users. Enables automatic retry with stronger constraints.",
+      "validationScenarios": ["UV001", "UV003", "UV004", "UV005", "UV006", "UV007", "UV016", "UV017"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Rewrite repairTemplatePlaceholderSpam() to use hint-based replacement before placeholder substitution",
+      "action": "In app/src/app/api/ai/request/route.ts, modify repairTemplatePlaceholderSpam() (lines 2879-3068) to: (1) FIRST extract all hints from conversation history using extractTemplateFillHints(), (2) THEN replace {placeholders} with hint values BEFORE any 'уточняется' substitution, (3) ONLY use 'уточняется' as absolute last resort when no hints exist. Current logic does placeholder→'уточняется' first, then tries to repair, which creates cascade failures.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:2879-3068 - Restructure the function to apply hints proactively rather than reactively repairing 'уточняется' spam",
+      "expectedImpact": "Eliminates garbled 'уточняется' output in templates. UV017 usefulness score improves from 1 to 4+.",
+      "risk": "Low - function is already isolated and has comprehensive test coverage via scenarios",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Add explicit constraint echo instruction to system prompt",
+      "action": "In buildAssistantSystemPrompt() (line 13058), add mandatory instruction: 'Before generating any template, you MUST echo back the constraints you identified from the conversation: [city], [quantity], [deadline], [product]. If any constraint is missing, ask for it BEFORE generating template.' This forces the model to acknowledge constraints explicitly.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:13058-13210 - Add constraint echo requirement to template generation section",
+      "expectedImpact": "Reduces constraint loss in multi-turn dialogs by 80%+. UV017 Turn 3 would properly include 500 кг, Минск, 3 дня constraints.",
+      "risk": "Low - additive instruction only",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV001", "UV016"]
+    },
+    {
+      "id": "R3",
+      "area": "guardrails",
+      "title": "Add post-generation template quality gate",
+      "action": "Create new function validateTemplateOutput(text, hints) that runs AFTER model generation but BEFORE returning to user. Check: (1) Count of 'уточняется' ≤ 2, (2) All hints.qty/hints.city/hints.deadline appear in output, (3) No raw user query text present (detect 'сформируй сообщение' in output). If checks fail, regenerate with stronger constraints or return fallback.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - Add new function after line 3068, call it in postProcessAssistantReply() around line 3822",
+      "expectedImpact": "Prevents garbled templates from reaching users. Enables automatic recovery.",
+      "risk": "Low - additive validation layer",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV003", "UV004", "UV005", "UV006", "UV007", "UV016", "UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Fix UV017 shortlist truncation via history context preservation",
+      "action": "In buildForcedShortlistAppendix() (line 3334), when params.candidates is empty but history contains previous search results, extract company slugs from history using extractAssistantCompanySlugsFromHistory() and rebuild candidate list. Current logic shows 'Подтвержденных карточек меньше чем запрошено' without attempting history recovery.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:3334-3387 - Add history-based candidate recovery when params.candidates is empty",
+      "expectedImpact": "UV017 Turn 2 delivers proper shortlist instead of truncated response. Fixes multi-turn context loss.",
+      "risk": "Medium - may affect other scenarios if over-aggressive",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV014", "UV007"]
+    },
+    {
+      "id": "R5",
+      "area": "retrieval",
+      "title": "Strengthen commodity filtering in ranking fallback",
+      "action": "In buildRankingFallbackAppendix() (line 999), add commodityTag-based filtering when strictPass is enabled. Currently returns 'ЖК Трейд ЧТПУП' (запчасти для спецтехники) for beet/vegetable queries. Add check: if commodityTag === 'beet', exclude companies with rubric containing 'запчасти', 'пчеловодство', 'спецтехника'.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:999-1074 - Add commodity-based exclusion filter to ranking rows generation",
+      "expectedImpact": "Eliminates irrelevant companies (пчеловодство, запчасти) from vegetable sourcing results. Judge relevance score improves.",
+      "risk": "Low - additive filtering only",
+      "effort": "S",
+      "validationScenarios": ["UV017", "UV014"]
+    },
+    {
+      "id": "R6",
+      "area": "guardrails",
+      "title": "Fix anti-link-gate for website scan continuity",
+      "action": "In postProcessAssistantReply() (line 3807), extend linkGateCandidates logic to also check for companies mentioned in previous turn's assistant response (not just historyVendorCandidates). UV012/UV022 fail because company was mentioned in Turn 1 response but not stored in historyVendorCandidates.",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:3877-3962 - Expand linkGateCandidates to parse companies from previous assistant messages using regex on /company/ paths",
+      "expectedImpact": "UV012 and UV022 strict checks pass. Website scan continuity works correctly.",
+      "risk": "Low - expands existing logic",
+      "effort": "S",
+      "validationScenarios": ["UV012", "UV022", "UV019", "UV020"]
+    },
+    {
+      "id": "R7",
+      "area": "prompt",
+      "title": "Add explicit 'no placeholder' constraint to template system prompt",
+      "action": "In buildPromptMessages() (line 13321), in the templateRequested block (line 13397), add: 'CRITICAL: Use ONLY real values from the conversation. NEVER use the word \"уточняется\" in any field. If a value is unknown, write \"[уточните: что именно]\" instead.'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts:13397-13405 - Add explicit prohibition on 'уточняется' in template mode",
+      "expectedImpact": "Reduces placeholder spam by 90%+ through explicit negative constraint.",
+      "risk": "Low - additive instruction",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017", "UV012", "UV022"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "qa_judge_uv001_005.json",
+      "qa_judge_uv006_010.json",
+      "qa_judge_uv011_015.json"
+    ],
+    "successMetrics": [
+      "Template usefulness score ≥ 4.0 for UV001, UV004, UV006, UV016, UV017",
+      "Strict pass rate ≥ 95% (21/22 scenarios)",
+      "Zero occurrences of 'уточняется' > 2 times in any template output",
+      "UV017 Turn 2 delivers complete shortlist with 3+ companies",
+      "UV012/UV022 company_path_min_count checks pass"
+    ]
+  }
+}
+```

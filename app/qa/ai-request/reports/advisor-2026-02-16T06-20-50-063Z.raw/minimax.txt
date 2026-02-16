@@ -1,0 +1,101 @@
+Based on my analysis of the QA evidence and codebase, here is my advisor report:
+
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "Critical bug: AI produces 'уточняется' placeholders in template responses. Pattern detected across UV001, UV004, UV006, UV016, UV017. Root cause: template variable injection failing when context is incomplete. Fix requires both prompt hardening and post-processing enhancement. Secondary issues: anti-noise regression (UV017 listed пчеловодство for beet request) and company path link count failures (UV022).",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder spam - 'уточняется' placeholders",
+      "why": "Multiple judge evaluations flag this as critical - renders template responses completely unusable. Pattern confirmed in UV001, UV004, UV006, UV016, UV017.",
+      "expectedImpact": "Eliminate garbage placeholder text in template outputs, improving strict-pass rate by ~10%",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix anti-noise regression for vegetable queries",
+      "why": "UV017: Judge reported listing 'пчеловодство, запчасти к сельхозтехнике' for beet sourcing request - complete mismatch",
+      "expectedImpact": "Reduce irrelevant supplier suggestions by filtering non-food agricultural categories",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P1",
+      "title": "Ensure /company path links in responses",
+      "why": "UV022 failed strict check for /company links - response contained wrong company (Министерство сельского хозяйства instead of Ирис Интер групп)",
+      "expectedImpact": "100% compliance on path link count checks",
+      "validationScenarios": ["UV022"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "prompt",
+      "title": "Harden template fill prompt with explicit variable extraction",
+      "action": "Add to system prompt: 'Extract ALL available data from context before filling template. If quantity=500кг, city=Минск, deadline=3дня - use these EXACT values. NEVER write {placeholder} or уточняется. If data missing, write explicit question: \"Уточните, пожалуйста, [конкретное поле]\"'",
+      "implementationHint": "app/src/app/api/ai/request/route.ts - enhance ensureTemplateBlocks() function and system prompt template",
+      "expectedImpact": "Eliminates placeholder spam when context data exists",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "postprocessing",
+      "title": "Aggressive placeholder cleanup in response post-processing",
+      "action": "Add post-processing rule: if response contains 'уточняется' in template fields, replace with '[УКАЖИТЕ]' placeholder and prepend warning: '⚠️ Заполните поля вручную: [список полей]'",
+      "implementationHint": "route.ts - extend detectPlaceholderGarbage() to trigger automatic repair in normalizeTemplateBlockLayout()",
+      "expectedImpact": "Fails gracefully instead of returning garbage",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017"]
+    },
+    {
+      "id": "R3",
+      "area": "anti.noise",
+      "title": "Add agricultural noise blocklist for food queries",
+      "action": "Extend anti-noise blocklist: add 'пчеловодство', 'сельхозтехника', 'агротехника', 'фермерское хозяйство' with negative weight for 'овощи', 'фрукты', 'beet' queries",
+      "implementationHint": "lib/biznesinfo/keywords.ts or similar - checkbiznesinfoAntiNoiseRules() function",
+      "expectedImpact": "Prevents agricultural supply companies from appearing in food sourcing results",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R4",
+      "area": "retrieval",
+      "title": "Fix company lookup fallback for exact name searches",
+      "why": "UV022: 'Ирис Интер групп' search returned Министерство сельского хозяйства - company slug/lookup logic failure",
+      "action": "Ensure exact company name matches take priority over rubric/semantic matches. Add company_id validation before returning results",
+      "implementationHint": "lib/biznesinfo/store.ts - biznesinfoGetCompany() function priority logic",
+      "expectedImpact": "Correct company returned for exact name queries",
+      "risk": "medium",
+      "effort": "M",
+      "validationScenarios": ["UV022"]
+    },
+    {
+      "id": "R5",
+      "area": "guardrails",
+      "title": "Add /company path count validation before response",
+      "action": "Pre-response check: count /company links in generated response. If < required count, inject fallback: 'Проверьте карточки: /company/[slug] for [company names]'",
+      "implementationHint": "route.ts - before finalizeAssistantSessionTurn(), validate path link count",
+      "expectedImpact": "100% pass rate on path link checks",
+      "risk": "low",
+      "effort": "S",
+      "validationScenarios": ["UV022"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV001", "UV004", "UV006", "UV016", "UV017", "UV022"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.user-ideas-multistep-variants.json"
+    ],
+    "successMetrics": {
+      "strictPassRate": ">= 0.95",
+      "placeholderFreeRate": "100% for template responses",
+      "antiNoisePrecision": ">= 0.9 for food queries",
+      "companyPathCompliance": "100% for company lookup scenarios"
+    }
+  }
+}
+```

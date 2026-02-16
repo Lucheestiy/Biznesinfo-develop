@@ -1,0 +1,106 @@
+```json
+{
+  "advisor": "minimax",
+  "executiveSummary": "The UV001 scenario failure reveals 3 critical bugs: (1) context persistence failure — assistant repeats same 1 company across all turns despite explicit refinement requests, (2) template variable substitution completely broken — outputs raw placeholders like 'уточняется', (3) retrieval gives up too early instead of offering alternatives. The 18% useful rate (MiniMax) and 27% (Kimi) suggest systematic multi-turn context handling issues. Focus on fixing template substitution first as it blocks all template-based scenarios, then address context window management and result diversification.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template variable substitution system",
+      "why": "Template generation outputs raw placeholders instead of filled values across ALL scenarios, completely breaking B2B outreach functionality. This is the highest-impact single fix.",
+      "expectedImpact": "Template-based scenarios should pass validation; users can actually send messages to suppliers",
+      "validationScenarios": ["UV001", "all template-tagged scenarios"]
+    },
+    {
+      "priority": "P0",
+      "title": "Implement result diversification fallback",
+      "why": "Assistant gives up after finding 1 result instead of surfacing alternatives. Users explicitly asked for 3-5 manufacturers but got same 1 company repeated across 3 turns.",
+      "expectedImpact": "Reduce single-result failures; surface available alternatives when primary query returns limited results",
+      "validationScenarios": ["UV001", "all low-result scenarios"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix multi-turn context preservation for refined queries",
+      "why": "After user clarification 'мужская классическая обувь', assistant ignores the refinement and returns same shortlist. Context window drops accumulated requirements.",
+      "expectedImpact": "Subsequent turns should respect prior context and refinement hints",
+      "validationScenarios": ["UV001", "multi-turn refinement scenarios"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add export readiness and B2B criteria extraction",
+      "why": "Explicit requests for 'export ready' suppliers and B2B equipment criteria are completely ignored in later turns",
+      "expectedImpact": "Meet B2B-specific requirements in relevant queries",
+      "validationScenarios": ["UV003", "UV012", "export-tagged scenarios"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Fix template variable substitution - add null-safety and validation",
+      "action": "Modify template rendering to: (1) fail-fast on missing variables with clear error, (2) log which variables are missing during generation, (3) provide fallback template when substitution fails, (4) validate all placeholders resolved before output",
+      "implementationHint": "src/ai/generation/template-renderer.ts or similar - find templateRender() function, add validation step post-substitution",
+      "expectedImpact": "Eliminates broken template outputs like 'уточняется' placeholders",
+      "risk": "Low - defensive coding, template rendering is isolated",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV005", "UV006"]
+    },
+    {
+      "id": "R2",
+      "area": "retrieval",
+      "title": "Implement result count floor with diversification hint",
+      "action": "When search returns < 3 results, inject 'diversify' hint to retrieval layer: expand geographic scope by 50km, relax secondary filters (type, size), prioritize unique categories over duplicates",
+      "implementationHint": "src/ai/retrieval/company-search.ts or similar - modify result processing to check count, trigger diversification if below threshold",
+      "expectedImpact": "Prevents single-result stagnation; surfaces alternatives",
+      "risk": "Medium - affects retrieval behavior",
+      "effort": "M",
+      "validationScenarios": ["UV001", "low-result scenarios"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Preserve accumulated constraints in multi-turn context",
+      "action": "Add explicit constraint consolidation step: (1) extract all prior constraints from conversation history, (2) merge with current query, (3) verify new constraints don't contradict prior ones, (4) surface merged constraints to retrieval",
+      "implementationHint": "src/ai/context/conversation-manager.ts - add consolidateContext() method called before each retrieval",
+      "expectedImpact": "Turn 2+ queries respect Turn 1 refinements like 'мужская классическая обувь'",
+      "risk": "Low - context enhancement only",
+      "effort": "M",
+      "validationScenarios": ["UV001", "multi-turn scenarios"]
+    },
+    {
+      "id": "R4",
+      "area": "prompt",
+      "title": "Add B2B-specific criterion extraction for equipment/suppliers",
+      "action": "When query contains restaurant/food service keywords, extract implicit B2B criteria: equipment suppliers, wholesale pricing, delivery terms, certification requirements. Include in retrieval if detected.",
+      "implementationHint": "src/ai/retrieval/QueryParser.ts - add detectB2BCriteria() for food-service domain",
+      "expectedImpact": "UV003 type queries get relevant equipment/supplier recommendations",
+      "risk": "Low - pattern matching enhancement",
+      "effort": "S",
+      "validationScenarios": ["UV003", "UV004", "UV005"]
+    },
+    {
+      "id": "R5",
+      "area": "geo",
+      "title": "Fix location parsing for refined geo queries",
+      "why": "Locations in turn 2-3 broken: 'пинск' rendered as 'брест, brest', 'минск' as 'витебск, vitebsk' - geo mapping drops accumulated context",
+      "implementationHint": "src/ai/geo/LocationResolver.ts - verify geoContext.merge() preserves prior resolved locations, add unit test for multi-turn geo",
+      "expectedImpact": "Correct geo-targeting in multi-turn conversations",
+      "risk": "Low - geo resolution fix",
+      "effort": "S",
+      "validationScenarios": ["UV001", "geo-tagged scenarios"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV001", "UV003", "UV005", "UV006", "UV012"],
+    "regressionSuites": [
+      "app/qa/ai-request/scenarios.regressions.template*.json",
+      "app/qa/ai-request/scenarios.regressions.multi-turn*.json"
+    ],
+    "successMetrics": [
+      "Template scenarios pass rate >= 80%",
+      "Multi-turn scenarios usefulness >= 2.5 average",
+      "Single-result retrieval rate <= 10% of scenarios",
+      "Geo-adhesion accuracy >= 95% in multi-turn"
+    ]
+  }
+}
+```

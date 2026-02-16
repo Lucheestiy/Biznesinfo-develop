@@ -2913,20 +2913,21 @@ function repairTemplatePlaceholderSpam(
   const hints = extractTemplateFillHints(params);
 
   // Count how many values we have
-  const hasHints = hints.qty || hints.city || hints.productService || hints.deadline || hints.delivery;
-  
-  // If no specific hints found, use generic fallback values to replace "уточняется"
-  // This ensures templates don't have placeholder spam even when context is unclear
-  const effectiveHints = hasHints ? hints : {
-    qty: "большой объем",
-    city: "Минск",
-    productService: "ваш товар",
-    delivery: "доставка",
-    deadline: "уточните срок"
-  };
+  const hasRealHints = Boolean(hints.qty || hints.city || hints.productService || hints.deadline || hints.delivery);
+
+  // IMPORTANT: Only use hints if we have REAL data from conversation
+  // Do NOT use generic fallback values - they create poor quality output
+  // If no real hints, let the template fail properly (detectPlaceholderGarbage will handle it)
+  const effectiveHints = hasRealHints ? hints : null;
 
   // AGGRESSIVE REPAIR: Replace standalone "уточняется" with actual hint values
   // This is more effective than relying on context words near placeholders
+
+  // If no real hints, don't try to replace placeholders - let them stay for proper error handling
+  // This prevents generating low-quality output with generic fallbacks
+  if (!effectiveHints) {
+    return out;
+  }
 
   // Strategy: Replace "уточняется" with the most relevant hint based on position/index
   // First, split template into lines and replace strategically

@@ -1,0 +1,162 @@
+Based on my comprehensive analysis of the QA data, I now have a clear picture of the issues. Let me provide the advisory JSON.
+
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "Biznesinfo assistant shows critical systemic failures in three areas: (1) template generation produces unusable placeholder garbage ('уточняется' patterns), (2) context continuity breaks in multi-turn conversations causing repetition or irrelevant results, (3) retrieval returns wrong-category companies when exact matches are scarce. Average usefulness is 1.8/5 with 27% useful rate. The 504 Gateway Timeout in UV001 indicates infrastructure instability. Fix template post-processing first (highest ROI), then add constraint tracking enforcement, then improve retrieval relevance filtering.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Fix template placeholder garbage (уточняется)",
+      "why": "Template generation is completely broken - outputs contain placeholders like 'уточняется', 'к сожалению', 'к меньше' that make templates unusable. This affects UV001, UV004, UV006, UV016 directly and destroys user trust.",
+      "expectedImpact": "Increase usefulRate from 27% to 45%+ by making templates actionable. Reduces #1 judge complaint category.",
+      "validationScenarios": ["UV001", "UV004", "UV006", "UV016", "S036", "S037"]
+    },
+    {
+      "priority": "P0",
+      "title": "Add constraint tracking enforcement in prompt",
+      "why": "Assistant ignores user constraints from previous turns (location, quantity, delivery time). Judge reports 'полное отсутствие контекстной непрерывности' as top issue. Code has constraint detection but no enforcement in LLM prompt.",
+      "expectedImpact": "Reduce continuity failures by 60%. Fixes UV001 turn 2, MX001 turn 4, S006-S010 cluster.",
+      "validationScenarios": ["UV001", "MX001", "S006", "S007", "S008", "S010"]
+    },
+    {
+      "priority": "P1",
+      "title": "Fix retrieval relevance - wrong category hallucination",
+      "why": "When exact matches not found, assistant returns completely wrong categories (сельхозфермы for молочные заводы, бухгалтеры for сварщики). This is worse than admitting no matches.",
+      "expectedImpact": "Eliminate 0-rated scenarios (S008, S013, S018). Increase user trust.",
+      "validationScenarios": ["S008", "S013", "S018", "S009", "UV005"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement conversation memory compression",
+      "why": "Turn 3+ often shows complete context loss (S010, MX003). History truncation at 12 messages loses critical constraints.",
+      "expectedImpact": "Improve multi-turn scenarios by 40%. Fixes S010, MX003, UV012-UV014.",
+      "validationScenarios": ["S010", "MX003", "UV012", "UV013", "UV014"]
+    },
+    {
+      "priority": "P2",
+      "title": "Add company count guarantee enforcement",
+      "why": "User requests 3-5 companies, gets 1 or 0 with excuses. Assistant should expand search or admit limitations honestly.",
+      "expectedImpact": "Reduce 'gives up after 1 result' complaints. Improves UV001, UV101, UV107.",
+      "validationScenarios": ["UV001", "UV101", "UV107", "S016"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "template",
+      "title": "Add template post-processor to strip placeholders",
+      "action": "In route.ts around line 214 (extractTemplateMeta), add a post-processing step that rejects templates containing placeholder patterns ('уточняется', 'к сожалению', 'к меньше', '[указать]', '[вставить]'). If detected, trigger a retry with stricter prompt or return a fallback message instead of broken template.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. Function: detectPlaceholderGarbage (already exists at line 281). Hook it into the response pipeline after extractTemplateMeta. If hasGarbage=true, increment a retry counter and regenerate with explicit instruction: 'Заполни ВСЕ поля шаблона конкретными данными. Запрещено использовать слова: уточняется, к сожалению, указать, вставить.'",
+      "expectedImpact": "Eliminates broken templates. UV001 usefulness increases from 1 to 3+.",
+      "risk": "May increase latency by 1 retry cycle. Mitigate with max 2 retries.",
+      "effort": "S",
+      "validationScenarios": ["UV001", "UV004", "UV006", "S036", "S037", "S038"]
+    },
+    {
+      "id": "R2",
+      "area": "prompt",
+      "title": "Inject constraint reminder into system prompt",
+      "action": "The constraint tracking code (lines 329-446) detects constraints but doesn't enforce them in the LLM prompt. Build a constraint summary from previous turns and inject it into the system prompt: 'USER CONSTRAINTS FROM PREVIOUS TURNS: [location: Малиновка], [quantity: 2-3т], [delivery: завтра утром]. YOU MUST ADDRESS THESE CONSTRAINTS EXPLICITLY IN YOUR RESPONSE.'",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. Function: buildConstraintReminderNote (exists at line 419). Modify to return actual constraint summary, not just warning. Inject into system prompt in the message construction logic around line 1200+ where history is processed.",
+      "expectedImpact": "Fixes continuity failures in 60% of multi-turn scenarios. S006-S010 cluster improves significantly.",
+      "risk": "May increase token usage by ~200 tokens per request. Acceptable for quality gain.",
+      "effort": "M",
+      "validationScenarios": ["UV001", "MX001", "S006", "S007", "S008", "S010", "D003"]
+    },
+    {
+      "id": "R3",
+      "area": "retrieval",
+      "title": "Add rubric relevance filter before returning results",
+      "action": "Before returning search results to user, verify that company rubrics match the query intent. If user asks for 'молочные заводы' and top result is 'сельхозферма', filter it out and continue searching. Current code in biznesinfoSearch returns results without rubric validation.",
+      "implementationHint": "File: src/lib/biznesinfo/store.ts. Function: biznesinfoSearch. After getting results from MeiliSearch, add a scoring function that checks rubric match against query keywords. Score < 0.3 = reject and try next page or return 'no matches found' honestly.",
+      "expectedImpact": "Eliminates catastrophic wrong-category results (S008, S013, S018).",
+      "risk": "May reduce result count in sparse categories. Add 'expanded search' option for edge cases.",
+      "effort": "M",
+      "validationScenarios": ["S008", "S013", "S018", "S009", "UV005"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Implement minimum company count enforcement",
+      "action": "When user explicitly requests N companies (3-5, top-3, etc.), enforce minimum count before returning. If search returns < N, automatically expand search (remove filters, try synonyms, search broader region) or honestly state 'Found only X companies in catalog' instead of returning 1 company repeatedly.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. After biznesinfoSearch call, check if user requested specific count (regex: /(?:топ|top)?[-\\s]?(\d+)|(\d+)[-\s]?(?:компани|поставщик)/i). If results.length < requestedCount, trigger search expansion with relaxed filters.",
+      "expectedImpact": "Fixes UV001, UV101 'only 1 company' issue. Improves user satisfaction.",
+      "risk": "Expansion may return lower relevance. Add relevance threshold.",
+      "effort": "M",
+      "validationScenarios": ["UV001", "UV101", "UV107", "S016", "S017"]
+    },
+    {
+      "id": "R5",
+      "area": "prompt",
+      "title": "Add conversation summary for long threads",
+      "action": "For conversations with >6 turns, compress history into a running summary instead of truncating. Current code truncates at ASSISTANT_HISTORY_MAX_MESSAGES=12, losing critical context from turn 1-2.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. Function: getAssistantSessionHistory. Before returning history, if messages.length > 8, call LLM to summarize turns 1-(n-3) into 'CONTEXT SUMMARY: User needs X in location Y with constraints Z'. Keep last 3 turns verbatim.",
+      "expectedImpact": "Fixes S010, MX003 turn-3+ failures. Improves continuity score from 2 to 4.",
+      "risk": "Adds 1 LLM call per request with long history. Cache summaries.",
+      "effort": "L",
+      "validationScenarios": ["S010", "MX003", "UV012", "UV013", "UV014"]
+    },
+    {
+      "id": "R6",
+      "area": "geo",
+      "title": "Fix region vs city disambiguation",
+      "action": "When user says 'Минская область, не город Минск', assistant returns companies from Брест (MX001). The normalizeCityForFilter function doesn't handle 'область' vs 'город' distinction properly.",
+      "implementationHint": "File: src/lib/utils/location.ts. Function: normalizeCityForFilter. Add explicit handling for 'X область' vs 'город X' patterns. When 'область' specified, use region filter exclusively, exclude city matches. Add test cases for Минская/Гродненская/Брестская область.",
+      "expectedImpact": "Fixes MX001, MX002 geo confusion. Improves location adherence.",
+      "risk": "Low - isolated to location normalization.",
+      "effort": "S",
+      "validationScenarios": ["MX001", "MX002", "GA001", "GA002"]
+    },
+    {
+      "id": "R7",
+      "area": "ranking",
+      "title": "Add explicit ranking rationale requirement",
+      "action": "When user requests ranking/shortlist, assistant often returns list without explaining why. Add prompt requirement: 'For each ranked company, explain: 1) Why it matches the query, 2) Why this rank position, 3) Key risk or verification needed.'",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. Function: looksLikeRankingRequest (line 248). When true, append to system prompt: 'RANKING REQUIRED: Provide transparent logic for each position. Never rank without explanation.'",
+      "expectedImpact": "Improves UV004, S041-S045 scenarios. Addresses 'прозрачная логика' user requests.",
+      "risk": "Increases response length. Truncate to essential rationale.",
+      "effort": "S",
+      "validationScenarios": ["UV004", "S041", "S042", "S043", "S044", "S045"]
+    },
+    {
+      "id": "R8",
+      "area": "guardrails",
+      "title": "Add response self-check for continuity",
+      "action": "Before streaming response, check if it addresses constraints from previous 2 turns. If not, append reminder to assistant's own response. This catches continuity breaks before they reach user.",
+      "implementationHint": "File: app/src/app/api/ai/request/route.ts. After generating response text, run checkConstraintsInResponse (exists at line 398). If missing constraints found, prepend warning to response: '[Note: Previous constraints not fully addressed: X, Y]' or trigger regeneration.",
+      "expectedImpact": "Catches 50% of continuity failures before they reach user.",
+      "risk": "Adds latency. Only run for multi-turn conversations.",
+      "effort": "M",
+      "validationScenarios": ["UV001", "S006", "S007", "S010", "MX003"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": [
+      "UV001",
+      "S006",
+      "S008",
+      "S010",
+      "MX001",
+      "MX003",
+      "UV101",
+      "UV107"
+    ],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.milk-brest-mogilev.json",
+      "scenarios.regressions.milk-onion-city-switch.json",
+      "scenarios.regressions.geo-ambiguity.json",
+      "scenarios.regressions.switchback-topic.json"
+    ],
+    "successMetrics": [
+      "usefulRate >= 0.60 (from current 0.27)",
+      "averageUsefulness >= 3.0 (from current 1.8)",
+      "continuityScore >= 3.5 average (from current 2.1)",
+      "template placeholderCount = 0 in all outputs",
+      "zero 504 Gateway Timeout errors in 100 runs",
+      "strictPass rate >= 0.70 for multi-turn scenarios"
+    ]
+  }
+}
+```

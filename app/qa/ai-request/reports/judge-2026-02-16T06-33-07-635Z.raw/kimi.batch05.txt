@@ -1,0 +1,76 @@
+Based on the provided scenarios, I need to evaluate UV021 and UV022 as a frustrated business user.
+
+**UV021 Analysis:**
+- Turn 1: User asks for tags for "Ирис Интер групп" related to analytics. Assistant provides 20 relevant tags for logistics company.
+- Turn 2: User asks for UTM structure. Assistant provides UTM templates.
+- Turn 3: User asks to find latest news on the company's website. Assistant responds with completely wrong company (САВАНА СЕРВИС ООО) and wrong website (ksa-grodno.by).
+- Turn 4: User says "Find on the company card." Assistant responds with a list of completely unrelated companies (18 УП, АВАНТАЖ-АГРО).
+
+**Critical issues in UV021:**
+1. Complete loss of context - assistant forgets "Ирис Интер групп" and returns random companies
+2. No continuity between turns
+3. Generic fallback behavior - instead of searching for the company in the catalog, returns random results
+4. User would definitely not continue this conversation
+
+**UV022 Analysis:**
+- Turn 1: User explicitly searches for "Ирис Интер групп" in Minsk. Assistant responds with generic rubric advice about search categories instead of actually finding the company.
+- Turn 2: User asks about latest news on their website. Assistant responds with completely unrelated companies (Ministry of Agriculture, Автомобильные конструкции).
+
+**Critical issues in UV022:**
+1. Turn 1: Generic fallback - instead of searching and finding the company, gives category advice
+2. Turn 2: Complete loss of context, returns random companies instead of news from "Ирис Интер групп"
+3. No continuity - didn't establish the company in context from Turn 1
+
+```json
+{
+  "judge": "kimi",
+  "ratings": [
+    {
+      "scenarioId": "UV021",
+      "usefulness": 1,
+      "verdict": "not_useful",
+      "confidence": 0.9,
+      "userSatisfaction": 0.1,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Assistant completely lost company context after 2 successful turns",
+        "Turn 3 returns wrong company (САВАНА СЕРВИС) instead of Ирис Интер групп",
+        "Turn 4 returns random unrelated companies instead of the requested one"
+      ],
+      "criticalIssues": [
+        "Total context amnesia - forgot Ирис Интер групп immediately after working with it",
+        "Generic fallback to random company listings instead of searching catalog",
+        "No error recovery or acknowledgment of inability to find the company"
+      ],
+      "strengths": [
+        "First two turns were relevant and useful"
+      ],
+      "nextUserProbe": "Почему ты мне предлагаешь Савану Сервис? Я спрашивал про Ирис Интер групп!"
+    },
+    {
+      "scenarioId": "UV022",
+      "usefulness": 0,
+      "verdict": "not_useful",
+      "confidence": 0.95,
+      "userSatisfaction": 0.0,
+      "wouldContinue": false,
+      "feltGenericFallback": true,
+      "continuityScore": 0,
+      "reasons": [
+        "Turn 1: Generic rubric advice instead of actually finding the requested company",
+        "Turn 2: Returns completely unrelated companies (Ministry of Agriculture, Автомобильные конструкции)",
+        "No attempt to establish Ирис Интер групп in context"
+      ],
+      "criticalIssues": [
+        "Explicit search request ignored - assistant gives category browsing advice instead",
+        "No company found or established in context",
+        "News request returns random companies, complete hallucination"
+      ],
+      "strengths": [],
+      "nextUserProbe": "Ты вообще искал Ирис Интер групп? Почему мне показывают министерство сельского хозяйства?"
+    }
+  ]
+}
+```
