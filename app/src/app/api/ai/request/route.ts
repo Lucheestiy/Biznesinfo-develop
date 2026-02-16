@@ -7649,6 +7649,67 @@ async function generateOpenAiReply(params: {
   }
 }
 
+// MiniMax uses a different API endpoint and response format
+async function generateMiniMaxReply(params: {
+  apiKey: string;
+  model: string;
+  prompt: PromptMessage[];
+  timeoutMs: number;
+  maxTokens: number;
+  temperature?: number;
+  signal?: AbortSignal;
+}): Promise<{ text: string; usage: AssistantUsage | null }> {
+  const url = "https://api.minimax.io/v1/text/chatcompletion_v2";
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), params.timeoutMs);
+  const onAbort = () => controller.abort();
+  params.signal?.addEventListener("abort", onAbort, { once: true });
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${params.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: params.model,
+        messages: params.prompt.map((m) => ({ role: m.role, content: m.content })),
+        temperature: Number.isFinite(params.temperature) ? Math.max(0, Math.min(1, Number(params.temperature))) : 0.2,
+        max_tokens: Math.max(64, Math.min(4096, Math.floor(params.maxTokens))),
+      }),
+      signal: controller.signal,
+    });
+
+    const raw = await res.text();
+    let data: any = null;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = null;
+    }
+
+    // Check MiniMax-specific error in base_resp
+    const baseResp = data?.base_resp;
+    if (baseResp?.status_code && baseResp.status_code !== 0) {
+      const code = baseResp.status_code;
+      const message = baseResp.status_msg || "Unknown error";
+      throw new Error(`MiniMax request failed (${code}): ${message}`);
+    }
+
+    if (!res.ok) {
+      throw new Error(`MiniMax request failed with ${res.status}`);
+    }
+
+    const content = data?.choices?.[0]?.message?.content;
+    if (typeof content !== "string" || !content.trim()) throw new Error("MiniMax returned empty response");
+    return { text: content.trim(), usage: parseAssistantUsage(data?.usage) };
+  } finally {
+    clearTimeout(timer);
+    params.signal?.removeEventListener("abort", onAbort);
+  }
+}
+
 async function generateCodexReply(params: {
   accessToken: string;
   accountId?: string | null;
@@ -14429,7 +14490,7 @@ export async function POST(request: Request) {
     }
 
     if (provider === "minimax" && !canceled) {
-      providerMeta = { provider: "minimax", model: providerModelOverride || pickEnvString("MINIMAX_MODEL", "MiniMax-M2.5") };
+      providerMeta = { provider: "minimax", model: providerModelOverride || pickEnvString("MINIMAX_MODEL", "M2-her") };
       const apiKey = (process.env.MINIMAX_API_KEY || "").trim();
 
       if (!apiKey) {
@@ -14442,9 +14503,8 @@ export async function POST(request: Request) {
           : 0.2;
 
         try {
-          const minimax = await generateOpenAiReply({
+          const minimax = await generateMiniMaxReply({
             apiKey,
-            baseUrl: pickEnvString("MINIMAX_BASE_URL", "https://api.minimax.io/v1"),
             model: providerMeta.model!,
             prompt,
             timeoutMs: Math.max(1000, Math.min(120_000, pickEnvInt("MINIMAX_TIMEOUT_SEC", 20) * 1000)),
