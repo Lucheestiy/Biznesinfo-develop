@@ -6556,7 +6556,7 @@ function postProcessAssistantReply(params: {
   if (hasExplicitWebsiteCheckRequest && isShortlistOutput) {
     // Check if there's already a source URL or fallback phrase in the response
     const hasExplicitSourceURL = /(?:source:|источник:|https?:\/\/)/iu.test(out);
-    const hasFallbackPhrase = /(?:нет\b|не\s+удалось|не\s+могу|нет\s+самих|не\s+удалось\s+надежно\s+прочитать\s+сайты|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен)/iu.test(out);
+    const hasFallbackPhrase = /(?:нет\b|не\s+удалось|не\s+могу|нет\s+самих|не\s+удалось\s+надежно\s+прочитать\s+сайты|подтвержденных\s+карточек\s*[,.]?\s*меньше|меньше\s*[,.]?\s*чем\s*[,.]?\s*запрошен|меньше\s*[,.]?\s*запрошен|по\s+текущим\s+данным)/iu.test(out);
     
     // If no source URL and no fallback phrase, add explicit fallback
     if (!hasExplicitSourceURL && !hasFallbackPhrase) {
