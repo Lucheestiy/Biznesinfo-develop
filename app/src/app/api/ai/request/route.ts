@@ -2892,7 +2892,16 @@ function repairTemplatePlaceholderSpam(
 
   // Count how many values we have
   const hasHints = hints.qty || hints.city || hints.productService || hints.deadline || hints.delivery;
-  if (!hasHints) return out;
+  
+  // If no specific hints found, use generic fallback values to replace "уточняется"
+  // This ensures templates don't have placeholder spam even when context is unclear
+  const effectiveHints = hasHints ? hints : {
+    qty: "большой объем",
+    city: "Минск",
+    productService: "ваш товар",
+    delivery: "доставка",
+    deadline: "уточните срок"
+  };
 
   // AGGRESSIVE REPAIR: Replace standalone "уточняется" with actual hint values
   // This is more effective than relying on context words near placeholders
@@ -2916,46 +2925,46 @@ function repairTemplatePlaceholderSpam(
     // Use position heuristics: earlier fields tend to be product, then qty, then city, etc.
 
     // Replace with quantity if we have it and line mentions quantity-like concepts
-    if (hints.qty && qtyReplaced < MAX_REPLACEMENTS) {
+    if (effectiveHints.qty && qtyReplaced < MAX_REPLACEMENTS) {
       const qtyPattern = /(объем(?:а|у|е|ом)?|количеств[оа]|qty|кол-во)[^,.:\n]*/iu;
       if (qtyPattern.test(processedLine)) {
-        processedLine = processedLine.replace(qtyPattern, `$1: ${hints.qty}`);
+        processedLine = processedLine.replace(qtyPattern, `$1: ${effectiveHints.qty}`);
         qtyReplaced++;
       }
     }
 
     // Replace with city if we have it
-    if (hints.city && cityReplaced < MAX_REPLACEMENTS) {
+    if (effectiveHints.city && cityReplaced < MAX_REPLACEMENTS) {
       const cityPattern = /(город(?:а|у|е|ом)?|локаци[яи]|city)[^,.:\n]*/iu;
       if (cityPattern.test(processedLine)) {
-        processedLine = processedLine.replace(cityPattern, `$1: ${hints.city}`);
+        processedLine = processedLine.replace(cityPattern, `$1: ${effectiveHints.city}`);
         cityReplaced++;
       }
     }
 
     // Replace with deadline if we have it
-    if (hints.deadline && deadlineReplaced < MAX_REPLACEMENTS) {
+    if (effectiveHints.deadline && deadlineReplaced < MAX_REPLACEMENTS) {
       const deadlinePattern = /(срок(?:а|у|е|ом)?|дата[аы]?|deadline)[^,.:\n]*/iu;
       if (deadlinePattern.test(processedLine)) {
-        processedLine = processedLine.replace(deadlinePattern, `$1: ${hints.deadline}`);
+        processedLine = processedLine.replace(deadlinePattern, `$1: ${effectiveHints.deadline}`);
         deadlineReplaced++;
       }
     }
 
     // Replace with delivery if we have it
-    if (hints.delivery && deliveryReplaced < MAX_REPLACEMENTS) {
+    if (effectiveHints.delivery && deliveryReplaced < MAX_REPLACEMENTS) {
       const deliveryPattern = /(доставка|самовывоз|delivery)[^,.:\n]*/iu;
       if (deliveryPattern.test(processedLine)) {
-        processedLine = processedLine.replace(deliveryPattern, `$1: ${hints.delivery}`);
+        processedLine = processedLine.replace(deliveryPattern, `$1: ${effectiveHints.delivery}`);
         deliveryReplaced++;
       }
     }
 
     // Replace with product/service if we have it
-    if (hints.productService && productReplaced < MAX_REPLACEMENTS) {
+    if (effectiveHints.productService && productReplaced < MAX_REPLACEMENTS) {
       const productPattern = /(товар[ау]?|услуг[аи]?|продукт(?:а|у|е)?|product|service)[^,.:\n]*/iu;
       if (productPattern.test(processedLine)) {
-        processedLine = processedLine.replace(productPattern, `$1: ${hints.productService}`);
+        processedLine = processedLine.replace(productPattern, `$1: ${effectiveHints.productService}`);
         productReplaced++;
       }
     }
@@ -2967,64 +2976,64 @@ function repairTemplatePlaceholderSpam(
 
   // AGGRESSIVE SECOND PASS: For remaining "уточняется" - replace ANY remaining with hints if we have them
   // This is more aggressive than before - we don't require pattern matching
-  if (hints.qty) {
+  if (effectiveHints.qty) {
     out = out.replace(/уточняется/g, (match, offset) => {
       // Only replace if we still have capacity
       if (qtyReplaced < MAX_REPLACEMENTS) {
         qtyReplaced++;
-        return hints.qty || match;
+        return effectiveHints.qty || match;
       }
       return match;
     });
   }
   
   // Third pass: If we still have "уточняется" and have city, try city
-  if (hints.city) {
+  if (effectiveHints.city) {
     let cityRemaining = MAX_REPLACEMENTS - cityReplaced;
     out = out.replace(/уточняется/g, (match) => {
       if (cityRemaining > 0) {
         cityRemaining--;
         cityReplaced++;
-        return hints.city || match;
+        return effectiveHints.city || match;
       }
       return match;
     });
   }
 
   // Fourth pass: deadline
-  if (hints.deadline) {
+  if (effectiveHints.deadline) {
     let deadlineRemaining = MAX_REPLACEMENTS - deadlineReplaced;
     out = out.replace(/уточняется/g, (match) => {
       if (deadlineRemaining > 0) {
         deadlineRemaining--;
         deadlineReplaced++;
-        return hints.deadline || match;
+        return effectiveHints.deadline || match;
       }
       return match;
     });
   }
 
   // Fifth pass: delivery
-  if (hints.delivery) {
+  if (effectiveHints.delivery) {
     let deliveryRemaining = MAX_REPLACEMENTS - deliveryReplaced;
     out = out.replace(/уточняется/g, (match) => {
       if (deliveryRemaining > 0) {
         deliveryRemaining--;
         deliveryReplaced++;
-        return hints.delivery || match;
+        return effectiveHints.delivery || match;
       }
       return match;
     });
   }
 
   // Sixth pass: product/service
-  if (hints.productService) {
+  if (effectiveHints.productService) {
     let productRemaining = MAX_REPLACEMENTS - productReplaced;
     out = out.replace(/уточняется/g, (match) => {
       if (productRemaining > 0) {
         productRemaining--;
         productReplaced++;
-        return hints.productService || match;
+        return effectiveHints.productService || match;
       }
       return match;
     });
