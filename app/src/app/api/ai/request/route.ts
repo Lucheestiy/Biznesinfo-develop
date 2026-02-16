@@ -13297,6 +13297,7 @@ function buildAssistantPrompt(params: {
   shortlistFacts?: string | null;
   promptInjection?: { flagged: boolean; signals: string[] };
   responseMode?: AssistantResponseMode;
+  fillHints?: TemplateFillHints | null;
 }): PromptMessage[] {
   const prompt: PromptMessage[] = [{ role: "system", content: buildAssistantSystemPrompt() }];
 
@@ -13360,12 +13361,24 @@ function buildAssistantPrompt(params: {
   }
 
   if (params.responseMode?.templateRequested) {
+    // Build explicit hints string for template filling
+    const hints: string[] = [];
+    if (params.fillHints) {
+      if (params.fillHints.productService) hints.push(`товар/услуга: ${params.fillHints.productService}`);
+      if (params.fillHints.qty) hints.push(`объём: ${params.fillHints.qty}`);
+      if (params.fillHints.city) hints.push(`город: ${params.fillHints.city}`);
+      if (params.fillHints.delivery) hints.push(`доставка: ${params.fillHints.delivery}`);
+      if (params.fillHints.deadline) hints.push(`срок: ${params.fillHints.deadline}`);
+    }
+    const hintsContext = hints.length > 0 ? `Известные данные из контекста: ${hints.join(", ")}. ` : "";
+
     prompt.push({
       role: "system",
       content:
         "Response mode: template. Return exactly Subject/Body/WhatsApp blocks now. Do not prepend extra analysis before Subject. " +
+        hintsContext +
         "CRITICAL: NEVER use placeholder words like 'уточняется', 'уточнить', 'к сожалению не могу', 'данные будут уточнены' in template fields. " +
-        "If you don't have specific values (quantity, city, deadline, product name), use generic but meaningful alternatives like '量大' → 'большой объем' or 'доставка' → 'доставка до склада'. " +
+        "If you don't have specific values (quantity, city, deadline, product name), use generic but meaningful alternatives like 'большой объём' или 'доставка до склада'. " +
         "Never leave a template field empty or with placeholder text — always provide a reasonable default or ask for clarification explicitly.",
     });
   } else {
@@ -14195,6 +14208,10 @@ export async function POST(request: Request) {
     version: ASSISTANT_GUARDRAILS_VERSION,
     promptInjection: detectPromptInjectionSignals(promptInjectionParts.join("\n\n")),
   };
+
+  // Extract template fill hints BEFORE building prompt so they can be passed to AI
+  const fillHints = extractTemplateFillHints({ message, history: history || [] });
+
   const prompt = buildAssistantPrompt({
     message,
     history,
@@ -14210,6 +14227,7 @@ export async function POST(request: Request) {
     shortlistFacts,
     promptInjection: guardrails.promptInjection,
     responseMode,
+    fillHints,
   });
 
   const buildPayloadToStore = (params: {
