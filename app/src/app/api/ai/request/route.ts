@@ -2892,6 +2892,12 @@ function repairTemplatePlaceholderSpam(
   let out = String(text || "");
   if (!out.trim()) return out;
 
+  // CRITICAL FIX (per advisor): Extract hints FIRST before any text processing
+  // This ensures we have real data available for replacement BEFORE 'уточняется' substitution
+  const hints = extractTemplateFillHints(params);
+  const hasRealHints = Boolean(hints.qty || hints.city || hints.productService || hints.deadline || hints.delivery);
+  const effectiveHints = hasRealHints ? hints : null;
+
   // Check for placeholder spam patterns - trigger on 1+ occurrences
   const utochnyaetsyaCount = (out.match(/уточняется/gu) || []).length;
   const formiruyCount = (out.match(/сформируй[а-яё\s]+сообщени[ея]/giu) || []).length;
@@ -2936,16 +2942,10 @@ function repairTemplatePlaceholderSpam(
     out = out.replace(/сформируй\s+(?:сообщени[ея])/giu, "запрос");
   }
 
-  // Extract fresh hints from full conversation history
-  const hints = extractTemplateFillHints(params);
-
-  // Count how many values we have
-  const hasRealHints = Boolean(hints.qty || hints.city || hints.productService || hints.deadline || hints.delivery);
-
+  // Hints already extracted at the top of function - use them here
   // IMPORTANT: Only use hints if we have REAL data from conversation
   // Do NOT use generic fallback values - they create poor quality output
   // If no real hints, let the template fail properly (detectPlaceholderGarbage will handle it)
-  const effectiveHints = hasRealHints ? hints : null;
 
   // AGGRESSIVE REPAIR: Replace standalone "уточняется" with actual hint values
   // This is more effective than relying on context words near placeholders
@@ -11498,12 +11498,12 @@ const VENDOR_INTENT_CONFLICT_RULES: Record<string, VendorIntentConflictRule> = {
   beet: {
     required: /\b(свекл\p{L}*|свёкл\p{L}*|буряк\p{L}*|бурак\p{L}*|плодоовощ\p{L}*|овощ\p{L}*|beet|beetroot|vegetable)\b/u,
     forbidden:
-      /\b(автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|вентиляц\p{L}*|кабел\p{L}*|клининг\p{L}*|сертификац\p{L}*|декларац\p{L}*|тара|упаков\p{L}*|packag\p{L}*|короб\p{L}*|сельхозтехник\p{L}*|агротехник\p{L}*|машмаркет\p{L}*|машинмаркет\p{L}*|трактор\p{L}*|навесн\p{L}*|комбайн\p{L}*)\b/u,
+      /\b(автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|вентиляц\p{L}*|кабел\p{L}*|клининг\p{L}*|сертификац\p{L}*|декларац\p{L}*|тара|упаков\p{L}*|packag\p{L}*|короб\p{L}*|сельхозтехник\p{L}*|агротехник\p{L}*|машмаркет\p{L}*|машинмаркет\p{L}*|трактор\p{L}*|навесн\p{L}*|комбайн\p{L}*|пчеловод\p{L}*|пасек\p{L}*|мед\p{L}*|пчел\p{L}*|фермерск\p{L}*\s*хозяйств\p{L}*|агрохозяйств\p{L}*|агрофирм\p{L}*)\b/u,
   },
   vegetables: {
     required: /\b(овощ\p{L}*|плодоовощ\p{L}*|лук\p{L}*|картоф\p{L}*|морков\p{L}*|свекл\p{L}*|vegetable)\b/u,
     forbidden:
-      /\b(автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|вентиляц\p{L}*|кабел\p{L}*|клининг\p{L}*|сертификац\p{L}*|декларац\p{L}*|сельхозтехник\p{L}*|агротехник\p{L}*|машмаркет\p{L}*|машинмаркет\p{L}*|трактор\p{L}*)\b/u,
+      /\b(автозапчаст\p{L}*|автосервис\p{L}*|шиномонтаж\p{L}*|подшип\p{L}*|металлопрокат\p{L}*|вентиляц\p{L}*|кабел\p{L}*|клининг\p{L}*|сертификац\p{L}*|декларац\p{L}*|сельхозтехник\p{L}*|агротехник\p{L}*|машмаркет\p{L}*|машинмаркет\p{L}*|трактор\p{L}*|пчеловод\p{L}*|пасек\p{L}*|мед\p{L}*|пчел\p{L}*|фермерск\p{L}*\s*хозяйств\p{L}*|агрохозяйств\p{L}*|агрофирм\p{L}*)\b/u,
   },
   footwear: {
     required: /\b(обув\p{L}*|shoe[s]?|footwear|ботин\p{L}*|туфл\p{L}*|кроссов\p{L}*|лофер\p{L}*|дерби|оксфорд\p{L}*|сапог\p{L}*)\b/u,
@@ -13319,6 +13319,13 @@ function buildAssistantSystemPrompt(): string {
     "- CRITICAL: When user asks to verify 'производители обуви' or similar on websites in Turn 1, you MUST first find companies in catalog BEFORE giving fallback.",
     "- If initial search returns empty: try broader search terms, related categories, or generic supplier searches.",
     "- NEVER give generic priority template without first attempting to find concrete companies in catalog.",
+    "",
+    "TEMPLATE GENERATION CRITICAL (P0):",
+    "- CRITICAL: Use ONLY real values from conversation context. NEVER use 'уточняется' placeholders.",
+    "- If you don't know a value (e.g., quantity, city, deadline), write '[уточните: что именно]' instead of 'уточняется'.",
+    "- NEVER leave template fields empty or with generic placeholders - be specific or ask for clarification.",
+    "- Before generating any template, you MUST echo back the constraints: city, quantity, deadline, product.",
+    "- If any constraint is missing, ask for it BEFORE generating template.",
     "",
     "FEW-SHOT EXAMPLES (обязательные образцы формата вывода):",
     "",

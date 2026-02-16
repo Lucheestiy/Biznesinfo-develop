@@ -1,0 +1,110 @@
+```json
+{
+  "advisor": "kimi",
+  "executiveSummary": "UV017 reveals critical gaps: (1) retrieval returns noise (tourism/spare parts for vegetable sourcing), (2) Turn 2 hard fails with 504 timeout instead of graceful fallback, (3) missing category-based relevance filtering. The assistant needs: A) post-retrieval relevance scoring to exclude non-supplier categories, B) timeout-resistant fallback paths, C) explicit 'no exact matches' handling with alternative queries.",
+  "priorityPlan": [
+    {
+      "priority": "P0",
+      "title": "Add category-based relevance guard to search pipeline",
+      "why": "UV017 Turn 1 returned tourism company (Турпродплюс) and spare parts seller (Агромашмаркет) for vegetable sourcing query - fundamental retrieval quality bug",
+      "expectedImpact": "Eliminate false positives from unrelated business categories, improve precision from ~25% to >80% for commodity queries",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "priority": "P0",
+      "title": "Fix Turn 2 empty response / 504 timeout",
+      "why": "User explicitly requested 'if no exact matches - honestly say and give 3 alternatives' but got empty response. Timeout handling fails to return fallback content.",
+      "expectedImpact": "Zero hard failures on multi-turn scenarios; graceful degradation to local fallback",
+      "validationScenarios": ["UV017", "UV011"]
+    },
+    {
+      "priority": "P1",
+      "title": "Implement commodity-specific category whitelist",
+      "why": "Beet/vegetable queries should only match agriculture/food/wholesale categories, never tourism/education/spare parts",
+      "expectedImpact": "Prevents category mismatch hallucinations across all food/commodity scenarios",
+      "validationScenarios": ["UV017", "UV002", "UV005"]
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "R1",
+      "area": "retrieval",
+      "title": "Add post-retrieval category relevance filter",
+      "action": "After meiliSearch returns results, filter candidates by checking primary_category_slug against commodity-specific whitelist. For 'beet'/'vegetables' queries, require category_slugs match: agriculture, food-production, wholesale, farming. Reject matches with categories: tourism, education, auto-parts, services.",
+      "implementationHint": "In app/src/app/api/ai/request/route.ts, after vendorCandidates are collected, add: const COMMODITY_CATEGORY_WHITELIST: Record<string, string[]> = { beet: ['agriculture','food-production','wholesale'], ... }; Filter candidates where primary_category_slug is in whitelist.",
+      "expectedImpact": "Eliminates Турпродплюс (tourism) and Агромашмаркет (auto-parts) from vegetable query results",
+      "risk": "May reduce recall for edge cases; add bypass for explicit company name searches",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R2",
+      "area": "guardrails",
+      "title": "Add 'non-supplier' keyword blacklist for company ranking",
+      "action": "Penalize or exclude companies whose primary_rubric_name or description contains: 'туризм', 'запчасти', 'обучение', 'колледж', 'университет', 'пчеловодство' when query contains sourcing keywords: 'оптом', 'поставщик', 'закупка', '500 кг'.",
+      "implementationHint": "Extend src/lib/meilisearch/search.ts keyword filtering pattern (similar to shouldApplyCheeseFilter) with NON_SUPPLIER_KEYWORDS array. In candidate ranking, subtract score for matches containing these terms.",
+      "expectedImpact": "Минская овощная фабрика tagged with 'пчеловодство' would be deprioritized despite name match",
+      "risk": "Low - only affects ranking, not hard filtering",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R3",
+      "area": "prompt",
+      "title": "Enforce explicit no-results path in system prompt",
+      "action": "Add to system prompt: 'If search returns <3 relevant suppliers, OR if results contain non-supplier categories (tourism, education, auto-parts), you MUST: (1) state 'Точных совпадений нет', (2) provide 3 alternative portal queries, (3) never list irrelevant companies.'",
+      "implementationHint": "In route.ts buildPrompt() or equivalent, append this constraint to system message when UV017-like scenarios detected (commodity + quantity + location pattern).",
+      "expectedImpact": "Forces honest 'no matches' response instead of padding with irrelevant results",
+      "risk": "May increase false negatives; validate with existing passing scenarios",
+      "effort": "M",
+      "validationScenarios": ["UV017", "UV011"]
+    },
+    {
+      "id": "R4",
+      "area": "guardrails",
+      "title": "Fix 504 timeout graceful fallback for Turn 2+",
+      "action": "When provider timeout occurs (504), check conversation history. If previous turn had search context, return buildLocalResilientFallbackReply with mode.rankingRequested=true instead of empty response. Ensure fallback includes: 'Точных совпадений нет' + 3 alternative queries.",
+      "implementationHint": "In route.ts POST handler catch block for timeout errors, detect if history.length > 0 and last assistant message had /company/ links. If so, trigger ranking fallback with honest no-match preamble.",
+      "expectedImpact": "UV017 Turn 2 would return useful fallback instead of empty response",
+      "risk": "May mask underlying performance issues; add alerting for timeout frequency",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R5",
+      "area": "ranking",
+      "title": "Add company name-category mismatch detector",
+      "action": "Flag companies where name suggests category X but primary_rubric_name is unrelated Y. Example: 'овощная фабрика' with rubric 'пчеловодство' = mismatch. Downrank or annotate such results.",
+      "implementationHint": "In documentToSummary or candidate ranking, add: const nameCategorySignals = extractCommodityFromName(name); if nameCategorySignals && !rubric.includes(nameCategorySignals) => confidence = 'LOW' with mismatch warning.",
+      "expectedImpact": "Surfaces data quality issues to users instead of presenting misleading matches",
+      "risk": "Requires maintenance of name->category mapping; keep heuristic simple",
+      "effort": "M",
+      "validationScenarios": ["UV017"]
+    },
+    {
+      "id": "R6",
+      "area": "template",
+      "title": "Pre-generate commodity-specific alternative queries",
+      "action": "Extend buildPortalAlternativeQueries() in route.ts to handle beet/vegetables specifically. For 'свекла 500 кг Минск', return: ['овощи оптом Минск', 'корнеплоды поставщик Минск', 'сельхозпродукция опт Минск'].",
+      "implementationHint": "Add 'beet' commodity branch in buildPortalAlternativeQueries() similar to existing 'flour', 'footwear' branches. Map to agriculture-focused queries.",
+      "expectedImpact": "When no exact matches, user gets relevant alternative searches instead of generic advice",
+      "risk": "None - additive change",
+      "effort": "S",
+      "validationScenarios": ["UV017"]
+    }
+  ],
+  "testPlan": {
+    "mustPassScenarios": ["UV017"],
+    "regressionSuites": [
+      "scenarios.regressions.user-ideas-multistep-variants.json",
+      "scenarios.regressions.milk-brest-mogilev.json"
+    ],
+    "successMetrics": [
+      "UV017 avgUsefulness >= 3.0 (currently 1.5)",
+      "Zero 504/empty responses on multi-turn scenarios",
+      "No tourism/education/auto-parts companies in vegetable/food sourcing queries",
+      "Honest 'no exact matches' rate when appropriate >= 90%"
+    ]
+  }
+}
+```
