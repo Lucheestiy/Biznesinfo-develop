@@ -4215,12 +4215,13 @@ function postProcessAssistantReply(params: {
     out = ensureTemplateBlocks(out, params.message);
     out = applyTemplateFillHints(out, fillHints);
     out = normalizeTemplateBlockLayout(out);
-    out = sanitizeUnfilledPlaceholdersInNonTemplateReply(out).trim();
+    // REMOVED: sanitizeUnfilledPlaceholdersInNonTemplateReply - this ADDS "уточняется" placeholders
+    // which is opposite of what we want in template mode. Use repairTemplatePlaceholderSpam instead.
     out = out.replace(/(^|\n)\s*Placeholders\s*:[^\n]*$/gimu, "").trim();
     out = normalizeTemplateBlockLayout(out);
     if (!extractTemplateMeta(out)?.isCompliant) {
       out = normalizeTemplateBlockLayout(applyTemplateFillHints(ensureTemplateBlocks("", params.message), fillHints));
-      out = sanitizeUnfilledPlaceholdersInNonTemplateReply(out).trim();
+      // REMOVED: sanitizeUnfilledPlaceholdersInNonTemplateReply - use repairTemplatePlaceholderSpam instead
     }
     // Post-process to repair excessive "уточняется" placeholder spam
     out = repairTemplatePlaceholderSpam(out, { message: params.message, history: params.history || [] }).trim();
